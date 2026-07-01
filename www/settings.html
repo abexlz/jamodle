@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+(function(){
+  try {
+    var p = JSON.parse(localStorage.getItem('jamodeul-preferences') || '{}');
+    var theme = p.theme || localStorage.getItem('jamodeul-theme') || 'system';
+    var resolved = theme;
+    if (theme === 'system' || (theme !== 'light' && theme !== 'dark')) {
+      resolved = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    document.documentElement.setAttribute('data-theme', resolved);
+    if (p.reduceMotion) document.documentElement.classList.add('reduce-motion');
+    if (p.highContrast) document.documentElement.classList.add('high-contrast');
+    if (p.largeText) document.documentElement.classList.add('large-text');
+    if (p.tapToPlace) document.documentElement.classList.add('tap-to-place');
+    document.documentElement.lang = p.language === 'ko' ? 'ko' : 'en';
+  } catch (e) {}
+})();
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0097B2">
+<title>Settings — 자모들</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app-preferences.css">
+<link rel="stylesheet" href="css/app-buttons.css">
+<style>
+  :root {
+    --bg: #FFF8F5; --card: #fff; --text: #5D6470; --text-soft: #9AA3AD;
+    --heading: #7B8FD4; --border: #E8E4E0; --lavender: #E8DEFF; --lavender-btn: #CFC0F5;
+    --mint: #C8F0E0; --peach: #FFE8D4; --peach-btn: #FFD0A8; --warn: #E8A898;
+    --warn-bg: #FFF0EC; --shadow: 0 4px 14px rgba(93, 100, 112, 0.08);
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  [data-theme="dark"] {
+    --bg: #1A1D28; --card: #2A2E3E; --text: #E4E8F0; --text-soft: #9AA3B8;
+    --heading: #B8C4F0; --border: #3A3E50; --lavender: #3A3555; --lavender-btn: #504878;
+    --peach: #453830; --peach-btn: #5A4838; --warn-bg: #4A3530;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100dvh; background: var(--bg); color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    padding: calc(16px + var(--safe-top)) 16px calc(32px + var(--safe-bottom));
+  }
+  .settings-app { max-width: 520px; margin: 0 auto; }
+  .settings-header {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
+  }
+  .settings-back {
+    padding: 10px 14px; border-radius: 999px; background: var(--lavender);
+    color: var(--heading); font-family: 'Jua', sans-serif; font-size: 14px;
+    text-decoration: none; border: 2px solid var(--lavender-btn);
+  }
+  .settings-header h1 {
+    flex: 1; text-align: center; font-family: 'Jua', sans-serif; font-size: 28px;
+    color: var(--heading); margin: 0;
+  }
+  .settings-section {
+    background: var(--card); border: 2px solid var(--border); border-radius: 20px;
+    padding: 18px 16px; margin-bottom: 16px; box-shadow: var(--shadow);
+  }
+  .settings-section-title {
+    font-family: 'Jua', sans-serif; font-size: 18px; color: var(--heading);
+    margin: 0 0 14px; display: flex; align-items: center; gap: 8px;
+  }
+  .settings-icon { font-size: 20px; }
+  .settings-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .settings-row:last-child { border-bottom: none; }
+  .settings-row-stack { flex-direction: column; align-items: stretch; }
+  .settings-row-label { font-size: 15px; font-weight: 500; }
+  .settings-hint { display: block; font-size: 12px; color: var(--text-soft); margin-top: 2px; }
+  .settings-note, .about-desc, .about-credit {
+    font-size: 14px; color: var(--text-soft); line-height: 1.5; margin: 0 0 12px;
+  }
+  .toggle-switch { position: relative; width: 52px; height: 32px; flex-shrink: 0; }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+  .toggle-track {
+    position: absolute; inset: 0; background: var(--border); border-radius: 999px;
+    cursor: pointer; transition: background 0.2s;
+  }
+  .toggle-track::after {
+    content: ''; position: absolute; width: 24px; height: 24px; left: 4px; top: 4px;
+    background: var(--card); border-radius: 50%; transition: transform 0.2s;
+    box-shadow: var(--shadow);
+  }
+  .toggle-switch input:checked + .toggle-track { background: var(--lavender-btn); }
+  .toggle-switch input:checked + .toggle-track::after { transform: translateX(20px); }
+  .language-selector, .theme-selector { display: flex; flex-direction: column; gap: 8px; }
+  .language-option, .theme-option {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 16px; border-radius: 14px; border: 2px solid var(--border);
+    background: var(--bg); font-family: 'Jua', sans-serif; font-size: 16px;
+    cursor: pointer; color: var(--text);
+  }
+  .language-option.selected, .theme-option.selected {
+    border-color: var(--lavender-btn); background: var(--lavender);
+  }
+  .language-check { color: var(--heading); font-weight: 700; }
+  .settings-select {
+    width: 100%; padding: 12px; border-radius: 12px; border: 2px solid var(--border);
+    font-size: 15px; background: var(--card); color: var(--text);
+  }
+  .settings-range { width: 100%; accent-color: var(--heading); }
+  .progress-summary {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;
+  }
+  .progress-stat {
+    background: var(--bg); border-radius: 12px; padding: 12px; text-align: center;
+  }
+  .progress-stat-label {
+    display: block; font-size: 11px; color: var(--text-soft); margin-bottom: 4px;
+  }
+  .progress-stat strong { font-family: 'Jua', sans-serif; font-size: 22px; color: var(--heading); }
+  .settings-actions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; }
+  .settings-actions > * { grid-column: span 2; }
+  .btn-soft, .btn-warn-outline, .btn-warn, .language-option, .theme-option {
+    /* app-buttons.css */
+  }
+  .about-name { font-family: 'Jua', sans-serif; font-size: 24px; color: var(--heading); margin: 0 0 6px; }
+  .about-version { font-size: 14px; margin: 0 0 10px; }
+  .about-links { display: flex; flex-wrap: wrap; gap: 12px; font-size: 13px; color: var(--text-soft); }
+  .about-link-placeholder { text-decoration: underline; cursor: default; opacity: 0.7; }
+  .settings-toast {
+    margin-top: 10px; padding: 10px; border-radius: 12px; background: var(--mint);
+    font-size: 14px; text-align: center;
+  }
+  .settings-toast.hidden { display: none; }
+  .confirm-overlay {
+    position: fixed; inset: 0; background: rgba(255,248,245,0.92); z-index: 200;
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  .confirm-overlay.hidden { display: none; }
+  .confirm-card {
+    background: var(--card); border: 2px solid var(--peach-btn); border-radius: 24px;
+    padding: 28px 24px; max-width: 360px; text-align: center; box-shadow: var(--shadow);
+  }
+  .confirm-card h3 { font-family: 'Jua', sans-serif; color: var(--heading); margin: 0 0 10px; }
+  .confirm-card p { font-size: 14px; line-height: 1.5; color: var(--text-soft); margin: 0 0 20px; }
+  .confirm-actions { /* app-buttons.css */ }
+  .btn-warn { /* app-buttons.css */ }
+</style>
+<link rel="stylesheet" href="css/app-theme.css">
+<link rel="stylesheet" href="css/app-wordle-ui.css">
+</head>
+<body>
+<div class="top-nav-actions">
+  <a class="top-nav-btn" href="index.html" id="nav-back" data-i18n-aria="nav.back">←</a>
+  <button type="button" class="top-nav-btn" id="theme-toggle" data-i18n-aria="common.themeToggle">🌙</button>
+</div>
+<div class="settings-app" id="settings-root"></div>
+
+<script src="js/storage.js"></script>
+<script src="js/user-preferences.js"></script>
+<script src="js/i18n-messages.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/app-bootstrap.js"></script>
+<script src="js/app-nav.js"></script>
+<script src="js/menu-config.js"></script>
+<script src="js/menu-progress.js"></script>
+<script src="js/dev-build.js"></script>
+<script src="js/learning-streak.js"></script>
+<script src="js/settings-components.js"></script>
+<script src="js/settings-app.js"></script>
+<script>
+(async function () {
+  if (window.AppNav?.initPage) {
+    await AppNav.initPage({ topNav: false });
+  } else {
+    console.error('[Jamodeul] AppNav failed to load on settings page.');
+    await AppBootstrap?.bootstrap?.();
+  }
+  SettingsApp?.mount?.('settings-root');
+})();
+</script>
+</body>
+</html>

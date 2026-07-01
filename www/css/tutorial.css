@@ -1,0 +1,80 @@
+/* Tutorial — integrated Korean Match lesson mode (not a popup overlay) */
+
+.tutorial-coach-finger {
+  position: fixed;
+  left: 0;
+  top: 0;
+  font-size: 42px;
+  line-height: 1;
+  opacity: 0;
+  z-index: 120;
+  pointer-events: none;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.35));
+}
+
+/* Lesson instructions — part of the match layout */
+.tutorial-lesson-bar {
+  background: #ffffff;
+  border: 2px solid #7BCFFF;
+  border-radius: 16px;
+  padding: 12px 14px 14px;
+  box-shadow: 0 4px 0 rgba(0, 80, 110, 0.12);
+  text-align: center;
+}
+
+.tutorial-lesson-progress {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #3A8AB5 !important;
+  text-shadow: none !important;
+}
+
+.tutorial-lesson-title {
+  margin: 0;
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: clamp(17px, 4.4vw, 21px);
+  color: #1A5A78 !important;
+  text-shadow: none !important;
+  line-height: 1.25;
+}
+
+.tutorial-lesson-body {
+  margin: 6px 0 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: #5D6470 !important;
+  text-shadow: none !important;
+}
+
+/* Explicit dim / focus — only targeted elements stay bright */
+.tutorial-match.tutorial-guiding .tutorial-dimmed {
+  opacity: 0.25 !important;
+  filter: saturate(0.45) brightness(0.85) !important;
+  transition: opacity 0.2s ease, filter 0.2s ease;
+}
+
+.tutorial-match.tutorial-guiding .tutorial-focus {
+  opacity: 1 !important;
+  filter: none !important;
+  position: relative;
+  z-index: 6;
+  outline: 3px solid #FFD743 !important;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px rgba(255, 215, 67, 0.45) !important;
+}
+
+.tutorial-match .match-hint-dock,
+.tutorial-match .learning-streak-bar,
+.tutorial-match .live-stats,
+.tutorial-match #match-reset {
+  display: none !important;
+}
+
+body.tutorial-page .title-block h1 {
+  color: #ffffff !important;
+}
+
+html.reduce-motion .tutorial-coach-finger {
+  display: none !important;
+}

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<script>
+(function(){
+  try {
+    var p = JSON.parse(localStorage.getItem('jamodeul-preferences') || '{}');
+    var theme = p.theme || localStorage.getItem('jamodeul-theme') || 'system';
+    var resolved = theme;
+    if (theme === 'system' || (theme !== 'light' && theme !== 'dark')) {
+      resolved = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    document.documentElement.setAttribute('data-theme', resolved);
+    if (p.reduceMotion) document.documentElement.classList.add('reduce-motion');
+    document.documentElement.lang = p.language === 'ko' ? 'ko' : 'en';
+  } catch (e) {}
+})();
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#0097B2">
+<title>끝말잇기 — Jamodeul</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Jua&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app-preferences.css">
+<link rel="stylesheet" href="css/app-theme.css">
+<link rel="stylesheet" href="css/app-buttons.css">
+<link rel="stylesheet" href="css/race.css">
+<link rel="stylesheet" href="css/app-wordle-ui.css">
+<style>
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    padding: calc(12px + env(safe-area-inset-top, 0px)) 14px calc(16px + env(safe-area-inset-bottom, 0px));
+  }
+  .race-app { max-width: 420px; margin: 0 auto; min-height: calc(100dvh - 28px); display: flex; flex-direction: column; gap: 10px; }
+</style>
+</head>
+<body>
+<div id="word-chain-root" class="race-app"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="js/firebase-social.js?v=9"></script>
+<script src="js/storage.js"></script>
+<script src="js/user-preferences.js"></script>
+<script src="js/i18n-messages.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/app-bootstrap.js"></script>
+<script src="js/app-nav.js"></script>
+<script src="js/dictionary-service.js"></script>
+<script src="js/word-chain-krdict.js"></script>
+<script src="js/word-chain-service.js"></script>
+<script src="js/race-results-ui.js"></script>
+<script src="js/profile-service.js"></script>
+<script src="js/level-utils.js"></script>
+<script src="js/badge-service.js"></script>
+<script src="js/shop-service.js"></script>
+<script src="js/xp-service.js"></script>
+<script src="js/profile-ui.js"></script>
+<script src="js/word-chain-app.js"></script>
+<script>
+(async function () {
+  FirebaseSocial?.init?.({});
+  await AppNav.initPage({ topNav: false });
+  const app = new WordChainApp(document.getElementById('word-chain-root'));
+  window.__wordChainAppInstance = app;
+  await app.init();
+})();
+</script>
+</body>
+</html>

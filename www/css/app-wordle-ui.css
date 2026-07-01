@@ -1,0 +1,489 @@
+/**
+ * Wordle-style UI — teal panels, yellow/sky 3D buttons, solid shadows (no glows).
+ * Load last, after page-specific CSS (race.css, multiplayer.css, etc.).
+ */
+
+/* ── Shared panel + button tokens (local aliases) ── */
+:root {
+  --w-panel-bg: rgba(0, 70, 85, 0.42);
+  --w-panel-border: rgba(123, 207, 255, 0.55);
+  --w-panel-shadow: 0 4px 0 rgba(0, 40, 50, 0.35);
+  --w-btn-yellow: linear-gradient(180deg, #FFE566 0%, #FFD743 38%, #FFC820 72%, #FFB800 100%);
+  --w-btn-sky: linear-gradient(180deg, #B8E8FF 0%, #7BCFFF 45%, #5EB0F0 100%);
+  --w-btn-shadow-yellow: inset 0 2px 0 rgba(255, 255, 255, 0.48), inset 0 -3px 0 rgba(255, 170, 0, 0.22), 0 5px 0 #C87A00;
+  --w-btn-shadow-sky: inset 0 2px 0 rgba(255, 255, 255, 0.5), inset 0 -3px 0 rgba(60, 150, 210, 0.25), 0 5px 0 #3A8FC7;
+  --w-btn-shadow-active-yellow: 0 2px 0 #C87A00;
+  --w-btn-shadow-active-sky: 0 2px 0 #3A8FC7;
+  --w-text-shadow: 0 2px 0 rgba(140, 70, 0, 0.42);
+  --w-text-shadow-sky: 0 2px 0 rgba(30, 90, 130, 0.45);
+}
+
+/* Multiplayer entry — purple (see multiplayer.css); do not override with sky blue here. */
+
+/* ── Multiplayer picker modal ── */
+.multiplayer-overlay {
+  background: var(--overlay-scrim, rgba(0, 60, 72, 0.88)) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.multiplayer-modal {
+  background: var(--w-panel-bg) !important;
+  border: 2px solid var(--w-panel-border) !important;
+  border-radius: 24px 24px 20px 20px !important;
+  box-shadow: var(--w-panel-shadow), var(--shadow) !important;
+}
+
+.multiplayer-modal-header {
+  background: rgba(0, 55, 68, 0.35) !important;
+  border-bottom: 2px solid var(--w-panel-border) !important;
+}
+
+.multiplayer-modal-title {
+  color: #ffffff !important;
+  text-shadow: 0 2px 0 rgba(0, 60, 72, 0.35) !important;
+}
+
+.multiplayer-modal-sub,
+.multiplayer-login-hint,
+.multiplayer-add-hint,
+.multiplayer-section-desc,
+.multiplayer-friends-list .profile-friends-empty {
+  color: var(--text-soft) !important;
+}
+
+.multiplayer-close-btn {
+  background: var(--w-btn-yellow) !important;
+  border: 2px solid #E09500 !important;
+  color: #ffffff !important;
+  box-shadow: var(--w-btn-shadow-yellow) !important;
+}
+
+.multiplayer-section-title {
+  color: #ffffff !important;
+}
+
+.multiplayer-section + .multiplayer-section {
+  border-top-color: rgba(123, 207, 255, 0.35) !important;
+}
+
+.multiplayer-add-hint {
+  background: rgba(0, 55, 68, 0.35) !important;
+  border-top-color: rgba(123, 207, 255, 0.35) !important;
+}
+
+.profile-friend-row {
+  background: rgba(0, 55, 68, 0.35) !important;
+  border-color: rgba(123, 207, 255, 0.4) !important;
+  color: #ffffff !important;
+}
+
+.profile-challenge-btn,
+.profile-challenge-btn--turn {
+  background: var(--w-btn-sky) !important;
+  border: 2px solid #3A9AD4 !important;
+  color: #ffffff !important;
+  box-shadow: var(--w-btn-shadow-sky) !important;
+  text-shadow: var(--w-text-shadow-sky) !important;
+  font-family: 'Jua', sans-serif !important;
+}
+
+/* ── 1v1 race screens ── */
+.race-back {
+  background: var(--w-btn-yellow) !important;
+  border: 2px solid #E09500 !important;
+  color: #ffffff !important;
+  border-radius: 16px !important;
+  box-shadow: var(--w-btn-shadow-yellow) !important;
+  text-shadow: var(--w-text-shadow) !important;
+}
+
+.race-opponent-bar {
+  background: var(--w-panel-bg) !important;
+  border: 2px solid var(--w-panel-border) !important;
+  border-radius: 16px !important;
+  box-shadow: var(--w-panel-shadow) !important;
+}
+
+.race-opp-name {
+  color: #ffffff !important;
+  text-shadow: 0 1px 0 rgba(0, 60, 72, 0.3) !important;
+}
+
+.race-dot.filled {
+  box-shadow: none !important;
+  border: 2px solid rgba(255, 255, 255, 0.35) !important;
+}
+
+.race-dot.filled:nth-child(1) { background: #5FD68A !important; }
+.race-dot.filled:nth-child(2n) { background: #FFD743 !important; }
+.race-dot.filled:nth-child(3n) { background: #7BCFFF !important; }
+
+.race-panel,
+.race-length-card,
+.race-results--ink {
+  background: var(--w-panel-bg) !important;
+  border: 2px solid var(--w-panel-border) !important;
+  border-radius: 24px !important;
+  box-shadow: var(--w-panel-shadow), var(--shadow-sm) !important;
+}
+
+.race-panel-title,
+.race-panel-msg,
+.race-results-heading,
+.race-length-card h3 {
+  color: #ffffff !important;
+  text-shadow: 0 2px 0 rgba(0, 60, 72, 0.35) !important;
+}
+
+.race-panel-sub,
+.race-panel-title + .race-panel-sub,
+.race-length-card p {
+  color: var(--text-soft) !important;
+}
+
+.race-results--win .race-results-heading { color: #5FD68A !important; }
+.race-results--loss .race-results-heading { color: #ffb4b4 !important; }
+.race-results--draw .race-results-heading { color: #7BCFFF !important; }
+
+.race-results--win.race-results--ink,
+.race-results--loss.race-results--ink,
+.race-results--draw.race-results--ink {
+  background: var(--w-panel-bg) !important;
+  border-color: var(--w-panel-border) !important;
+  box-shadow: var(--w-panel-shadow), var(--shadow-sm) !important;
+}
+
+.race-btn,
+.race-length-options button,
+.race-challenge-banner-actions button {
+  background: var(--w-btn-yellow) !important;
+  border: 2px solid #E09500 !important;
+  border-radius: 16px !important;
+  color: #ffffff !important;
+  box-shadow: var(--w-btn-shadow-yellow) !important;
+  text-shadow: var(--w-text-shadow) !important;
+  font-family: 'Jua', sans-serif !important;
+}
+
+.race-btn--primary,
+.race-challenge-banner-actions .accept,
+.race-results-btn.race-btn--rematch {
+  background: var(--w-btn-yellow) !important;
+  border-color: #E09500 !important;
+  color: #ffffff !important;
+  box-shadow: var(--w-btn-shadow-yellow) !important;
+}
+
+.race-btn--blue,
+.race-btn--home,
+.race-results-btn.race-btn--home {
+  background: var(--w-btn-sky) !important;
+  border-color: #3A9AD4 !important;
+  box-shadow: var(--w-btn-shadow-sky) !important;
+  text-shadow: var(--w-text-shadow-sky) !important;
+}
+
+.race-btn--peach,
+.race-btn--lavender,
+.race-btn--ghost {
+  background: rgba(0, 55, 68, 0.55) !important;
+  border-color: rgba(123, 207, 255, 0.45) !important;
+  box-shadow: 0 4px 0 rgba(0, 40, 50, 0.35) !important;
+  text-shadow: none !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.race-btn:active,
+.race-length-options button:active,
+.race-challenge-banner-actions button:active {
+  transform: translateY(3px) !important;
+  box-shadow: var(--w-btn-shadow-active-yellow) !important;
+}
+
+.race-btn--blue:active,
+.race-btn--home:active {
+  box-shadow: var(--w-btn-shadow-active-sky) !important;
+}
+
+.race-ready-row {
+  background: rgba(0, 55, 68, 0.35) !important;
+  border: 2px solid rgba(123, 207, 255, 0.35) !important;
+  color: #ffffff !important;
+}
+
+.race-ready-row:nth-child(even) {
+  background: rgba(0, 45, 55, 0.45) !important;
+}
+
+.race-ready-row.ready {
+  background: rgba(95, 214, 138, 0.2) !important;
+  border-color: #5FD68A !important;
+  box-shadow: none !important;
+}
+
+.race-ready-row.ready span:last-child {
+  color: #5FD68A !important;
+}
+
+.race-countdown {
+  background: var(--overlay-scrim) !important;
+  color: #FFD743 !important;
+  text-shadow: 0 6px 0 rgba(140, 70, 0, 0.45) !important;
+}
+
+.race-countdown.go {
+  color: #5FD68A !important;
+  text-shadow: 0 6px 0 rgba(0, 80, 40, 0.45) !important;
+}
+
+/* Challenge accept modal */
+.race-challenge-overlay {
+  z-index: 1100 !important;
+  background: var(--overlay-scrim, rgba(0, 60, 72, 0.88)) !important;
+}
+
+.race-challenge-modal {
+  background: var(--w-panel-bg) !important;
+  border: 2px solid var(--w-panel-border) !important;
+  box-shadow: var(--w-panel-shadow), 0 12px 40px rgba(0, 0, 0, 0.35) !important;
+}
+
+.race-challenge-modal-text {
+  color: #ffffff !important;
+}
+
+.race-challenge-btn--accept {
+  background: linear-gradient(180deg, #7AE8A8 0%, #5FD68A 38%, #45C878 72%, #38B868 100%) !important;
+  border-color: #2A9850 !important;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -3px 0 rgba(0, 100, 50, 0.22),
+    0 5px 0 #2A8048 !important;
+  text-shadow: 0 2px 0 rgba(0, 80, 40, 0.45) !important;
+}
+
+.race-challenge-btn--decline {
+  background: linear-gradient(180deg, #FF8A8A 0%, #F06868 38%, #E04848 72%, #C83838 100%) !important;
+  border-color: #A83030 !important;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -3px 0 rgba(120, 20, 20, 0.25),
+    0 5px 0 #902828 !important;
+  text-shadow: 0 2px 0 rgba(80, 10, 10, 0.45) !important;
+}
+
+.race-challenge-btn:active {
+  transform: translateY(3px) !important;
+}
+
+/* Challenge banner + overlay (legacy) */
+.race-challenge-banner {
+  background: var(--w-panel-bg) !important;
+  border: 2px solid var(--w-panel-border) !important;
+  box-shadow: var(--w-panel-shadow), var(--shadow) !important;
+}
+
+.race-challenge-banner p {
+  color: #ffffff !important;
+}
+
+.race-challenge-banner strong {
+  color: #FFD743 !important;
+}
+
+.race-length-overlay {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.race-opt--blue,
+.race-opt--peach,
+.race-opt--mint,
+.race-opt--yellow,
+.race-opt--pink,
+.race-opt--purple {
+  background: var(--w-btn-yellow) !important;
+  border: 2px solid #E09500 !important;
+  color: #ffffff !important;
+  box-shadow: var(--w-btn-shadow-yellow) !important;
+  text-shadow: var(--w-text-shadow) !important;
+}
+
+.race-opt--blue {
+  background: var(--w-btn-sky) !important;
+  border-color: #3A9AD4 !important;
+  box-shadow: var(--w-btn-shadow-sky) !important;
+  text-shadow: var(--w-text-shadow-sky) !important;
+}
+
+/* Turn-based match UI */
+.race-turn-bar,
+.race-turn-history-card {
+  background: var(--w-panel-bg) !important;
+  border: 2px solid var(--w-panel-border) !important;
+  box-shadow: var(--w-panel-shadow) !important;
+}
+
+.race-turn-previous {
+  background: var(--w-panel-bg) !important;
+  border: 2px solid var(--w-panel-border) !important;
+  box-shadow: var(--w-panel-shadow) !important;
+}
+
+.race-turn-bar.is-my-turn {
+  border-color: #5FD68A !important;
+  box-shadow: var(--w-panel-shadow) !important;
+}
+
+.race-turn-label,
+.race-turn-section-label {
+  color: #ffffff !important;
+}
+
+.race-turn-progress {
+  background: rgba(0, 40, 50, 0.5) !important;
+}
+
+.race-turn-progress-fill {
+  background: linear-gradient(90deg, #FFD743, #FFB800) !important;
+}
+
+.race-turn-bar.is-my-turn .race-turn-progress-fill {
+  background: linear-gradient(90deg, #7BCFFF, #5EB0F0) !important;
+}
+
+.race-turn-previous-nav-btn {
+  background: var(--w-btn-yellow) !important;
+  border: 2px solid #E09500 !important;
+  color: #ffffff !important;
+  box-shadow: var(--w-btn-shadow-yellow) !important;
+}
+
+body.match-turn-page .rotation-dock {
+  background: var(--w-btn-yellow) !important;
+  border: 2px solid #E09500 !important;
+  color: #ffffff !important;
+  box-shadow: var(--w-btn-shadow-yellow) !important;
+  text-shadow: var(--w-text-shadow) !important;
+  transition: background 0.18s, border-color 0.18s !important;
+}
+
+body.match-turn-page .rotation-dock[data-dock-mode="merge"] {
+  background: linear-gradient(180deg, #7BCFFF 0%, #4FB8F0 100%) !important;
+  border-color: #2A88C8 !important;
+  box-shadow: 0 4px 0 rgba(0, 60, 100, 0.35) !important;
+}
+
+body.match-turn-page .rotation-dock[data-dock-mode="split"] {
+  background: linear-gradient(180deg, #B0D4FF 0%, #88B8EE 100%) !important;
+  border-color: #5A88CC !important;
+  box-shadow: 0 4px 0 rgba(0, 40, 80, 0.3) !important;
+}
+
+body.match-turn-page .rotation-dock-icon,
+body.match-turn-page .rotation-dock-label {
+  color: #ffffff !important;
+}
+
+/* non-turn pages — merge/split teal accent */
+.rotation-dock[data-dock-mode="merge"] {
+  background: #C8E6FF !important;
+  border-color: #7BCFFF !important;
+}
+
+.rotation-dock[data-dock-mode="split"] {
+  background: #D8EEFF !important;
+  border-color: #A8CCEE !important;
+}
+
+.race-opp-reveal,
+.opp-reveal-area {
+  background: var(--w-panel-bg) !important;
+  border: 2px solid var(--w-panel-border) !important;
+  border-radius: 16px !important;
+}
+
+/* Korean Match — no glow rings on selection / tap targets */
+.jamo-tile.selected {
+  outline: 3px solid #FFD743 !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 4px 0 rgba(140, 70, 0, 0.35) !important;
+  transform: scale(1.03) !important;
+}
+
+.drop-zone.tap-target,
+.merge-slot.tap-target,
+.merge-result.tap-target {
+  border-color: #FFD743 !important;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.25), 0 3px 0 rgba(140, 70, 0, 0.3) !important;
+  transform: none !important;
+}
+
+#rotation-dock.tap-target {
+  outline: 3px solid #FFD743 !important;
+  outline-offset: 2px !important;
+  box-shadow: var(--w-btn-shadow-yellow) !important;
+}
+
+/* Profile / shop / quests panels on teal */
+.profile-header-card,
+.profile-section,
+.profile-social-block,
+.quest-card,
+.shop-card,
+.leaderboard-panel {
+  background: var(--w-panel-bg) !important;
+  border: 2px solid var(--w-panel-border) !important;
+  box-shadow: var(--w-panel-shadow) !important;
+}
+
+.profile-challenge-btn:focus-visible,
+.profile-friend-row:focus-visible {
+  outline: 2px solid #FFD743 !important;
+  outline-offset: 2px !important;
+  box-shadow: none !important;
+}
+
+/* Settings, shop, quests, daily gift — teal panels */
+.settings-section,
+.confirm-card,
+.daily-gift-card,
+.daily-gift-modal,
+.shop-item-card,
+.quest-card-inner {
+  background: var(--w-panel-bg) !important;
+  border: 2px solid var(--w-panel-border) !important;
+  box-shadow: var(--w-panel-shadow) !important;
+  color: #ffffff !important;
+}
+
+.settings-section-title,
+.settings-row-label,
+.confirm-card h3 {
+  color: #ffffff !important;
+}
+
+.settings-hint,
+.settings-note,
+.confirm-card p {
+  color: var(--text-soft) !important;
+}
+
+.settings-select {
+  background: rgba(0, 55, 68, 0.55) !important;
+  border-color: rgba(123, 207, 255, 0.45) !important;
+  color: #ffffff !important;
+}
+
+/* Results answer tiles — solid 3D, no colored glow */
+.race-results-syl-tile--win {
+  box-shadow: 0 4px 0 rgba(0, 40, 50, 0.35) !important;
+}
+
+/* Remove blur scrims that read as glow */
+.daily-gift-overlay,
+.profile-modal-overlay {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}

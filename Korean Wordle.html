@@ -1,0 +1,2162 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>자모들 — 한글 단어 게임</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink: #0B0F1A;
+    --ink-2: #141A2B;
+    --ink-3: #1C2438;
+    --paper: #F4EBD9;
+    --paper-dim: #B8A990;
+    --seal: #C23B22;
+    --seal-dim: #7A2214;
+    --seal-glow: rgba(194, 59, 34, 0.45);
+    --correct: #2DB89A;
+    --correct-deep: #1A6B5C;
+    --present: #E8A84A;
+    --present-deep: #8B5E1A;
+    --absent: #2A3142;
+    --absent-text: #6B7589;
+    --glow-correct: rgba(45, 184, 154, 0.55);
+    --glow-present: rgba(232, 168, 74, 0.5);
+    --glow-seal: rgba(194, 59, 34, 0.35);
+    --syl-size: 76px;
+    --board-gap: 10px;
+    --row-gap: 10px;
+    --jamo-font: 22px;
+    --jamo-font-jong: 20px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  *{box-sizing:border-box;}
+  html{
+    scroll-behavior:smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body{
+    margin:0;
+    min-height: 100dvh;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'Noto Sans KR', sans-serif;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding: calc(16px + var(--safe-top)) 12px calc(20px + var(--safe-bottom));
+    position:relative;
+    overflow-x:hidden;
+  }
+  body.overlay-open{
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+  }
+
+  .app{
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .screen.hidden{ display: none !important; }
+
+  /* ── menu screen ── */
+  #menu-screen{
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: fadeDown .6s ease both;
+  }
+  .menu-inner{ width: 100%; }
+  .menu-tagline{
+    font-size: 14px;
+    color: var(--paper-dim);
+    text-align: center;
+    margin: 0 0 28px;
+    letter-spacing: .3px;
+  }
+  .mode-list{
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+  .mode-card{
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    padding: 18px 20px;
+    background: linear-gradient(160deg, rgba(28,36,56,.9), rgba(20,26,43,.85));
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(244,235,217,.15);
+    border-radius: 16px;
+    cursor: pointer;
+    text-align: left;
+    color: var(--paper);
+    font-family: 'Noto Sans KR', sans-serif;
+    box-shadow: 0 8px 28px rgba(0,0,0,.3);
+    transition: all .2s ease;
+  }
+  .mode-card:hover{
+    border-color: rgba(244,235,217,.35);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 36px rgba(0,0,0,.4);
+  }
+  .mode-card:active{ transform: translateY(0); }
+  .mode-icon{
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(145deg, rgba(194,59,34,.25), rgba(194,59,34,.1));
+    border: 1px solid rgba(194,59,34,.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .mode-name{
+    font-family: 'Gowun Batang', serif;
+    font-size: 22px;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 2px;
+  }
+  .mode-desc{
+    font-size: 12px;
+    color: var(--paper-dim);
+    display: block;
+  }
+  .mode-arrow{
+    margin-left: auto;
+    color: var(--paper-dim);
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  /* ── length picker overlay ── */
+  #length-overlay{
+    position: fixed; inset: 0;
+    background: rgba(6,8,14,.82);
+    backdrop-filter: blur(6px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 26;
+    opacity: 0;
+    transition: opacity .3s ease;
+    padding: 16px;
+  }
+  #length-overlay.show{
+    display: flex;
+    opacity: 1;
+  }
+  .length-modal{
+    background: linear-gradient(165deg, var(--ink-3) 0%, var(--ink-2) 100%);
+    border: 1px solid rgba(244,235,217,.15);
+    border-radius: 18px;
+    padding: 28px 24px;
+    text-align: center;
+    width: 100%;
+    max-width: 320px;
+    box-shadow: 0 24px 64px rgba(0,0,0,.5);
+    animation: modalIn .45s cubic-bezier(.34,1.3,.64,1) both;
+  }
+  .length-modal h2{
+    font-family: 'Gowun Batang', serif;
+    font-size: 22px;
+    margin: 0 0 6px;
+    background: linear-gradient(180deg, var(--paper), var(--paper-dim));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .length-modal p{
+    font-size: 13px;
+    color: var(--paper-dim);
+    margin: 0 0 20px;
+  }
+  .length-options{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .length-btn{
+    background: rgba(20,26,43,.8);
+    border: 1.5px solid rgba(244,235,217,.2);
+    color: var(--paper);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    padding: 16px 20px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all .2s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,.2);
+  }
+  .length-btn:hover{
+    border-color: var(--seal);
+    background: rgba(194,59,34,.15);
+    transform: translateY(-1px);
+  }
+  .length-btn span{
+    display: block;
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--paper-dim);
+    margin-top: 4px;
+  }
+  .length-cancel{
+    margin-top: 14px;
+    background: transparent;
+    border: none;
+    color: var(--paper-dim);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 8px;
+  }
+  .length-cancel:hover{ color: var(--paper); }
+
+  .mode-badge{
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: rgba(194,59,34,.2);
+    border: 1px solid rgba(194,59,34,.35);
+    color: var(--paper);
+    margin-bottom: 6px;
+  }
+
+  /* ambient layers */
+  .bg-layer{
+    position:fixed; inset:0; pointer-events:none; z-index:0;
+  }
+  .bg-gradient{
+    background:
+      radial-gradient(ellipse 80% 60% at 15% 10%, rgba(194,59,34,.18) 0%, transparent 55%),
+      radial-gradient(ellipse 70% 50% at 85% 20%, rgba(45,184,154,.12) 0%, transparent 50%),
+      radial-gradient(ellipse 60% 70% at 50% 100%, rgba(232,168,74,.08) 0%, transparent 55%),
+      linear-gradient(165deg, #0f1524 0%, var(--ink) 45%, #080c14 100%);
+    animation: bgDrift 18s ease-in-out infinite alternate;
+  }
+  @keyframes bgDrift{
+    0%{ filter: hue-rotate(0deg) brightness(1); }
+    100%{ filter: hue-rotate(8deg) brightness(1.06); }
+  }
+  .bg-grain{
+    opacity:.35;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+    mix-blend-mode: overlay;
+  }
+  .bg-orbs span{
+    position:absolute;
+    border-radius:50%;
+    filter: blur(60px);
+    animation: orbFloat 14s ease-in-out infinite;
+  }
+  .bg-orbs span:nth-child(1){
+    width:280px; height:280px; top:-8%; left:-6%;
+    background: rgba(194,59,34,.22);
+    animation-delay: 0s;
+  }
+  .bg-orbs span:nth-child(2){
+    width:220px; height:220px; top:40%; right:-8%;
+    background: rgba(45,184,154,.15);
+    animation-delay: -5s;
+    animation-duration: 20s;
+  }
+  .bg-orbs span:nth-child(3){
+    width:180px; height:180px; bottom:5%; left:20%;
+    background: rgba(232,168,74,.12);
+    animation-delay: -9s;
+    animation-duration: 16s;
+  }
+  @keyframes orbFloat{
+    0%,100%{ transform: translate(0,0) scale(1); }
+    33%{ transform: translate(18px,-22px) scale(1.08); }
+    66%{ transform: translate(-12px,14px) scale(0.94); }
+  }
+
+  body > *:not(.bg-layer):not(#confetti-canvas):not(#overlay):not(#length-overlay){ position:relative; z-index:1; }
+
+  #confetti-canvas{
+    position:fixed; inset:0; pointer-events:none; z-index:20;
+  }
+
+  .header{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    margin-bottom: 6px;
+    animation: fadeDown .7s ease both;
+  }
+  @keyframes fadeDown{
+    from{ opacity:0; transform:translateY(-12px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+  .seal{
+    width:56px; height:56px;
+    background: linear-gradient(145deg, #D44A32 0%, var(--seal) 40%, var(--seal-dim) 100%);
+    border-radius: 10px;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Gowun Batang', serif;
+    font-weight:700;
+    font-size:26px;
+    color:var(--paper);
+    box-shadow:
+      0 4px 0 var(--seal-dim),
+      0 8px 24px rgba(0,0,0,.45),
+      inset 0 1px 0 rgba(255,255,255,.25);
+    transform: rotate(-3deg);
+    flex-shrink:0;
+    animation: sealFloat 4s ease-in-out infinite;
+  }
+  @keyframes sealFloat{
+    0%,100%{ transform: rotate(-3deg) translateY(0); }
+    50%{ transform: rotate(-2deg) translateY(-4px); }
+  }
+  h1{
+    font-family:'Gowun Batang', serif;
+    font-weight:700;
+    font-size: 36px;
+    margin:0;
+    letter-spacing: 2px;
+    text-shadow: 0 2px 20px rgba(244,235,217,.15);
+    background: linear-gradient(180deg, var(--paper) 0%, var(--paper-dim) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .subtitle{
+    font-size:13px;
+    color: var(--paper-dim);
+    margin: 2px 0 22px;
+    letter-spacing:.5px;
+    text-align:center;
+    animation: fadeDown .7s .1s ease both;
+  }
+  .meta-row{
+    display:flex; gap:10px; margin-bottom: 18px;
+    animation: fadeDown .7s .15s ease both;
+  }
+  button.ghost{
+    background: rgba(20,26,43,.6);
+    backdrop-filter: blur(8px);
+    border:1px solid rgba(244,235,217,.2);
+    color: var(--paper);
+    font-family:'Noto Sans KR',sans-serif;
+    font-size:13px;
+    padding:8px 16px;
+    border-radius:20px;
+    cursor:pointer;
+    transition: all .2s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,.2);
+  }
+  button.ghost:hover{
+    background: rgba(244,235,217,.1);
+    border-color: var(--paper);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(0,0,0,.3);
+  }
+  button.ghost:active{ transform: translateY(0); }
+
+  #board{
+    display:flex;
+    flex-direction:column;
+    gap: var(--row-gap);
+    margin-bottom: 14px;
+    width: 100%;
+    animation: fadeDown .7s .2s ease both;
+  }
+  .row{
+    display:flex;
+    gap: var(--board-gap);
+    justify-content: center;
+    width: 100%;
+    transition: transform .3s ease;
+  }
+  .row.row-enter{
+    animation: rowSlideIn .45s cubic-bezier(.22,1,.36,1) both;
+  }
+  @keyframes rowSlideIn{
+    from{ opacity:0; transform:translateY(8px) scale(.97); }
+    to{ opacity:1; transform:translateY(0) scale(1); }
+  }
+
+  .syl{
+    width: var(--syl-size);
+    height: var(--syl-size);
+    flex: 0 0 var(--syl-size);
+    border-radius: 10px;
+    background: linear-gradient(160deg, var(--ink-3) 0%, var(--ink-2) 100%);
+    border: 1.5px solid rgba(244,235,217,.12);
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    position:relative;
+    box-shadow:
+      0 4px 12px rgba(0,0,0,.35),
+      inset 0 1px 0 rgba(255,255,255,.06);
+    transition: box-shadow .3s ease, border-color .3s ease;
+  }
+  .syl::before{
+    content:'';
+    position:absolute; inset:0;
+    background: linear-gradient(135deg, rgba(255,255,255,.04) 0%, transparent 50%);
+    pointer-events:none;
+  }
+  .syl.shake{ animation: shake .5s cubic-bezier(.36,.07,.19,.97); }
+  @keyframes shake{
+    10%,90%{ transform:translateX(-2px) rotate(-1deg); }
+    20%,80%{ transform:translateX(3px) rotate(1deg); }
+    30%,50%,70%{ transform:translateX(-5px); }
+    40%,60%{ transform:translateX(5px); }
+  }
+
+  /* per-guess row accent when settled */
+  .row[data-guess="0"] .syl{ border-color: rgba(244,235,217,.14); }
+  .row[data-guess="1"] .syl{ box-shadow: 0 4px 12px rgba(0,0,0,.35), 0 0 0 1px rgba(45,184,154,.08); }
+  .row[data-guess="2"] .syl{ box-shadow: 0 4px 12px rgba(0,0,0,.35), 0 0 12px rgba(232,168,74,.06); }
+  .row[data-guess="3"] .syl{ border-color: rgba(45,184,154,.2); }
+  .row[data-guess="4"] .syl{ box-shadow: 0 4px 16px rgba(194,59,34,.15), inset 0 0 20px rgba(194,59,34,.04); }
+  .row[data-guess="5"] .syl{
+    border-color: rgba(194,59,34,.35);
+    animation: lastChancePulse 2.5s ease-in-out infinite;
+  }
+  @keyframes lastChancePulse{
+    0%,100%{ box-shadow: 0 4px 16px rgba(194,59,34,.2), 0 0 0 0 rgba(194,59,34,.2); }
+    50%{ box-shadow: 0 4px 20px rgba(194,59,34,.35), 0 0 20px 4px rgba(194,59,34,.12); }
+  }
+
+  .syl-row{
+    flex:1;
+    min-height:0;
+    display:flex;
+  }
+  .syl-row:not(:last-child){
+    border-bottom: 1px solid rgba(244,235,217,.08);
+  }
+  .syl-row-jong .jamo{ font-size: var(--jamo-font-jong); }
+  .jamo{
+    flex:1;
+    display:flex; align-items:center; justify-content:center;
+    font-size: var(--jamo-font);
+    font-weight:700;
+    border-right: 1px solid rgba(244,235,217,.08);
+    background: transparent;
+    position:relative;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+  }
+  .jamo:last-child{ border-right:none; }
+  .jamo.pending{
+    color: var(--paper);
+    background: rgba(244,235,217,.06);
+  }
+  .jamo.empty{ color: rgba(244,235,217,.22); font-size:14px; }
+
+  /* scored tile styles */
+  .jamo.correct{
+    background: linear-gradient(145deg, #3DD4B4 0%, var(--correct) 50%, var(--correct-deep) 100%);
+    color: #062A22;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 0 14px var(--glow-correct);
+    border-color: transparent;
+  }
+  .jamo.present{
+    background: linear-gradient(145deg, #F5C06A 0%, var(--present) 50%, var(--present-deep) 100%);
+    color: #3A2208;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 0 12px var(--glow-present);
+    border-color: transparent;
+  }
+  .jamo.absent{
+    background: linear-gradient(160deg, #333B4E 0%, var(--absent) 100%);
+    color: var(--absent-text);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,.3);
+    border-color: transparent;
+  }
+
+  /* per-guess reveal animations */
+  .jamo.reveal-0{ animation: revealInk .55s cubic-bezier(.4,0,.2,1) both; }
+  .jamo.reveal-1{ animation: revealRipple .6s cubic-bezier(.34,1.4,.64,1) both; }
+  .jamo.reveal-2{ animation: revealPop .55s cubic-bezier(.34,1.56,.64,1) both; }
+  .jamo.reveal-3{ animation: revealShimmer .65s ease both; }
+  .jamo.reveal-4{ animation: revealBleed .6s cubic-bezier(.22,1,.36,1) both; }
+  .jamo.reveal-5{ animation: revealFinal .7s cubic-bezier(.34,1.3,.64,1) both; }
+
+  @keyframes revealInk{
+    0%{ transform: rotateX(0deg) scale(1); opacity:1; }
+    45%{ transform: rotateX(88deg) scale(.92); opacity:.7; }
+    55%{ transform: rotateX(88deg) scale(.92); }
+    100%{ transform: rotateX(0deg) scale(1); opacity:1; }
+  }
+  @keyframes revealRipple{
+    0%{ transform: scale(.6) rotateZ(-6deg); opacity:0; filter: blur(4px); }
+    50%{ transform: scale(1.12) rotateZ(3deg); filter: blur(0); }
+    75%{ transform: scale(.95) rotateZ(-1deg); }
+    100%{ transform: scale(1) rotateZ(0); opacity:1; }
+  }
+  @keyframes revealPop{
+    0%{ transform: scale(0) rotateY(90deg); opacity:0; }
+    55%{ transform: scale(1.18) rotateY(-8deg); }
+    75%{ transform: scale(.92) rotateY(4deg); }
+    100%{ transform: scale(1) rotateY(0); opacity:1; }
+  }
+  @keyframes revealShimmer{
+    0%{ transform: rotateX(0); filter: brightness(1); }
+    30%{ transform: rotateX(90deg); filter: brightness(2) saturate(1.5); }
+    60%{ transform: rotateX(90deg); filter: brightness(2.5); }
+    100%{ transform: rotateX(0); filter: brightness(1); }
+  }
+  @keyframes revealBleed{
+    0%{ transform: scale(1.3); opacity:0; box-shadow: 0 0 30px var(--glow-seal); }
+    40%{ transform: scale(.88); opacity:1; }
+    65%{ transform: scale(1.06); }
+    100%{ transform: scale(1); box-shadow: none; }
+  }
+  @keyframes revealFinal{
+    0%{ transform: rotateX(0) scale(1); filter: hue-rotate(0deg); }
+    20%{ transform: rotateX(90deg) scale(1.1); filter: hue-rotate(30deg) brightness(1.5); }
+    40%{ transform: rotateX(90deg) scale(1.1); filter: hue-rotate(-20deg) brightness(1.8); }
+    60%{ transform: rotateX(90deg); filter: hue-rotate(15deg); }
+    100%{ transform: rotateX(0) scale(1); filter: hue-rotate(0deg); }
+  }
+
+  .jamo.correct.spark::after,
+  .jamo.present.spark::after{
+    content:'';
+    position:absolute; inset:-2px;
+    border-radius:4px;
+    animation: sparkBurst .5s ease forwards;
+    pointer-events:none;
+  }
+  .jamo.correct.spark::after{ box-shadow: 0 0 20px 6px var(--glow-correct); }
+  .jamo.present.spark::after{ box-shadow: 0 0 18px 5px var(--glow-present); }
+  @keyframes sparkBurst{
+    0%{ opacity:1; transform: scale(.8); }
+    100%{ opacity:0; transform: scale(1.4); }
+  }
+
+  #input-row{
+    display:flex; gap:10px; margin-bottom: 16px;
+    width: 100%;
+    justify-content: center;
+    animation: fadeDown .7s .25s ease both;
+  }
+  #input-row.shake{ animation: shake .5s cubic-bezier(.36,.07,.19,.97); }
+  #guess-input{
+    background: rgba(20,26,43,.7);
+    backdrop-filter: blur(10px);
+    border: 1.5px solid rgba(244,235,217,.2);
+    color: var(--paper);
+    font-family:'Gowun Batang', serif;
+    font-size: 22px;
+    text-align:center;
+    width: 190px;
+    padding: 13px 10px;
+    border-radius: 12px;
+    letter-spacing: 6px;
+    transition: all .25s ease;
+    box-shadow: 0 4px 16px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.05);
+  }
+  #guess-input:focus{
+    outline:none;
+    border-color: var(--seal);
+    box-shadow: 0 4px 20px rgba(194,59,34,.25), 0 0 0 3px rgba(194,59,34,.15);
+  }
+  #guess-input:disabled{ opacity:.45; }
+  #submit-btn{
+    background: linear-gradient(145deg, #D44A32, var(--seal) 50%, var(--seal-dim));
+    color: var(--paper);
+    border:none;
+    font-family:'Noto Sans KR',sans-serif;
+    font-weight:700;
+    font-size:15px;
+    padding: 0 22px;
+    border-radius: 12px;
+    cursor:pointer;
+    transition: all .2s ease;
+    box-shadow: 0 4px 0 var(--seal-dim), 0 6px 20px rgba(194,59,34,.3);
+    position:relative;
+    overflow:hidden;
+  }
+  #submit-btn::after{
+    content:'';
+    position:absolute; inset:0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.15), transparent);
+    transform: translateX(-100%);
+    transition: transform .5s ease;
+  }
+  #submit-btn:hover:not(:disabled){
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 var(--seal-dim), 0 10px 28px rgba(194,59,34,.4);
+  }
+  #submit-btn:hover:not(:disabled)::after{ transform: translateX(100%); }
+  #submit-btn:active:not(:disabled){ transform: translateY(2px); box-shadow: 0 2px 0 var(--seal-dim); }
+  #submit-btn:disabled{ opacity:.4; cursor:default; box-shadow: none; }
+  #submit-btn.submitting{ pointer-events:none; animation: btnPulse .6s ease infinite; }
+  @keyframes btnPulse{
+    0%,100%{ opacity:1; }
+    50%{ opacity:.7; }
+  }
+
+  #message{
+    min-height: 22px;
+    font-size: 13px;
+    color: var(--present);
+    margin-bottom: 14px;
+    text-align:center;
+    transition: all .3s ease;
+  }
+  #message.show{ animation: messagePop .4s cubic-bezier(.34,1.4,.64,1) both; }
+  @keyframes messagePop{
+    from{ opacity:0; transform:translateY(-6px) scale(.95); }
+    to{ opacity:1; transform:translateY(0) scale(1); }
+  }
+
+  #tracker{
+    width: 100%;
+    margin-top: 4px;
+    animation: fadeDown .7s .3s ease both;
+    background: rgba(20,26,43,.45);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(244,235,217,.08);
+    border-radius: 14px;
+    padding: 12px 14px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.25);
+    max-height: 38vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tracker-label{
+    font-size:10px;
+    color: var(--paper-dim);
+    letter-spacing:2px;
+    margin-bottom:8px;
+    font-weight:700;
+  }
+  .tracker-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:5px;
+    margin-bottom:12px;
+  }
+  .tracker-row:last-child{ margin-bottom:0; }
+  .tkey{
+    width:32px; height:36px;
+    border-radius:7px;
+    background: linear-gradient(160deg, var(--ink-3), var(--ink-2));
+    border:1px solid rgba(244,235,217,.1);
+    display:flex; align-items:center; justify-content:center;
+    font-size:15px;
+    font-weight:700;
+    color: var(--paper-dim);
+    transition: all .35s cubic-bezier(.34,1.2,.64,1);
+    box-shadow: 0 2px 6px rgba(0,0,0,.2);
+  }
+  .tkey.updated{ animation: keyFlip .45s cubic-bezier(.34,1.4,.64,1) both; }
+  @keyframes keyFlip{
+    0%{ transform: rotateX(0) scale(1); }
+    45%{ transform: rotateX(90deg) scale(1.1); }
+    100%{ transform: rotateX(0) scale(1); }
+  }
+  .tkey.correct{
+    background: linear-gradient(145deg, #3DD4B4, var(--correct-deep));
+    color:#062A22;
+    border-color: var(--correct);
+    box-shadow: 0 0 12px var(--glow-correct);
+  }
+  .tkey.present{
+    background: linear-gradient(145deg, #F5C06A, var(--present-deep));
+    color:#3A2208;
+    border-color: var(--present);
+    box-shadow: 0 0 10px var(--glow-present);
+  }
+  .tkey.absent{
+    background: rgba(42,49,66,.6);
+    color: rgba(107,117,137,.45);
+    border-color: transparent;
+    transform: scale(.92);
+  }
+
+  #overlay{
+    position:fixed; inset:0;
+    background: rgba(6,8,14,.82);
+    backdrop-filter: blur(6px);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index: 25;
+    opacity:0;
+    transition: opacity .35s ease;
+    padding: 12px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  #overlay.show{
+    display:flex;
+    opacity:1;
+  }
+  #overlay.show.loss{
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: calc(10px + var(--safe-top));
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .modal{
+    background: linear-gradient(165deg, var(--ink-3) 0%, var(--ink-2) 100%);
+    border: 1px solid rgba(244,235,217,.15);
+    border-radius: 18px;
+    padding: 36px 32px;
+    text-align:center;
+    max-width: 340px;
+    width: 100%;
+    box-shadow:
+      0 24px 64px rgba(0,0,0,.5),
+      inset 0 1px 0 rgba(255,255,255,.08);
+    animation: modalIn .5s cubic-bezier(.34,1.3,.64,1) both;
+  }
+  #overlay.show.loss .modal{
+    max-width: 100%;
+    padding: 20px 18px;
+    border-radius: 14px;
+    animation: modalDropTop .45s cubic-bezier(.34,1.3,.64,1) both;
+    box-shadow:
+      0 12px 40px rgba(0,0,0,.55),
+      0 0 0 1px rgba(244,235,217,.1),
+      inset 0 1px 0 rgba(255,255,255,.08);
+  }
+  @keyframes modalIn{
+    from{ opacity:0; transform: scale(.85) translateY(20px); }
+    to{ opacity:1; transform: scale(1) translateY(0); }
+  }
+  @keyframes modalDropTop{
+    from{ opacity:0; transform: translateY(-28px) scale(.94); }
+    to{ opacity:1; transform: translateY(0) scale(1); }
+  }
+  .modal.win .modal-icon{
+    animation: winBounce 1s ease infinite;
+  }
+  @keyframes winBounce{
+    0%,100%{ transform: scale(1) rotate(-3deg); }
+    50%{ transform: scale(1.15) rotate(3deg); }
+  }
+  .modal-icon{
+    font-size:48px;
+    margin-bottom:8px;
+    display:block;
+  }
+  .modal h2{
+    font-family:'Gowun Batang', serif;
+    font-size:28px;
+    margin: 0 0 8px;
+    background: linear-gradient(180deg, var(--paper), var(--paper-dim));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .modal .answer{
+    font-size: 36px;
+    font-weight:900;
+    margin: 12px 0;
+    letter-spacing:4px;
+    text-shadow: 0 0 30px rgba(244,235,217,.2);
+    animation: answerGlow 2s ease-in-out infinite alternate;
+  }
+  @keyframes answerGlow{
+    from{ text-shadow: 0 0 20px rgba(45,184,154,.3); }
+    to{ text-shadow: 0 0 40px rgba(232,168,74,.4); }
+  }
+  .modal button{
+    margin-top: 18px;
+    background: linear-gradient(145deg, #D44A32, var(--seal));
+    color: var(--paper);
+    border:none;
+    font-weight:700;
+    padding: 12px 26px;
+    border-radius: 12px;
+    cursor:pointer;
+    font-family:'Noto Sans KR',sans-serif;
+    box-shadow: 0 4px 0 var(--seal-dim), 0 6px 20px rgba(194,59,34,.3);
+    transition: all .2s ease;
+  }
+  .modal button:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 var(--seal-dim), 0 10px 28px rgba(194,59,34,.4);
+  }
+
+  footer{
+    margin-top: 14px;
+    font-size:11px;
+    color: rgba(244,235,217,.35);
+    text-align:center;
+    line-height:1.6;
+    animation: fadeDown .7s .35s ease both;
+  }
+
+  @media (max-width: 520px){
+    :root{
+      --syl-size: 54px;
+      --board-gap: 6px;
+      --row-gap: 6px;
+      --jamo-font: 17px;
+      --jamo-font-jong: 15px;
+    }
+    body{ padding: calc(10px + var(--safe-top)) 10px calc(12px + var(--safe-bottom)); }
+    .header{ gap: 10px; margin-bottom: 2px; }
+    .seal{ width: 40px; height: 40px; font-size: 20px; }
+    h1{ font-size: 26px; letter-spacing: 1px; }
+    .subtitle{ font-size: 11px; margin: 0 0 10px; }
+    .meta-row{ margin-bottom: 10px; gap: 8px; }
+    button.ghost{ font-size: 12px; padding: 6px 12px; }
+    #board{ margin-bottom: 10px; }
+    .syl{ border-radius: 8px; }
+    .jamo.empty{ font-size: 11px; }
+    #input-row{ margin-bottom: 8px; gap: 8px; width: 100%; }
+    #guess-input{
+      flex: 1;
+      min-width: 0;
+      width: auto;
+      font-size: 18px;
+      padding: 10px 8px;
+      letter-spacing: 4px;
+      border-radius: 10px;
+    }
+    #submit-btn{
+      font-size: 14px;
+      padding: 0 16px;
+      border-radius: 10px;
+      flex-shrink: 0;
+    }
+    #message{ min-height: 18px; font-size: 12px; margin-bottom: 8px; }
+    #tracker{
+      padding: 10px 12px;
+      border-radius: 12px;
+      max-height: 32vh;
+    }
+    .tracker-label{ font-size: 9px; margin-bottom: 5px; letter-spacing: 1.5px; }
+    .tracker-row{ gap: 4px; margin-bottom: 8px; }
+    .tkey{ width: 26px; height: 28px; font-size: 12px; border-radius: 5px; }
+    footer{ display: none; }
+    .menu-tagline{ font-size: 12px; margin-bottom: 20px; }
+    .mode-card{ padding: 14px 16px; }
+    .mode-icon{ width: 40px; height: 40px; font-size: 18px; }
+    .mode-name{ font-size: 18px; }
+    .modal{ padding: 28px 22px; }
+    .modal-icon{ font-size: 36px; }
+    .modal h2{ font-size: 22px; }
+    .modal .answer{ font-size: 28px; letter-spacing: 3px; margin: 8px 0; }
+    #overlay.show.loss .modal .modal-icon{ font-size: 28px; margin-bottom: 4px; }
+    #overlay.show.loss .modal h2{ font-size: 20px; }
+    #overlay.show.loss .modal .answer{ font-size: 32px; }
+    #overlay.show.loss .modal button{ margin-top: 12px; padding: 10px 20px; }
+  }
+
+  @media (max-width: 380px){
+    :root{
+      --syl-size: 48px;
+      --board-gap: 5px;
+      --row-gap: 5px;
+      --jamo-font: 15px;
+      --jamo-font-jong: 13px;
+    }
+    .tkey{ width: 24px; height: 26px; font-size: 11px; }
+  }
+
+  .menu-auth-row{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 14px;
+    width: 100%;
+  }
+  #menu-screen .header{ width: 100%; }
+  #menu-screen .header h1{ flex: 1; }
+  .menu-login-btn{ margin-left: auto; flex-shrink: 0; }
+  .menu-user-label{
+    width: 100%;
+    text-align: center;
+    font-size: 12px;
+    color: var(--paper-dim);
+    margin: 4px 0 0;
+  }
+
+  #friends-overlay, #leaderboard-overlay{
+    position: fixed; inset: 0;
+    background: rgba(6,8,14,.82);
+    backdrop-filter: blur(6px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 27;
+    opacity: 0;
+    transition: opacity .3s ease;
+    padding: 16px;
+  }
+  #friends-overlay.show, #leaderboard-overlay.show{
+    display: flex;
+    opacity: 1;
+  }
+  .panel-modal{
+    background: linear-gradient(165deg, var(--ink-3) 0%, var(--ink-2) 100%);
+    border: 1px solid rgba(244,235,217,.15);
+    border-radius: 18px;
+    padding: 24px 20px;
+    width: 100%;
+    max-width: 360px;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 24px 64px rgba(0,0,0,.5);
+    animation: modalIn .45s cubic-bezier(.34,1.3,.64,1) both;
+  }
+  .panel-modal h2{
+    font-family: 'Gowun Batang', serif;
+    font-size: 22px;
+    margin: 0 0 16px;
+    text-align: center;
+    background: linear-gradient(180deg, var(--paper), var(--paper-dim));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .panel-section{
+    margin-bottom: 18px;
+  }
+  .panel-label{
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--paper-dim);
+    margin-bottom: 8px;
+  }
+  .friend-code-row{
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .friend-code-display{
+    flex: 1;
+    font-family: 'Gowun Batang', serif;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    text-align: center;
+    padding: 10px;
+    background: rgba(20,26,43,.8);
+    border: 1px solid rgba(244,235,217,.2);
+    border-radius: 10px;
+  }
+  .panel-input-row{
+    display: flex;
+    gap: 8px;
+  }
+  .panel-input{
+    flex: 1;
+    background: rgba(20,26,43,.8);
+    border: 1px solid rgba(244,235,217,.2);
+    color: var(--paper);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 14px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    text-transform: uppercase;
+  }
+  .panel-input:focus{
+    outline: none;
+    border-color: var(--seal);
+  }
+  .panel-btn{
+    background: linear-gradient(145deg, #D44A32, var(--seal));
+    color: var(--paper);
+    border: none;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .panel-btn:disabled{ opacity: .45; cursor: default; }
+  .panel-msg{
+    font-size: 12px;
+    margin-top: 8px;
+    min-height: 18px;
+    text-align: center;
+  }
+  .panel-msg.error{ color: #ff8a7a; }
+  .panel-msg.ok{ color: var(--correct); }
+  .friends-list{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .friends-list li{
+    padding: 10px 12px;
+    background: rgba(20,26,43,.6);
+    border: 1px solid rgba(244,235,217,.1);
+    border-radius: 10px;
+    font-size: 14px;
+  }
+  .friends-list .empty{
+    color: var(--paper-dim);
+    text-align: center;
+    font-size: 13px;
+  }
+  .leaderboard-list{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .leaderboard-list li{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 14px;
+    background: rgba(20,26,43,.6);
+    border: 1px solid rgba(244,235,217,.1);
+    border-radius: 10px;
+    font-size: 14px;
+  }
+  .leaderboard-list li.me{
+    border-color: rgba(194,59,34,.4);
+    background: rgba(194,59,34,.12);
+  }
+  .leaderboard-score{
+    font-weight: 700;
+    color: var(--present);
+  }
+  .leaderboard-score.pending{ color: var(--paper-dim); font-weight: 400; }
+  .panel-close{
+    display: block;
+    width: 100%;
+    margin-top: 16px;
+    background: transparent;
+    border: 1px solid rgba(244,235,217,.2);
+    color: var(--paper-dim);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 13px;
+    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  .panel-close:hover{ color: var(--paper); border-color: var(--paper); }
+</style>
+</head>
+<body>
+
+<div class="bg-layer bg-gradient"></div>
+<div class="bg-layer bg-grain"></div>
+<div class="bg-layer bg-orbs"><span></span><span></span><span></span></div>
+<canvas id="confetti-canvas"></canvas>
+
+<div id="menu-screen" class="screen">
+  <div class="menu-inner">
+    <div class="header">
+      <div class="seal">字</div>
+      <h1>자모들</h1>
+      <button type="button" class="ghost menu-login-btn" id="login-btn">로그인</button>
+    </div>
+    <p class="menu-tagline">모드를 선택하세요</p>
+    <div class="mode-list">
+      <button type="button" class="mode-card" id="mode-daily-btn">
+        <span class="mode-icon">📅</span>
+        <span>
+          <span class="mode-name">Daily</span>
+          <span class="mode-desc">오늘의 단어 · 친구와 순위 비교</span>
+        </span>
+        <span class="mode-arrow">›</span>
+      </button>
+      <button type="button" class="mode-card" id="mode-wordle-btn">
+        <span class="mode-icon">📝</span>
+        <span>
+          <span class="mode-name">Wordle</span>
+          <span class="mode-desc">자모 단위로 한글 단어 맞히기 (연습)</span>
+        </span>
+        <span class="mode-arrow">›</span>
+      </button>
+    </div>
+    <div class="menu-auth-row">
+      <button type="button" class="ghost" id="friends-btn" hidden>친구</button>
+      <button type="button" class="ghost" id="leaderboard-menu-btn" hidden>친구 순위</button>
+    </div>
+    <p class="menu-user-label" id="menu-user-label" hidden></p>
+  </div>
+</div>
+
+<div id="length-overlay">
+  <div class="length-modal">
+    <h2>Wordle</h2>
+    <p>글자 수를 선택하세요</p>
+    <div class="length-options">
+      <button type="button" class="length-btn" data-length="2">
+        2 letter
+        <span>두 글자 단어</span>
+      </button>
+      <button type="button" class="length-btn" data-length="3">
+        3 letters
+        <span>세 글자 단어</span>
+      </button>
+    </div>
+    <button type="button" class="length-cancel" id="length-cancel-btn">취소</button>
+  </div>
+</div>
+
+<div id="game-screen" class="screen hidden">
+<div class="app">
+  <div class="header">
+    <div class="seal">字</div>
+    <h1>자모들</h1>
+  </div>
+  <div class="mode-badge" id="mode-badge">3글자</div>
+  <div class="subtitle" id="subtitle">세 글자 한글 단어 · 자모 단위로 맞혀보세요</div>
+
+  <div class="meta-row">
+    <button class="ghost" id="menu-btn">메뉴</button>
+    <button class="ghost" id="new-game-btn">새 단어</button>
+    <button class="ghost" id="leaderboard-btn" hidden>친구 순위</button>
+    <button class="ghost" id="how-btn">방법</button>
+  </div>
+
+  <div id="board"></div>
+
+  <div id="input-row">
+    <input id="guess-input" maxlength="3" placeholder="단어 입력" autocomplete="off" />
+    <button id="submit-btn">확인</button>
+  </div>
+  <div id="extra-guess-row" style="display:flex;justify-content:center;margin-bottom:10px;">
+    <button class="ghost" id="extra-guess-btn">한 번 더</button>
+  </div>
+  <div id="message"></div>
+
+  <div id="tracker">
+    <div class="tracker-label">초성</div>
+    <div class="tracker-row" id="cho-row"></div>
+    <div class="tracker-label">중성</div>
+    <div class="tracker-row" id="jung-row"></div>
+    <div class="tracker-label">종성</div>
+    <div class="tracker-row" id="jong-row"></div>
+  </div>
+
+  <footer id="game-footer">
+    자모(초성·중성·종성) 단위로 정답 여부를 알려줍니다. 사전에 없는 글자라도 올바른 한글 음절이면 추측으로 인정됩니다. 6번의 기회가 있어요.
+  </footer>
+</div>
+</div>
+
+<div id="overlay">
+  <div class="modal" id="modal">
+    <span class="modal-icon" id="modal-icon">🎉</span>
+    <h2 id="modal-title">정답!</h2>
+    <div class="answer" id="modal-answer"></div>
+    <div id="modal-sub" style="font-size:13px;color:var(--paper-dim);"></div>
+    <button id="modal-btn">새 단어로 시작</button>
+  </div>
+</div>
+
+<div id="friends-overlay">
+  <div class="panel-modal">
+    <h2>친구</h2>
+    <div class="panel-section">
+      <div class="panel-label">내 친구 코드</div>
+      <div class="friend-code-row">
+        <div class="friend-code-display" id="my-friend-code">------</div>
+        <button type="button" class="panel-btn" id="copy-friend-code-btn">복사</button>
+      </div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-label">친구 추가</div>
+      <div class="panel-input-row">
+        <input type="text" class="panel-input" id="add-friend-input" maxlength="6" placeholder="친구 코드" autocomplete="off">
+        <button type="button" class="panel-btn" id="add-friend-btn">추가</button>
+      </div>
+      <div class="panel-msg" id="add-friend-msg"></div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-label">친구 목록</div>
+      <ul class="friends-list" id="friends-list"></ul>
+    </div>
+    <button type="button" class="panel-close" id="friends-close-btn">닫기</button>
+  </div>
+</div>
+
+<div id="leaderboard-overlay">
+  <div class="panel-modal">
+    <h2>친구 순위</h2>
+    <p style="font-size:12px;color:var(--paper-dim);text-align:center;margin:0 0 14px;" id="leaderboard-date"></p>
+    <ul class="leaderboard-list" id="leaderboard-list"></ul>
+    <button type="button" class="panel-close" id="leaderboard-close-btn">닫기</button>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+const CHO = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+const JUNG = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
+const JONG = ['','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+
+const CHO_ALL = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+const JUNG_ALL = ['ㅏ','ㅐ','ㅑ','ㅓ','ㅔ','ㅕ','ㅗ','ㅘ','ㅚ','ㅛ','ㅜ','ㅝ','ㅟ','ㅠ','ㅡ','ㅣ'];
+const JONG_ALL = ['ㄱ','ㄴ','ㄷ','ㄹ','ㅁ','ㅂ','ㅅ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+
+const REVEAL_STAGGER = 95;
+const PARTS = ['cho','jung','jong'];
+const DAILY_LAUNCH = '2024-01-01';
+const DAILY_TZ = 'Asia/Seoul';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAf2sMQ_0-qfF8188Zo9RXQMe5mvu8KA6w",
+  authDomain: "korean-wordle-d30a3.firebaseapp.com",
+  projectId: "korean-wordle-d30a3",
+  storageBucket: "korean-wordle-d30a3.firebasestorage.app",
+  messagingSenderId: "736210860951",
+  appId: "1:736210860951:web:07cee34d068953e21f22d2"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let currentUser = null;
+let userProfile = null;
+let lengthPickerMode = 'practice';
+
+const WORDS_3 = [
+"자전거","컴퓨터","운동화","비행기","자동차","냉장고","세탁기","도서관","음악회","미용실",
+"편의점","놀이터","떡볶이","삼겹살","비빔밥","무지개","거북이","고양이","강아지","호랑이",
+"코끼리","원숭이","너구리","다람쥐","미나리","라면집","사진관","미술관","박물관","수영장",
+"운동장","정류장","주차장","지하철","신호등","가로등","우체국","은행원","회사원","선생님",
+"학생증","도시락","보름달","눈사람","무궁화","한라산","태극기","떡갈비","불고기","된장국",
+"김치전","목요일","화요일","월요일","서울역","부산행","고속도","약국장","경찰관","소방관"
+];
+
+const WORDS_2 = [
+"학교","친구","가족","시간","나무","사랑","하늘","바다","커피","우유",
+"동물","여름","겨울","아침","저녁","오늘","내일","어제","사과","포도",
+"수박","행복","기쁨","슬픔","노래","영화","사진","그림","편지","전화",
+"시계","지도","우산","안경","모자","신발","가방","연필","공책","책상",
+"의자","침대","창문","지갑","열쇠","시장","병원","약국","은행","공원",
+"운동","수영","등산","여행","피자","라면","김밥","빵집","과일","야채",
+"달빛","별빛","꽃길","산책","독서","요리","청소","주방","빨래","세탁"
+];
+
+function decompose(syllable){
+  const code = syllable.codePointAt(0) - 0xAC00;
+  const choIdx = Math.floor(code / (21*28));
+  const jungIdx = Math.floor((code % (21*28)) / 28);
+  const jongIdx = code % 28;
+  return { cho: CHO[choIdx], jung: JUNG[jungIdx], jong: JONG[jongIdx] };
+}
+
+function isHangulSyllable(ch){
+  const c = ch.codePointAt(0);
+  return c >= 0xAC00 && c <= 0xD7A3;
+}
+
+function wordToSlots(word){
+  const cho=[], jung=[], jong=[];
+  for(const ch of word){
+    const d = decompose(ch);
+    cho.push(d.cho); jung.push(d.jung); jong.push(d.jong);
+  }
+  return {cho, jung, jong};
+}
+
+function scoreCategory(guessArr, targetArr){
+  const result = new Array(guessArr.length).fill('absent');
+  const targetUsed = new Array(targetArr.length).fill(false);
+  for(let i=0;i<guessArr.length;i++){
+    if(guessArr[i] !== '' && guessArr[i] === targetArr[i]){
+      result[i] = 'correct';
+      targetUsed[i] = true;
+    }
+  }
+  for(let i=0;i<guessArr.length;i++){
+    if(result[i] === 'correct') continue;
+    if(guessArr[i] === ''){ result[i] = (targetArr[i]==='') ? 'correct' : 'absent'; continue; }
+    for(let j=0;j<targetArr.length;j++){
+      if(!targetUsed[j] && targetArr[j] === guessArr[i]){
+        result[i] = 'present';
+        targetUsed[j] = true;
+        break;
+      }
+    }
+  }
+  return result;
+}
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+let state = {
+  gameMode: 'practice',
+  wordLength: 3,
+  target: "",
+  targetSlots: null,
+  guesses: [],
+  maxGuesses: 6,
+  over: false,
+  won: false,
+  animating: false,
+  pendingRow: null,
+  tracker: {}
+};
+
+function hashString(str){
+  let h = 0;
+  for(let i = 0; i < str.length; i++){
+    h = ((h << 5) - h) + str.charCodeAt(i);
+    h |= 0;
+  }
+  return Math.abs(h);
+}
+
+function getTodayKey(){
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: DAILY_TZ,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).format(new Date());
+}
+
+function getDayNumber(){
+  const today = getTodayKey();
+  const launchMs = new Date(DAILY_LAUNCH + 'T00:00:00+09:00').getTime();
+  const todayMs = new Date(today + 'T00:00:00+09:00').getTime();
+  return Math.floor((todayMs - launchMs) / 86400000) + 1;
+}
+
+function pickDailyWord(wordLength){
+  const list = wordLength === 2 ? WORDS_2 : WORDS_3;
+  const seed = getTodayKey() + '-' + wordLength;
+  return list[hashString(seed) % list.length];
+}
+
+const FRIEND_CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+
+function generateFriendCode(){
+  let code = '';
+  for(let i = 0; i < 6; i++){
+    code += FRIEND_CODE_CHARS[Math.floor(Math.random() * FRIEND_CODE_CHARS.length)];
+  }
+  return code;
+}
+
+async function ensureUserDoc(user){
+  const ref = db.collection('users').doc(user.uid);
+  const snap = await ref.get();
+  if(!snap.exists){
+    let friendCode = generateFriendCode();
+    for(let attempt = 0; attempt < 12; attempt++){
+      const dup = await db.collection('users').where('friendCode', '==', friendCode).limit(1).get();
+      if(dup.empty) break;
+      friendCode = generateFriendCode();
+    }
+    const data = {
+      displayName: user.displayName || '플레이어',
+      friendCode,
+      friends: []
+    };
+    await ref.set(data);
+    return data;
+  }
+  return snap.data();
+}
+
+function updateAuthUI(){
+  const loggedIn = !!currentUser;
+  document.getElementById('login-btn').textContent = loggedIn ? '로그아웃' : '로그인';
+  document.getElementById('friends-btn').hidden = !loggedIn;
+  document.getElementById('leaderboard-menu-btn').hidden = !loggedIn;
+  document.getElementById('leaderboard-btn').hidden = !loggedIn;
+  const label = document.getElementById('menu-user-label');
+  if(loggedIn){
+    label.hidden = false;
+    label.textContent = (userProfile?.displayName || currentUser.displayName || '플레이어') + '님';
+  } else {
+    label.hidden = true;
+    label.textContent = '';
+  }
+}
+
+auth.onAuthStateChanged(async (user) => {
+  currentUser = user;
+  if(user){
+    try {
+      userProfile = await ensureUserDoc(user);
+    } catch(err) {
+      console.error('[Firebase] user profile load failed', err);
+      userProfile = null;
+    }
+  } else {
+    userProfile = null;
+  }
+  updateAuthUI();
+});
+
+async function signInWithGoogle(){
+  const provider = new firebase.auth.GoogleAuthProvider();
+  try {
+    await auth.signInWithPopup(provider);
+  } catch(err) {
+    if(err.code !== 'auth/popup-closed-by-user'){
+      alert('로그인에 실패했어요. 다시 시도해주세요.');
+    }
+  }
+}
+
+async function signOut(){
+  await auth.signOut();
+}
+
+function openFriendsPanel(){
+  if(!currentUser || !userProfile) return;
+  document.getElementById('my-friend-code').textContent = userProfile.friendCode || '------';
+  document.getElementById('add-friend-input').value = '';
+  document.getElementById('add-friend-msg').textContent = '';
+  document.getElementById('add-friend-msg').className = 'panel-msg';
+  renderFriendsList();
+  document.getElementById('friends-overlay').classList.add('show');
+  document.body.classList.add('overlay-open');
+}
+
+function closeFriendsPanel(){
+  document.getElementById('friends-overlay').classList.remove('show');
+  if(!document.getElementById('overlay').classList.contains('show') &&
+     !document.getElementById('length-overlay').classList.contains('show') &&
+     !document.getElementById('leaderboard-overlay').classList.contains('show')){
+    document.body.classList.remove('overlay-open');
+  }
+}
+
+async function renderFriendsList(){
+  const listEl = document.getElementById('friends-list');
+  const friendUids = userProfile?.friends || [];
+  if(!friendUids.length){
+    listEl.innerHTML = '<li class="empty">아직 친구가 없어요</li>';
+    return;
+  }
+  const snaps = await Promise.all(
+    friendUids.map(uid => db.collection('users').doc(uid).get())
+  );
+  listEl.innerHTML = '';
+  snaps.forEach(snap => {
+    const li = document.createElement('li');
+    li.textContent = snap.exists ? (snap.data().displayName || '플레이어') : '알 수 없음';
+    listEl.appendChild(li);
+  });
+}
+
+async function addFriendByCode(){
+  const msgEl = document.getElementById('add-friend-msg');
+  const input = document.getElementById('add-friend-input');
+  const code = input.value.trim().toUpperCase();
+  msgEl.textContent = '';
+  msgEl.className = 'panel-msg';
+  if(!currentUser || !userProfile) return;
+  if(code.length !== 6){
+    msgEl.textContent = '6자리 코드를 입력해주세요.';
+    msgEl.classList.add('error');
+    return;
+  }
+  if(code === userProfile.friendCode){
+    msgEl.textContent = '자기 코드는 추가할 수 없어요.';
+    msgEl.classList.add('error');
+    return;
+  }
+  const addBtn = document.getElementById('add-friend-btn');
+  addBtn.disabled = true;
+  try {
+    const q = await db.collection('users').where('friendCode', '==', code).limit(1).get();
+    if(q.empty){
+      msgEl.textContent = '코드를 찾을 수 없어요.';
+      msgEl.classList.add('error');
+      return;
+    }
+    const friendDoc = q.docs[0];
+    const friendUid = friendDoc.id;
+    if((userProfile.friends || []).includes(friendUid)){
+      msgEl.textContent = '이미 친구예요.';
+      msgEl.classList.add('error');
+      return;
+    }
+    await db.runTransaction(async (tx) => {
+      const meRef = db.collection('users').doc(currentUser.uid);
+      const friendRef = db.collection('users').doc(friendUid);
+      const meSnap = await tx.get(meRef);
+      const friendSnap = await tx.get(friendRef);
+      if(!meSnap.exists || !friendSnap.exists) throw new Error('missing');
+      const myFriends = meSnap.data().friends || [];
+      const theirFriends = friendSnap.data().friends || [];
+      if(myFriends.includes(friendUid)) return;
+      tx.update(meRef, { friends: [...myFriends, friendUid] });
+      tx.update(friendRef, { friends: [...theirFriends, currentUser.uid] });
+    });
+    userProfile = await ensureUserDoc(currentUser);
+    input.value = '';
+    msgEl.textContent = '친구가 추가됐어요!';
+    msgEl.classList.add('ok');
+    renderFriendsList();
+  } catch(err) {
+    console.error('[Firebase] add friend failed', err);
+    msgEl.textContent = '친구 추가에 실패했어요.';
+    msgEl.classList.add('error');
+  } finally {
+    addBtn.disabled = false;
+  }
+}
+
+async function copyFriendCode(){
+  const code = userProfile?.friendCode;
+  if(!code) return;
+  try {
+    await navigator.clipboard.writeText(code);
+  } catch {
+    const ta = document.createElement('textarea');
+    ta.value = code;
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  }
+  const btn = document.getElementById('copy-friend-code-btn');
+  const prev = btn.textContent;
+  btn.textContent = '복사됨';
+  setTimeout(() => { btn.textContent = prev; }, 1500);
+}
+
+function buildGuessGrid(){
+  return state.guesses.map(guess => {
+    const row = [];
+    for(let s = 0; s < state.wordLength; s++){
+      row.push({
+        cho: guess.choScore[s],
+        jung: guess.jungScore[s],
+        jong: guess.jongScore[s]
+      });
+    }
+    return row;
+  });
+}
+
+let dailyResultSaved = false;
+
+async function saveDailyResult(won){
+  if(state.gameMode !== 'daily' || !currentUser) return;
+  const today = getTodayKey();
+  const docId = today + '_' + currentUser.uid;
+  try {
+    await db.collection('dailyResults').doc(docId).set({
+      uid: currentUser.uid,
+      date: today,
+      wordLength: state.wordLength,
+      guessCount: won ? state.guesses.length : null,
+      won,
+      guessGrid: buildGuessGrid()
+    });
+    dailyResultSaved = true;
+  } catch(err) {
+    console.error('[Firebase] daily result save failed', err);
+  }
+}
+
+function sortLeaderboardEntries(entries){
+  return entries.sort((a, b) => {
+    if(a.notPlayed && !b.notPlayed) return 1;
+    if(!a.notPlayed && b.notPlayed) return -1;
+    if(a.notPlayed && b.notPlayed) return a.displayName.localeCompare(b.displayName, 'ko');
+    if(a.won && !b.won) return -1;
+    if(!a.won && b.won) return 1;
+    if(a.won && b.won) return (a.guessCount || 99) - (b.guessCount || 99);
+    return a.displayName.localeCompare(b.displayName, 'ko');
+  });
+}
+
+async function openLeaderboard(){
+  if(!currentUser || !userProfile) return;
+  const listEl = document.getElementById('leaderboard-list');
+  const dateEl = document.getElementById('leaderboard-date');
+  const today = getTodayKey();
+  dateEl.textContent = 'Daily · Day ' + getDayNumber() + ' · ' + today;
+  listEl.innerHTML = '<li style="justify-content:center;color:var(--paper-dim);">불러오는 중…</li>';
+  document.getElementById('leaderboard-overlay').classList.add('show');
+  document.body.classList.add('overlay-open');
+
+  const uids = [currentUser.uid, ...(userProfile.friends || [])];
+  const userSnaps = await Promise.all(uids.map(uid => db.collection('users').doc(uid).get()));
+  const resultSnaps = await Promise.all(
+    uids.map(uid => db.collection('dailyResults').doc(today + '_' + uid).get())
+  );
+
+  const entries = uids.map((uid, i) => {
+    const name = userSnaps[i].exists
+      ? (userSnaps[i].data().displayName || '플레이어')
+      : '알 수 없음';
+    const result = resultSnaps[i];
+    if(!result.exists){
+      return { uid, displayName: name, notPlayed: true };
+    }
+    const data = result.data();
+    return {
+      uid,
+      displayName: name,
+      won: !!data.won,
+      guessCount: data.guessCount
+    };
+  });
+
+  sortLeaderboardEntries(entries);
+  listEl.innerHTML = '';
+  entries.forEach(entry => {
+    const li = document.createElement('li');
+    if(entry.uid === currentUser.uid) li.classList.add('me');
+    const nameSpan = document.createElement('span');
+    nameSpan.textContent = entry.displayName + (entry.uid === currentUser.uid ? ' (나)' : '');
+    const scoreSpan = document.createElement('span');
+    scoreSpan.className = 'leaderboard-score';
+    if(entry.notPlayed){
+      scoreSpan.classList.add('pending');
+      scoreSpan.textContent = '아직 안 함';
+    } else if(entry.won){
+      scoreSpan.textContent = entry.guessCount + '/6';
+    } else {
+      scoreSpan.textContent = 'X/6';
+    }
+    li.appendChild(nameSpan);
+    li.appendChild(scoreSpan);
+    listEl.appendChild(li);
+  });
+}
+
+function closeLeaderboard(){
+  document.getElementById('leaderboard-overlay').classList.remove('show');
+  if(!document.getElementById('overlay').classList.contains('show') &&
+     !document.getElementById('length-overlay').classList.contains('show') &&
+     !document.getElementById('friends-overlay').classList.contains('show')){
+    document.body.classList.remove('overlay-open');
+  }
+}
+
+function getWordList(){
+  return state.wordLength === 2 ? WORDS_2 : WORDS_3;
+}
+
+function pickWord(){
+  if(state.gameMode === 'daily') return pickDailyWord(state.wordLength);
+  const list = getWordList();
+  return list[Math.floor(Math.random() * list.length)];
+}
+
+function showMenu(){
+  state.over = true;
+  state.animating = false;
+  closeFriendsPanel();
+  closeLeaderboard();
+  document.getElementById('menu-screen').classList.remove('hidden');
+  document.getElementById('game-screen').classList.add('hidden');
+  document.getElementById('overlay').classList.remove('show', 'loss');
+  document.getElementById('modal').classList.remove('win');
+  closeLengthPicker();
+  document.body.classList.remove('overlay-open');
+}
+
+function openLengthPicker(mode){
+  lengthPickerMode = mode || 'practice';
+  const title = document.querySelector('.length-modal h2');
+  title.textContent = mode === 'daily' ? 'Daily' : 'Wordle';
+  document.getElementById('length-overlay').classList.add('show');
+  document.body.classList.add('overlay-open');
+}
+
+function closeLengthPicker(){
+  document.getElementById('length-overlay').classList.remove('show');
+  if(!document.getElementById('overlay').classList.contains('show')){
+    document.body.classList.remove('overlay-open');
+  }
+}
+
+function updateGameUI(){
+  const n = state.wordLength;
+  const day = getDayNumber();
+  if(state.gameMode === 'daily'){
+    document.getElementById('mode-badge').textContent = 'Daily · Day ' + day + ' · ' + n + '글자';
+    document.getElementById('subtitle').textContent =
+      '오늘 모두 같은 ' + n + '글자 단어 · 자정(KST)에 새 단어';
+    document.getElementById('new-game-btn').style.display = 'none';
+    document.getElementById('game-footer').textContent =
+      '오늘의 Daily는 자정(KST)에 새 단어로 바뀝니다. ' + n + '글자 한글 단어를 맞혀보세요. 6번의 기회가 있어요.';
+  } else {
+    document.getElementById('mode-badge').textContent = n + '글자';
+    document.getElementById('subtitle').textContent =
+      n === 2 ? '두 글자 한글 단어 · 자모 단위로 맞혀보세요'
+              : '세 글자 한글 단어 · 자모 단위로 맞혀보세요';
+    document.getElementById('new-game-btn').style.display = '';
+    document.getElementById('game-footer').textContent =
+      '자모(초성·중성·종성) 단위로 정답 여부를 알려줍니다. ' + n + '글자 한글 단어를 맞혀보세요. 6번의 기회가 있어요.';
+  }
+  const input = document.getElementById('guess-input');
+  input.maxLength = n;
+  input.value = '';
+}
+
+function startGame(wordLength, mode){
+  state.gameMode = mode || lengthPickerMode || 'practice';
+  state.wordLength = wordLength;
+  dailyResultSaved = false;
+  closeLengthPicker();
+  document.getElementById('menu-screen').classList.add('hidden');
+  document.getElementById('game-screen').classList.remove('hidden');
+  updateGameUI();
+  initGameSession();
+  document.getElementById('guess-input').focus();
+}
+
+function newGame(){
+  if(state.gameMode === 'daily') return;
+  dailyResultSaved = false;
+  initGameSession();
+}
+
+function initGameSession(){
+  state.target = pickWord();
+  state.targetSlots = wordToSlots(state.target);
+  state.guesses = [];
+  state.maxGuesses = 6;
+  state.over = false;
+  state.won = false;
+  state.animating = false;
+  state.pendingRow = null;
+  state.tracker = {};
+  document.getElementById('message').textContent = '';
+  document.getElementById('message').classList.remove('show');
+  document.getElementById('guess-input').value = '';
+  document.getElementById('guess-input').disabled = false;
+  document.getElementById('submit-btn').disabled = false;
+  document.getElementById('submit-btn').classList.remove('submitting');
+  document.getElementById('overlay').classList.remove('show', 'loss');
+  document.getElementById('modal').classList.remove('win');
+  document.body.classList.remove('overlay-open');
+  document.getElementById('modal-btn').textContent =
+    state.gameMode === 'daily' ? '메뉴로' : '새 단어로 시작';
+  renderBoard();
+  renderTracker();
+  syncExtraGuessBtn();
+}
+
+function setMessage(text){
+  const el = document.getElementById('message');
+  el.textContent = text;
+  el.classList.remove('show');
+  if(text) requestAnimationFrame(() => el.classList.add('show'));
+}
+
+function shakeInput(){
+  const row = document.getElementById('input-row');
+  row.classList.remove('shake');
+  void row.offsetWidth;
+  row.classList.add('shake');
+  setTimeout(() => row.classList.remove('shake'), 500);
+}
+
+function makeJamoCell(row, syl, part){
+  const cell = document.createElement('div');
+  cell.className = 'jamo';
+  cell.dataset.row = row;
+  cell.dataset.syl = syl;
+  cell.dataset.part = part;
+  return cell;
+}
+
+const STACK_VOWELS = new Set(['ㅗ','ㅛ','ㅜ','ㅠ','ㅡ']);
+function vowelLayout(jung){
+  return STACK_VOWELS.has(jung) ? 'stack' : 'side';
+}
+
+function renderBoard(){
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+  for(let r=0;r<state.maxGuesses;r++){
+    const rowDiv = document.createElement('div');
+    rowDiv.className = 'row';
+    if(r < state.guesses.length) rowDiv.dataset.guess = String(r);
+    const guess = state.guesses[r];
+    const isPending = state.pendingRow === r;
+
+    for(let s=0;s<state.wordLength;s++){
+      const sylDiv = document.createElement('div');
+      sylDiv.className = 'syl';
+
+      const choCell = makeJamoCell(r, s, 'cho');
+      const jungCell = makeJamoCell(r, s, 'jung');
+
+      const hasJong = guess && guess.jong[s] !== '';
+      const layout = guess ? vowelLayout(guess.jung[s]) : 'side';
+
+      if(guess){
+        choCell.textContent = guess.cho[s];
+        jungCell.textContent = guess.jung[s];
+
+        if(!isPending){
+          choCell.classList.add(guess.choScore[s]);
+          jungCell.classList.add(guess.jungScore[s]);
+        } else {
+          choCell.classList.add('pending');
+          jungCell.classList.add('pending');
+        }
+      }
+
+      if(layout === 'stack'){
+        // horizontal vowel (ㅗㅛㅜㅠㅡ): consonant sits above the vowel
+        const choRow = document.createElement('div');
+        choRow.className = 'syl-row';
+        choRow.appendChild(choCell);
+        const jungRow = document.createElement('div');
+        jungRow.className = 'syl-row';
+        jungRow.appendChild(jungCell);
+        sylDiv.appendChild(choRow);
+        sylDiv.appendChild(jungRow);
+      } else {
+        // vertical vowel (ㅏㅓㅣ etc): consonant sits beside the vowel
+        const topRow = document.createElement('div');
+        topRow.className = 'syl-row';
+        topRow.appendChild(choCell);
+        topRow.appendChild(jungCell);
+        sylDiv.appendChild(topRow);
+      }
+
+      const jongCell = makeJamoCell(r, s, 'jong');
+      if(guess){
+        if(hasJong){
+          jongCell.textContent = guess.jong[s];
+          if(!isPending){
+            jongCell.classList.add(guess.jongScore[s]);
+          } else {
+            jongCell.classList.add('pending');
+          }
+        } else {
+          jongCell.textContent = '·';
+          jongCell.classList.add('empty');
+          if(!isPending) jongCell.classList.add(guess.jongScore[s]);
+          else jongCell.classList.add('pending');
+        }
+      }
+      const jongRow = document.createElement('div');
+      jongRow.className = 'syl-row syl-row-jong';
+      jongRow.appendChild(jongCell);
+      sylDiv.appendChild(jongRow);
+
+      rowDiv.appendChild(sylDiv);
+    }
+    board.appendChild(rowDiv);
+  }
+}
+
+function getJamoCell(row, syl, part){
+  return document.querySelector(`.jamo[data-row="${row}"][data-syl="${syl}"][data-part="${part}"]`);
+}
+
+async function revealRow(rowIdx, guess){
+  for(let s=0;s<state.wordLength;s++){
+    for(const part of PARTS){
+      const cell = getJamoCell(rowIdx, s, part);
+      if(!cell) continue;
+      const scoreKey = part + 'Score';
+      const score = guess[scoreKey][s];
+
+      cell.classList.remove('pending');
+      cell.classList.add('reveal-' + rowIdx, score);
+      if(score === 'correct' || score === 'present') cell.classList.add('spark');
+
+      await sleep(REVEAL_STAGGER);
+    }
+  }
+  await sleep(350);
+}
+
+function renderTracker(updatedKeys){
+  const choRow = document.getElementById('cho-row');
+  const jungRow = document.getElementById('jung-row');
+  const jongRow = document.getElementById('jong-row');
+  choRow.innerHTML=''; jungRow.innerHTML=''; jongRow.innerHTML='';
+
+  function addKey(container, cat, jamo){
+    const el = document.createElement('div');
+    el.className = 'tkey';
+    const key = cat + ':' + jamo;
+    const st = state.tracker[key];
+    if(st) el.classList.add(st);
+    if(updatedKeys && updatedKeys.has(key)) el.classList.add('updated');
+    el.textContent = jamo;
+    container.appendChild(el);
+  }
+
+  CHO_ALL.forEach(j => addKey(choRow, 'cho', j));
+  JUNG_ALL.forEach(j => addKey(jungRow, 'jung', j));
+  JONG_ALL.forEach(j => addKey(jongRow, 'jong', j));
+}
+
+function updateTracker(cat, arr, scores){
+  const rank = {absent:0, present:1, correct:2};
+  const updated = new Set();
+  arr.forEach((jamo, i)=>{
+    if(jamo === '') return;
+    const key = cat+':'+jamo;
+    const newScore = scores[i];
+    const old = state.tracker[key];
+    if(!old || rank[newScore] > rank[old]){
+      state.tracker[key] = newScore;
+      updated.add(key);
+    }
+  });
+  return updated;
+}
+
+function launchConfetti(){
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const colors = ['#2DB89A','#E8A84A','#C23B22','#F4EBD9','#3DD4B4','#F5C06A'];
+  const pieces = Array.from({length: 120}, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height * 0.5 - canvas.height * 0.5,
+    w: 6 + Math.random() * 8,
+    h: 4 + Math.random() * 6,
+    color: colors[Math.floor(Math.random() * colors.length)],
+    rot: Math.random() * 360,
+    spin: (Math.random() - 0.5) * 12,
+    vy: 2 + Math.random() * 4,
+    vx: (Math.random() - 0.5) * 3,
+    opacity: 1
+  }));
+
+  let frame = 0;
+  const maxFrames = 140;
+
+  function draw(){
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    pieces.forEach(p => {
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot * Math.PI / 180);
+      ctx.globalAlpha = p.opacity;
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+      ctx.restore();
+      p.x += p.vx;
+      p.y += p.vy;
+      p.rot += p.spin;
+      p.vy += 0.08;
+    });
+    frame++;
+    if(frame < maxFrames) requestAnimationFrame(draw);
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  draw();
+}
+
+function showOverlay(won){
+  const overlay = document.getElementById('overlay');
+  const modal = document.getElementById('modal');
+  document.getElementById('modal-icon').textContent = won ? '🎉' : '💧';
+  document.getElementById('modal-title').textContent = won ? '정답입니다!' : '아쉬워요';
+  document.getElementById('modal-answer').textContent = state.target;
+  document.getElementById('modal-sub').textContent = won
+    ? (state.guesses.length+'번 만에 맞히셨어요.')
+    : '정답을 확인하고 다시 도전해보세요.';
+  modal.classList.toggle('win', won);
+  overlay.classList.toggle('loss', !won);
+  overlay.classList.remove('show');
+  document.getElementById('modal-btn').textContent =
+    state.gameMode === 'daily' ? '메뉴로' : '새 단어로 시작';
+  window.scrollTo(0, 0);
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+  document.body.classList.add('overlay-open');
+  requestAnimationFrame(() => overlay.classList.add('show'));
+  if(won) launchConfetti();
+  if(state.gameMode === 'daily') saveDailyResult(won);
+}
+
+async function submitGuess(){
+  if(state.over || state.animating) return;
+  const input = document.getElementById('guess-input');
+  const submitBtn = document.getElementById('submit-btn');
+  const raw = input.value.trim();
+
+  const n = state.wordLength;
+  const example = n === 2 ? '사랑' : '자전거';
+  if(raw.length !== n || ![...raw].every(isHangulSyllable)){
+    setMessage('완성된 한글 ' + n + '글자를 입력해주세요. (예: ' + example + ')');
+    shakeInput();
+    return;
+  }
+
+  state.animating = true;
+  submitBtn.classList.add('submitting');
+  input.disabled = true;
+  submitBtn.disabled = true;
+
+  const slots = wordToSlots(raw);
+  const choScore = scoreCategory(slots.cho, state.targetSlots.cho);
+  const jungScore = scoreCategory(slots.jung, state.targetSlots.jung);
+  const jongScore = scoreCategory(slots.jong, state.targetSlots.jong);
+
+  const guessData = {
+    word: raw,
+    cho: slots.cho, jung: slots.jung, jong: slots.jong,
+    choScore, jungScore, jongScore
+  };
+
+  const rowIdx = state.guesses.length;
+  state.guesses.push(guessData);
+  state.pendingRow = rowIdx;
+  renderBoard();
+
+  const rowEl = document.getElementById('board').children[rowIdx];
+  if(rowEl) rowEl.classList.add('row-enter');
+
+  input.value = '';
+  setMessage('');
+
+  await revealRow(rowIdx, guessData);
+
+  state.pendingRow = null;
+  renderBoard();
+
+  const updatedKeys = new Set([
+    ...updateTracker('cho', slots.cho, choScore),
+    ...updateTracker('jung', slots.jung, jungScore),
+    ...updateTracker('jong', slots.jong, jongScore)
+  ]);
+  renderTracker(updatedKeys);
+
+  state.animating = false;
+  submitBtn.classList.remove('submitting');
+
+  const won = raw === state.target;
+  if(won){
+    state.over = true;
+    state.won = true;
+    syncExtraGuessBtn();
+    setTimeout(() => showOverlay(true), 200);
+    return;
+  }
+  if(state.guesses.length >= state.maxGuesses){
+    state.over = true;
+    state.won = false;
+    syncExtraGuessBtn();
+    window.scrollTo(0, 0);
+    setTimeout(() => showOverlay(false), 200);
+    return;
+  }
+
+  input.disabled = false;
+  submitBtn.disabled = false;
+  input.focus();
+}
+
+function syncExtraGuessBtn(){
+  const btn = document.getElementById('extra-guess-btn');
+  const row = document.getElementById('extra-guess-row');
+  // Hide entirely if the game was won
+  const won = state.over && state.guesses.length > 0 &&
+    state.guesses[state.guesses.length - 1].word === state.target;
+  if(won){
+    row.style.display = 'none';
+  } else {
+    row.style.display = 'flex';
+    btn.disabled = false;
+  }
+}
+
+document.getElementById('extra-guess-btn').addEventListener('click', () => {
+  // Ignore if game ended in a win
+  const won = state.over && state.guesses.length > 0 &&
+    state.guesses[state.guesses.length - 1].word === state.target;
+  if(won) return;
+
+  state.maxGuesses += 1;
+
+  // Revive from a loss
+  if(state.over){
+    state.over = false;
+    if(state.gameMode === 'daily') dailyResultSaved = false;
+    const overlay = document.getElementById('overlay');
+    overlay.classList.remove('show', 'loss');
+    document.body.classList.remove('overlay-open');
+    const input = document.getElementById('guess-input');
+    const submitBtn = document.getElementById('submit-btn');
+    input.disabled = false;
+    submitBtn.disabled = false;
+    input.focus();
+  }
+
+  renderBoard();
+  syncExtraGuessBtn();
+});
+
+document.getElementById('mode-daily-btn').addEventListener('click', () => openLengthPicker('daily'));
+document.getElementById('mode-wordle-btn').addEventListener('click', () => openLengthPicker('practice'));
+document.getElementById('length-cancel-btn').addEventListener('click', closeLengthPicker);
+document.querySelectorAll('.length-btn').forEach(btn => {
+  btn.addEventListener('click', () => startGame(Number(btn.dataset.length), lengthPickerMode));
+});
+document.getElementById('login-btn').addEventListener('click', () => {
+  if(currentUser) signOut();
+  else signInWithGoogle();
+});
+document.getElementById('friends-btn').addEventListener('click', openFriendsPanel);
+document.getElementById('friends-close-btn').addEventListener('click', closeFriendsPanel);
+document.getElementById('add-friend-btn').addEventListener('click', addFriendByCode);
+document.getElementById('add-friend-input').addEventListener('keydown', (e) => {
+  if(e.key === 'Enter') addFriendByCode();
+});
+document.getElementById('copy-friend-code-btn').addEventListener('click', copyFriendCode);
+document.getElementById('leaderboard-btn').addEventListener('click', openLeaderboard);
+document.getElementById('leaderboard-menu-btn').addEventListener('click', openLeaderboard);
+document.getElementById('leaderboard-close-btn').addEventListener('click', closeLeaderboard);
+document.getElementById('menu-btn').addEventListener('click', showMenu);
+document.getElementById('submit-btn').addEventListener('click', submitGuess);
+document.getElementById('guess-input').addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter') submitGuess();
+});
+document.getElementById('new-game-btn').addEventListener('click', newGame);
+document.getElementById('modal-btn').addEventListener('click', () => {
+  if(state.gameMode === 'daily') showMenu();
+  else newGame();
+});
+document.getElementById('how-btn').addEventListener('click', ()=>{
+  const n = state.wordLength;
+  alert(n + '글자 한글 단어를 추측하세요.\n각 글자는 초성·중성·종성(받침)으로 나뉘어 채점됩니다.\n\n초록 = 그 자리에 정확한 자모\n주황 = 단어 안에 있지만 다른 글자 자리\n회색 = 그 자모는 단어에 없음\n\n받침이 없는 글자에 받침을 넣으면 오답으로 처리됩니다.\n6번의 기회 안에 맞혀보세요!');
+});
+
+showMenu();
+</script>
+</body>
+</html>

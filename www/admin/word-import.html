@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Word Import Tool — 자모들 (Developer)</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FFF8F5; --card: #fff; --text: #5D6470; --text-soft: #9AA3AD;
+    --heading: #7B8FD4; --border: #E8E4E0; --mint: #C8F0E0; --mint-btn: #98DDB8;
+    --error-bg: #FFE8E5; --error: #D47870; --lavender: #E8DEFF; --lavender-btn: #CFC0F5;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); padding: 24px 16px; }
+  .wrap { max-width: 640px; margin: 0 auto; }
+  h1 { font-family: 'Jua', sans-serif; color: var(--heading); }
+  .card { background: var(--card); border: 2px solid var(--border); border-radius: 18px; padding: 18px; margin-bottom: 16px; }
+  label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; color: var(--heading); }
+  input, select, textarea {
+    width: 100%; padding: 10px 12px; border-radius: 12px; border: 2px solid var(--border);
+    font-family: inherit; font-size: 15px; margin-bottom: 12px;
+  }
+  button {
+    font-family: 'Jua', sans-serif; padding: 12px 20px; border-radius: 999px;
+    border: 2px solid var(--lavender-btn); background: var(--lavender); color: var(--heading);
+    cursor: pointer; margin-right: 8px; margin-bottom: 8px;
+  }
+  button.secondary { background: var(--card); border-color: var(--border); color: var(--text); }
+  .status { padding: 12px; border-radius: 12px; font-size: 14px; margin-top: 8px; }
+  .status.ok { background: var(--mint); border: 2px solid var(--mint-btn); }
+  .status.err { background: var(--error-bg); border: 2px solid var(--error); color: var(--error); }
+  .status.info { background: var(--lavender); border: 2px solid var(--lavender-btn); }
+  .candidate { padding: 10px; border: 2px solid var(--border); border-radius: 12px; margin-bottom: 8px; cursor: pointer; }
+  .candidate:hover, .candidate.selected { border-color: var(--lavender-btn); background: var(--lavender); }
+  pre { background: #1A1D28; color: #E4E8F0; padding: 14px; border-radius: 12px; overflow-x: auto; font-size: 13px; }
+  .gate { text-align: center; padding: 40px 20px; }
+  .hint { font-size: 13px; color: var(--text-soft); line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>📚 Word Import Tool</h1>
+  <p class="hint">Developer-only tool. Search the Korean Basic Dictionary, pick an entry, and export a curated <code>LearningWord</code> snippet for <code>learning-words.js</code>.</p>
+
+  <div id="gate" class="card gate">
+    <label for="admin-token">Admin token</label>
+    <input id="admin-token" type="password" placeholder="Set ADMIN_IMPORT_TOKEN in .env">
+    <button type="button" id="unlock-btn">Unlock</button>
+    <p class="hint">Token is checked locally against <code>?token=</code> or session storage. API key stays on the server.</p>
+  </div>
+
+  <div id="tool" hidden>
+    <div class="card">
+      <label for="search-word">Korean word</label>
+      <input id="search-word" type="text" placeholder="고양이" lang="ko">
+      <label><input type="checkbox" id="allow-exception"> Allow app exception (proper noun / lesson word without dictionary match)</label>
+      <button type="button" id="search-btn">Search dictionary</button>
+      <button type="button" id="validate-btn" class="secondary">Validate only</button>
+      <div id="search-status"></div>
+      <div id="candidates"></div>
+    </div>
+
+    <div class="card">
+      <label for="meaning">English meaning (curated)</label>
+      <input id="meaning" type="text" placeholder="Cat">
+      <label for="emoji">Emoji / image</label>
+      <input id="emoji" type="text" placeholder="🐱">
+      <label for="category">Category</label>
+      <select id="category">
+        <option value="animals">animals</option>
+        <option value="food">food</option>
+        <option value="school">school</option>
+        <option value="family">family</option>
+        <option value="colours">colours</option>
+        <option value="everyday">everyday</option>
+        <option value="general">general</option>
+      </select>
+      <label for="difficulty">Difficulty</label>
+      <select id="difficulty">
+        <option value="beginner">beginner</option>
+        <option value="intermediate">intermediate</option>
+        <option value="advanced">advanced</option>
+      </select>
+      <label for="tags">Tags (comma-separated)</label>
+      <input id="tags" type="text" placeholder="pets, level-1">
+      <button type="button" id="export-btn">Export LearningWord JSON</button>
+      <button type="button" id="copy-btn" class="secondary">Copy to clipboard</button>
+      <pre id="export-output">{ }</pre>
+    </div>
+  </div>
+</div>
+
+<script src="../js/hangul-compose.js"></script>
+<script src="../js/learning-word-model.js"></script>
+<script src="../js/dictionary-service.js"></script>
+<script>
+const ADMIN_TOKEN_KEY = 'jamodeul-admin-token';
+const params = new URLSearchParams(location.search);
+const expectedToken = params.get('token') || '';
+
+const els = {
+  gate: document.getElementById('gate'),
+  tool: document.getElementById('tool'),
+  token: document.getElementById('admin-token'),
+  unlock: document.getElementById('unlock-btn'),
+  searchWord: document.getElementById('search-word'),
+  allowException: document.getElementById('allow-exception'),
+  searchBtn: document.getElementById('search-btn'),
+  validateBtn: document.getElementById('validate-btn'),
+  searchStatus: document.getElementById('search-status'),
+  candidates: document.getElementById('candidates'),
+  meaning: document.getElementById('meaning'),
+  emoji: document.getElementById('emoji'),
+  category: document.getElementById('category'),
+  difficulty: document.getElementById('difficulty'),
+  tags: document.getElementById('tags'),
+  exportBtn: document.getElementById('export-btn'),
+  copyBtn: document.getElementById('copy-btn'),
+  exportOutput: document.getElementById('export-output'),
+};
+
+let selectedEntry = null;
+
+function setStatus(html, type = 'info') {
+  els.searchStatus.className = 'status ' + type;
+  els.searchStatus.innerHTML = html;
+}
+
+function unlock() {
+  const token = els.token.value.trim();
+  if (expectedToken && token !== expectedToken) {
+    setStatus('Invalid admin token.', 'err');
+    return;
+  }
+  sessionStorage.setItem(ADMIN_TOKEN_KEY, token || 'dev');
+  els.gate.hidden = true;
+  els.tool.hidden = false;
+}
+
+function renderCandidates(list) {
+  els.candidates.innerHTML = '';
+  list.forEach((entry) => {
+    const div = document.createElement('div');
+    div.className = 'candidate';
+    div.innerHTML = `<strong>${entry.word}</strong> · ${entry.partOfSpeech || ''}<br>${entry.definition || entry.englishWord || ''}`;
+    div.addEventListener('click', () => {
+      document.querySelectorAll('.candidate').forEach((c) => c.classList.remove('selected'));
+      div.classList.add('selected');
+      selectedEntry = entry;
+      if (!els.meaning.value) els.meaning.value = entry.definition || entry.englishWord || '';
+    });
+    els.candidates.appendChild(div);
+  });
+}
+
+async function searchDictionary() {
+  const word = els.searchWord.value.trim();
+  if (!word) return setStatus('Enter a Korean word.', 'err');
+  setStatus('Searching…');
+  selectedEntry = null;
+  const result = await DictionaryService.lookupWord(word);
+  if (!result.found) {
+    setStatus(result.error || 'No dictionary match.', 'err');
+    els.candidates.innerHTML = '';
+    return;
+  }
+  selectedEntry = result.entry;
+  setStatus(`Found ${result.total} result(s). Select the best entry below.`, 'ok');
+  renderCandidates([result.entry, ...(result.candidates || []).filter((c) => c.entryId !== result.entry?.entryId)]);
+  if (!els.meaning.value) els.meaning.value = result.entry.definition || result.entry.englishWord || '';
+}
+
+async function validateOnly() {
+  const word = els.searchWord.value.trim();
+  const allow = els.allowException.checked;
+  setStatus('Validating…');
+  const result = await DictionaryService.validateWord(word, allow);
+  if (result.valid) {
+    setStatus(allow && !result.hasDictionaryEntry
+      ? '⚠️ No dictionary match, but exception allowed for lesson word.'
+      : '✓ Valid dictionary entry.', result.hasDictionaryEntry ? 'ok' : 'info');
+    if (result.entry) { selectedEntry = result.entry; renderCandidates([result.entry]); }
+  } else {
+    setStatus('✗ No valid dictionary result. Enable exception for custom lesson words.', 'err');
+  }
+}
+
+function buildExportObject() {
+  const word = els.searchWord.value.trim();
+  const LWM = window.LearningWordModel;
+  const base = {
+    word,
+    emoji: els.emoji.value.trim() || undefined,
+    meaning: els.meaning.value.trim(),
+    category: els.category.value,
+    difficulty: LWM ? LWM.labelToDifficulty(els.difficulty.value) : 2,
+    tags: els.tags.value.split(',').map((t) => t.trim()).filter(Boolean),
+    dictionaryException: els.allowException.checked && !selectedEntry,
+  };
+  const normalized = LWM ? LWM.normalizeLearningWord(base) : base;
+  if (selectedEntry && LWM) {
+    return LWM.attachDictionary(normalized, selectedEntry);
+  }
+  return normalized;
+}
+
+function exportJson() {
+  const obj = buildExportObject();
+  els.exportOutput.textContent = JSON.stringify(obj, null, 2);
+}
+
+async function copyJson() {
+  exportJson();
+  await navigator.clipboard.writeText(els.exportOutput.textContent);
+  setStatus('Copied to clipboard. Paste into <code>learning-words.js</code>.', 'ok');
+}
+
+els.unlock.addEventListener('click', unlock);
+els.searchBtn.addEventListener('click', searchDictionary);
+els.validateBtn.addEventListener('click', validateOnly);
+els.exportBtn.addEventListener('click', exportJson);
+els.copyBtn.addEventListener('click', copyJson);
+
+if (sessionStorage.getItem(ADMIN_TOKEN_KEY) || !expectedToken) {
+  if (!expectedToken) { els.gate.hidden = true; els.tool.hidden = false; }
+  else unlock();
+}
+</script>
+</body>
+</html>

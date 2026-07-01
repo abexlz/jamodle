@@ -1,0 +1,173 @@
+.daily-gift-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  background: var(--overlay-scrim, rgba(18, 20, 28, 0.72));
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s ease;
+}
+
+.daily-gift-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.daily-gift-modal {
+  width: 100%;
+  max-width: 360px;
+  background: var(--card, #fff);
+  border: 2px solid var(--border, #E8E4E0);
+  border-radius: 24px;
+  padding: 24px 20px 22px;
+  box-shadow: var(--shadow, 0 8px 24px rgba(0, 0, 0, 0.12));
+  text-align: center;
+}
+
+.daily-gift-title {
+  margin: 0 0 6px;
+  font-family: 'Jua', sans-serif;
+  font-size: 22px;
+  color: var(--heading, #7B8FD4);
+}
+
+.daily-gift-sub {
+  margin: 0 0 18px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--text-soft, #9AA3AD);
+}
+
+.daily-gift-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.daily-gift-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 96px;
+  padding: 12px 8px;
+  border-radius: 16px;
+  border: 2px solid var(--border, #E8E4E0);
+  background: var(--bg-soft, #FFF0EB);
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.2s ease, box-shadow 0.15s ease;
+  touch-action: manipulation;
+}
+
+.daily-gift-box.accent-peach {
+  background: var(--peach, #FFE8D4);
+  border-color: var(--peach-btn, #FFD0A8);
+}
+
+.daily-gift-box.accent-mint {
+  background: var(--mint, #C8F0E0);
+  border-color: var(--mint-btn, #98DDB8);
+}
+
+.daily-gift-box.accent-lavender {
+  background: var(--lavender, #E8DEFF);
+  border-color: var(--lavender-btn, #CFC0F5);
+}
+
+.daily-gift-box:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm, 0 2px 8px rgba(0, 0, 0, 0.08));
+}
+
+.daily-gift-box:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.daily-gift-box.is-picked {
+  transform: scale(1.04);
+  box-shadow: var(--shadow, 0 4px 14px rgba(0, 0, 0, 0.12));
+}
+
+.daily-gift-box.is-faded {
+  opacity: 0.45;
+  transform: scale(0.96);
+}
+
+.daily-gift-box:disabled {
+  cursor: default;
+}
+
+.daily-gift-box-icon {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.daily-gift-box-label {
+  font-family: 'Jua', sans-serif;
+  font-size: 12px;
+  color: var(--heading, #7B8FD4);
+  line-height: 1.2;
+}
+
+.daily-gift-reveal {
+  padding: 8px 4px 4px;
+}
+
+.daily-gift-reveal-icon {
+  display: block;
+  font-size: 48px;
+  margin-bottom: 8px;
+  animation: dailyGiftPop 0.45s ease both;
+}
+
+@keyframes dailyGiftPop {
+  from { transform: scale(0.6); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.daily-gift-reveal-title {
+  margin: 0 0 8px;
+  font-family: 'Jua', sans-serif;
+  font-size: 22px;
+  color: var(--heading, #7B8FD4);
+}
+
+.daily-gift-reveal-gift {
+  margin: 0 0 10px;
+  font-size: 15px;
+  color: var(--text, #5D6470);
+}
+
+.daily-gift-reveal-coins {
+  margin: 0 0 18px;
+  font-family: 'Jua', sans-serif;
+  font-size: 20px;
+  color: var(--heading, #7B8FD4);
+}
+
+.daily-gift-done-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 140px;
+  padding: 12px 22px;
+  border-radius: 999px;
+  border: 2px solid var(--peach-btn, #FFD0A8);
+  background: var(--peach, #FFE8D4);
+  font-family: 'Jua', sans-serif;
+  font-size: 16px;
+  color: var(--heading, #7B8FD4);
+  cursor: pointer;
+}
+
+.daily-gift-done-btn:active {
+  transform: scale(0.98);
+}

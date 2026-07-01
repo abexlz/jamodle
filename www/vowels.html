@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<script>
+(function(){
+  try {
+    var p = JSON.parse(localStorage.getItem('jamodeul-preferences') || '{}');
+    var theme = p.theme || localStorage.getItem('jamodeul-theme') || 'system';
+    var resolved = theme;
+    if (theme === 'system' || (theme !== 'light' && theme !== 'dark')) {
+      resolved = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    document.documentElement.setAttribute('data-theme', resolved);
+    if (p.reduceMotion) document.documentElement.classList.add('reduce-motion');
+    if (p.highContrast) document.documentElement.classList.add('high-contrast');
+    if (p.largeText) document.documentElement.classList.add('large-text');
+    if (p.tapToPlace) document.documentElement.classList.add('tap-to-place');
+    document.documentElement.lang = p.language === 'ko' ? 'ko' : 'en';
+  } catch (e) {}
+})();
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#0097B2">
+<title>Vowel Practice — 자모들</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app-preferences.css">
+<link rel="stylesheet" href="css/app-buttons.css">
+<style>
+  :root {
+    --bg: #FFF8F5;
+    --card: #FFFFFF;
+    --text: #5D6470;
+    --text-soft: #9AA3AD;
+    --heading: #7B8FD4;
+    --blue: #C8E6FF;
+    --blue-btn: #A8D4F5;
+    --lavender: #E8DEFF;
+    --lavender-btn: #CFC0F5;
+    --mint: #C8F0E0;
+    --mint-btn: #98DDB8;
+    --peach: #FFE8D4;
+    --peach-btn: #FFD0A8;
+    --border: #E8E4E0;
+    --border-soft: #F0ECE8;
+    --shadow: 0 4px 14px rgba(93, 100, 112, 0.08);
+    --shadow-sm: 0 2px 8px rgba(93, 100, 112, 0.06);
+    --radius: 18px;
+    --radius-sm: 14px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  [data-theme="dark"] {
+    --bg: #1A1D28;
+    --card: #2A2E3E;
+    --text: #E4E8F0;
+    --text-soft: #9AA3B8;
+    --heading: #B8C4F0;
+    --blue: #2A3D52;
+    --blue-btn: #3D5470;
+    --lavender: #3A3555;
+    --lavender-btn: #504878;
+    --mint: #2A4038;
+    --mint-btn: #3D5A4E;
+    --peach: #453830;
+    --peach-btn: #5A4838;
+    --border: #3A3E50;
+    --border-soft: #323648;
+    --shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    padding: calc(16px + var(--safe-top)) 16px calc(24px + var(--safe-bottom));
+  }
+  .app { max-width: 480px; margin: 0 auto; }
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .back-link {
+    /* app-buttons.css */
+  }
+  .title-block { flex: 1; text-align: center; }
+  .title-block h1 {
+    font-family: 'Jua', sans-serif;
+    font-size: clamp(24px, 6vw, 32px);
+    margin: 0;
+    color: var(--heading);
+  }
+  .title-block p { margin: 6px 0 0; font-size: 14px; color: var(--text-soft); }
+  .intro {
+    background: var(--card);
+    border: 2px solid var(--border-soft);
+    border-radius: var(--radius);
+    padding: 18px 16px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-sm);
+    line-height: 1.55;
+    font-size: 14px;
+  }
+  .section {
+    background: var(--card);
+    border: 2px solid var(--border-soft);
+    border-radius: var(--radius);
+    padding: 18px 16px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow-sm);
+  }
+  .section h2 {
+    font-family: 'Jua', sans-serif;
+    font-size: 18px;
+    color: var(--heading);
+    margin: 0 0 6px;
+  }
+  .section .en { font-size: 13px; color: var(--text-soft); margin: 0 0 12px; }
+  .vowel-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .vowel-chip {
+    min-width: 52px;
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    font-family: 'Jua', sans-serif;
+    font-size: 26px;
+    text-align: center;
+    border: 2px solid transparent;
+  }
+  .chip-vertical { background: var(--blue); border-color: var(--blue-btn); }
+  .chip-horizontal { background: var(--mint); border-color: var(--mint-btn); }
+  .chip-compound { background: var(--peach); border-color: var(--peach-btn); }
+  .compound-note {
+    font-size: 12px;
+    color: var(--text-soft);
+    margin-top: 10px;
+    line-height: 1.45;
+  }
+  .done-lesson-btn {
+    /* app-buttons.css */
+  }
+  .lesson-complete-msg {
+    text-align: center;
+    font-family: 'Jua', sans-serif;
+    font-size: 16px;
+    color: var(--heading);
+    margin-top: 12px;
+    min-height: 1.4em;
+  }
+</style>
+<link rel="stylesheet" href="css/app-theme.css">
+<link rel="stylesheet" href="css/app-wordle-ui.css">
+</head>
+<body>
+<div class="top-nav-actions">
+  <a class="top-nav-btn" href="profile.html" id="nav-profile" data-i18n-aria="nav.profile">👤</a>
+  <a class="top-nav-btn" href="settings.html" id="nav-settings" data-i18n-aria="nav.settings">⚙️</a>
+  <button type="button" class="top-nav-btn" id="theme-toggle" data-i18n-aria="common.themeToggle">🌙</button>
+</div>
+<div class="app">
+  <header class="header">
+    <a class="back-link" href="index.html" data-i18n="vowels.back">← Home</a>
+    <div class="title-block">
+      <h1 data-i18n="vowels.title">Vowel Practice</h1>
+      <p data-i18n="vowels.subtitle">Learn horizontal, vertical, and compound vowels</p>
+    </div>
+    <span style="width:72px"></span>
+  </header>
+
+  <p class="intro">
+    Korean vowels sit beside or under the consonant in a syllable block.
+    Tap each group to learn the shapes you will see in Hangul Builder and Korean Match.
+  </p>
+
+  <section class="section">
+    <h2>Vertical vowels</h2>
+    <p class="en">Written beside the consonant — ㅏ, ㅓ, ㅣ</p>
+    <div class="vowel-grid" id="vertical-vowels"></div>
+  </section>
+
+  <section class="section">
+    <h2>Horizontal vowels</h2>
+    <p class="en">Written under the consonant — ㅗ, ㅜ, ㅡ</p>
+    <div class="vowel-grid" id="horizontal-vowels"></div>
+  </section>
+
+  <section class="section">
+    <h2>Compound vowels</h2>
+    <p class="en">Two vowels combined — ㅘ, ㅝ, ㅢ</p>
+    <div class="vowel-grid" id="compound-vowels"></div>
+    <p class="compound-note" id="compound-note"></p>
+  </section>
+
+  <button type="button" class="done-lesson-btn" id="done-lesson">✓ I finished this lesson</button>
+  <p class="lesson-complete-msg" id="lesson-complete-msg"></p>
+</div>
+
+<script src="js/storage.js"></script>
+<script src="js/user-preferences.js"></script>
+<script src="js/i18n-messages.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/app-bootstrap.js"></script>
+<script src="js/app-nav.js"></script>
+<script src="js/menu-progress.js"></script>
+<script src="js/learning-streak.js"></script>
+<script src="js/level-utils.js"></script>
+<script src="js/badge-service.js"></script>
+<script src="js/profile-service.js"></script>
+<script src="js/xp-service.js"></script>
+<script src="js/profile-ui.js"></script>
+<script src="js/hangul-compose.js"></script>
+<script>
+const HC = window.HangulCompose;
+const vertical = [...HC.VERTICAL_VOWELS];
+const horizontal = [...HC.HORIZONTAL_VOWELS];
+const compounds = Object.keys(HC.COMPOUND_VOWELS);
+
+function renderChips(containerId, items, cls) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = items.map((v) => `<span class="vowel-chip ${cls}">${v}</span>`).join('');
+}
+
+renderChips('vertical-vowels', vertical, 'chip-vertical');
+renderChips('horizontal-vowels', horizontal, 'chip-horizontal');
+renderChips('compound-vowels', compounds, 'chip-compound');
+
+document.getElementById('compound-note').textContent =
+  compounds.map((v) => {
+    const p = HC.COMPOUND_VOWELS[v];
+    return `${v} = ${p.h} + ${p.v}`;
+  }).join(' · ');
+
+(async function () {
+  await AppNav.initPage({ topNav: false });
+})();
+
+document.getElementById('done-lesson').addEventListener('click', () => {
+  const msg = document.getElementById('lesson-complete-msg');
+  if (window.LearningStreak) {
+    const result = LearningStreak.recordActivity('vowel-practice');
+    const info = LearningStreak.getDisplayInfo();
+    msg.textContent = result.newMilestone
+      ? `${result.newMilestone.badge} ${result.newMilestone.message}`
+      : `${info.headline} · ${info.progressMessage}`;
+  } else {
+    msg.textContent = 'Great work! Keep learning Korean every day.';
+  }
+  if (window.XpService?.awardAndCelebrate) {
+    XpService.awardAndCelebrate({ mode: 'vowelPractice', wordId: 'lesson' });
+  }
+});
+</script>
+</body>
+</html>

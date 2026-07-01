@@ -1,0 +1,76 @@
+/* Global preference-driven styles — included on all pages */
+
+html.reduce-motion *,
+html.reduce-motion *::before,
+html.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+html.reduce-motion .confetti-piece,
+html.reduce-motion .tile.snap-in,
+html.reduce-motion .drop-zone.correct {
+  animation: none !important;
+}
+
+html.large-text {
+  font-size: 112.5%;
+}
+
+html.high-contrast {
+  --border: #5D6470;
+  --text: #2A2E38;
+  --heading: #4A5A9A;
+}
+
+html.high-contrast[data-theme="dark"] {
+  --border: #C8CCD8;
+  --text: #FFFFFF;
+  --heading: #D8E0FF;
+}
+
+html.tap-to-place .tile {
+  cursor: pointer;
+}
+
+.top-nav-actions {
+  position: fixed;
+  top: calc(12px + env(safe-area-inset-top, 0px));
+  right: 12px;
+  z-index: 200;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.top-nav-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid var(--border, #E8E4E0);
+  background: var(--card, #fff);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: var(--shadow, 0 4px 14px rgba(93, 100, 112, 0.08));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: var(--text, #5D6470);
+  touch-action: manipulation;
+}
+
+.top-nav-btn:active {
+  transform: scale(0.92);
+}
+
+.top-nav-btn:focus-visible,
+.settings-select:focus-visible,
+.language-option:focus-visible,
+.theme-option:focus-visible,
+.toggle-switch input:focus-visible + .toggle-track {
+  outline: 3px solid var(--heading, #7B8FD4);
+  outline-offset: 2px;
+}

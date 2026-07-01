@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<script>
+(function(){
+  try {
+    var p = JSON.parse(localStorage.getItem('jamodeul-preferences') || '{}');
+    var theme = p.theme || localStorage.getItem('jamodeul-theme') || 'system';
+    var resolved = theme;
+    if (theme === 'system' || (theme !== 'light' && theme !== 'dark')) {
+      resolved = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    document.documentElement.setAttribute('data-theme', resolved);
+    if (p.reduceMotion) document.documentElement.classList.add('reduce-motion');
+    if (p.highContrast) document.documentElement.classList.add('high-contrast');
+    if (p.largeText) document.documentElement.classList.add('large-text');
+    document.documentElement.lang = p.language === 'ko' ? 'ko' : 'en';
+  } catch (e) {}
+})();
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#0097B2">
+<title>Turn-based Match — Jamodeul</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Jua&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app-preferences.css">
+<link rel="stylesheet" href="css/app-buttons.css">
+<link rel="stylesheet" href="css/korean-match.css">
+<link rel="stylesheet" href="css/race.css">
+<link rel="stylesheet" href="css/app-theme.css">
+<link rel="stylesheet" href="css/app-wordle-ui.css">
+<style>
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    padding: calc(6px + env(safe-area-inset-top, 0px)) 10px calc(8px + env(safe-area-inset-bottom, 0px));
+  }
+
+  body.match-race-page {
+    --block-size: min(84px, calc((100% - (var(--syl-count, 5) - 1) * 6px) / var(--syl-count, 5)));
+    --tile-size: min(46px, calc(var(--block-size) * 0.48));
+  }
+
+  body.match-race-page.match-turn-page {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    height: 100dvh;
+    max-height: 100dvh;
+    min-height: 0;
+    padding: calc(4px + env(safe-area-inset-top, 0px)) 8px calc(4px + env(safe-area-inset-bottom, 0px));
+    box-sizing: border-box;
+  }
+
+  body.match-race-page.match-turn-page .race-app {
+    flex: 1;
+    min-height: 0;
+    max-height: none;
+    height: auto;
+    overflow: hidden;
+    gap: 6px;
+    width: 100%;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  body.match-race-page.match-turn-page .race-header {
+    flex-shrink: 0;
+    margin-bottom: 0;
+  }
+
+  body.match-race-page.match-turn-page .race-header h1 {
+    font-size: 18px;
+  }
+
+  body.match-race-page.match-turn-page #race-turn-previous {
+    flex-shrink: 0;
+    margin-bottom: 4px;
+  }
+
+  body.match-race-page.match-turn-page #match-opp-area { display: none !important; }
+  body.match-race-page.match-turn-page .game-feedback { display: none !important; }
+  body.match-race-page.match-turn-page .blocks-area .section-label,
+  body.match-race-page.match-turn-page .bank-section .section-label { display: none; }
+  body.match-race-page.match-turn-page .live-stats { display: none !important; }
+
+  .match-race-game .match-header { margin-bottom: 8px; }
+  body.match-race-page.match-turn-page .race-main {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  body.match-race-page.match-turn-page .race-turn-mine {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  body.match-race-page.match-turn-page .race-main #match-app {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    height: auto;
+    max-height: none;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  body.match-race-page.match-turn-page #match-app > .match-header { display: none; }
+</style>
+</head>
+<body class="match-page match-race-page match-turn-page">
+<div id="match-turn-root" class="race-app"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="js/firebase-social.js?v=9"></script>
+<script src="js/storage.js"></script>
+<script src="js/user-preferences.js"></script>
+<script src="js/i18n-messages.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/app-bootstrap.js"></script>
+<script src="js/app-nav.js"></script>
+<script src="js/hangul-compose.js"></script>
+<script src="js/drag-hit-test.js"></script>
+<script src="js/vowel-merge-dock.js"></script>
+<script src="js/learning-word-model.js"></script>
+<script src="js/learning-words.js"></script>
+<script src="js/match-word-bank.js"></script>
+<script src="js/match-words.js"></script>
+<script src="js/wordle-words.js"></script>
+<script src="js/race-service.js"></script>
+<script src="js/race-results-ui.js"></script>
+<script src="js/race-countdown.js"></script>
+<script src="js/korean-match.js"></script>
+<script src="js/match-turn-app.js"></script>
+<script>
+(async function () {
+  FirebaseSocial?.init?.({});
+  await AppNav.initPage({ topNav: false });
+  const app = new MatchTurnApp(document.getElementById('match-turn-root'));
+  window.__matchTurnAppInstance = app;
+  await app.init();
+})();
+</script>
+</body>
+</html>

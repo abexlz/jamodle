@@ -1,0 +1,145 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{uid} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.auth.uid == uid;
+      allow update: if request.auth != null && request.auth.uid == uid;
+    }
+
+    match /friendRequests/{requestId} {
+      function partsMatch() {
+        return request.auth != null
+          && (requestId.split('_')[0] == request.auth.uid
+            || requestId.split('_')[1] == request.auth.uid);
+      }
+      function isParty() {
+        return request.auth != null
+          && (request.auth.uid == resource.data.fromUid
+            || request.auth.uid == resource.data.toUid);
+      }
+      allow get: if partsMatch();
+      allow list: if isParty();
+      allow create: if request.auth != null
+        && request.auth.uid == request.resource.data.fromUid
+        && request.resource.data.fromUid != request.resource.data.toUid
+        && request.resource.data.status == 'pending'
+        && request.resource.data.fromName is string
+        && request.resource.data.toName is string
+        && requestId == request.resource.data.fromUid + '_' + request.resource.data.toUid;
+      allow update: if request.auth != null
+        && request.auth.uid == resource.data.toUid
+        && resource.data.status == 'pending'
+        && request.resource.data.status == 'accepted'
+        && request.resource.data.fromUid == resource.data.fromUid
+        && request.resource.data.toUid == resource.data.toUid;
+      allow delete: if request.auth != null
+        && resource.data.status == 'pending'
+        && (
+          request.auth.uid == resource.data.fromUid
+          || request.auth.uid == resource.data.toUid
+        );
+    }
+
+    match /dailyResults/{docId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+        && request.resource.data.uid == request.auth.uid
+        && docId == request.resource.data.date + '_' + request.auth.uid;
+    }
+
+    match /matches/{matchId} {
+      function isMatchParty() {
+        return request.auth != null
+          && (request.auth.uid == resource.data.player1Uid
+            || request.auth.uid == resource.data.player2Uid);
+      }
+
+      function isMatchPartyOnWrite() {
+        return request.auth != null
+          && (request.auth.uid == request.resource.data.player1Uid
+            || request.auth.uid == request.resource.data.player2Uid);
+      }
+
+      function opponentProgressUnchanged() {
+        return (request.auth.uid == resource.data.player1Uid
+            && request.resource.data.player2Progress == resource.data.player2Progress)
+          || (request.auth.uid == resource.data.player2Uid
+            && request.resource.data.player1Progress == resource.data.player1Progress);
+      }
+
+      allow get: if isMatchParty();
+      allow list: if isMatchParty();
+
+      allow create: if request.auth != null
+        && request.auth.uid == request.resource.data.player1Uid
+        && request.resource.data.player2Uid is string
+        && request.resource.data.player1Uid != request.resource.data.player2Uid
+        && request.resource.data.status == 'pending'
+        && request.resource.data.player1Ready == true
+        && request.resource.data.player2Ready == false
+        && request.resource.data.target is string
+        && request.resource.data.player1Name is string
+        && request.resource.data.player2Name is string
+        && (
+          (request.resource.data.get('gameType', 'wordle') == 'wordle'
+            && request.resource.data.wordLength in [2, 3])
+          || (request.resource.data.gameType == 'korean-match'
+            && request.resource.data.wordLength is int
+            && request.resource.data.wordLength in [2, 3, 4, 5, 6])
+        );
+
+      allow update: if request.auth != null
+        && isMatchParty()
+        && isMatchPartyOnWrite()
+        && opponentProgressUnchanged();
+
+      allow delete: if request.auth != null
+        && resource.data.status == 'pending'
+        && (
+          request.auth.uid == resource.data.player2Uid
+          || request.auth.uid == resource.data.player1Uid
+        );
+    }
+
+    match /wordChainMatches/{matchId} {
+      function isWordChainParty() {
+        return request.auth != null
+          && (request.auth.uid == resource.data.player1Uid
+            || request.auth.uid == resource.data.player2Uid);
+      }
+
+      function isWordChainPartyOnWrite() {
+        return request.auth != null
+          && (request.auth.uid == request.resource.data.player1Uid
+            || request.auth.uid == request.resource.data.player2Uid);
+      }
+
+      allow get: if isWordChainParty();
+      allow list: if isWordChainParty();
+
+      allow create: if request.auth != null
+        && request.auth.uid == request.resource.data.player1Uid
+        && request.resource.data.player2Uid is string
+        && request.resource.data.player1Uid != request.resource.data.player2Uid
+        && request.resource.data.status == 'waiting'
+        && request.resource.data.player1Name is string
+        && request.resource.data.player2Name is string
+        && request.resource.data.currentTurnUid is string
+        && request.resource.data.usedWords is list;
+
+      allow update: if request.auth != null
+        && isWordChainParty()
+        && isWordChainPartyOnWrite()
+        && request.resource.data.player1Uid == resource.data.player1Uid
+        && request.resource.data.player2Uid == resource.data.player2Uid;
+
+      allow delete: if request.auth != null
+        && resource.data.status == 'waiting'
+        && (
+          request.auth.uid == resource.data.player2Uid
+          || request.auth.uid == resource.data.player1Uid
+        );
+    }
+  }
+}

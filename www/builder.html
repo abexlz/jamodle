@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<script>
+(function(){
+  try {
+    var p = JSON.parse(localStorage.getItem('jamodeul-preferences') || '{}');
+    var theme = p.theme || localStorage.getItem('jamodeul-theme') || 'system';
+    var resolved = theme;
+    if (theme === 'system' || (theme !== 'light' && theme !== 'dark')) {
+      resolved = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    document.documentElement.setAttribute('data-theme', resolved);
+    if (p.reduceMotion) document.documentElement.classList.add('reduce-motion');
+    if (p.highContrast) document.documentElement.classList.add('high-contrast');
+    if (p.largeText) document.documentElement.classList.add('large-text');
+    if (p.tapToPlace) document.documentElement.classList.add('tap-to-place');
+    document.documentElement.lang = p.language === 'ko' ? 'ko' : 'en';
+  } catch (e) {}
+})();
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0097B2">
+<title>한글 만들기 — 자모들</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=Jua&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app-preferences.css">
+<link rel="stylesheet" href="css/app-buttons.css">
+<style>
+  :root {
+    --bg: #FFF8F5;
+    --card: #FFFFFF;
+    --text: #5D6470;
+    --text-soft: #9AA3AD;
+    --heading: #7B8FD4;
+    --pink: #FFD6E8;
+    --pink-btn: #FFB8D0;
+    --blue: #C8E6FF;
+    --blue-btn: #A8D4F5;
+    --lavender: #E8DEFF;
+    --lavender-btn: #CFC0F5;
+    --mint: #C8F0E0;
+    --mint-btn: #98DDB8;
+    --yellow: #FFF6C8;
+    --yellow-btn: #FFEAA0;
+    --peach: #FFE8D4;
+    --peach-btn: #FFD0A8;
+    --cho: #FFB8C8;
+    --cho-border: #FFA0B8;
+    --jung: #B8DCFF;
+    --jung-border: #9ECFF5;
+    --jong: #FFD8A8;
+    --jong-border: #FFC888;
+    --success: #6BB88A;
+    --success-bg: #E4F8EC;
+    --error: #D47870;
+    --error-bg: #FFE8E5;
+    --border: #E8E4E0;
+    --slot-border: #D8D4D0;
+    --shadow: 0 4px 14px rgba(93, 100, 112, 0.08);
+    --shadow-tile: 0 3px 0 rgba(93, 100, 112, 0.1);
+    --overlay-scrim: rgba(255, 248, 245, 0.92);
+    --slot-cho-bg: #FFF5F8;
+    --slot-jung-bg: #F5FAFF;
+    --slot-jong-bg: #FFFAF5;
+    --error-border: #FFB0A8;
+    --tile-size: clamp(52px, 14vw, 68px);
+    --slot-size: clamp(48px, 13vw, 64px);
+    --block-size: clamp(100px, 26vw, 130px);
+    --zone-bg: #FEFCFB;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  [data-theme="dark"] {
+    --bg: #1A1D28;
+    --card: #2A2E3E;
+    --text: #E4E8F0;
+    --text-soft: #9AA3B8;
+    --heading: #B8C4F0;
+    --pink: #4A3545;
+    --pink-btn: #6B4558;
+    --blue: #2A3D52;
+    --blue-btn: #3D5470;
+    --lavender: #3A3555;
+    --lavender-btn: #504878;
+    --mint: #2A4038;
+    --mint-btn: #3D5A4E;
+    --yellow: #454028;
+    --yellow-btn: #5A5238;
+    --peach: #453830;
+    --peach-btn: #5A4838;
+    --cho: #6B4858;
+    --cho-border: #8B6070;
+    --jung: #486078;
+    --jung-border: #608098;
+    --jong: #786048;
+    --jong-border: #987860;
+    --success: #88D4A8;
+    --success-bg: #2A4038;
+    --error: #D47870;
+    --error-bg: #4A3035;
+    --border: #3A3E50;
+    --slot-border: #4A4E60;
+    --overlay-scrim: rgba(18, 20, 28, 0.92);
+    --slot-cho-bg: #352830;
+    --slot-jung-bg: #283038;
+    --slot-jong-bg: #383028;
+    --zone-bg: #252830;
+    --error-border: #8B5050;
+    --shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    --shadow-tile: 0 3px 0 rgba(0, 0, 0, 0.2);
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    font-family: 'Noto Sans KR', sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    padding: calc(16px + var(--safe-top)) 16px calc(24px + var(--safe-bottom));
+    overflow-x: hidden;
+  }
+
+  .app {
+    max-width: 480px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .back-link {
+    /* app-buttons.css */
+  }
+
+  .title-block { flex: 1; text-align: center; min-width: 0; }
+
+  .title-block h1 {
+    font-family: 'Jua', 'Noto Sans KR', sans-serif;
+    font-size: clamp(24px, 5.5vw, 32px);
+    margin: 0;
+    line-height: 1.1;
+    color: var(--heading);
+  }
+
+  .title-block p {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: var(--text-soft);
+  }
+
+  .level-badge {
+    background: var(--yellow);
+    border: 2px solid var(--yellow-btn);
+    border-radius: 999px;
+    padding: 10px 14px;
+    font-family: 'Jua', sans-serif;
+    font-size: 13px;
+    box-shadow: var(--shadow);
+    color: var(--text);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .learning-streak-bar {
+    background: var(--peach);
+    border: 2px solid var(--peach-btn);
+    border-radius: 18px;
+    padding: 12px 16px;
+    text-align: center;
+    box-shadow: var(--shadow);
+  }
+
+  .streak-headline {
+    font-family: 'Jua', sans-serif;
+    font-size: clamp(16px, 4vw, 18px);
+    color: var(--heading);
+    margin: 0;
+  }
+
+  .streak-progress {
+    font-size: 13px;
+    color: var(--text-soft);
+    margin-top: 4px;
+  }
+
+  .streak-progress.saved {
+    color: var(--success);
+    font-weight: 600;
+  }
+
+  .clue-card {
+    background: var(--card);
+    border-radius: 22px;
+    padding: 24px 20px;
+    text-align: center;
+    box-shadow: var(--shadow);
+    border: 2px solid var(--border);
+    animation: popIn .4s ease both;
+  }
+
+  .clue-emoji {
+    font-size: clamp(52px, 14vw, 72px);
+    line-height: 1;
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .clue-word {
+    font-family: 'Jua', 'Noto Sans KR', sans-serif;
+    font-size: clamp(36px, 9vw, 48px);
+    color: var(--text);
+    margin: 0 0 6px;
+    letter-spacing: 0.02em;
+  }
+
+  .clue-meaning {
+    font-family: 'Jua', sans-serif;
+    font-size: clamp(20px, 4.5vw, 26px);
+    color: var(--heading);
+    margin: 0;
+  }
+
+  .pronounce-btn {
+    margin-top: 12px;
+    padding: 8px 18px;
+    border-radius: 999px;
+    border: 2px solid var(--blue-btn);
+    background: var(--blue);
+    color: var(--heading);
+    font-family: 'Jua', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  .pronounce-btn:active { transform: scale(.97); }
+
+  .clue-hint {
+    margin: 14px 0 0;
+    font-size: 14px;
+    color: var(--text-soft);
+    line-height: 1.45;
+  }
+
+  .clue-hint-ko {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: var(--text-soft);
+    opacity: .85;
+  }
+
+  .section-label {
+    font-family: 'Jua', sans-serif;
+    font-size: 16px;
+    color: var(--heading);
+    margin: 0 0 10px;
+    text-align: center;
+  }
+
+  .answer-area {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 16px 12px;
+    border: 2px solid var(--border);
+    box-shadow: var(--shadow);
+  }
+
+  .syllable-blocks-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: clamp(12px, 3vw, 18px);
+  }
+
+  .syllable-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg);
+    border-radius: 18px;
+    padding: 10px;
+    border: 2px solid var(--border);
+  }
+
+  .syllable-label {
+    font-family: 'Jua', sans-serif;
+    font-size: 11px;
+    color: var(--text-soft);
+  }
+
+  .syllable-preview {
+    font-family: 'Jua', 'Noto Sans KR', sans-serif;
+    font-size: clamp(22px, 5vw, 28px);
+    color: var(--text-soft);
+    min-height: 1.2em;
+    opacity: .5;
+    transition: opacity .2s, color .2s;
+  }
+
+  .syllable-preview.preview-active {
+    opacity: 1;
+    color: var(--heading);
+  }
+
+  /* Same 4-zone grid as Korean Match */
+  .syllable-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 0.55fr;
+    grid-template-rows: 1fr 0.65fr auto;
+    gap: 6px;
+    width: var(--block-size);
+    min-height: calc(var(--block-size) * 1.15);
+  }
+
+  .drop-zone {
+    background: var(--zone-bg);
+    border: 2px dashed var(--slot-border);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    min-height: 36px;
+    transition: border-color .2s, background .2s, transform .15s;
+    touch-action: manipulation;
+    cursor: pointer;
+  }
+
+  .drop-zone[data-zone="cho"] {
+    grid-column: 1;
+    grid-row: 1;
+    min-height: 48px;
+    border-color: var(--cho-border);
+    background: var(--slot-cho-bg);
+  }
+
+  .drop-zone[data-zone="jungH"] {
+    grid-column: 1;
+    grid-row: 2;
+    min-height: 32px;
+    border-color: var(--jung-border);
+    background: var(--slot-jung-bg);
+  }
+
+  .vowel-column {
+    grid-column: 2;
+    grid-row: 1 / 3;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-height: 80px;
+  }
+
+  .vowel-column.zone-inactive {
+    opacity: 0.25;
+    pointer-events: none;
+  }
+
+  .vowel-column .drop-zone {
+    flex: 1;
+    min-height: 28px;
+    border-color: var(--jung-border);
+    background: var(--slot-jung-bg);
+  }
+
+  .vowel-merge-preview {
+    font-family: 'Jua', 'Noto Sans KR', sans-serif;
+    font-size: clamp(8px, 2vw, 10px);
+    text-align: center;
+    color: var(--text-soft);
+    line-height: 1.2;
+    padding: 2px 1px;
+    opacity: 0.7;
+    pointer-events: none;
+    flex-shrink: 0;
+  }
+
+  .vowel-merge-preview.preview-active {
+    opacity: 1;
+    color: var(--heading);
+  }
+
+  .drop-zone.zone-inactive {
+    opacity: 0.25;
+    pointer-events: none;
+    border-style: dotted;
+  }
+
+  .drop-zone[data-zone="jong"] {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    min-height: 38px;
+    border-color: var(--jong-border);
+    background: var(--slot-jong-bg);
+  }
+
+  .drop-zone.drag-over {
+    border-style: solid;
+    transform: scale(1.03);
+  }
+
+  .drop-zone.filled { border-style: solid; }
+
+  .drop-zone.correct {
+    border-color: var(--mint-btn) !important;
+    background: var(--success-bg);
+    animation: slotPop .4s ease;
+  }
+
+  .drop-zone.wrong {
+    border-color: var(--error) !important;
+    background: var(--error-bg);
+    animation: gentleShake .45s ease;
+  }
+
+  .drop-zone.zone-inactive,
+  .vowel-column.zone-inactive {
+    display: none;
+  }
+
+  .slot-part-tag {
+    position: absolute;
+    bottom: 3px;
+    font-size: 7px;
+    font-weight: 700;
+    color: var(--text-soft);
+    opacity: .55;
+    pointer-events: none;
+    text-align: center;
+    line-height: 1.1;
+    padding: 0 2px;
+  }
+
+  .bank-area {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 16px 12px;
+    border: 2px solid var(--border);
+    box-shadow: var(--shadow);
+  }
+
+  .bank-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    min-height: calc(var(--tile-size) + 8px);
+  }
+
+  .tile {
+    width: var(--tile-size);
+    height: var(--tile-size);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Jua', 'Noto Sans KR', sans-serif;
+    font-size: clamp(24px, 6vw, 32px);
+    cursor: grab;
+    user-select: none;
+    touch-action: none;
+    box-shadow: var(--shadow-tile), var(--shadow);
+    transition: transform .15s, box-shadow .15s;
+    position: relative;
+    z-index: 1;
+    color: var(--text);
+  }
+
+  .tile:active { cursor: grabbing; }
+
+  .tile.cho { background: var(--cho); border: 2px solid var(--cho-border); }
+  .tile.jung { background: var(--jung); border: 2px solid var(--jung-border); }
+  .tile.jong { background: var(--jong); border: 2px solid var(--jong-border); }
+
+  .tile.selected {
+    outline: 3px solid var(--heading);
+    outline-offset: 2px;
+    transform: scale(1.06);
+  }
+
+  .tile.dragging { opacity: .4; transform: scale(.92); pointer-events: none; }
+  .tile.hidden-in-bank { visibility: hidden; pointer-events: none; }
+
+  .tile-ghost {
+    position: fixed;
+    z-index: 9999;
+    pointer-events: none;
+    transform: translate(-50%, -50%) scale(1.06);
+    box-shadow: var(--shadow);
+    opacity: .95;
+  }
+
+  .tile.snap-in { animation: snapIn .3s ease; }
+
+  .feedback {
+    text-align: center;
+    padding: 12px 16px;
+    border-radius: 16px;
+    font-family: 'Jua', sans-serif;
+    font-size: clamp(16px, 4vw, 20px);
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .3s;
+    line-height: 1.4;
+  }
+
+  .feedback.empty { background: transparent; color: transparent; }
+  .feedback.success { background: var(--success-bg); color: var(--success); border: 2px solid var(--mint-btn); animation: popIn .35s ease; }
+  .feedback.error { background: var(--error-bg); color: var(--error); border: 2px solid var(--error-border); animation: gentleShake .45s ease; }
+  .feedback.info { background: var(--blue); color: var(--heading); font-size: 14px; font-family: 'Noto Sans KR', sans-serif; font-weight: 500; border: 2px solid var(--blue-btn); }
+
+  .actions {
+    /* app-buttons.css */
+  }
+
+  .btn {
+    /* app-buttons.css */
+  }
+
+  .btn-next.visible { display: flex; }
+
+  .progress-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 2px 0;
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--card);
+    border: 2px solid var(--lavender-btn);
+    transition: all .25s;
+  }
+
+  .dot.done { background: var(--lavender); }
+  .dot.current { background: var(--peach); border-color: var(--peach-btn); transform: scale(1.25); }
+
+  .win-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--overlay-scrim);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 20px;
+  }
+
+  .win-overlay.show { display: flex; }
+
+  .win-card {
+    background: var(--card);
+    border-radius: 28px;
+    padding: 32px 26px;
+    text-align: center;
+    max-width: 340px;
+    border: 2px solid var(--border);
+    box-shadow: var(--shadow);
+    animation: popIn .45s ease;
+  }
+
+  .win-card .big-emoji { font-size: 56px; display: block; margin-bottom: 12px; }
+  .win-card h2 { font-family: 'Jua', sans-serif; font-size: 28px; color: var(--heading); margin: 0 0 10px; }
+  .win-word { font-family: 'Jua', sans-serif; font-size: 22px; color: var(--text); margin: 0 0 10px; }
+  .win-breakdown { font-size: 14px; color: var(--text-soft); margin: 0 0 12px; line-height: 1.55; }
+  .win-milestone { font-size: 15px; color: var(--success); font-weight: 600; margin: 0 0 16px; min-height: 1.2em; }
+  .win-actions { display: flex; justify-content: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(.92) translateY(10px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  @keyframes snapIn {
+    from { transform: scale(1.15); opacity: .6; }
+    to   { transform: scale(1); opacity: 1; }
+  }
+
+  @keyframes gentleShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+
+  @keyframes slotPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes confetti-fall {
+    to { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+  }
+
+  .confetti-piece {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    top: -10px;
+    z-index: 200;
+    pointer-events: none;
+    animation: confetti-fall 2.5s ease-in forwards;
+  }
+
+
+  @media (max-width: 360px) {
+    :root { --tile-size: 48px; --slot-size: 44px; }
+  }
+</style>
+<link rel="stylesheet" href="css/app-theme.css">
+<link rel="stylesheet" href="css/app-wordle-ui.css">
+</head>
+<body>
+
+<div class="top-nav-actions">
+  <a class="top-nav-btn" href="profile.html" id="nav-profile" data-i18n-aria="nav.profile">👤</a>
+  <a class="top-nav-btn" href="settings.html" id="nav-settings" data-i18n-aria="nav.settings">⚙️</a>
+  <button type="button" class="top-nav-btn" id="theme-toggle" data-i18n-aria="common.themeToggle">🌙</button>
+</div>
+
+<div class="app" id="builder-app"></div>
+
+<script src="js/storage.js"></script>
+<script src="js/user-preferences.js"></script>
+<script src="js/i18n-messages.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/app-bootstrap.js"></script>
+<script src="js/app-nav.js"></script>
+<script src="js/hangul-compose.js"></script>
+<script src="js/drag-hit-test.js"></script>
+<script src="js/learning-word-model.js"></script>
+<script src="js/learning-words.js"></script>
+<script src="js/dictionary-service.js"></script>
+<script src="js/dictionary-modal.js"></script>
+<script src="js/learning-streak.js"></script>
+<script src="js/menu-progress.js"></script>
+<script src="js/level-utils.js"></script>
+<script src="js/badge-service.js"></script>
+<script src="js/profile-service.js"></script>
+<script src="js/xp-service.js"></script>
+<script src="js/profile-ui.js"></script>
+<script src="js/hangul-builder.js"></script>
+<script>
+(async function () {
+  await AppNav.initPage({ topNav: false });
+  const game = new HangulBuilderGame(document.getElementById('builder-app'));
+  game.mount();
+})();
+</script>
+</body>
+</html>

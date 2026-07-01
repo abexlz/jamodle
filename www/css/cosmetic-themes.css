@@ -1,0 +1,186 @@
+/**
+ * Cosmetic palette overrides — --ink/--paper/--correct/--present/--absent + app aliases.
+ */
+
+/* ── 벚꽃 Cherry blossom ── */
+:root[data-cosmetic-theme="cherry"],
+[data-cosmetic-theme="cherry"] {
+  --ink: #2A1820;
+  --ink-2: #3D2430;
+  --ink-3: #4A3040;
+  --paper: #FFF5F8;
+  --paper-dim: #E8C4D0;
+  --seal: #E87898;
+  --seal-dim: #B84868;
+  --bg: #FFF5F8;
+  --bg-soft: #FFEEF4;
+  --card: #FFFFFF;
+  --text: #6A4858;
+  --text-soft: #A88898;
+  --heading: #D47898;
+  --correct: #FFB8D0;
+  --correct-text: #8A4060;
+  --present: #FFD6E8;
+  --present-text: #9A5080;
+  --absent: #F8E8EE;
+  --absent-text: #B898A8;
+  --border: #F0D8E0;
+  --border-soft: #F8E8EE;
+  --mint: #FFD6E8;
+  --mint-btn: #FFB8D0;
+  --lavender: #F8E0F0;
+  --lavender-btn: #E8C0D8;
+  --peach: #FFE8F0;
+  --peach-btn: #FFD0E0;
+  --overlay-scrim: rgba(255, 245, 248, 0.92);
+}
+
+[data-theme="dark"][data-cosmetic-theme="cherry"],
+[data-theme="dark"] [data-cosmetic-theme="cherry"] {
+  --ink: #1A1018;
+  --ink-2: #281820;
+  --ink-3: #382830;
+  --paper: #FFE8F0;
+  --paper-dim: #C898A8;
+  --bg: #281820;
+  --bg-soft: #302028;
+  --card: #382830;
+  --text: #F0D8E0;
+  --text-soft: #B898A8;
+  --heading: #FFB8D0;
+  --correct: #6A3850;
+  --correct-text: #FFD6E8;
+  --present: #6A4858;
+  --present-text: #FFD6E8;
+  --absent: #3A2830;
+  --absent-text: #988088;
+  --border: #4A3840;
+  --border-soft: #403038;
+  --overlay-scrim: rgba(26, 16, 24, 0.92);
+}
+
+/* ── 심해 Deep sea ── */
+:root[data-cosmetic-theme="deep-sea"],
+[data-cosmetic-theme="deep-sea"] {
+  --ink: #051018;
+  --ink-2: #0A1828;
+  --ink-3: #102038;
+  --paper: #E8F4FC;
+  --paper-dim: #88B8D8;
+  --seal: #2888B8;
+  --seal-dim: #186898;
+  --bg: #E8F4FC;
+  --bg-soft: #D8ECF8;
+  --card: #FFFFFF;
+  --text: #385868;
+  --text-soft: #6890A8;
+  --heading: #2888B8;
+  --correct: #5BA8C8;
+  --correct-text: #184868;
+  --present: #88C8E8;
+  --present-text: #186888;
+  --absent: #D8E8F0;
+  --absent-text: #88A8B8;
+  --border: #C8DCE8;
+  --border-soft: #D8E8F0;
+  --mint: #A8D8E8;
+  --mint-btn: #78B8D8;
+  --blue: #C8E8F8;
+  --blue-btn: #98C8E8;
+  --lavender: #D8E8F8;
+  --lavender-btn: #A8C8E8;
+  --overlay-scrim: rgba(232, 244, 252, 0.92);
+}
+
+[data-theme="dark"][data-cosmetic-theme="deep-sea"],
+[data-theme="dark"] [data-cosmetic-theme="deep-sea"] {
+  --ink: #020810;
+  --ink-2: #081820;
+  --ink-3: #102838;
+  --paper: #C8E8F8;
+  --paper-dim: #5888A8;
+  --bg: #081820;
+  --bg-soft: #0C2030;
+  --card: #102838;
+  --text: #C8E0F0;
+  --text-soft: #6898B8;
+  --heading: #78C8E8;
+  --correct: #286878;
+  --correct-text: #A8E8F8;
+  --present: #385868;
+  --present-text: #88D8F0;
+  --absent: #182838;
+  --absent-text: #588098;
+  --border: #203848;
+  --border-soft: #183038;
+  --overlay-scrim: rgba(4, 12, 20, 0.92);
+}
+
+/* ── 다크 한지 Dark hanji ── */
+:root[data-cosmetic-theme="dark-hanji"],
+[data-cosmetic-theme="dark-hanji"] {
+  --ink: #1A1410;
+  --ink-2: #241C16;
+  --ink-3: #302820;
+  --paper: #C8B898;
+  --paper-dim: #8A7858;
+  --seal: #8A5840;
+  --seal-dim: #5A3828;
+  --bg: #E8E0D0;
+  --bg-soft: #DDD4C4;
+  --card: #F0E8D8;
+  --text: #484038;
+  --text-soft: #787068;
+  --heading: #685848;
+  --correct: #8A9868;
+  --correct-text: #384828;
+  --present: #C8A868;
+  --present-text: #584818;
+  --absent: #D8D0C0;
+  --absent-text: #989080;
+  --border: #C8C0B0;
+  --border-soft: #D0C8B8;
+  --mint: #B8C8A8;
+  --mint-btn: #98A888;
+  --peach: #E8D8C0;
+  --peach-btn: #C8B898;
+  --overlay-scrim: rgba(232, 224, 208, 0.92);
+}
+
+[data-theme="dark"][data-cosmetic-theme="dark-hanji"],
+[data-theme="dark"] [data-cosmetic-theme="dark-hanji"] {
+  --ink: #100C08;
+  --ink-2: #1A1410;
+  --ink-3: #241C16;
+  --paper: #B8A888;
+  --paper-dim: #786858;
+  --bg: #1A1410;
+  --bg-soft: #201810;
+  --card: #282018;
+  --text: #D8C8B0;
+  --text-soft: #988870;
+  --heading: #C8A878;
+  --correct: #485838;
+  --correct-text: #B8C898;
+  --present: #685030;
+  --present-text: #E8C888;
+  --absent: #302820;
+  --absent-text: #787058;
+  --border: #383028;
+  --border-soft: #302820;
+  --overlay-scrim: rgba(16, 12, 8, 0.92);
+}
+
+/* Shop theme preview swatches */
+.shop-theme-swatch[data-theme-id="default"] {
+  background: linear-gradient(135deg, #7B8FD4 0%, #A8E6C4 50%, #FFE0A8 100%);
+}
+.shop-theme-swatch[data-theme-id="cherry"] {
+  background: linear-gradient(135deg, #FFD6E8 0%, #FFB8D0 50%, #FFF5F8 100%);
+}
+.shop-theme-swatch[data-theme-id="deep-sea"] {
+  background: linear-gradient(135deg, #051018 0%, #5BA8C8 50%, #E8F4FC 100%);
+}
+.shop-theme-swatch[data-theme-id="dark-hanji"] {
+  background: linear-gradient(135deg, #1A1410 0%, #8A9868 50%, #C8B898 100%);
+}

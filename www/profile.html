@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+(function(){
+  try {
+    var p = JSON.parse(localStorage.getItem('jamodeul-preferences') || '{}');
+    var theme = p.theme || localStorage.getItem('jamodeul-theme') || 'system';
+    var resolved = theme;
+    if (theme === 'system' || (theme !== 'light' && theme !== 'dark')) {
+      resolved = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    document.documentElement.setAttribute('data-theme', resolved);
+    if (p.reduceMotion) document.documentElement.classList.add('reduce-motion');
+    if (p.highContrast) document.documentElement.classList.add('high-contrast');
+    if (p.largeText) document.documentElement.classList.add('large-text');
+    document.documentElement.lang = p.language === 'ko' ? 'ko' : 'en';
+    try {
+      var prof = JSON.parse(localStorage.getItem('jamodeul-user-profile') || '{}');
+      if (prof.selectedCosmeticTheme && prof.selectedCosmeticTheme !== 'default') {
+        document.documentElement.setAttribute('data-cosmetic-theme', prof.selectedCosmeticTheme);
+      }
+    } catch (e2) {}
+  } catch (e) {}
+})();
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0097B2">
+<title>Profile — 자모들</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app-preferences.css">
+<link rel="stylesheet" href="css/app-buttons.css">
+<link rel="stylesheet" href="css/profile.css">
+<link rel="stylesheet" href="css/cosmetic-themes.css">
+<link rel="stylesheet" href="css/shop.css">
+<link rel="stylesheet" href="css/race.css">
+<style>
+  :root {
+    --bg: #FFF8F5; --card: #fff; --text: #5D6470; --text-soft: #9AA3AD;
+    --heading: #7B8FD4; --border: #E8E4E0; --border-soft: #F0ECE8;
+    --lavender: #E8DEFF; --lavender-btn: #CFC0F5; --mint: #C8F0E0; --mint-btn: #98DDB8;
+    --correct-text: #3A7A58; --shadow: 0 4px 14px rgba(93, 100, 112, 0.08);
+    --safe-top: env(safe-area-inset-top, 0px); --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  [data-theme="dark"] {
+    --bg: #1A1D28; --card: #2A2E3E; --text: #E4E8F0; --text-soft: #9AA3B8;
+    --heading: #B8C4F0; --border: #3A3E50; --border-soft: #323648;
+    --lavender: #3A3555; --lavender-btn: #504878; --mint: #2A4038; --mint-btn: #3D5A4E;
+    --correct-text: #A8E6C4;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100dvh; background: var(--bg); color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    padding: calc(16px + var(--safe-top)) 16px calc(32px + var(--safe-bottom));
+  }
+  .settings-header {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
+  }
+  .settings-back {
+    padding: 10px 14px; border-radius: 999px; background: var(--lavender);
+    color: var(--heading); font-family: 'Jua', sans-serif; font-size: 14px;
+    text-decoration: none; border: 2px solid var(--lavender-btn);
+  }
+  .settings-header h1 {
+    flex: 1; text-align: center; font-family: 'Jua', sans-serif; font-size: 28px;
+    color: var(--heading); margin: 0;
+  }
+</style>
+<link rel="stylesheet" href="css/app-theme.css">
+<link rel="stylesheet" href="css/app-wordle-ui.css">
+</head>
+<body>
+<div class="top-nav-actions">
+  <a class="top-nav-btn" href="index.html" id="nav-back" data-i18n-aria="nav.back">←</a>
+  <button type="button" class="top-nav-btn" id="theme-toggle" data-i18n-aria="common.themeToggle">🌙</button>
+</div>
+<div class="profile-app" id="profile-root"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="js/firebase-social.js?v=8"></script>
+<script src="js/wordle-words.js"></script>
+<script src="js/hangul-compose.js"></script>
+<script src="js/learning-word-model.js"></script>
+<script src="js/learning-words.js"></script>
+<script src="js/match-word-bank.js"></script>
+<script src="js/match-words.js"></script>
+<script src="js/race-service.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/user-preferences.js"></script>
+<script src="js/i18n-messages.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/app-bootstrap.js"></script>
+<script src="js/app-nav.js"></script>
+<script src="js/menu-progress.js"></script>
+<script src="js/learning-streak.js"></script>
+<script src="js/level-utils.js"></script>
+<script src="js/badge-service.js"></script>
+<script src="js/profile-service.js"></script>
+<script src="js/cosmetic-themes.js"></script>
+<script src="js/hint-tokens.js"></script>
+<script src="js/shop-service.js"></script>
+<script src="js/daily-gift-service.js"></script>
+<script src="js/xp-service.js"></script>
+<script src="js/profile-ui.js"></script>
+<script src="js/player-hud.js"></script>
+<script src="js/shop-ui.js"></script>
+<script src="js/daily-gift-ui.js"></script>
+<script src="js/profile-app.js"></script>
+<script>
+(async function () {
+  FirebaseSocial?.init?.({});
+  await AppNav.initPage({ topNav: false });
+  CosmeticThemes?.applyStored?.();
+  ProfileApp.mount('profile-root');
+  if (window.FirebaseSocial?.initProfile) {
+    FirebaseSocial.initProfile('profile-social-root');
+  }
+  DailyGiftUI?.tryShow?.();
+})();
+</script>
+</body>
+</html>

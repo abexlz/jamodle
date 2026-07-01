@@ -1,0 +1,527 @@
+/**
+ * Wordle-inspired global theme — teal background, juicy yellow 3D buttons, white labels.
+ * Load after page-specific <style> blocks.
+ */
+
+html,
+html[data-theme="light"],
+html[data-theme="dark"] {
+  --bg: #0097B2;
+  --bg-soft: #007A8E;
+  --card: rgba(0, 80, 95, 0.42);
+  --text: #ffffff;
+  --heading: #ffffff;
+  --text-soft: rgba(255, 255, 255, 0.78);
+  --border: rgba(123, 207, 255, 0.55);
+  --border-soft: rgba(123, 207, 255, 0.35);
+  --overlay-scrim: rgba(0, 60, 72, 0.88);
+  --shadow: 0 8px 24px rgba(0, 40, 50, 0.35);
+  --shadow-sm: 0 4px 12px rgba(0, 40, 50, 0.25);
+  --panel-bg: rgba(0, 70, 85, 0.38);
+  --panel-border: rgba(123, 207, 255, 0.5);
+  --app-btn-fill: linear-gradient(180deg, #FFE566 0%, #FFD743 38%, #FFC820 72%, #FFB800 100%);
+  --app-btn-fill-hover: linear-gradient(180deg, #FFED80 0%, #FFE255 38%, #FFD430 72%, #FFC820 100%);
+  --app-btn-fill-sky: linear-gradient(180deg, #B8E8FF 0%, #7BCFFF 45%, #5EB0F0 100%);
+  --app-btn-fill-dark: linear-gradient(180deg, #00889E 0%, #007A8E 55%, #006878 100%);
+  --app-btn-border-color: #E09500;
+  --app-btn-border-sky: #3A9AD4;
+  --app-btn-border-dark: #005868;
+  --app-btn-text: #ffffff;
+  --app-btn-text-shadow: 0 2px 0 rgba(140, 70, 0, 0.42), 0 1px 2px rgba(0, 0, 0, 0.15);
+  --app-btn-text-shadow-sky: 0 2px 0 rgba(30, 90, 130, 0.45);
+  --app-btn-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.48),
+    inset 0 -3px 0 rgba(255, 170, 0, 0.22),
+    0 6px 0 #C87A00,
+    0 8px 18px rgba(0, 0, 0, 0.22);
+  --app-btn-shadow-sky:
+    inset 0 2px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -3px 0 rgba(60, 150, 210, 0.25),
+    0 6px 0 #3A8FC7,
+    0 8px 18px rgba(0, 0, 0, 0.2);
+  --app-btn-shadow-dark:
+    inset 0 2px 0 rgba(255, 255, 255, 0.12),
+    0 4px 0 #004858,
+    0 6px 14px rgba(0, 0, 0, 0.25);
+  --app-btn-shadow-active: 0 2px 0 #C87A00, inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  --app-btn-shadow-active-sky: 0 2px 0 #3A8FC7, inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  --app-btn-radius: 24px;
+  --mint: rgba(0, 90, 105, 0.5);
+  --mint-btn: rgba(123, 207, 255, 0.55);
+  --peach: rgba(0, 90, 105, 0.5);
+  --peach-btn: rgba(123, 207, 255, 0.55);
+  --lavender: rgba(0, 90, 105, 0.5);
+  --lavender-btn: rgba(123, 207, 255, 0.55);
+  --blue: rgba(0, 90, 105, 0.5);
+  --blue-btn: rgba(123, 207, 255, 0.55);
+  --yellow: rgba(0, 90, 105, 0.5);
+  --yellow-btn: rgba(123, 207, 255, 0.55);
+  --pink: rgba(0, 90, 105, 0.5);
+  --pink-btn: rgba(123, 207, 255, 0.55);
+  --correct: #5FD68A;
+  --correct-text: #ffffff;
+  --present: #FFD743;
+  --present-text: #7A4A00;
+  --absent: #8A9AA4;
+  --absent-text: rgba(255, 255, 255, 0.92);
+  --info-text: #ffffff;
+  --info-bg: rgba(0, 70, 85, 0.55);
+  --success-text: #ffffff;
+  --error-text: #ffb4b4;
+  --error-bg: rgba(80, 20, 20, 0.55);
+  --success-bg: rgba(20, 70, 40, 0.55);
+  --zone-bg: rgba(255, 255, 255, 0.92);
+}
+
+body {
+  background-color: #0097B2 !important;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='%23006E82' fill-opacity='0.14'%3E%3Cpath d='M30 20c8 12 6 28-4 38-6-14-2-30 4-38zM90 75c10 8 12 24 4 34-12-8-14-24-4-34zM55 95c-4 10-14 16-26 14 8-10 20-14 26-14zM75 25c6-8 18-10 28-4-10 6-20 8-28 4z'/%3E%3C/g%3E%3C/svg%3E"),
+    radial-gradient(ellipse 110% 75% at 50% -8%, rgba(255, 255, 255, 0.22) 0%, transparent 52%),
+    radial-gradient(circle at 12% 88%, rgba(0, 0, 0, 0.07) 0%, transparent 38%),
+    radial-gradient(circle at 88% 72%, rgba(0, 0, 0, 0.06) 0%, transparent 34%),
+    radial-gradient(circle at 50% 120%, rgba(0, 60, 72, 0.35) 0%, transparent 55%),
+    linear-gradient(180deg, #00B4CC 0%, #0097B2 48%, #007A8E 100%) !important;
+  color: #ffffff !important;
+}
+
+/* ── Typography on teal ── */
+h1, h2, h3,
+.section-title,
+.featured-continue-title,
+.title-block h1 {
+  color: #ffffff !important;
+  text-shadow: 0 2px 0 rgba(0, 60, 72, 0.35);
+}
+
+.menu-tagline,
+.menu-tagline-ko,
+.featured-continue-subtitle,
+.section-subtitle,
+.subtitle,
+.title-block p {
+  color: var(--text-soft) !important;
+}
+
+.seal {
+  background: linear-gradient(180deg, #FFE566 0%, #FFB800 100%) !important;
+  border-color: #E09500 !important;
+  color: #ffffff !important;
+  text-shadow: 0 2px 0 rgba(140, 70, 0, 0.4);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.45),
+    0 4px 0 #C87A00,
+    0 6px 14px rgba(0, 0, 0, 0.2) !important;
+}
+
+.top-nav-btn {
+  background: linear-gradient(180deg, #00889E 0%, #007A8E 100%) !important;
+  border-color: rgba(123, 207, 255, 0.45) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 0 #004858, 0 6px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+.top-nav-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #004858 !important;
+}
+
+/* ── Menu panels (Wordle-style grouped buttons) ── */
+.featured-continue-card,
+.daily-challenges-grid,
+.learning-modes-list,
+.match-hint-dock,
+.jamo-bank,
+.hint-area,
+#hint-panel,
+#tracker,
+.syllable-block,
+.game-feedback:not(.empty) {
+  background: var(--panel-bg) !important;
+  border: 2px solid var(--panel-border) !important;
+  border-radius: 24px !important;
+  box-shadow: var(--shadow-sm) !important;
+  backdrop-filter: blur(6px);
+}
+
+.daily-challenges-grid,
+.learning-modes-list {
+  padding: 10px !important;
+  gap: 8px !important;
+}
+
+.featured-continue-progress {
+  background: rgba(0, 60, 72, 0.45) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid rgba(123, 207, 255, 0.35);
+}
+
+/* ── Primary yellow 3D buttons ── */
+.app-btn,
+.learning-mode-card,
+.daily-challenge-card,
+.word-game-card,
+.featured-continue-cta,
+.match-mode-btn,
+.match-actions .btn,
+.actions .btn,
+.btn-soft,
+.btn-warn,
+.btn-warn-outline,
+.btn-next,
+.btn-continue,
+.btn-leave,
+.profile-modal-btn,
+.done-lesson-btn,
+.length-btn,
+button.ghost,
+.match-hint-btn,
+.hint-dock-btn,
+.rotation-dock,
+#submit-btn,
+.modal button,
+#share-btn,
+#modal-btn,
+.syl-pick-btn,
+.language-option,
+.theme-option,
+.confirm-actions button,
+.settings-back,
+.back-link,
+.top-nav-btn,
+.accent-mint,
+.accent-peach,
+.accent-blue,
+.accent-lavender,
+.accent-yellow,
+.accent-pink,
+.btn-reset,
+.btn-check,
+.match-mode-btn[data-match-mode="easy"],
+.match-mode-btn[data-match-mode="medium"],
+.match-mode-btn[data-match-mode="hard"],
+.match-token-counter {
+  background: var(--app-btn-fill) !important;
+  border: 2px solid var(--app-btn-border-color) !important;
+  border-radius: var(--app-btn-radius, 24px) !important;
+  color: var(--app-btn-text) !important;
+  box-shadow: var(--app-btn-shadow) !important;
+}
+
+/* Sky-blue secondary buttons */
+.match-mode-cancel,
+.length-cancel,
+#syl-picker-cancel,
+.btn-leave,
+.accent-blue.learning-mode-card,
+.accent-blue.daily-challenge-card,
+.accent-blue.word-game-card {
+  background: var(--app-btn-fill-sky) !important;
+  border-color: var(--app-btn-border-sky) !important;
+  box-shadow: var(--app-btn-shadow-sky) !important;
+}
+
+/* Dark teal ghost / cancel */
+.match-mode-cancel,
+.length-cancel,
+#syl-picker-cancel {
+  background: var(--app-btn-fill-dark) !important;
+  border-color: var(--app-btn-border-dark) !important;
+  box-shadow: var(--app-btn-shadow-dark) !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.language-option.selected,
+.theme-option.selected {
+  background: var(--app-btn-fill-hover) !important;
+  border-color: #FFE566 !important;
+}
+
+.app-btn-title,
+.mode-name,
+.match-mode-btn-title,
+.length-btn > span:first-child,
+.hint-btn-text,
+.rotation-dock-label,
+#submit-btn,
+button.ghost,
+.match-actions .btn,
+.actions .btn,
+.btn-next,
+.btn-continue,
+.profile-modal-btn,
+.language-option,
+.theme-option,
+.done-lesson-btn,
+.settings-back,
+.featured-continue-cta,
+.modal button,
+#share-btn,
+#modal-btn,
+.back-link,
+.match-token-counter {
+  color: #ffffff !important;
+  text-shadow: var(--app-btn-text-shadow) !important;
+}
+
+.match-mode-cancel .app-btn-title,
+.length-cancel,
+#syl-picker-cancel,
+.accent-blue .app-btn-title {
+  text-shadow: var(--app-btn-text-shadow-sky) !important;
+}
+
+.hint-dock-btn .hi-tile,
+.hint-dock-btn .hi-elim,
+.hint-dock-btn .hi-def,
+.rotation-dock-icon {
+  color: #ffffff !important;
+  text-shadow: var(--app-btn-text-shadow) !important;
+}
+
+/* ── Hide button descriptions ── */
+.app-btn-desc,
+.mode-desc,
+.mode-ko,
+.match-mode-btn-desc,
+.match-hint-cost,
+.hint-cost,
+.length-btn > span:last-child:not(:only-child),
+.mode-status,
+.mode-unlock-hint,
+.hint-btn-text .hint-cost {
+  display: none !important;
+}
+
+/* ── Button press feel ── */
+.app-btn:active:not(:disabled),
+.learning-mode-card:active:not(.is-locked),
+.daily-challenge-card:active,
+.featured-continue-cta:active,
+.match-mode-btn:active,
+.match-actions .btn:active:not(:disabled),
+.match-hint-btn:active:not(:disabled),
+.rotation-dock:active:not(.disabled),
+#submit-btn:active:not(:disabled),
+.length-btn:active,
+.modal button:active {
+  transform: translateY(4px) !important;
+  box-shadow: var(--app-btn-shadow-active) !important;
+}
+
+.accent-blue:active,
+.match-mode-cancel:active,
+.length-cancel:active {
+  box-shadow: var(--app-btn-shadow-active-sky) !important;
+}
+
+.rotation-dock {
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  text-align: left;
+  aspect-ratio: auto !important;
+  width: 100%;
+  padding: 10px 14px !important;
+}
+
+.rotation-dock-icon {
+  font-size: clamp(22px, 5.5vw, 28px) !important;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.rotation-dock-label {
+  font-size: clamp(15px, 3.8vw, 18px) !important;
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: none;
+}
+
+.rotation-dock.drag-over {
+  background: var(--app-btn-fill-hover) !important;
+  border-color: #FFE566 !important;
+}
+
+.match-hint-btn {
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 8px !important;
+  text-align: left !important;
+  aspect-ratio: auto !important;
+  padding: 8px 12px !important;
+}
+
+.match-hint-btn .app-btn-title {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+
+.hint-dock-btn {
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 8px !important;
+  text-align: left !important;
+  aspect-ratio: auto !important;
+  padding: 8px 12px !important;
+}
+
+.hint-dock-btn .hint-btn-text {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Cards & modals ── */
+.settings-section,
+.profile-header-card,
+.profile-section,
+.match-mode-card,
+.length-modal,
+.modal,
+.results-card,
+.confirm-card,
+.section {
+  background: var(--panel-bg) !important;
+  border: 2px solid var(--panel-border) !important;
+  border-radius: 24px !important;
+  color: var(--text) !important;
+  backdrop-filter: blur(8px);
+}
+
+.mode-label-recommended,
+.mode-lock-badge {
+  background: rgba(0, 50, 60, 0.65) !important;
+  color: #fff !important;
+  border-color: rgba(123, 207, 255, 0.5) !important;
+}
+
+/* ── Game tiles — white bubbles on teal ── */
+.syl,
+.syl.syl-blank {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 2px solid rgba(255, 255, 255, 0.6) !important;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.8),
+    0 4px 0 rgba(0, 60, 72, 0.25),
+    0 6px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.jamo {
+  color: #2A4A58 !important;
+}
+
+.jamo.pending {
+  background: rgba(123, 207, 255, 0.35) !important;
+  color: #ffffff !important;
+}
+
+.jamo.correct {
+  background: var(--correct) !important;
+  color: var(--correct-text) !important;
+  text-shadow: 0 1px 0 rgba(0, 60, 30, 0.3);
+}
+
+.jamo.present {
+  background: var(--present) !important;
+  color: var(--present-text) !important;
+  text-shadow: 0 1px 0 rgba(140, 70, 0, 0.25);
+}
+
+.jamo.absent {
+  background: var(--absent) !important;
+  color: var(--absent-text) !important;
+  text-shadow: none;
+}
+
+.jamo-tile,
+.drop-zone {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border: 2px solid rgba(255, 255, 255, 0.55) !important;
+  color: #2A4A58 !important;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.75),
+    0 3px 0 rgba(0, 60, 72, 0.22) !important;
+}
+
+.jamo-ghost {
+  background: rgba(255, 255, 255, 0.98) !important;
+  color: #2A4A58 !important;
+  border: 2px solid rgba(255, 255, 255, 0.9) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  z-index: 100000 !important;
+}
+
+/* Jamo tracker — bright for letters in the answer, dim for unused */
+#tracker .tkey:not(.unused):not(.correct):not(.present):not(.absent) {
+  background: rgba(255, 255, 255, 0.9) !important;
+  color: #2A4A58 !important;
+  border-color: rgba(255, 255, 255, 0.55) !important;
+}
+
+#tracker .tkey.unused {
+  background: rgba(0, 40, 50, 0.52) !important;
+  color: rgba(255, 255, 255, 0.28) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  opacity: 0.5 !important;
+}
+
+#tracker .tkey.absent {
+  background: rgba(0, 35, 42, 0.58) !important;
+  color: rgba(255, 255, 255, 0.25) !important;
+  border-color: transparent !important;
+  opacity: 0.48 !important;
+}
+
+#guess-input {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 2px solid rgba(123, 207, 255, 0.5) !important;
+  color: #2A4A58 !important;
+  box-shadow: inset 0 2px 4px rgba(0, 60, 72, 0.08) !important;
+}
+
+#guess-input::placeholder {
+  color: rgba(42, 74, 88, 0.45) !important;
+}
+
+.profile-modal-overlay {
+  background: var(--overlay-scrim) !important;
+}
+
+.panel-close {
+  background: transparent !important;
+  border-color: rgba(123, 207, 255, 0.4) !important;
+  color: rgba(255, 255, 255, 0.75) !important;
+  box-shadow: none !important;
+}
+
+.leaderboard-list li.me {
+  background: rgba(123, 207, 255, 0.25) !important;
+  border-color: rgba(123, 207, 255, 0.55) !important;
+}
+
+.daily-leaderboard-btn {
+  background: var(--app-btn-fill) !important;
+  border: 2px solid var(--app-btn-border-color) !important;
+  box-shadow: var(--app-btn-shadow) !important;
+  text-decoration: none !important;
+  color: #ffffff !important;
+}
+
+.daily-leaderboard-btn:active {
+  transform: translateY(4px) !important;
+  box-shadow: var(--app-btn-shadow-active) !important;
+}

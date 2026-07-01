@@ -1,0 +1,12 @@
+node_modules/
+.DS_Store
+.env
+.env.local
+.vercel
+ios/App/App/public/
+android/app/src/main/assets/public/
+*.xcuserdata
+.idea/
+local.properties
+*.jks
+*.keystore

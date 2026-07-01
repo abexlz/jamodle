@@ -1,0 +1,391 @@
+.daily-cal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+  background: var(--overlay-scrim, rgba(18, 20, 28, 0.72));
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s ease;
+}
+
+.daily-cal-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.daily-cal-modal {
+  width: 100%;
+  max-width: 420px;
+  max-height: min(92vh, 720px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--card, #fff);
+  border: 2px solid var(--border, #E8E4E0);
+  border-radius: 24px 24px 0 0;
+  box-shadow: var(--shadow, 0 -8px 32px rgba(0, 0, 0, 0.15));
+  transform: translateY(16px);
+  transition: transform 0.32s ease;
+}
+
+.daily-cal-overlay.visible .daily-cal-modal {
+  transform: translateY(0);
+}
+
+@media (min-width: 480px) {
+  .daily-cal-overlay {
+    align-items: center;
+    padding: 20px;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  }
+  .daily-cal-modal {
+    border-radius: 24px;
+    max-height: min(88vh, 720px);
+  }
+}
+
+.daily-cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px 8px;
+  gap: 8px;
+}
+
+.daily-cal-close {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: var(--bg, #FFF8F5);
+  color: var(--text-soft, #9AA3AD);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.daily-cal-tabs {
+  display: flex;
+  gap: 6px;
+  flex: 1;
+  justify-content: center;
+}
+
+.daily-cal-tab {
+  font-family: 'Jua', sans-serif;
+  font-size: 14px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background: transparent;
+  color: var(--text-soft, #9AA3AD);
+  cursor: pointer;
+}
+
+.daily-cal-tab.is-active {
+  background: var(--mint, #C8F0E0);
+  border-color: var(--mint-btn, #98DDB8);
+  color: var(--correct-text, #3A7A58);
+}
+
+.daily-cal-body {
+  overflow-y: auto;
+  padding: 0 18px 18px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.daily-cal-prizes {
+  background: linear-gradient(135deg, var(--mint, #C8F0E0) 0%, var(--blue, #C8E6FF) 100%);
+  border-radius: 16px;
+  padding: 14px 14px 12px;
+  margin-bottom: 14px;
+}
+
+.daily-cal-prizes-title {
+  margin: 0 0 10px;
+  font-family: 'Jua', sans-serif;
+  font-size: 15px;
+  color: var(--heading, #7B8FD4);
+  text-align: center;
+}
+
+.daily-cal-badges {
+  display: flex;
+  justify-content: space-around;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.daily-cal-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  opacity: 0.45;
+  filter: grayscale(0.6);
+  transition: opacity 0.2s, filter 0.2s;
+}
+
+.daily-cal-badge.is-earned {
+  opacity: 1;
+  filter: none;
+}
+
+.daily-cal-badge-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.daily-cal-badge-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text, #5D6470);
+}
+
+.daily-cal-progress-wrap {
+  background: rgba(255, 255, 255, 0.55);
+  border-radius: 999px;
+  height: 10px;
+  overflow: hidden;
+}
+
+.daily-cal-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #0097B2, #98DDB8);
+  border-radius: 999px;
+  transition: width 0.35s ease;
+  min-width: 0;
+}
+
+.daily-cal-progress-text {
+  margin: 6px 0 0;
+  font-size: 12px;
+  text-align: center;
+  color: var(--text, #5D6470);
+}
+
+.daily-cal-month-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  gap: 8px;
+}
+
+.daily-cal-month-btn {
+  width: 36px;
+  height: 36px;
+  border: 2px solid var(--border, #E8E4E0);
+  border-radius: 12px;
+  background: var(--card, #fff);
+  color: var(--heading, #7B8FD4);
+  font-size: 18px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.daily-cal-month-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.daily-cal-month-label {
+  font-family: 'Jua', sans-serif;
+  font-size: 17px;
+  color: var(--heading, #7B8FD4);
+  text-align: center;
+  flex: 1;
+}
+
+.daily-cal-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.daily-cal-weekday {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-soft, #9AA3AD);
+  padding: 2px 0;
+}
+
+.daily-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.daily-cal-day {
+  aspect-ratio: 1;
+  min-height: 38px;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  background: var(--bg, #FFF8F5);
+  color: var(--text, #5D6470);
+  font-family: 'Jua', sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  touch-action: manipulation;
+}
+
+.daily-cal-day.is-empty {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.daily-cal-day.is-future {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.daily-cal-day.is-past {
+  background: var(--peach, #FFE8D4);
+  color: var(--text-soft, #9AA3AD);
+}
+
+.daily-cal-day.is-today {
+  border-color: #0097B2;
+  background: var(--blue, #C8E6FF);
+  color: var(--heading, #7B8FD4);
+  font-weight: 700;
+}
+
+.daily-cal-day.is-completed {
+  background: var(--mint, #C8F0E0);
+  color: var(--correct-text, #3A7A58);
+}
+
+.daily-cal-day.is-completed::after {
+  content: '✓';
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.daily-cal-day.is-selected {
+  box-shadow: 0 0 0 2px #0097B2;
+  transform: scale(1.04);
+}
+
+.daily-cal-day.is-locked-past:not(.is-completed) {
+  background: var(--yellow, #FFF6C8);
+}
+
+.daily-cal-footer {
+  padding: 12px 18px calc(14px + env(safe-area-inset-bottom, 0px));
+  border-top: 2px solid var(--border-soft, #F0ECE8);
+  background: var(--card, #fff);
+}
+
+.daily-cal-play-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.daily-cal-play-btn {
+  width: 100%;
+  font-family: 'Jua', sans-serif;
+  font-size: 17px;
+  padding: 14px 20px;
+  border-radius: 999px;
+  border: 2px solid #0097B2;
+  background: linear-gradient(180deg, #00B4CC 0%, #0097B2 100%);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 3px 0 rgba(0, 100, 120, 0.25);
+}
+
+.daily-cal-play-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.daily-cal-unlock-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.daily-cal-unlock-btn {
+  font-family: 'Jua', sans-serif;
+  font-size: 13px;
+  padding: 12px 10px;
+  border-radius: 14px;
+  border: 2px solid var(--border, #E8E4E0);
+  background: var(--card, #fff);
+  color: var(--text, #5D6470);
+  cursor: pointer;
+}
+
+.daily-cal-unlock-btn.coins {
+  background: var(--yellow, #FFF6C8);
+  border-color: var(--yellow-btn, #FFEAA0);
+}
+
+.daily-cal-unlock-btn.ad {
+  background: var(--lavender, #E8DEFF);
+  border-color: var(--lavender-btn, #CFC0F5);
+}
+
+.daily-cal-free-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--correct-text, #3A7A58);
+  background: var(--mint, #C8F0E0);
+  padding: 2px 8px;
+  border-radius: 999px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.daily-cal-trophies {
+  text-align: center;
+  padding: 24px 12px;
+}
+
+.daily-cal-trophy-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.daily-cal-trophy-card {
+  background: var(--bg, #FFF8F5);
+  border: 2px solid var(--border, #E8E4E0);
+  border-radius: 16px;
+  padding: 14px 8px;
+}
+
+.daily-cal-trophy-card.is-earned {
+  border-color: var(--mint-btn, #98DDB8);
+  background: var(--mint, #C8F0E0);
+}
+
+.daily-cal-trophy-card .daily-cal-badge-icon {
+  font-size: 36px;
+}
+
+body.daily-cal-open {
+  overflow: hidden;
+}

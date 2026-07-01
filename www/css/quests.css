@@ -1,0 +1,206 @@
+/* Quest tab — scroll list under fixed bottom nav */
+
+.quest-tab-section {
+  width: 100%;
+  padding-bottom: 8px;
+}
+
+#menu-screen.is-quests-tab .quest-section {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.quest-section-header {
+  margin-bottom: 16px;
+}
+
+.quest-section-title {
+  margin: 0 0 4px;
+  font-family: 'Jua', sans-serif;
+  font-size: 18px;
+  color: var(--heading, #7B8FD4);
+}
+
+.quest-section-sub {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-soft, #9AA3AD);
+}
+
+.quest-subsection-title {
+  margin: 20px 0 4px;
+  font-family: 'Jua', sans-serif;
+  font-size: 15px;
+  color: var(--heading, #7B8FD4);
+}
+
+.quest-subsection-title--weekly {
+  color: var(--peach-btn, #E8A090);
+}
+
+.quest-subsection-hint {
+  margin: 0 0 10px;
+  font-size: 12px;
+  color: var(--text-soft, #9AA3AD);
+}
+
+.quest-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.quest-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: start;
+  padding: 12px;
+  border-radius: var(--radius-sm, 12px);
+  border: 2px solid var(--border-soft, #F0ECE8);
+  background: var(--card, #fff);
+}
+
+.quest-card--weekly {
+  border-color: var(--peach-btn, #E8A090);
+  background: linear-gradient(135deg, var(--card) 0%, rgba(255, 214, 200, 0.15) 100%);
+}
+
+.quest-card.is-complete {
+  opacity: 0.85;
+  border-color: var(--mint-btn, #7BC4A8);
+  background: rgba(200, 240, 224, 0.2);
+}
+
+.quest-card-icon {
+  font-size: 26px;
+  line-height: 1;
+  padding-top: 2px;
+}
+
+.quest-card-title {
+  margin: 0 0 2px;
+  font-family: 'Jua', sans-serif;
+  font-size: 14px;
+  color: var(--heading, #7B8FD4);
+}
+
+.quest-card-desc {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: var(--text-soft, #9AA3AD);
+  line-height: 1.35;
+}
+
+.quest-progress {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--border-soft, #F0ECE8);
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.quest-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--lavender-btn, #A8B8E8);
+  transition: width 0.3s ease;
+}
+
+.quest-card--weekly .quest-progress-fill {
+  background: var(--peach-btn, #E8A090);
+}
+
+.quest-card.is-complete .quest-progress-fill {
+  background: var(--mint-btn, #7BC4A8);
+}
+
+.quest-progress-label {
+  margin: 0;
+  font-size: 11px;
+  color: var(--text-soft, #9AA3AD);
+}
+
+.quest-card-rewards {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  min-width: 56px;
+}
+
+.quest-reward {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--heading, #7B8FD4);
+  white-space: nowrap;
+}
+
+.quest-done-badge {
+  font-family: 'Jua', sans-serif;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--mint, #C8F0E0);
+  color: var(--heading, #7B8FD4);
+}
+
+.quest-empty {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-soft);
+}
+
+.home-tab-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--peach-btn, #E8A090);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+}
+
+.home-tab-btn {
+  position: relative;
+}
+
+.quest-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(90px + var(--safe-bottom, 0px));
+  transform: translateX(-50%) translateY(12px);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  border-radius: 999px;
+  background: var(--card, #fff);
+  border: 2px solid var(--mint-btn, #7BC4A8);
+  box-shadow: var(--shadow-md, 0 8px 24px rgba(0, 0, 0, 0.12));
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+}
+
+.quest-toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.quest-toast-icon {
+  font-size: 22px;
+}
+
+.quest-toast-text {
+  font-family: 'Jua', sans-serif;
+  font-size: 14px;
+  color: var(--heading, #7B8FD4);
+}

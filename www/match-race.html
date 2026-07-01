@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<script>
+(function(){
+  try {
+    var p = JSON.parse(localStorage.getItem('jamodeul-preferences') || '{}');
+    var theme = p.theme || localStorage.getItem('jamodeul-theme') || 'system';
+    var resolved = theme;
+    if (theme === 'system' || (theme !== 'light' && theme !== 'dark')) {
+      resolved = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    document.documentElement.setAttribute('data-theme', resolved);
+    if (p.reduceMotion) document.documentElement.classList.add('reduce-motion');
+    if (p.highContrast) document.documentElement.classList.add('high-contrast');
+    if (p.largeText) document.documentElement.classList.add('large-text');
+    document.documentElement.lang = p.language === 'ko' ? 'ko' : 'en';
+  } catch (e) {}
+})();
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#0097B2">
+<title>Korean Match 1v1 — Jamodeul</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Jua&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app-preferences.css">
+<link rel="stylesheet" href="css/app-buttons.css">
+<link rel="stylesheet" href="css/korean-match.css">
+<link rel="stylesheet" href="css/race.css">
+<link rel="stylesheet" href="css/app-theme.css">
+<link rel="stylesheet" href="css/app-wordle-ui.css">
+<style>
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    padding: calc(12px + env(safe-area-inset-top, 0px)) 14px calc(16px + env(safe-area-inset-bottom, 0px));
+  }
+
+  body.match-race-page {
+    --block-size: min(84px, calc((100vw - 28px - (var(--syl-count, 5) - 1) * 6px) / var(--syl-count, 5)));
+    --tile-size: min(46px, calc((100vw - 28px - (var(--syl-count, 5) - 1) * 6px) / var(--syl-count, 5) * 0.48));
+  }
+
+  .match-race-game .match-header {
+    margin-bottom: 8px;
+  }
+
+  .match-race-game .match-header .title-block h1 {
+    font-size: clamp(18px, 5vw, 22px);
+  }
+
+  .match-race-game .match-header .title-block p {
+    font-size: 12px;
+  }
+
+  .race-main {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  body.match-race-page .race-main #match-app {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+  }
+
+  body.match-race-page #match-app > .match-header {
+    display: none;
+  }
+</style>
+</head>
+<body class="match-page match-race-page">
+<div id="match-race-root" class="race-app"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="js/firebase-social.js?v=8"></script>
+<script src="js/storage.js"></script>
+<script src="js/user-preferences.js"></script>
+<script src="js/i18n-messages.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/app-bootstrap.js"></script>
+<script src="js/app-nav.js"></script>
+<script src="js/hangul-compose.js"></script>
+<script src="js/drag-hit-test.js"></script>
+<script src="js/vowel-merge-dock.js"></script>
+<script src="js/learning-word-model.js"></script>
+<script src="js/learning-words.js"></script>
+<script src="js/match-word-bank.js"></script>
+<script src="js/match-words.js"></script>
+<script src="js/wordle-words.js"></script>
+<script src="js/race-service.js"></script>
+<script src="js/race-results-ui.js"></script>
+<script src="js/race-countdown.js"></script>
+<script src="js/korean-match.js"></script>
+<script src="js/match-race-app.js"></script>
+<script>
+(async function () {
+  FirebaseSocial?.init?.({});
+  await AppNav.initPage({ topNav: false });
+  const app = new MatchRaceApp(document.getElementById('match-race-root'));
+  window.__matchRaceAppInstance = app;
+  await app.init();
+})();
+</script>
+</body>
+</html>

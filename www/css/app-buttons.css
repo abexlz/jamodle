@@ -1,0 +1,963 @@
+/**
+ * Global action buttons — wide 2:1 tiles, bold centered hero text + description.
+ * Linked on every page after app-preferences.css.
+ */
+
+:root {
+  --app-btn-radius: 24px;
+  --app-btn-border: 2px;
+  --app-btn-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.45),
+    0 6px 0 #C87A00,
+    0 8px 18px rgba(0, 0, 0, 0.2);
+  --app-btn-shadow-active: 0 2px 0 #C87A00;
+  --app-btn-text-shadow: 0 2px 0 rgba(140, 70, 0, 0.4);
+  --app-btn-title-size: clamp(17px, 4.2vw, 22px);
+  --app-btn-desc-size: clamp(10px, 2.4vw, 12px);
+  --app-btn-icon-size: clamp(22px, 5.5vw, 28px);
+  --app-btn-min-h: 56px;
+  --app-btn-max-h: 76px;
+}
+
+[data-theme="dark"] {
+  --app-btn-shadow: 0 4px 0 rgba(0, 0, 0, 0.28), 0 6px 18px rgba(0, 0, 0, 0.2);
+  --app-btn-shadow-active: 0 1px 0 rgba(0, 0, 0, 0.22);
+}
+
+/* ── Shared tile shape ── */
+.app-btn,
+.learning-mode-card,
+.daily-challenge-card,
+.word-game-card,
+.featured-continue-cta,
+.match-mode-btn,
+.match-actions .btn,
+.actions .btn,
+.btn-soft,
+.btn-warn,
+.btn-warn-outline,
+.btn-next,
+.btn-continue,
+.btn-leave,
+.profile-modal-btn,
+.done-lesson-btn,
+.length-btn,
+button.ghost,
+.rotation-dock,
+.hint-dock-btn,
+.match-hint-btn,
+#submit-btn,
+.modal button,
+#share-btn,
+#modal-btn,
+.syl-pick-btn,
+.language-option,
+.theme-option,
+.confirm-actions button,
+.match-mode-cancel,
+.length-cancel,
+#syl-picker-cancel,
+.settings-back {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 3px;
+  width: 100%;
+  min-height: var(--app-btn-min-h);
+  aspect-ratio: 2.4 / 1;
+  max-height: var(--app-btn-max-h);
+  padding: 8px 10px;
+  overflow: hidden;
+  border-radius: var(--app-btn-radius);
+  border: var(--app-btn-border) solid var(--border, #E8E4E0);
+  background: var(--card, #fff);
+  color: var(--text, #5D6470);
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: var(--app-btn-shadow);
+  touch-action: manipulation;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.featured-continue-cta {
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: var(--app-btn-title-size);
+  font-weight: 400;
+  line-height: 1.15;
+  color: var(--heading, #7B8FD4);
+}
+
+.app-btn-title,
+.mode-name,
+.match-mode-btn-title,
+.length-btn > span:first-child,
+.hint-btn-text,
+.rotation-dock-label,
+#submit-btn,
+button.ghost,
+.match-actions .btn,
+.actions .btn,
+.btn-next,
+.btn-continue,
+.btn-leave,
+.profile-modal-btn,
+.language-option,
+.theme-option,
+.done-lesson-btn,
+.settings-back {
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: var(--app-btn-title-size);
+  font-weight: 400;
+  line-height: 1.12;
+  letter-spacing: 0.02em;
+  text-shadow: var(--app-btn-text-shadow, 0 2px 0 rgba(140, 70, 0, 0.35));
+  color: var(--heading, #7B8FD4);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.match-hint-btn .app-btn-title {
+  font-size: clamp(14px, 3.6vw, 17px);
+}
+
+.app-btn-desc,
+.mode-desc,
+.mode-ko,
+.match-mode-btn-desc,
+.match-hint-cost,
+.hint-cost,
+.length-btn > span:last-child:not(:only-child),
+.mode-status,
+.mode-unlock-hint,
+.hint-btn-text .hint-cost {
+  display: none !important;
+}
+
+.app-btn-icon,
+.mode-icon {
+  font-family: 'Jua', sans-serif;
+  font-size: var(--app-btn-icon-size);
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* ── Hover / active ── */
+.app-btn:hover:not(:disabled):not([aria-disabled="true"]),
+.learning-mode-card:hover:not(.is-locked),
+.daily-challenge-card:hover,
+.featured-continue-cta:hover,
+.length-btn:hover,
+button.ghost:hover:not(:disabled),
+.hint-dock-btn:hover:not(:disabled),
+.match-hint-btn:hover:not(:disabled),
+.rotation-dock:hover:not(.disabled),
+#submit-btn:hover:not(:disabled),
+.modal button:hover,
+.language-option:hover,
+.theme-option:hover {
+  transform: translateY(-2px);
+}
+
+.app-btn:active:not(:disabled):not([aria-disabled="true"]),
+.learning-mode-card:active:not(.is-locked),
+.daily-challenge-card:active,
+.featured-continue-cta:active,
+.match-mode-btn:active,
+.match-actions .btn:active:not(:disabled),
+.btn-soft:active,
+.btn-warn:active,
+.length-btn:active,
+button.ghost:active:not(:disabled),
+.hint-dock-btn:active:not(:disabled),
+.match-hint-btn:active:not(:disabled),
+.rotation-dock:active:not(.disabled),
+#submit-btn:active:not(:disabled),
+.modal button:active,
+.done-lesson-btn:active,
+.syl-pick-btn:active:not(.revealed),
+.language-option:active,
+.theme-option:active,
+.confirm-actions button:active {
+  transform: translateY(3px);
+  box-shadow: var(--app-btn-shadow-active);
+}
+
+.app-btn:disabled,
+.match-hint-btn:disabled,
+.hint-dock-btn:disabled,
+.match-actions .btn:disabled,
+#submit-btn:disabled,
+button.ghost:disabled,
+.learning-mode-card.is-locked {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: var(--app-btn-shadow);
+}
+
+/* ── Accent fills (menu cards) ── */
+.accent-mint { background: var(--mint, #C8F0E0); border-color: var(--mint-btn, #98DDB8); }
+.accent-peach { background: var(--peach, #FFE8D4); border-color: var(--peach-btn, #FFD0A8); }
+.accent-blue { background: var(--blue, #C8E6FF); border-color: var(--blue-btn, #A8D4F5); }
+.accent-lavender { background: var(--lavender, #E8DEFF); border-color: var(--lavender-btn, #CFC0F5); }
+.accent-yellow { background: var(--yellow, #FFF6C8); border-color: var(--yellow-btn, #FFEAA0); }
+.accent-pink { background: var(--pink, #FFD6E8); border-color: var(--pink-btn, #FFB8D0); }
+
+.learning-mode-card.is-recommended {
+  border-color: #E09500 !important;
+  box-shadow: var(--app-btn-shadow, 0 5px 0 #C87A00) !important;
+}
+
+.daily-challenge-card.is-complete {
+  border-color: var(--mint-btn, #98DDB8);
+}
+
+/* ── Menu cards: icon + label in a row ── */
+.learning-mode-card,
+.daily-challenge-card,
+.word-game-card {
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+  gap: 10px;
+  max-width: 100%;
+  aspect-ratio: auto;
+  max-height: none;
+  min-height: 52px;
+  padding: 10px 14px;
+}
+
+.learning-mode-content,
+.daily-challenge-content {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  flex: 1;
+  width: auto;
+  min-width: 0;
+  padding: 0;
+}
+
+.learning-mode-card .mode-name,
+.daily-challenge-card .mode-name,
+.word-game-card .mode-name {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+
+.learning-mode-card .mode-arrow,
+.daily-challenge-card .mode-arrow {
+  display: none;
+}
+
+.learning-mode-card.is-recommended .learning-mode-content,
+.learning-mode-card.is-locked .learning-mode-content {
+  padding-right: 0;
+}
+
+.mode-label,
+.mode-lock-badge {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-family: 'Jua', sans-serif;
+  font-size: 10px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  line-height: 1.2;
+  max-width: 46%;
+}
+
+.mode-label-recommended {
+  background: var(--card, #fff);
+  color: var(--heading, #7B8FD4);
+  border: 2px solid var(--lavender-btn, #CFC0F5);
+}
+
+.mode-lock-badge {
+  background: var(--yellow, #FFF6C8);
+  color: var(--text, #5D6470);
+  border: 2px solid var(--yellow-btn, #FFEAA0);
+}
+
+/* ── Home menu lists ── */
+.learning-modes-list,
+.daily-challenges-grid,
+.match-mode-options,
+.length-options,
+.modal-actions,
+.confirm-actions,
+.results-actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  width: 100%;
+}
+
+.modal-actions {
+  margin-top: 18px;
+}
+
+.match-mode-options {
+  margin-bottom: 14px;
+}
+.match-hint-dock,
+.match-actions,
+.actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--panel-bg, rgba(0, 70, 85, 0.38));
+  border: 2px solid var(--panel-border, rgba(123, 207, 255, 0.5));
+  border-radius: 24px;
+  box-shadow: var(--shadow-sm, 0 4px 12px rgba(0, 40, 50, 0.25));
+  backdrop-filter: blur(6px);
+}
+
+.match-actions {
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.actions {
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.results-actions > .btn-continue,
+.results-actions > .btn-leave,
+.results-actions > a,
+.results-actions > button {
+  grid-column: span 2;
+}
+
+.learning-modes-list > *,
+.daily-challenges-grid > *,
+.match-mode-options > *,
+.length-options > *,
+.modal-actions > *,
+.confirm-actions > *,
+.results-actions > *,
+.match-hint-dock > .match-hint-btn,
+.match-actions > .btn,
+.actions > .btn {
+  grid-column: span 2;
+}
+
+.match-hint-dock > .match-token-counter {
+  grid-column: span 2;
+  justify-self: center;
+}
+
+/* ── Featured continue CTA ── */
+.featured-continue-cta {
+  background: var(--peach, #FFE8D4);
+  border-color: var(--peach-btn, #FFD0A8);
+  color: var(--heading, #7B8FD4);
+}
+
+/* ── Match mode buttons ── */
+.match-mode-btn[data-match-mode="easy"] {
+  background: var(--mint, #C8F0E0);
+  border-color: var(--mint-btn, #98DDB8);
+}
+
+.match-mode-btn[data-match-mode="medium"] {
+  background: var(--peach, #FFE8D4);
+  border-color: var(--peach-btn, #FFD0A8);
+}
+
+.match-mode-btn[data-match-mode="hard"] {
+  background: var(--lavender, #E8DEFF);
+  border-color: var(--lavender-btn, #CFC0F5);
+}
+
+.match-mode-btn-title {
+  font-size: clamp(18px, 4.5vw, 24px);
+  white-space: normal;
+  -webkit-line-clamp: 1;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ── Game action buttons ── */
+.btn-reset {
+  background: var(--card, #fff);
+  border-color: var(--border, #E8E4E0);
+  color: var(--text, #5D6470);
+}
+
+.btn-check,
+.done-lesson-btn,
+.profile-modal-btn {
+  background: var(--mint, #C8F0E0);
+  border-color: var(--mint-btn, #98DDB8);
+  color: var(--correct-text, #3A7A58);
+}
+
+.btn-next,
+#share-btn,
+.btn-soft {
+  background: var(--lavender, #E8DEFF);
+  border-color: var(--lavender-btn, #CFC0F5);
+  color: var(--heading, #7B8FD4);
+}
+
+.btn-continue {
+  background: var(--lavender, #E8DEFF);
+  border-color: var(--lavender-btn, #CFC0F5);
+}
+
+.btn-leave {
+  background: var(--card, #fff);
+  border-color: var(--border, #E8E4E0);
+}
+
+#submit-btn {
+  background: var(--peach, #FFE8D4);
+  border-color: var(--peach-btn, #FFD0A8);
+  width: auto;
+  min-width: 72px;
+  aspect-ratio: 1 / 1;
+  max-height: none;
+  font-size: clamp(15px, 3.8vw, 18px);
+  padding: 0 14px;
+}
+
+/* ── Hints & rotation ── */
+.match-hint-btn,
+.hint-dock-btn {
+  background: var(--lavender, #E8DEFF);
+  border-color: var(--lavender-btn, #CFC0F5);
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+  gap: 8px;
+  aspect-ratio: auto;
+  padding: 8px 12px;
+}
+
+.rotation-dock {
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+  aspect-ratio: auto;
+  width: 100%;
+  min-width: 0;
+  padding: 8px 12px;
+  background: var(--lavender, #E8DEFF);
+  border-color: var(--lavender-btn, #CFC0F5);
+}
+
+.rotation-dock-icon {
+  font-size: clamp(20px, 5vw, 26px);
+  line-height: 1;
+  color: var(--heading, #7B8FD4);
+  flex-shrink: 0;
+}
+
+.rotation-dock-label {
+  font-size: clamp(13px, 3.4vw, 16px);
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rotation-dock.drag-over {
+  border-color: var(--mint-btn, #98DDB8);
+  background: var(--mint, #C8F0E0);
+}
+
+.hint-dock-btn {
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+  padding: 8px 12px;
+}
+
+.hint-dock-btn .hint-icon {
+  width: auto;
+  height: auto;
+  flex-shrink: 0;
+  background: transparent;
+  margin-bottom: 0;
+}
+
+.hint-dock-btn .hint-btn-text {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hint-dock-btn .hi-tile,
+.hint-dock-btn .hi-elim,
+.hint-dock-btn .hi-def {
+  font-size: clamp(18px, 4.5vw, 22px);
+}
+
+.hint-btn-text {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  font-size: clamp(13px, 3.4vw, 16px);
+  color: var(--heading, #7B8FD4);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.rotation-dock.disabled {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+/* ── Wordle ghost menu buttons ── */
+#bottom-bar .menu-col {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  width: 100%;
+  max-width: 168px;
+}
+
+#bottom-bar .bottom-bar-top {
+  display: flex;
+  width: 100%;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+#bottom-bar .hint-col {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+  width: 100%;
+  max-width: none;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+#bottom-bar .hint-dock-btn {
+  flex-direction: row !important;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  width: 100%;
+  min-height: 38px !important;
+  max-height: 42px !important;
+  aspect-ratio: auto !important;
+  padding: 5px 10px !important;
+  border-radius: 14px;
+}
+
+#bottom-bar .hint-dock-btn .hint-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  margin-bottom: 0;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.22);
+  flex-shrink: 0;
+}
+
+#bottom-bar .hint-dock-btn .hi-tile,
+#bottom-bar .hint-dock-btn .hi-elim,
+#bottom-bar .hint-dock-btn .hi-def {
+  font-size: clamp(13px, 3.2vw, 15px);
+  line-height: 1;
+}
+
+#bottom-bar .hint-dock-btn .hint-btn-text {
+  font-size: clamp(11px, 2.8vw, 13px);
+  line-height: 1.1;
+  text-align: left;
+  align-items: flex-start;
+}
+
+#bottom-bar #token-counter {
+  align-self: flex-start;
+  font-size: 11px;
+  padding: 4px 8px;
+}
+
+#bottom-bar .menu-col > button.ghost {
+  grid-column: span 2;
+  min-height: 48px;
+  max-height: 52px;
+  aspect-ratio: auto;
+  font-size: clamp(14px, 3.6vw, 17px);
+  white-space: nowrap;
+}
+
+#bottom-bar .menu-col > button.ghost#how-btn {
+  grid-column: span 2;
+}
+
+#bottom-bar .tracker-col {
+  width: 100%;
+}
+
+#bottom-bar #tracker .tkey {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  min-height: 32px;
+  max-height: 32px;
+  aspect-ratio: 1 / 1;
+}
+
+/* ── Length picker ── */
+.length-btn:nth-child(1) {
+  background: var(--blue, #C8E6FF);
+  border-color: var(--blue-btn, #A8D4F5);
+}
+
+.length-btn:nth-child(2) {
+  background: var(--lavender, #E8DEFF);
+  border-color: var(--lavender-btn, #CFC0F5);
+}
+
+/* ── Settings / profile ── */
+.language-option.selected,
+.theme-option.selected {
+  border-color: #E09500 !important;
+  box-shadow: var(--app-btn-shadow, 0 5px 0 #C87A00) !important;
+}
+
+.btn-warn {
+  background: var(--warn-bg, #FFF0EC);
+  border-color: var(--warn, #E8A898);
+}
+
+.btn-warn-outline {
+  background: var(--warn-bg, #FFF0EC);
+  border-color: var(--warn, #E8A898);
+}
+
+.settings-back {
+  width: auto;
+  min-width: 72px;
+  aspect-ratio: 1 / 1;
+  max-height: 72px;
+  font-size: 20px;
+  background: var(--lavender, #E8DEFF);
+  border-color: var(--lavender-btn, #CFC0F5);
+  padding: 8px 14px;
+}
+
+/* ── Secondary / cancel (smaller but still bold) ── */
+.match-mode-cancel,
+.length-cancel,
+#syl-picker-cancel {
+  width: auto;
+  min-height: 48px;
+  max-height: 56px;
+  aspect-ratio: auto;
+  padding: 10px 20px;
+  font-size: clamp(15px, 4vw, 17px);
+  background: transparent;
+  border: 2px solid var(--border, #E8E4E0);
+  box-shadow: none;
+  color: var(--text-soft, #9AA3AD);
+}
+
+.match-mode-cancel:active,
+.length-cancel:active,
+#syl-picker-cancel:active {
+  box-shadow: none;
+}
+
+/* ── Syl picker chips ── */
+.syl-pick-btn {
+  width: auto;
+  min-width: 72px;
+  aspect-ratio: 1 / 1;
+  max-height: 88px;
+  background: var(--mint, #C8F0E0);
+  border-color: var(--mint-btn, #98DDB8);
+  font-size: clamp(16px, 4.5vw, 20px);
+}
+
+.syl-pick-btn.revealed {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+/* ── Top nav (icon buttons — bolder, not 2:1) ── */
+.top-nav-btn {
+  width: 48px;
+  height: 48px;
+  border-width: 3px;
+  font-size: 22px;
+  box-shadow: var(--app-btn-shadow);
+}
+
+.top-nav-btn:active {
+  transform: translateY(2px);
+  box-shadow: var(--app-btn-shadow-active);
+}
+
+.done-lesson-btn {
+  margin-top: 20px;
+}
+
+.btn-next:not(.visible) {
+  display: none;
+}
+
+#submit-btn.submitting {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.back-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 48px;
+  aspect-ratio: 2 / 1;
+  max-height: 64px;
+  padding: 8px 14px;
+  border-radius: var(--app-btn-radius);
+  border: var(--app-btn-border) solid var(--lavender-btn, #CFC0F5);
+  background: var(--lavender, #E8DEFF);
+  color: var(--heading, #7B8FD4);
+  font-family: 'Jua', sans-serif;
+  font-size: clamp(16px, 4.5vw, 20px);
+  text-decoration: none;
+  box-shadow: var(--app-btn-shadow);
+  touch-action: manipulation;
+  flex-shrink: 0;
+}
+
+.back-link:active {
+  transform: translateY(3px);
+  box-shadow: var(--app-btn-shadow-active);
+}
+
+/* ── Home menu — compact, above-the-fold ── */
+#menu-screen .menu-tagline-ko,
+#menu-screen .featured-continue-ko,
+#menu-screen .featured-continue-subtitle,
+#menu-screen .mode-ko,
+#menu-screen .section-subtitle {
+  display: none;
+}
+
+#menu-screen .header {
+  margin-bottom: 2px;
+  gap: 10px;
+}
+
+#menu-screen .seal {
+  width: 40px;
+  height: 40px;
+  font-size: 20px;
+}
+
+#menu-screen h1 {
+  font-size: 26px;
+}
+
+#menu-screen .menu-tagline {
+  font-size: 12px;
+  margin: 0 0 8px;
+  line-height: 1.35;
+}
+
+#menu-screen .menu-sections {
+  gap: 10px;
+}
+
+#menu-screen .section-header {
+  margin-bottom: 4px;
+}
+
+#menu-screen .section-title {
+  font-size: 14px;
+  margin-bottom: 0;
+}
+
+#menu-screen .featured-continue-card {
+  padding: 10px 12px 12px;
+  border-radius: 16px;
+}
+
+#menu-screen .featured-continue-title {
+  font-size: 17px;
+  margin: 0 0 4px;
+}
+
+#menu-screen .featured-continue-progress {
+  font-size: 11px;
+  padding: 6px 8px;
+  margin: 0 0 8px;
+  line-height: 1.3;
+}
+
+#menu-screen .featured-continue-cta {
+  --app-btn-min-h: 40px;
+  --app-btn-max-h: 48px;
+  aspect-ratio: 2.6 / 1;
+}
+
+#menu-screen .menu-top-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+#menu-screen .menu-top-classic {
+  display: grid !important;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 12px;
+}
+
+#menu-screen .menu-top-daily .mode-name {
+  text-align: center;
+  width: 100%;
+}
+
+#menu-screen .daily-challenges-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+#menu-screen .daily-challenges-grid > * {
+  grid-column: auto;
+  width: 100%;
+  --app-btn-min-h: 48px;
+  --app-btn-max-h: none;
+  aspect-ratio: auto;
+  padding: 10px 12px;
+}
+
+#menu-screen .daily-challenge-bar {
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 12px !important;
+}
+
+#menu-screen .daily-challenge-bar .mode-icon {
+  display: flex !important;
+  flex-shrink: 0;
+}
+
+#menu-screen .daily-challenge-bar .daily-challenge-content {
+  flex: 1;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+#menu-screen .daily-challenge-bar .mode-name {
+  font-size: clamp(16px, 4vw, 20px);
+  white-space: nowrap;
+  text-align: left;
+}
+
+#menu-screen .learning-modes-list {
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+#menu-screen .learning-modes-list > * {
+  grid-column: span 1;
+  width: 100%;
+  --app-btn-min-h: 52px;
+  --app-btn-max-h: none;
+  aspect-ratio: auto;
+  padding: 10px 14px;
+}
+
+#menu-screen .mode-icon {
+  display: flex !important;
+  flex-shrink: 0;
+}
+
+#menu-screen .mode-status {
+  font-size: 9px;
+  margin-top: 0;
+  -webkit-line-clamp: 1;
+}
+
+#menu-screen .mode-label,
+#menu-screen .mode-lock-badge {
+  top: 4px;
+  right: 4px;
+  font-size: 8px;
+  padding: 2px 6px;
+  max-width: 55%;
+}
+
+#menu-screen .mode-unlock-hint {
+  display: none;
+}
+
+#menu-screen .learning-mode-content,
+#menu-screen .daily-challenge-content {
+  gap: 6px;
+  justify-content: flex-start;
+}
+
+#menu-screen .mode-name {
+  font-size: clamp(15px, 3.8vw, 18px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+
+#menu-screen .mode-desc {
+  display: none !important;
+}
+
+html.reduce-motion .app-btn,
+html.reduce-motion .learning-mode-card,
+html.reduce-motion .match-mode-btn,
+html.reduce-motion button.ghost,
+html.reduce-motion .match-hint-btn,
+html.reduce-motion .hint-dock-btn,
+html.reduce-motion .rotation-dock,
+html.reduce-motion #submit-btn,
+html.reduce-motion .top-nav-btn {
+  transition: none;
+}

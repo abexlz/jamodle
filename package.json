@@ -1,0 +1,32 @@
+{
+  "name": "jamodeul",
+  "version": "1.0.0",
+  "description": "자모들 — Korean jamo Wordle game",
+  "private": true,
+  "scripts": {
+    "dev": "node scripts/dev-server.js",
+    "sync": "npx cap sync",
+    "copy": "npx cap copy",
+    "open:ios": "npx cap open ios",
+    "open:android": "npx cap open android",
+    "build:android": "cd android && ./gradlew bundleRelease",
+    "test": "node tests/hangul-compose.test.js && node tests/korean-dictionary.test.js && node tests/daily-calendar.test.js && node tests/tutorial-progress.test.js",
+    "validate-words": "node scripts/validate-words.js",
+    "sync-i18n": "node scripts/sync-i18n-messages.js"
+  },
+  "capacitor": {
+    "platforms": ["ios", "android"]
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.0.0",
+    "dotenv": "^16.4.7"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/ios": "^7.0.0",
+    "@capacitor/splash-screen": "^7.0.0",
+    "@capacitor/status-bar": "^7.0.0",
+    "fast-xml-parser": "^4.5.1"
+  }
+}
