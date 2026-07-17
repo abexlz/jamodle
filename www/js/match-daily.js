@@ -6,6 +6,7 @@
 
   const DAILY_LAUNCH = '2024-01-01';
   const DAILY_TZ = 'Asia/Seoul';
+  const DAILY_WORD_LENGTH = 2;
 
   function hashString(str) {
     let h = 0;
@@ -56,7 +57,7 @@
 
   function pickDailyMatchWord(wordList, dateKey) {
     const list = wordList.filter(Boolean);
-    if (!list.length) return '학교';
+    if (!list.length) return '나무';
     const seed = (dateKey || getActiveDateKey()) + '-match';
     return list[hashString(seed) % list.length];
   }
@@ -107,6 +108,7 @@
   global.MatchDaily = {
     DAILY_LAUNCH,
     DAILY_TZ,
+    DAILY_WORD_LENGTH,
     hashString,
     getTodayKey,
     isValidDateKey,

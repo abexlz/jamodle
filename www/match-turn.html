@@ -15,26 +15,28 @@
     if (p.highContrast) document.documentElement.classList.add('high-contrast');
     if (p.largeText) document.documentElement.classList.add('large-text');
     document.documentElement.lang = p.language === 'ko' ? 'ko' : 'en';
+    document.documentElement.setAttribute('data-font-pack', p.devFontPack === 'jua' ? 'jua' : 'junegull');
   } catch (e) {}
 })();
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
 <meta name="theme-color" content="#0097B2">
-<title>Turn-based Match — Jamodeul</title>
+<title>Jamodle Battle — Jamodeul</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Jua&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/app-preferences.css">
-<link rel="stylesheet" href="css/app-buttons.css">
-<link rel="stylesheet" href="css/korean-match.css">
+<link rel="stylesheet" href="css/app-buttons.css?v=10">
+<link rel="stylesheet" href="css/korean-match.css?v=20260713f">
+<link rel="stylesheet" href="css/match-emotes.css">
+<link rel="stylesheet" href="css/profile.css">
 <link rel="stylesheet" href="css/race.css">
-<link rel="stylesheet" href="css/app-theme.css">
-<link rel="stylesheet" href="css/app-wordle-ui.css">
+<link rel="stylesheet" href="css/app-theme.css?v=10">
+<link rel="stylesheet" href="css/app-wordle-ui.css?v=11">
 <style>
   body {
     margin: 0;
     min-height: 100dvh;
-    background: var(--bg);
     color: var(--text);
     font-family: 'Noto Sans KR', sans-serif;
     padding: calc(6px + env(safe-area-inset-top, 0px)) 10px calc(8px + env(safe-area-inset-bottom, 0px));
@@ -54,6 +56,42 @@
     min-height: 0;
     padding: calc(4px + env(safe-area-inset-top, 0px)) 8px calc(4px + env(safe-area-inset-bottom, 0px));
     box-sizing: border-box;
+    --turn-dock-tile-size: 44px;
+  }
+
+  /* Turn dock jamo bank — square tiles (match-turn.html only) */
+  body.match-race-page.match-turn-page .jamo-bank--turn {
+    flex: 0 0 auto !important;
+    flex-shrink: 0 !important;
+    min-height: calc(var(--turn-dock-tile-size, var(--tile-size, 44px)) + 16px) !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow-y: visible !important;
+    align-items: flex-start !important;
+    align-content: flex-start !important;
+    flex-wrap: wrap !important;
+  }
+
+  body.match-race-page.match-turn-page .jamo-bank--turn.jamo-bank--wrap12 {
+    flex-wrap: wrap !important;
+    align-content: flex-start !important;
+    align-items: flex-start !important;
+    min-height: calc(var(--turn-dock-tile-size, var(--tile-size, 44px)) + 16px) !important;
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
+  }
+
+  body.match-race-page.match-turn-page .jamo-bank--turn > .jamo-tile:not(.in-zone) {
+    --dock-tile-local: var(--turn-dock-tile-size, var(--dock-tile-size, 44px));
+    flex: 0 0 var(--dock-tile-local) !important;
+    width: var(--dock-tile-local) !important;
+    height: var(--dock-tile-local) !important;
+    min-width: var(--dock-tile-local) !important;
+    max-width: var(--dock-tile-local) !important;
+    min-height: var(--dock-tile-local) !important;
+    max-height: var(--dock-tile-local) !important;
+    aspect-ratio: 1 / 1 !important;
+    border-radius: 10px !important;
   }
 
   body.match-race-page.match-turn-page .race-app {
@@ -70,6 +108,7 @@
     min-width: 0;
     box-sizing: border-box;
   }
+
   body.match-race-page.match-turn-page .race-header {
     flex-shrink: 0;
     margin-bottom: 0;
@@ -80,7 +119,9 @@
   }
 
   body.match-race-page.match-turn-page #race-turn-previous {
-    flex-shrink: 0;
+    flex-shrink: 1;
+    flex-basis: auto;
+    min-height: 0;
     margin-bottom: 4px;
   }
 
@@ -118,6 +159,7 @@
   }
   body.match-race-page.match-turn-page #match-app > .match-header { display: none; }
 </style>
+<link rel="stylesheet" href="css/app-fonts.css?v=3">
 </head>
 <body class="match-page match-race-page match-turn-page">
 <div id="match-turn-root" class="race-app"></div>
@@ -125,26 +167,43 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="js/firebase-social.js?v=9"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="js/firebase-social.js?v=20260707y"></script>
 <script src="js/storage.js"></script>
 <script src="js/user-preferences.js"></script>
-<script src="js/i18n-messages.js"></script>
-<script src="js/i18n.js"></script>
+<script src="js/button-press.js?v=20260706n"></script>
+<script src="js/sound-effects.js"></script>
+<script src="js/i18n-messages.js?v=20260705a"></script>
+<script src="js/i18n.js?v=20260705a"></script>
 <script src="js/app-bootstrap.js"></script>
 <script src="js/app-nav.js"></script>
 <script src="js/hangul-compose.js"></script>
 <script src="js/drag-hit-test.js"></script>
-<script src="js/vowel-merge-dock.js"></script>
+<script src="js/vowel-merge-dock.js?v=20260706l"></script>
 <script src="js/learning-word-model.js"></script>
+<script src="js/match-word-meanings.js"></script>
 <script src="js/learning-words.js"></script>
-<script src="js/match-word-bank.js"></script>
 <script src="js/match-words.js"></script>
 <script src="js/wordle-words.js"></script>
-<script src="js/race-service.js"></script>
+<script src="js/dictionary-service.js"></script>
+<script src="js/word-chain-krdict.js"></script>
+<script src="js/turn-live-rtdb.js?v=20260706j"></script>
+<script src="js/race-service.js?v=20260706j"></script>
 <script src="js/race-results-ui.js"></script>
+<script src="js/race-rematch-ui.js"></script>
 <script src="js/race-countdown.js"></script>
-<script src="js/korean-match.js"></script>
-<script src="js/match-turn-app.js"></script>
+<script src="js/dev-build.js"></script>
+<script src="js/hint-tokens.js"></script>
+<script src="js/level-utils.js"></script>
+<script src="js/badge-service.js"></script>
+<script src="js/profile-service.js"></script>
+<script src="js/shop-service.js"></script>
+<script src="js/xp-service.js"></script>
+<script src="js/profile-ui.js"></script>
+<script src="js/rw-score-odometer.js"></script>
+<script src="js/match-emotes.js?v=20260707y"></script>
+<script src="js/korean-match.js?v=20260713a"></script>
+<script src="js/match-turn-app.js?v=20260707u"></script>
 <script>
 (async function () {
   FirebaseSocial?.init?.({});

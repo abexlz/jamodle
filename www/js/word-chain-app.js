@@ -362,6 +362,7 @@
         global.XpService?.awardAndCelebrate?.({
           mode: 'wordChain',
           wordId: `wc-${this.matchId}`,
+          won: iWon,
         });
       }
 
@@ -372,6 +373,10 @@
         resultLine,
         resultKind,
         winnerUid,
+        battleXpMode: iWon ? 'wordChain' : '',
+        battleMatchId: this.matchId,
+        battleQuestMode: 'wordChain',
+        battleFriend: true,
         players: [
           {
             uid: this.myUid,
@@ -391,6 +396,8 @@
         profileHref: 'index.html',
         subtitleHtml: reasonText ? `<p class="wc-result-reason">${escapeHtml(reasonText)}</p>` : '',
       }));
+
+      global.RaceResultsUI?.afterResultsMount?.(this.els?.main);
 
       this.root.querySelector('#race-rematch')?.addEventListener('click', async () => {
         const oppUid = opp?.uid;

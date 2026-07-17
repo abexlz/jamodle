@@ -468,6 +468,7 @@
       this.clearSelection();
       this.selectedTileId = tileId;
       if (tile.el) tile.el.classList.add('selected');
+      global.SoundEffects?.select?.();
       this.setFeedback('info', t('builder.feedbackTapSlot'));
     }
 
@@ -498,6 +499,7 @@
       if (!HC.isValidTilePlacement(tile, slot)) {
         if (slot.expected) {
           slot.el.classList.add('wrong');
+          global.SoundEffects?.wrong?.();
           this.setFeedback('error', t('builder.feedbackWrong'));
           setTimeout(() => slot.el.classList.remove('wrong'), 600);
         }
@@ -507,6 +509,7 @@
 
       if (!HC.isCorrectTilePlacement(tile, slot)) {
         slot.el.classList.add('wrong');
+        global.SoundEffects?.wrong?.();
         this.setFeedback('error', t('builder.feedbackWrong'));
         setTimeout(() => slot.el.classList.remove('wrong'), 600);
         this.clearSelection();
@@ -546,6 +549,7 @@
       tile.slotId = slotId;
 
       this.updateSyllablePreview(slot.syllableIndex);
+      global.SoundEffects?.place?.();
       this.maybeCompleteWord();
       return true;
     }
@@ -613,6 +617,7 @@
     maybeCompleteWord() {
       if (!this.allSlotsLocked() || this.wordComplete) return;
       this.wordComplete = true;
+      global.SoundEffects?.win?.();
       const entry = this.getCurrentEntry();
 
       let milestoneText = '';

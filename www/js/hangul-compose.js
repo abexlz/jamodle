@@ -86,12 +86,14 @@
 
   const ZONE = { CHO: 'cho', JUNG_H: 'jungH', JUNG_V: 'jungV', JONG: 'jong' };
 
-  /** Vertical + vertical merges for the vowel merge dock only */
+  /** Vertical + vertical merges for the vowel merge dock only (left slot + right slot). */
   const VERTICAL_MERGE_RULES = {
     'ㅏ+ㅣ': 'ㅐ',
-    'ㅑ+ㅣ': 'ㅒ',
     'ㅓ+ㅣ': 'ㅔ',
+    'ㅣ+ㅓ': 'ㅐ',
+    'ㅑ+ㅣ': 'ㅒ',
     'ㅕ+ㅣ': 'ㅖ',
+    'ㅣ+ㅕ': 'ㅒ',
   };
 
   const VERTICAL_MERGE_MEDIALS = new Set(['ㅐ', 'ㅒ', 'ㅔ', 'ㅖ']);
@@ -177,15 +179,13 @@
     return VERTICAL_MERGE_MEDIALS.has(medial);
   }
 
-  /** Merge two vertical vowels in the dock (ㅏ+ㅣ→ㅐ, order-independent) */
+  /** Merge two vertical vowels in the dock — left slot + right slot only (order matters). */
   function tryComposeVerticalMedial(first, second) {
     if (!first || !second) return null;
     if (!PLACEABLE_VERTICAL_VOWELS.has(first) || !PLACEABLE_VERTICAL_VOWELS.has(second)) {
       return null;
     }
-    return VERTICAL_MERGE_RULES[`${first}+${second}`]
-      || VERTICAL_MERGE_RULES[`${second}+${first}`]
-      || null;
+    return VERTICAL_MERGE_RULES[`${first}+${second}`] || null;
   }
 
   /** Basic jamo pair for un-merging dock compounds */
@@ -369,7 +369,7 @@
     if (zoneType === ZONE.JONG) return JONG.includes(char) && char !== '';
     if (zoneType === ZONE.JUNG_H) return PLACEABLE_HORIZONTAL_VOWELS.has(char);
     if (zoneType === ZONE.JUNG_V) {
-      return PLACEABLE_VERTICAL_VOWELS.has(char) || isVerticalMergeMedial(char);
+      return PLACEABLE_VERTICAL_VOWELS.has(char);
     }
     return false;
   }
@@ -432,11 +432,11 @@
 
     if (tile.zoneType !== ZONE.JUNG_H && tile.zoneType !== ZONE.JUNG_V) return false;
 
-    if (!canPlaceInZone(tile.char, zone.zoneType)) return false;
-
     if (tile.isMerged) {
-      return zone.zoneType === ZONE.JUNG_V;
+      return zone.zoneType === ZONE.JUNG_V && isVerticalMergeMedial(tile.char);
     }
+
+    if (!canPlaceInZone(tile.char, zone.zoneType)) return false;
 
     return zone.zoneType === ZONE.JUNG_H || zone.zoneType === ZONE.JUNG_V;
   }
@@ -536,10 +536,74 @@
     return a;
   }
 
-  /** Korean Match letter swap — ㄱ↔ㄴ and vowel cycles */
+  /** Korean Match letter swap — ㄱ↔ㄴ (bank / non-slot) */
   const JAMO_SWAPS = { 'ㄱ': 'ㄴ', 'ㄴ': 'ㄱ', 'ㅡ': 'ㅣ', 'ㅣ': 'ㅡ' };
   const H_VOWEL_CYCLE = ['ㅗ', 'ㅓ', 'ㅜ', 'ㅏ'];
   const V_VOWEL_CYCLE = ['ㅕ', 'ㅠ', 'ㅑ', 'ㅛ'];
+
+  /** In-slot vowel pair swaps */
+  const VERTICAL_SLOT_PAIR = { 'ㅏ': 'ㅓ', 'ㅓ': 'ㅏ', 'ㅑ': 'ㅕ', 'ㅕ': 'ㅑ' };
+  const HORIZONTAL_SLOT_PAIR = { 'ㅗ': 'ㅜ', 'ㅜ': 'ㅗ', 'ㅛ': 'ㅠ', 'ㅠ': 'ㅛ' };
+
+  /** Merge dock — ㅏ↔ㅓ, ㅑ↔ㅕ (rotatable siblings for valid merges, not cross-family) */
+  const MERGE_SLOT_VOWEL_PAIR = { 'ㅏ': 'ㅓ', 'ㅓ': 'ㅏ', 'ㅑ': 'ㅕ', 'ㅕ': 'ㅑ' };
+
+  /** Cross-slot vowel mapping (vertical → horizontal) */
+  const VERTICAL_TO_HORIZONTAL = {
+    'ㅏ': 'ㅗ', 'ㅓ': 'ㅜ', 'ㅑ': 'ㅛ', 'ㅕ': 'ㅠ', 'ㅣ': 'ㅡ',
+  };
+
+  /** Cross-slot vowel mapping (horizontal → vertical) */
+  const HORIZONTAL_TO_VERTICAL = {
+    'ㅗ': 'ㅏ', 'ㅜ': 'ㅓ', 'ㅛ': 'ㅑ', 'ㅠ': 'ㅕ', 'ㅡ': 'ㅣ',
+  };
+
+  /** Vertical-slot entry chars: next step is in-slot pair swap */
+  const VOWEL_CYCLE_V_PAIR_FIRST = new Set(['ㅓ', 'ㅕ']);
+  /** Vertical-slot chars after pair: next step crosses to horizontal when empty */
+  const VOWEL_CYCLE_V_CROSS_NEXT = new Set(['ㅏ', 'ㅑ']);
+  /** Horizontal-slot entry chars: next step is in-slot pair swap */
+  const VOWEL_CYCLE_H_PAIR_FIRST = new Set(['ㅗ', 'ㅛ']);
+  /** Horizontal-slot chars after pair: next step crosses to vertical when empty */
+  const VOWEL_CYCLE_H_CROSS_NEXT = new Set(['ㅜ', 'ㅠ']);
+
+  function rotateVowelInVerticalSlot(char, otherSlotOccupied) {
+    if (VOWEL_CYCLE_V_PAIR_FIRST.has(char)) {
+      return { char: VERTICAL_SLOT_PAIR[char], zoneType: ZONE.JUNG_V };
+    }
+    if (VOWEL_CYCLE_V_CROSS_NEXT.has(char)) {
+      if (!otherSlotOccupied && VERTICAL_TO_HORIZONTAL[char]) {
+        return { char: VERTICAL_TO_HORIZONTAL[char], zoneType: ZONE.JUNG_H };
+      }
+      if (VERTICAL_SLOT_PAIR[char]) {
+        return { char: VERTICAL_SLOT_PAIR[char], zoneType: ZONE.JUNG_V };
+      }
+      return null;
+    }
+    if (char === 'ㅣ' && !otherSlotOccupied) {
+      return { char: 'ㅡ', zoneType: ZONE.JUNG_H };
+    }
+    return null;
+  }
+
+  function rotateVowelInHorizontalSlot(char, otherSlotOccupied) {
+    if (VOWEL_CYCLE_H_PAIR_FIRST.has(char)) {
+      return { char: HORIZONTAL_SLOT_PAIR[char], zoneType: ZONE.JUNG_H };
+    }
+    if (VOWEL_CYCLE_H_CROSS_NEXT.has(char)) {
+      if (!otherSlotOccupied && HORIZONTAL_TO_VERTICAL[char]) {
+        return { char: HORIZONTAL_TO_VERTICAL[char], zoneType: ZONE.JUNG_V };
+      }
+      if (HORIZONTAL_SLOT_PAIR[char]) {
+        return { char: HORIZONTAL_SLOT_PAIR[char], zoneType: ZONE.JUNG_H };
+      }
+      return null;
+    }
+    if (char === 'ㅡ' && !otherSlotOccupied) {
+      return { char: 'ㅣ', zoneType: ZONE.JUNG_V };
+    }
+    return null;
+  }
 
   function nextInCycle(cycle, char) {
     const idx = cycle.indexOf(char);
@@ -561,6 +625,24 @@
     return rotateJamo(char) !== null;
   }
 
+  /** Merge machine slots — vertical pair swap only (ㅏ↔ㅓ, ㅑ↔ㅕ). */
+  function rotateJamoInMergeSlot(char) {
+    const next = MERGE_SLOT_VOWEL_PAIR[char];
+    if (!next) return null;
+    return { char: next, zoneType: ZONE.JUNG_V };
+  }
+
+  function canRotateJamoInMergeSlot(char) {
+    return !!MERGE_SLOT_VOWEL_PAIR[char];
+  }
+
+  /** Placement orientation for rotatable vowel jamo */
+  function vowelPlacementOrientation(char) {
+    if (PLACEABLE_HORIZONTAL_VOWELS.has(char)) return 'h';
+    if (PLACEABLE_VERTICAL_VOWELS.has(char)) return 'v';
+    return null;
+  }
+
   /** Keep 초성/받침 role for ㄱ/ㄴ; update vowel zone when cycle crosses H/V */
   function zoneTypeForRotatedJamo(char, currentZoneType) {
     if (currentZoneType === ZONE.CHO || currentZoneType === ZONE.JONG) return currentZoneType;
@@ -569,16 +651,107 @@
     return currentZoneType;
   }
 
+  /**
+   * Vowel rotation inside a syllable block slot.
+   * Four-family cycles: pair swap → cross (if empty) → pair → cross → repeat.
+   * ㅣ/ㅡ still cross only when the other slot is empty.
+   */
+  function rotateJamoForZone(char, currentZoneType, { otherSlotOccupied = false, inVowelSlot = false } = {}) {
+    if (!inVowelSlot || (currentZoneType !== ZONE.JUNG_H && currentZoneType !== ZONE.JUNG_V)) {
+      const next = rotateJamo(char);
+      if (!next) return null;
+      return {
+        char: next,
+        zoneType: zoneTypeForRotatedJamo(next, currentZoneType),
+      };
+    }
+
+    if (currentZoneType === ZONE.JUNG_V) {
+      return rotateVowelInVerticalSlot(char, otherSlotOccupied);
+    }
+
+    return rotateVowelInHorizontalSlot(char, otherSlotOccupied);
+  }
+
+  function canRotateJamoForZone(char, currentZoneType, options = {}) {
+    return rotateJamoForZone(char, currentZoneType, options) !== null;
+  }
+
   /** Rotate repeatedly until `char` becomes `target`, or null if unreachable */
   function orientJamoToTarget(char, target) {
     if (!char || !target || char === target) return char === target ? char : null;
     let current = char;
     for (let i = 0; i < 8; i++) {
       const next = rotateJamo(current);
-      if (!next) return null;
+      if (!next) break;
       current = next;
       if (current === target) return current;
     }
+    current = char;
+    for (let i = 0; i < 4; i++) {
+      const next = MERGE_SLOT_VOWEL_PAIR[current];
+      if (!next) break;
+      current = next;
+      if (current === target) return current;
+    }
+    return null;
+  }
+
+  /**
+   * Orient a tile toward its answer jamo, including merge-dock pair swaps and
+   * vowel-slot cross rotations when the bank cycle alone cannot reach the target.
+   */
+  function orientTileJamo(char, zoneType, target, options = {}) {
+    if (!char || !target) return null;
+    if (char === target) {
+      return { char: target, zoneType: zoneTypeForRotatedJamo(target, zoneType) };
+    }
+
+    const bankResult = orientJamoToTarget(char, target);
+    if (bankResult) {
+      return { char: bankResult, zoneType: zoneTypeForRotatedJamo(bankResult, zoneType) };
+    }
+
+    if (options.inMergeSlot || MERGE_SLOT_VOWEL_PAIR[char] || MERGE_SLOT_VOWEL_PAIR[target]) {
+      let current = char;
+      for (let i = 0; i < 4; i++) {
+        const next = MERGE_SLOT_VOWEL_PAIR[current];
+        if (!next) break;
+        current = next;
+        if (current === target) {
+          return { char: current, zoneType: ZONE.JUNG_V };
+        }
+      }
+    }
+
+    const trySlotOrient = (otherSlotOccupied) => {
+      let current = char;
+      let zt = zoneType;
+      for (let i = 0; i < 8; i++) {
+        const next = rotateJamoForZone(current, zt, {
+          inVowelSlot: true,
+          otherSlotOccupied,
+        });
+        if (!next) break;
+        current = next.char;
+        zt = next.zoneType;
+        if (current === target) {
+          return { char: current, zoneType: zt };
+        }
+      }
+      return null;
+    };
+
+    if (options.inVowelSlot) {
+      const slotted = trySlotOrient(options.otherSlotOccupied === true);
+      if (slotted) return slotted;
+    }
+
+    if (vowelPlacementOrientation(char) || vowelPlacementOrientation(target)) {
+      const open = trySlotOrient(false);
+      if (open) return open;
+    }
+
     return null;
   }
 
@@ -651,9 +824,15 @@
     getSyllableSlotDefs,
     shuffle,
     rotateJamo,
+    rotateJamoForZone,
+    rotateJamoInMergeSlot,
     canRotateJamo,
+    canRotateJamoForZone,
+    canRotateJamoInMergeSlot,
+    vowelPlacementOrientation,
     zoneTypeForRotatedJamo,
     orientJamoToTarget,
+    orientTileJamo,
     randomRotateJamo,
   };
 })(typeof window !== 'undefined' ? window : globalThis);

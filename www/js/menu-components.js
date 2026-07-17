@@ -31,6 +31,8 @@
       return {
         MENU: {
           dailyChallenges: [],
+          menuTop: [],
+          menuPlay: [],
           sections: [],
         },
       };
@@ -57,6 +59,76 @@
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;');
+  }
+
+  function renderDailyCalendarBadge() {
+    const now = new Date();
+    const lang = global.I18n?.getLanguage?.() || document.documentElement.lang || 'en';
+    const locale = lang === 'ko' ? 'ko-KR' : 'en-US';
+    const month = now.toLocaleDateString(locale, { month: 'short' }).replace(/\./g, '').trim();
+    const monthLabel = lang === 'ko' ? month : month.toUpperCase();
+    const day = String(now.getDate());
+    return `
+      <span class="menu-daily-calendar" aria-hidden="true">
+        <span class="menu-daily-calendar-sheet">
+          <span class="menu-daily-calendar-month">${escapeHtml(monthLabel)}</span>
+          <span class="menu-daily-calendar-day">${escapeHtml(day)}</span>
+        </span>
+      </span>
+    `;
+  }
+
+  const MENU_MODE_ICONS = {
+    jamoGame: 'assets/menu-jamo-game.png',
+    wordChain: 'assets/menu-word-chain.png',
+  };
+
+  function renderMenuModeIcon(iconKey) {
+    const src = MENU_MODE_ICONS[iconKey];
+    if (!src) return '';
+    return `<img class="mode-icon app-btn-icon menu-mode-icon-img" src="${escapeHtml(src)}" alt="" width="69" height="69" decoding="async" draggable="false">`;
+  }
+
+  function renderBattleModeLabel(text) {
+    const trimmed = String(text || '').trim();
+    const spaceIdx = trimmed.indexOf(' ');
+    if (spaceIdx === -1) return escapeHtml(trimmed);
+    return `${escapeHtml(trimmed.slice(0, spaceIdx))}<br>${escapeHtml(trimmed.slice(spaceIdx + 1).trim())}`;
+  }
+
+  const MENU_HEADING_BLOSSOM_SVG = `<svg class="menu-mode-heading-blossom-svg" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><circle cx="12" cy="12" r="2.2" fill="currentColor"/><ellipse cx="12" cy="6.5" rx="3.2" ry="4.2" fill="currentColor"/><ellipse cx="12" cy="17.5" rx="3.2" ry="4.2" fill="currentColor"/><ellipse cx="6.5" cy="12" rx="4.2" ry="3.2" fill="currentColor"/><ellipse cx="17.5" cy="12" rx="4.2" ry="3.2" fill="currentColor"/></svg>`;
+
+  const MENU_HEADING_CLOUD_SVG = `<svg class="menu-mode-heading-cloud-svg" viewBox="0 0 40 16" width="34" height="14" aria-hidden="true"><path d="M2 10c2-4 6-6 10-5 2-3 7-4 11-1 3 2 4 5 3 8H2z" fill="currentColor" opacity="0.9"/><path d="M6 12c1.5-2.5 4.5-3.5 7-2.5" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity="0.55"/></svg>`;
+
+  function renderMenuSectionHeading(headingId, title, { showClouds = true } = {}) {
+    const cloudLeft = showClouds
+      ? `<span class="menu-mode-heading-cloud menu-mode-heading-cloud--left" aria-hidden="true">${MENU_HEADING_CLOUD_SVG}</span>`
+      : '';
+    const cloudRight = showClouds
+      ? `<span class="menu-mode-heading-cloud menu-mode-heading-cloud--right" aria-hidden="true">${MENU_HEADING_CLOUD_SVG}</span>`
+      : '';
+    return `
+      <div class="menu-mode-heading-wrap">
+        ${cloudLeft}
+        <h2 class="menu-mode-heading" id="${escapeHtml(headingId)}">
+          <span class="menu-mode-heading-badge">
+            ${MENU_HEADING_BLOSSOM_SVG}
+            <span class="menu-mode-heading-text">${title}</span>
+            ${MENU_HEADING_BLOSSOM_SVG}
+          </span>
+        </h2>
+        ${cloudRight}
+      </div>
+    `;
+  }
+
+  function renderMenuModePanel({ panelClass, headingId, title, bodyHtml, showHeadingClouds = true }) {
+    return `
+      <div class="menu-mode-panel ${panelClass} daily-challenges-grid">
+        ${renderMenuSectionHeading(headingId, title, { showClouds: showHeadingClouds })}
+        ${bodyHtml}
+      </div>
+    `;
   }
 
   /** Section heading with optional Korean support line. */
@@ -167,29 +239,12 @@
 
   function renderMenuTop() {
     const top = MC().MENU.menuTop || [];
-    const classic = top.find((m) => m.id === 'classic');
     const daily = top.find((m) => m.id === 'daily-match');
-    if (!classic && !daily) return '';
+    if (!daily) return '';
 
-    const classicTitle = classic ? modeText(classic, 'title') : '';
-    const dailyTitle = daily ? modeText(daily, 'title') : '';
-    const dailyProgress = daily ? MP().getDailyMatchProgress() : '';
-    const dailyComplete = daily ? MP().isDailyMatchComplete() : false;
-
-  const classicHtml = classic ? `
-      <a class="menu-top-classic daily-challenge-card daily-challenge-bar word-game-bar accent-${classic.accent}" id="menu-${escapeHtml(classic.id)}" href="${escapeHtml(classic.href)}">
-        <span class="menu-top-icon-box" aria-hidden="true">${classic.icon}</span>
-        <span class="menu-top-classic-label app-btn-title">${escapeHtml(classicTitle)}</span>
-      </a>` : '';
-
-    const dailyHtml = daily ? `
-      <button type="button" class="menu-top-daily daily-challenge-card daily-challenge-bar word-game-bar accent-${daily.accent}${dailyComplete ? ' is-complete' : ''}" id="menu-${escapeHtml(daily.id)}" data-menu-action="daily-match">
-        <span class="daily-challenge-content">
-          <span class="mode-name app-btn-title">${escapeHtml(dailyTitle)}</span>
-          <span id="daily-match-status" hidden>${escapeHtml(dailyProgress)}</span>
-        </span>
-      </button>` : '';
-
+    const dailyTitle = modeText(daily, 'title');
+    const dailyProgress = MP().getDailyMatchProgress();
+    const dailyComplete = MP().isDailyMatchComplete();
     const leaderboardLabel = escapeHtml(t('menu.leaderboard') || 'Leaderboard');
 
     return `
@@ -202,9 +257,14 @@
               <rect x="16" y="5" width="5" height="16" rx="1.5" fill="currentColor"/>
             </svg>
           </a>
-          ${dailyHtml}
+          <button type="button" class="menu-top-daily menu-daily-puzzle-bar menu-btn-primary daily-challenge-card daily-challenge-bar word-game-bar accent-${daily.accent}${dailyComplete ? ' is-complete' : ''}" id="menu-${escapeHtml(daily.id)}" data-menu-action="daily-match">
+            <span class="daily-challenge-content menu-daily-puzzle-main">
+              <span class="mode-name app-btn-title">${escapeHtml(dailyTitle)}</span>
+              <span id="daily-match-status" hidden>${escapeHtml(dailyProgress)}</span>
+            </span>
+            ${renderDailyCalendarBadge()}
+          </button>
         </div>
-        ${classicHtml}
       </div>
     `;
   }
@@ -243,8 +303,9 @@
     return `
       <div class="menu-sections">
         ${renderMenuTop()}
-        <div class="menu-section-divider" role="presentation" aria-hidden="true"></div>
-        ${renderWordGames()}
+        ${renderSinglePlayerSection()}
+        ${renderMenuBottom()}
+        ${renderTutorialBar()}
       </div>
     `;
   }
@@ -255,16 +316,22 @@
   }
 
   /** Word game bar — same horizontal layout as daily challenges. */
-  function WordGameBar(mode) {
+  function WordGameBar(mode, opts = {}) {
     const { id, icon, accent, href, action } = mode;
     const title = modeText(mode, 'title');
     const tag = href ? 'a' : 'button';
     const hrefAttr = href ? ` href="${escapeHtml(href)}"` : '';
     const typeAttr = !href ? ' type="button"' : '';
     const actionAttr = action ? ` data-menu-action="${escapeHtml(action)}"` : '';
+    const categoryClass = opts.category === 'game'
+      ? ' menu-btn-game'
+      : opts.category === 'primary'
+        ? ' menu-btn-primary'
+        : '';
+    const playClass = opts.playPair ? ' menu-play-game-btn' : '';
 
     return `
-      <${tag} class="daily-challenge-card daily-challenge-bar word-game-bar accent-${accent}" id="menu-${escapeHtml(id)}"${hrefAttr}${typeAttr}${actionAttr}>
+      <${tag} class="daily-challenge-card daily-challenge-bar word-game-bar accent-${accent}${categoryClass}${playClass}" id="menu-${escapeHtml(id)}"${hrefAttr}${typeAttr}${actionAttr}>
         <span class="mode-icon app-btn-icon" aria-hidden="true">${icon}</span>
         <span class="daily-challenge-content">
           <span class="mode-name app-btn-title">${escapeHtml(title)}</span>
@@ -273,27 +340,123 @@
     `;
   }
 
-  function renderMultiplayerBar() {
+  function renderWordChainTitle(text) {
+    const trimmed = String(text || '').trim();
+    const spaceIdx = trimmed.indexOf(' ');
+    if (spaceIdx === -1) return escapeHtml(trimmed);
+    return `${escapeHtml(trimmed.slice(0, spaceIdx))}<br>${escapeHtml(trimmed.slice(spaceIdx + 1).trim())}`;
+  }
+
+  function renderMenuComboBadge(bestCombo, labelKey = 'match.bestCombo') {
+    const count = Math.max(0, Number(bestCombo) || 0);
+    const comboLabel = escapeHtml(t('relatedWords.comboLabel') || 'combo');
     return `
-      <button type="button" class="daily-challenge-card daily-challenge-bar word-game-bar accent-lavender menu-multiplayer-btn" id="menu-multiplayer-btn">
-        <span class="mode-icon app-btn-icon" aria-hidden="true">⚔️</span>
-        <span class="daily-challenge-content">
-          <span class="mode-name app-btn-title" data-i18n="nav.multiplayer">${escapeHtml(t('nav.multiplayer'))}</span>
+      <span class="menu-game-combo" aria-label="${escapeHtml(t(labelKey, { n: count, count }) || `Best combo: ${count}`)}">
+        <span class="menu-game-combo-sheet">
+          <span class="menu-game-combo-count">${escapeHtml(String(count))}</span>
+          <span class="menu-game-combo-label">${comboLabel}</span>
         </span>
-      </button>
+      </span>
     `;
   }
 
+  function renderWordChainComboBadge(bestCombo) {
+    return renderMenuComboBadge(bestCombo, 'relatedWords.bestCombo');
+  }
+
+  function renderSinglePlayerGameButton(mode) {
+    const label = escapeHtml(modeText(mode, 'title'));
+    const tag = mode.href ? 'a' : 'button';
+    const hrefAttr = mode.href ? ` href="${escapeHtml(mode.href)}"` : '';
+    const typeAttr = !mode.href ? ' type="button"' : '';
+    const actionAttr = mode.action ? ` data-menu-action="${escapeHtml(mode.action)}"` : '';
+
+    if (mode.id === 'related-words') {
+      const bestCombo = MP().getWordChainBestCombo?.() || 0;
+      return `
+        <${tag} class="daily-challenge-card daily-challenge-bar word-game-bar accent-mint menu-single-player-game-btn menu-word-chain-bar menu-game-combo-bar" id="menu-${escapeHtml(mode.id)}"${hrefAttr}${typeAttr}${actionAttr} aria-label="${label}">
+          ${renderWordChainComboBadge(bestCombo)}
+          <span class="daily-challenge-content menu-word-chain-main">
+            <span class="mode-name app-btn-title">${renderWordChainTitle(modeText(mode, 'title'))}</span>
+          </span>
+        </${tag}>
+      `;
+    }
+
+    if (mode.id === 'classic') {
+      const bestCombo = MP().getMatchBestCombo?.() || 0;
+      return `
+        <${tag} class="daily-challenge-card daily-challenge-bar word-game-bar accent-${mode.accent} menu-btn-primary menu-jamo-game-btn menu-jamo-game-bar menu-game-combo-bar menu-single-player-game-btn" id="menu-${escapeHtml(mode.id)}"${hrefAttr}${typeAttr}${actionAttr} aria-label="${label}">
+          ${renderMenuComboBadge(bestCombo)}
+          <span class="daily-challenge-content menu-jamo-game-main">
+            <span class="mode-name app-btn-title">${renderWordChainTitle(modeText(mode, 'title'))}</span>
+          </span>
+        </${tag}>
+      `;
+    }
+
+    const categoryClass = ' menu-btn-game';
+    return `
+      <${tag} class="daily-challenge-card daily-challenge-bar word-game-bar accent-${mode.accent}${categoryClass} menu-single-player-game-btn" id="menu-${escapeHtml(mode.id)}"${hrefAttr}${typeAttr}${actionAttr} aria-label="${label}">
+        <span class="mode-icon app-btn-icon" aria-hidden="true">${mode.icon || '🎮'}</span>
+        <span class="daily-challenge-content">
+          <span class="mode-name app-btn-title">${label}</span>
+        </span>
+      </${tag}>
+    `;
+  }
+
+  function renderSinglePlayerSection() {
+    const playModes = MC().MENU.menuPlay || [];
+    if (!playModes.length) return '';
+
+    const title = escapeHtml(t('menu.singlePlayer.title') || 'Single Mode');
+    const buttons = playModes.map((mode) => renderSinglePlayerGameButton(mode)).join('');
+
+    return renderMenuModePanel({
+      panelClass: 'menu-single-player-grid',
+      headingId: 'menu-single-player-heading',
+      title,
+      bodyHtml: buttons,
+    });
+  }
+
+  function renderBattleModeSection() {
+    const jamodleLabel = escapeHtml(t('menu.battle.jamodle') || t('menu.modes.classic.title') || 'Jamo Game');
+    const wordChainLabel = escapeHtml(t('menu.battle.wordChain') || t('menu.modes.related-words.title') || 'Word Chain');
+    const title = escapeHtml(t('menu.battle.title') || t('nav.multiplayer') || 'Battle Mode');
+    const buttons = `
+      <button type="button" class="daily-challenge-card daily-challenge-bar word-game-bar menu-jamo-game-btn menu-battle-game-btn" data-battle-game="jamodle" aria-label="${jamodleLabel}">
+        ${renderMenuModeIcon('jamoGame')}
+        <span class="daily-challenge-content">
+          <span class="mode-name app-btn-title">${renderBattleModeLabel(jamodleLabel)}</span>
+        </span>
+      </button>
+      <button type="button" class="daily-challenge-card daily-challenge-bar word-game-bar accent-mint menu-battle-game-btn" data-battle-game="word-chain" aria-label="${wordChainLabel}">
+        ${renderMenuModeIcon('wordChain')}
+        <span class="daily-challenge-content">
+          <span class="mode-name app-btn-title">${renderBattleModeLabel(wordChainLabel)}</span>
+        </span>
+      </button>
+    `;
+
+    return renderMenuModePanel({
+      panelClass: 'menu-battle-grid',
+      headingId: 'menu-battle-heading',
+      title,
+      bodyHtml: buttons,
+      showHeadingClouds: false,
+    });
+  }
+
   function shouldShowTutorialMenuEntry() {
-    const devAccess = global.DevBuild?.hasDevAccess?.() === true;
-    const devMode = global.UserPreferences?.get?.()?.devMode === true;
-    return devAccess && devMode;
+    return true;
   }
 
   function renderTutorialBar() {
     if (!shouldShowTutorialMenuEntry()) return '';
     return `
-      <a class="daily-challenge-card daily-challenge-bar word-game-bar accent-yellow menu-tutorial-btn" id="menu-tutorial-btn" href="match-tutorial.html?replay=1">
+      <a class="daily-challenge-card daily-challenge-bar word-game-bar accent-muted menu-tutorial-btn menu-tutorial-bottom" id="menu-tutorial-btn" href="match-tutorial.html?start=1">
         <span class="mode-icon app-btn-icon" aria-hidden="true">📘</span>
         <span class="daily-challenge-content">
           <span class="mode-name app-btn-title" data-i18n="menu.tutorialMode">${escapeHtml(t('menu.tutorialMode'))}</span>
@@ -302,19 +465,8 @@
     `;
   }
 
-  function renderWordGames() {
-    const section = MC().MENU.sections.find((s) => s.id === 'word-games');
-    if (!section?.modes?.length) {
-      return `${renderMultiplayerBar()}${renderTutorialBar()}`;
-    }
-    const cards = section.modes.map((mode) => WordGameBar(mode)).join('');
-    return `
-      <div class="word-games-grid daily-challenges-grid">
-        ${cards}
-        ${renderMultiplayerBar()}
-        ${renderTutorialBar()}
-      </div>
-    `;
+  function renderMenuBottom() {
+    return renderBattleModeSection();
   }
 
   function renderFeatured() {
@@ -353,7 +505,6 @@
     if (root) root.innerHTML = renderMenu(tab);
     global.ShopUI?.bindSection?.(root);
     global.QuestUI?.bindSection?.(root);
-    global.TutorialOnboardingUI?.mount?.();
     refreshMenuTaglines();
   }
 

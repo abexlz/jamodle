@@ -77,17 +77,19 @@ module.exports = async function handler(req, res) {
 
   try {
     const result = await dict.searchWord(apiKey, word);
+    const exactMatch = dict.hasExactDictionaryMatch(result.candidates, word);
     const payload = {
       found: result.found,
+      exactMatch,
       query: result.query,
       total: result.total,
       entry: result.entry,
-      candidates: result.candidates?.slice(0, 5) || [],
+      candidates: result.candidates?.slice(0, 10) || [],
       source: dict.SOURCE_NAME,
       sourceHome: dict.SOURCE_HOME,
       cached: false,
     };
-    if (result.found) cache.set(word, payload);
+    if (exactMatch) cache.set(word, payload);
     return json(res, 200, payload);
   } catch (err) {
     const code = err.code || 'UNKNOWN';

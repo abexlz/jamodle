@@ -24,5 +24,14 @@
     }
   }
 
-  global.DevBuild = { isDevBuild, hasDevAccess };
+  function isDevModeActive() {
+    if (!hasDevAccess()) return false;
+    try {
+      return global.UserPreferences?.get?.()?.devMode === true;
+    } catch {
+      return false;
+    }
+  }
+
+  global.DevBuild = { isDevBuild, hasDevAccess, isDevModeActive };
 })(typeof window !== 'undefined' ? window : globalThis);

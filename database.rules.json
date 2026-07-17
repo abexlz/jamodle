@@ -1,0 +1,27 @@
+{
+  "rules": {
+    "turnLive": {
+      "$matchId": {
+        "live": {
+          "$uid": {
+            ".read": "auth != null",
+            ".write": "auth != null && auth.uid == $uid",
+            ".validate": "newData.hasChildren(['byUid', 'turnNumber', 'updatedAt']) && newData.child('byUid').val() == auth.uid"
+          }
+        },
+        "meta": {
+          ".read": "auth != null",
+          ".write": "auth != null && (!data.exists() || data.child('player1Uid').val() == auth.uid || data.child('player2Uid').val() == auth.uid)",
+          ".validate": "newData.hasChildren(['player1Uid', 'player2Uid'])"
+        },
+        "emotes": {
+          "$uid": {
+            ".read": "auth != null",
+            ".write": "auth != null && auth.uid == $uid",
+            ".validate": "newData.hasChildren(['emoteId', 'at', 'byUid']) && newData.child('byUid').val() == auth.uid"
+          }
+        }
+      }
+    }
+  }
+}

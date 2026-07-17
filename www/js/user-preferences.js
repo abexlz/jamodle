@@ -7,6 +7,7 @@
   const PREFS_KEY = 'jamodeul-preferences';
   const LEGACY_THEME_KEY = 'jamodeul-theme';
   const APP_VERSION = '1.0.0';
+  const CACHE_STAMP = '20260706n';
 
   const DEFAULTS = {
     language: 'en',
@@ -27,6 +28,7 @@
     turnAutofillCorrect: true,
     devMode: false,
     devAccessUnlocked: false,
+    devFontPack: 'junegull',
   };
 
   let prefs = { ...DEFAULTS };
@@ -113,9 +115,15 @@
     html.classList.toggle('tap-to-place', !!prefs.tapToPlace);
   }
 
+  function applyFontPack() {
+    const pack = prefs.devFontPack === 'jua' ? 'jua' : 'junegull';
+    document.documentElement.setAttribute('data-font-pack', pack);
+  }
+
   function applyAll() {
     applyTheme();
     applyAccessibility();
+    applyFontPack();
     if (global.I18n && prefs.language !== global.I18n.getLocale()) {
       global.I18n.setLocale(prefs.language);
     }
@@ -173,6 +181,7 @@
 
   load();
   applyAccessibility();
+  applyFontPack();
 
   if (global.matchMedia) {
     matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
@@ -183,12 +192,14 @@
   global.UserPreferences = {
     DEFAULTS,
     APP_VERSION,
+    CACHE_STAMP,
     PREFS_KEY,
     load,
     save,
     get,
     applyTheme,
     applyAccessibility,
+    applyFontPack,
     applyAll,
     onChange,
     speakKorean,

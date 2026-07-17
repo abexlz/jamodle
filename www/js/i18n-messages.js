@@ -18,7 +18,7 @@
       "tabLearn": "Learn",
       "tabShop": "Shop",
       "tabQuests": "Quests",
-      "multiplayer": "Multiplayer"
+      "multiplayer": "Battle Mode"
     },
     "menu": {
       "continueLearning": "Continue Learning",
@@ -29,7 +29,22 @@
       "learnHangul": "Learn Hangul",
       "wordGames": "Word Games",
       "recommended": "Recommended",
-      "tutorialMode": "Tutorial Mode",
+      "tutorialMode": "Tutorial",
+      "singlePlayer": {
+        "title": "Single Mode"
+      },
+      "battle": {
+        "title": "Battle Mode",
+        "jamodle": "Jamo Game",
+        "wordChain": "Word Chain",
+        "multiplayer": "Random Match",
+        "custom": "Custom",
+        "customSub": "(face your friends!)",
+        "practiceSolo": "Practice solo",
+        "pickFriend": "Pick a friend for your custom match.",
+        "multiplayerTitle": "Random Match",
+        "multiplayerSoon": "Online matchmaking is coming soon. Use Custom to challenge friends for now!"
+      },
       "modes": {
         "level-mode": {
           "title": "Level Mode",
@@ -47,7 +62,7 @@
           "subtitleKo": "자모를 끌어 단어를 완성해요"
         },
         "classic": {
-          "title": "Classic",
+          "title": "Jamo Game",
           "subtitleKo": "자모를 끌어 단어를 완성해요"
         },
         "match-multi-find": {
@@ -60,10 +75,10 @@
           "subtitle": "Learn horizontal, vertical, and compound vowels.",
           "subtitleKo": "ㅏ · ㅓ · ㅗ · ㅜ · ㅘ"
         },
-        "wordle-practice": {
-          "title": "Wordle Practice",
-          "subtitle": "Guess random Korean words with hints.",
-          "subtitleKo": "힌트와 함께 연습하기"
+        "related-words": {
+          "title": "Word Chain",
+          "subtitle": "Link related words across every theme.",
+          "subtitleKo": "여러 테마의 연관 단어를 이어 만들어요"
         },
         "hard-mode": {
           "title": "Hard Mode",
@@ -77,7 +92,7 @@
           "subtitleKo": "오늘의 단어"
         },
         "daily-match": {
-          "title": "Daily Match",
+          "title": "Daily Puzzle",
           "subtitle": "Build today's word with jamo",
           "subtitleKo": "오늘의 자모 조합"
         }
@@ -186,6 +201,7 @@
       "rotateSuccess": "Great rotation!",
       "mergeFirst": "Fill both merge slots, then tap Merge.",
       "mergeSuccess": "Vowels merged!",
+      "checkPrompt": "Check answer after you have got it!",
       "xpEarned": "+{{n}} XP",
       "steps": {
         "placeSo": {
@@ -212,19 +228,129 @@
           "title": "Compound vowels — 과",
           "body": "Some syllables use two vowel parts (복모음). Place ㄱ, then ㅗ on top and ㅏ below to make 과."
         },
-        "solveSagwa": {
-          "title": "Build 사과",
-          "body": "Use everything you learned to build 사과. Tap Check when every slot is filled."
-        },
         "solveHwasal": {
           "title": "Final challenge — 화살",
           "body": "Build 화살. You may need to rotate jamo — try turning ㅜ into ㅗ for 화."
         }
       }
     },
+    "pauseQuit": {
+      "pauseLabel": "Pause",
+      "title": "Are you sure you want to quit?",
+      "streakWarning": "You'll lose your {{count}} streak!",
+      "comboWarning": "You'll lose your {{count}} combo!",
+      "resume": "Resume",
+      "saveProgressAd": "Leave while saving progress (ad)",
+      "quit": "Quit",
+      "saveAdConfirm": "Watch a short ad to save your progress? (Demo — no ad will play.)"
+    },
+    "relatedWords": {
+      "back": "← Home",
+      "banner": "WORD CHAIN",
+      "prompt": "What word comes next?",
+      "dockLabel": "Pick syllables",
+      "livesLabel": "Guesses remaining",
+      "livesAria": "{{used}} of {{total}} guesses used",
+      "slotAria": "Answer slot {{n}}",
+      "chainProgress": "Link {{current}} of {{total}}",
+      "wrong": "Not quite — try again!",
+      "tryAgain": "Pick different syllables.",
+      "winTitle": "Linked!",
+      "correct": "Correct!",
+      "raceSaveFailed": "Could not save your score — try again.",
+      "winSub": "{{clue}} → {{answer}}",
+      "chainCompleteTitle": "Chain complete!",
+      "chainCompleteSub": "You finished all {{count}} links in this chain.",
+      "newChain": "Start a new chain",
+      "lossTitle": "Out of guesses",
+      "lossSub": "After {{clue}}, the next word was:",
+      "next": "Next link",
+      "retry": "Try again",
+      "streak": "🔥 {{count}} in a row",
+      "comboLabel": "combo",
+      "bestCombo": "Best combo: {{count}}",
+      "recallDockAria": "Recall {{char}} from answer",
+      "extraGuessTitle": "Extra guess?",
+      "extraGuessUseToken": "Use extra guess ({{count}})",
+      "extraGuessBuyCoins": "🪙 {{count}} coins",
+      "extraGuessWatchAd": "Watch ad · FREE",
+      "extraGuessAdConfirm": "Watch a short ad for an extra guess? (Demo — no ad will play.)",
+      "extraGuessInsufficient": "Not enough coins.",
+      "extraGuessGiveUp": "Give up",
+      "chains": {
+        "foodAnimals": "Food & Animals",
+        "skySeasons": "Sky & Seasons",
+        "schoolHome": "School & Home",
+        "peopleColors": "People & Colors",
+        "transportCity": "Transport & City",
+        "sportsFun": "Sports & Fun",
+        "kitchenFood": "Kitchen & Food",
+        "clothesSeasons": "Clothes & Seasons",
+        "animalsNature": "Animals & Nature",
+        "schoolStudy": "School & Study",
+        "musicArt": "Music & Art",
+        "farmCountryside": "Farm & Countryside"
+      }
+    },
+    "relatedWordsRace": {
+      "pageTitle": "Word Chain 1v1 — Jamodeul",
+      "title": "Word Chain 1v1",
+      "modeLabel": "Word chain race",
+      "backProfile": "← Home",
+      "backToProfile": "Back to home",
+      "profileLink": "Home",
+      "loading": "Loading…",
+      "noMatchId": "Match not found.",
+      "loginRequired": "Sign in required. Sign in with Google on your profile and try again.",
+      "permissionDenied": "Firestore permission denied. Check that matches rules are deployed.",
+      "loadFailed": "Could not load match.",
+      "matchCancelled": "This match was cancelled or not found.",
+      "notParticipant": "You can't join this match.",
+      "waitingFor": "Waiting for {{name}}…",
+      "challengeSent": "{{mode}} · first to 25 words · challenge sent",
+      "challengedYou": "{{name}} challenged you!",
+      "matchRace": "Word Chain · {{mode}} · first to 25 words",
+      "startingSoon": "Starting soon…",
+      "waitingRoom": "Waiting room",
+      "versus": "{{opp}} vs me · {{mode}}",
+      "me": "Me",
+      "opponent": "Opponent",
+      "ready": "Ready",
+      "readyDone": "Ready!",
+      "readying": "Getting ready…",
+      "oppReadying": "Opponent getting ready…",
+      "readySaveFailed": "Could not save ready status.",
+      "acceptFailed": "Could not accept.",
+      "declineFailed": "Could not decline.",
+      "battleDeclined": "{{name}} declined the battle!",
+      "opponentAbandoned": "{{name}} has abandoned the match.",
+      "go": "GO!",
+      "enemy": "Enemy",
+      "you": "You",
+      "wordsProgress": "{{current}} / {{target}} words",
+      "oppWordsAria": "Opponent words solved: {{count}}",
+      "oppFinishedFirst": "Opponent reached 25 words first!",
+      "oppGotRound": "Opponent got it first!",
+      "revealAnswer": "Reveal answer",
+      "revealUsersPressed": "{{count}}/2 users pressed",
+      "roundSkipped": "Skipping to next word…",
+      "stunned": "Stunned! Wait 10 seconds…",
+      "win": "Victory! 🎉",
+      "loss": "Defeat",
+      "draw": "Draw",
+      "chainLabel": "Chain",
+      "rematch": "Rematch",
+      "rematchProgress": "Rematch {{ready}}/2",
+      "rematchFailed": "Could not create a new match.",
+      "timeSec": "{{s}}s",
+      "words": "words",
+      "points": "pts"
+    },
     "multiplayer": {
-      "title": "Multiplayer",
-      "subtitle": "Pick a friend and choose how you want to play.",
+      "title": "Jamo Game Battle",
+      "subtitle": "Pick a user to verse!",
+      "pickUserTitle": "Pick a user to verse!",
+      "pickUserDesc": "User first, then mode and letters.",
       "addFriendsHint": "Add friends from your profile with a friend code.",
       "raceTitle": "Race",
       "raceDesc": "Play at the same time — first to finish the word wins.",
@@ -280,23 +406,33 @@
       "subtitleDaily": "Today's word · updates at midnight (KST)",
       "buildLabel": "Place jamo in the empty slots",
       "jamoLabel": "Jamo pieces",
-      "reset": "🔄 Reset",
-      "check": "✓ Check Answer",
+      "slotGuideConsonant": "Consonant",
+      "slotGuideVowel": "Vowel",
+      "slotGuideBatchim": "Batchim",
+      "reset": "Reset",
+      "check": "Check",
       "guesses": "Attempts {{n}}",
       "timer": "Time",
       "feedbackCheck": "Place jamo, then tap Check Answer",
       "feedbackDaily": "Today's Daily Match · tap Check Answer",
+      "feedbackChecking": "Checking the dictionary…",
+      "feedbackDictionarySuccess": "🎉 {{word}} is in the dictionary!",
+      "feedbackNotInDictionary": "That word is not in the dictionary. Try rearranging the jamo.",
+      "feedbackCantCompose": "Those jamo do not spell a complete Korean word yet.",
+      "feedbackDictionaryOffline": "Dictionary is unavailable. Run npm run dev and tunnel ngrok to port 3000.",
       "feedbackSuccess": "🎉 Perfect!",
       "feedbackDailyDone": "🎉 Daily Match complete!",
       "feedbackPartial": "Great! Some letters are in the correct place.",
       "feedbackWrong": "Some jamo are not correct yet. Try again.",
-      "resultsTitle": "You got it!",
+      "resultsTitle": "Match Clear!",
       "resultsDaily": "Daily complete!",
       "keepGoing": "Keep Going →",
       "leave": "Leave",
       "menu": "← Home",
       "dictionary": "📖 Dictionary",
-      "bestStreak": "Best streak: {{n}}",
+      "bestStreak": "Best Streak: {{n}}",
+      "comboLabel": "Combo",
+      "bestCombo": "Best Combo: {{n}}",
       "selectTile": "\"{{char}}\" selected — tap a slot",
       "rotationLabel": "Rotate",
       "mergeLabel": "Merge",
@@ -318,6 +454,10 @@
         "meaning": "Meaning",
         "meaningDone": "English meaning revealed.",
         "noMeaning": "No definition found."
+      },
+      "dev": {
+        "showAnswer": "Show answer",
+        "answer": "Answer: {{word}}"
       },
       "modePicker": {
         "title": "Choose word length",
@@ -343,7 +483,8 @@
         "progress": "{{n}} / {{total}} found",
         "found": "Found {{word}}!",
         "alreadyFound": "You already found that word.",
-        "notValid": "That is not a valid word from these tiles.",
+        "checking": "Checking the dictionary…",
+        "notValid": "That word is not in the Korean dictionary.",
         "noneYet": "No words found yet",
         "keepGoing": "Keep going — find more words!",
         "win": "You found them all!"
@@ -436,7 +577,11 @@
       "developer": {
         "title": "Developer",
         "devMode": "Dev mode",
-        "devModeHint": "Shows Tutorial Mode on the menu.",
+        "devModeHint": "Unlocks Tutorial on the menu and all profile cosmetics for testing.",
+        "devFontPack": "English font",
+        "devFontPackHint": "English always uses Junegull. Jua toggle only affects the Korean font stack for comparison.",
+        "devFontPackJunegull": "Junegull",
+        "devFontPackJua": "Jua (previous)",
         "replayTutorial": "Replay tutorial",
         "unlockTitle": "Developer access",
         "unlockHint": "Enter the developer password to unlock dev tools.",
@@ -472,8 +617,7 @@
       "hardLockedFooter": "Recommended after Level 5 in Korean Match.",
       "modes": {
         "daily": "Daily Wordle",
-        "hard": "Hard Mode",
-        "practice": "Wordle Practice"
+        "hard": "Hard Mode"
       },
       "game": {
         "pageTitle": "Jamodeul — Korean Word Game",
@@ -549,6 +693,12 @@
       "streakStart": "Start your Korean learning streak today",
       "longestStreak": "Longest streak: {{days}} days",
       "loadError": "Could not load profile. Please refresh.",
+      "tabs": {
+        "label": "Profile sections",
+        "friends": "Friends",
+        "cosmetics": "Cosmetics",
+        "stats": "Stats"
+      },
       "levelUp": {
         "title": "Level Up!",
         "message": "You are now Level {{level}}: {{title}}",
@@ -559,12 +709,12 @@
         "continue": "Nice!"
       },
       "levelTitles": {
-        "hangul-starter": "Hangul Starter · 한글 시작",
-        "jamo-learner": "Jamo Learner · 자모 배우기",
-        "syllable-builder": "Syllable Builder · 음절 만들기",
-        "word-explorer": "Word Explorer · 단어 탐험",
-        "korean-pathfinder": "Korean Pathfinder · 한국어 길잡이",
-        "hangul-hero": "Hangul Hero · 한글 영웅"
+        "hangul-starter": "Hangul Beginner",
+        "jamo-learner": "Jamo Leader",
+        "syllable-builder": "Syllable leader",
+        "word-explorer": "Word Expert",
+        "korean-pathfinder": "Korean Pro",
+        "hangul-hero": "Hangul Master"
       },
       "xp": {
         "builderComplete": "Hangul Builder complete!",
@@ -632,13 +782,59 @@
         }
       },
       "avatars": {
-        "title": "Avatars",
-        "default": "Default blossom",
+        "title": "Profile icons",
+        "default": "Blossom",
+        "cherry-blossom": "Cherry blossom",
         "cat": "Cat",
+        "dog": "Dog",
         "rabbit": "Rabbit",
-        "star": "Star",
+        "butterfly": "Butterfly",
+        "bear": "Bear",
+        "fox": "Fox",
+        "sun": "Sun",
         "hangul-tile": "Hangul tile",
-        "flame": "Streak flame"
+        "rainbow": "Rainbow",
+        "panda": "Panda",
+        "rocket": "Rocket",
+        "owl": "Owl",
+        "sparkles": "Sparkles",
+        "crown": "Crown",
+        "trophy": "Trophy",
+        "seedling": "Seedling",
+        "star": "Star",
+        "clover": "Clover",
+        "flame": "Streak flame",
+        "heart": "Heart",
+        "moon": "Moon",
+        "medal": "Medal",
+        "book": "Book",
+        "pencil": "Pencil",
+        "puzzle": "Puzzle piece",
+        "frog": "Frog",
+        "music": "Music",
+        "globe": "Globe"
+      },
+      "titles": {
+        "title": "Player titles",
+        "hint": "Unlock titles as you level up, then pick your favorite to display."
+      },
+      "frames": {
+        "title": "Profile frames",
+        "hint": "Earn frames by leveling up and completing challenges.",
+        "none": "No frame",
+        "bronze": "Bronze",
+        "silver": "Silver",
+        "gold": "Gold",
+        "ruby": "Ruby",
+        "diamond": "Diamond",
+        "emerald": "Emerald",
+        "amethyst": "Amethyst",
+        "obsidian": "Obsidian / Master",
+        "pink": "Pink",
+        "sakura": "Sakura",
+        "neon": "Neon glow",
+        "sunset": "Sunset",
+        "galaxy": "Galaxy"
       },
       "nickname": {
         "title": "Nickname",
@@ -679,6 +875,7 @@
         "friendsLoadFailed": "Could not load friends list",
         "noFriendsYet": "No friends yet",
         "challenge": "Challenge",
+        "challengeChooseUser": "Pick",
         "requestAccepted": "You're now friends!",
         "acceptRequestFailed": "Could not accept friend request.",
         "declineRequestFailed": "Could not decline request.",
@@ -693,8 +890,21 @@
         "requestSendFailed": "Could not send friend request.",
         "challengeTitle": "Challenge {{name}}",
         "challengePickGame": "Choose a game for the 1v1 race",
+        "challengePickMode": "Choose mode",
+        "challengeModeJamodle": "Jamo Game 1v1",
+        "challengePickJamodlePlayMode": "Choose play style",
+        "challengePickBattleGame": "Choose a game",
+        "challengePickWordChain": "Pick a word chain — both players race the same links",
+        "challengePickWordChainRandom": "Random chain",
+        "challengeBattleJamodle": "Jamo Game",
+        "challengeBattleRelatedWords": "Word Chain",
+        "challengeJamodleRace": "Race",
+        "challengeJamodleTurn": "Turn based",
+        "challengeModeWordChainUnavailable": "끝말잇기 (currently unavailable)",
+        "challengeModeWordChainUnavailableNotice": "Word Chain is currently unavailable.",
         "challengeGameWordle": "Wordle Race",
-        "challengeGameMatch": "Korean Match 1v1",
+        "challengeGameMatch": "Korean Match — Turn-based",
+        "challengeGameRelatedWords": "Word Chain 1v1",
         "challengePickLength": "How many letters for the race?",
         "challengePickMatchMode": "Choose Korean Match difficulty",
         "challengeLoadFailed": "Could not load challenge feature. Refresh and try again.",
@@ -705,6 +915,7 @@
         "challengeBannerMatch": "{{name}} challenged you to Korean Match! ({{mode}})",
         "challengeBannerTurn": "{{name}} invited you to turn-based Match! ({{mode}})",
         "challengeBannerWordChain": "{{name}} invited you to word chain (끝말잇기)!",
+        "challengeBannerRelatedWords": "{{name}} challenged you to Word Chain 1v1! (25 words)",
         "turnChallengeTitle": "Turn-based Match with {{name}}",
         "turnChallengePickMode": "Choose Normal or Hardcore",
         "acceptChallengeFailed": "Could not accept challenge.",
@@ -713,7 +924,7 @@
       }
     },
     "race": {
-      "pageTitle": "1v1 Race — Jamodeul",
+      "pageTitle": "1v1 Race — Jamo Game",
       "title": "1v1 Race",
       "backProfile": "← Profile",
       "backToProfile": "Back to profile",
@@ -741,6 +952,8 @@
       "readySaveFailed": "Could not save ready status.",
       "acceptFailed": "Could not accept.",
       "declineFailed": "Could not decline.",
+      "battleDeclined": "{{name}} declined the battle!",
+      "opponentAbandoned": "{{name}} has abandoned the match.",
       "go": "GO!",
       "racePrompt": "Be the first to guess the same word!",
       "inputPlaceholder": "Enter word",
@@ -754,6 +967,7 @@
       "answer": "Answer: {{word}}",
       "answerLabel": "Answer",
       "rematch": "Rematch",
+      "rematchProgress": "Rematch {{ready}}/2",
       "rematchFailed": "Could not create a new match.",
       "pickLengthTitle": "Choose word length",
       "timeSec": "{{s}}s",
@@ -761,7 +975,7 @@
       "example3": "자전거"
     },
     "matchRace": {
-      "pageTitle": "Korean Match 1v1 — Jamodeul",
+      "pageTitle": "Korean Match 1v1 — Jamo Game",
       "title": "Korean Match 1v1",
       "backProfile": "← Profile",
       "backToProfile": "Back to profile",
@@ -789,6 +1003,8 @@
       "readySaveFailed": "Could not save ready status.",
       "acceptFailed": "Could not accept.",
       "declineFailed": "Could not decline.",
+      "battleDeclined": "{{name}} declined the battle!",
+      "opponentAbandoned": "{{name}} has abandoned the match.",
       "go": "GO!",
       "prompt": "Be the first to build the same word!",
       "oppAttempts": "{{count}} attempts",
@@ -802,6 +1018,7 @@
       "answer": "Answer: {{word}}",
       "answerLabel": "Answer",
       "rematch": "Rematch",
+      "rematchProgress": "Rematch {{ready}}/2",
       "rematchFailed": "Could not create a new match.",
       "loadWordFailed": "Could not load the match word. Try rematching.",
       "timeSec": "{{s}}s",
@@ -812,10 +1029,20 @@
         "hardSubtitle": "Long words · race a friend"
       }
     },
+    "matchEmotes": {
+      "open": "Emotes",
+      "happy": "Happy",
+      "angry": "Angry",
+      "sad": "Sad",
+      "yawn": "Bored"
+    },
     "matchTurn": {
-      "pageTitle": "Turn-based Match — Jamodeul",
-      "title": "Turn-based Match",
+      "pageTitle": "Jamo Game Battle — Jamodeul",
+      "title": "Jamo Game Battle",
       "backHome": "← Home",
+      "loading": "Loading…",
+      "startingSoon": "Starting soon…",
+      "go": "GO!",
       "turnInviteSent": "Turn-based {{mode}} · {{seconds}}s per turn · invite sent",
       "turnInvite": "Turn-based {{mode}} · {{seconds}}s per turn",
       "turnVersus": "{{opp}} vs me · turn-based {{mode}}",
@@ -829,6 +1056,8 @@
       "turnSwap": "TURN SWAP!",
       "turns": "turns",
       "turnSubmitFailed": "Could not submit your turn. Try again.",
+      "battleDeclined": "{{name}} declined the battle!",
+      "opponentAbandoned": "{{name}} has abandoned the match.",
       "waitingHidden": "Board hidden",
       "waitingForTurn": "Waiting while {{name}} plays…",
       "waitingForReveal": "{{name}} submitted — results appear when the timer ends",
@@ -857,6 +1086,7 @@
       "draw": "Draw",
       "answerLabel": "Answer",
       "rematch": "Rematch",
+      "rematchProgress": "Rematch {{ready}}/2",
       "rematchFailed": "Could not create a new match.",
       "profileLink": "Home",
       "me": "Me",
@@ -912,6 +1142,7 @@
       "loser": "Lost",
       "finalChain": "Full chain",
       "rematch": "Rematch",
+      "rematchProgress": "Rematch {{ready}}/2",
       "rematchFailed": "Could not create a new match.",
       "me": "Me",
       "opponent": "Opponent",
@@ -923,33 +1154,62 @@
       "title": "Quests",
       "subtitle": "Complete quests for bonus XP and coins.",
       "dailyTitle": "Daily quests",
-      "dailyHint": "3 new quests every day (KST).",
+      "dailyHint": "Complete all 3 for a bonus wheel spin! (KST)",
+      "scopeDaily": "Daily",
+      "scopeWeekly": "Weekly",
+      "refreshIn": "Refreshes in",
+      "refreshKst": "(KST)",
       "weeklyTitle": "Weekly quests",
       "weeklyHint": "5 bigger goals — reset every Monday (KST).",
       "progress": "{{current}} / {{target}}",
       "complete": "Done!",
+      "claim": "Claim",
       "empty": "No quests right now.",
       "rewardToast": "Quest complete! +{{xp}} XP · 🪙 {{coins}}",
       "defs": {
-        "daily-wordle": {
-          "title": "Daily Wordle",
-          "desc": "Complete today's Daily Wordle"
+        "daily-play": {
+          "title": "Daily Jamo Game",
+          "desc": "Play today's Daily Jamo Game once (win or lose)"
         },
-        "daily-match": {
-          "title": "Daily Match",
-          "desc": "Complete today's Daily Match"
+        "daily-related-chain": {
+          "title": "Related Words",
+          "desc": "Solve one Related Words link"
+        },
+        "classic-play-3": {
+          "title": "Classic Jamo Game",
+          "desc": "Play {{count}} Classic Jamo Game rounds"
+        },
+        "friend-battle": {
+          "title": "Friend battle",
+          "desc": "Play one 1v1 battle with a friend"
+        },
+        "login-streak-3": {
+          "title": "Login streak",
+          "desc": "Reach a 3-day learning streak"
+        },
+        "daily-under-3": {
+          "title": "Daily sharp solve",
+          "desc": "Solve today's Daily Jamo Game in 3 tries or fewer"
+        },
+        "classic-first-try": {
+          "title": "First try!",
+          "desc": "Solve a Classic Jamo Game word on your first try"
+        },
+        "race-win": {
+          "title": "Race winner",
+          "desc": "Win a 1v1 race match"
+        },
+        "coop-win": {
+          "title": "Turn win",
+          "desc": "Win a turn-based match with a friend"
+        },
+        "total-5-wins": {
+          "title": "Daily scorer",
+          "desc": "Get {{count}} correct answers today"
         },
         "match-1": {
           "title": "Match maker",
           "desc": "Win {{count}} Korean Match word"
-        },
-        "builder-1": {
-          "title": "Letter builder",
-          "desc": "Complete {{count}} Hangul Builder word"
-        },
-        "wordle-1": {
-          "title": "Wordle practice",
-          "desc": "Win {{count}} Wordle practice game"
         },
         "play-2": {
           "title": "Keep learning",
@@ -959,13 +1219,25 @@
           "title": "Match master",
           "desc": "Win {{count}} Korean Match words this week"
         },
-        "weekly-builder-5": {
-          "title": "Builder streak",
-          "desc": "Complete {{count}} Hangul Builder words this week"
+        "weekly-match-3": {
+          "title": "Quick matcher",
+          "desc": "Win {{count}} Korean Match words this week"
         },
-        "weekly-wordle-5": {
-          "title": "Wordle warrior",
-          "desc": "Win {{count}} Wordle games this week"
+        "weekly-jamodle-5": {
+          "title": "Jamo Game warrior",
+          "desc": "Win {{count}} Jamo Game games this week"
+        },
+        "weekly-related-3": {
+          "title": "Chain linker",
+          "desc": "Finish {{count}} full Related Words chains this week"
+        },
+        "weekly-related-links-5": {
+          "title": "Link collector",
+          "desc": "Solve {{count}} Related Words links this week"
+        },
+        "weekly-word-chain-2": {
+          "title": "Word chain duelist",
+          "desc": "Win {{count}} Word Chain battles this week"
         },
         "weekly-daily-4": {
           "title": "Daily dedication",
@@ -978,11 +1250,31 @@
         "weekly-play-12": {
           "title": "Marathon learner",
           "desc": "Finish {{count}} activities this week"
-        },
-        "weekly-vowel": {
-          "title": "Vowel virtuoso",
-          "desc": "Complete the vowel practice lesson"
         }
+      }
+    },
+    "wheel": {
+      "title": "Bonus wheel!",
+      "subtitle": "All daily quests done — spin for a prize!",
+      "bonusTitle": "Daily bonus wheel",
+      "lockedDesc": "Complete all {{total}} daily quests to unlock ({{done}}/{{total}} done)",
+      "readyDesc": "All dailies complete — spin the wheel!",
+      "claimedDesc": "You already spun today. Come back tomorrow!",
+      "spin": "Spin!",
+      "locked": "Locked",
+      "claimed": "Spun!",
+      "wonTitle": "You won!",
+      "continue": "Awesome!",
+      "prizes": {
+        "coins-5": "+5 coins",
+        "coins-10": "+10 coins",
+        "coins-15": "+15 coins",
+        "coins-25": "+25 coins",
+        "coins-50": "+50 coins",
+        "xp-20": "+20 XP",
+        "xp-40": "+40 XP",
+        "hint-1": "+1 hint token",
+        "extra-1": "+1 extra-guess token"
       }
     },
     "dailyGift": {
@@ -1005,6 +1297,8 @@
       "coins": "coins",
       "balance": "Your balance",
       "tabCosmetics": "Style",
+      "tabTitles": "Titles",
+      "tabFrames": "Profile frames",
       "tabItems": "Items",
       "buy": "Buy",
       "owned": "Owned",
@@ -1033,32 +1327,66 @@
         "hintTokenDesc": "Spend in Wordle for syllable, elimination, or meaning hints",
         "extraGuess": "Extra-guess token",
         "extraGuessDesc": "Get one more guess when you'd run out"
+      },
+      "titles": {
+        "wordsmith": "Word smith",
+        "wordsmithDesc": "A title for dedicated word crafters",
+        "chain-master": "Chain master",
+        "chain-masterDesc": "Master of word connections",
+        "jamodle-pro": "Jamo Game pro",
+        "jamodle-proDesc": "Daily puzzle champion",
+        "hangul-sage": "Hangul sage",
+        "hangul-sageDesc": "Ancient wisdom of Korean letters"
+      },
+      "frames": {
+        "sakura": "Sakura",
+        "sakuraDesc": "Soft cherry blossom border",
+        "neon": "Neon glow",
+        "neonDesc": "Bright cyan neon frame",
+        "sunset": "Sunset",
+        "sunsetDesc": "Warm orange gradient frame",
+        "galaxy": "Galaxy",
+        "galaxyDesc": "Cosmic purple star frame"
       }
     },
     "leaderboard": {
       "title": "Leaderboard",
       "subtitle": "Fastest daily completions · KST",
+      "subtitleMatch": "Fastest daily match times · KST",
+      "subtitleStreak": "Best word chain solo combos · all-time",
       "dailyWordle": "Daily Wordle",
       "dailyMatch": "Daily Match",
+      "wordChainStreak": "Word Chain Streak",
+      "allTime": "All-time best",
+      "noStreak": "—",
       "global": "Global",
       "friends": "Friends",
       "backHome": "← Home",
       "loginHint": "Sign in to view rankings and submit your daily times.",
       "loginToView": "Sign in to view the leaderboard.",
       "emptyGlobal": "No times yet today. Be the first to play!",
+      "emptyGlobalStreak": "No streaks yet. Be the first to build a combo!",
       "emptyFriends": "No friend times on the board yet.",
+      "emptyFriendsStreak": "No friends with a streak yet.",
       "loadError": "Could not load rankings.",
       "me": "(me)"
     },
     "dailyCalendar": {
       "title": "Daily Match",
       "close": "Close",
+      "closeLabel": "Close calendar",
       "tabPuzzles": "PUZZLES",
       "tabTrophies": "TROPHIES",
       "monthlyPrizes": "Monthly Prizes",
       "badgeAt": "{{count}} wins",
+      "winsCount": "{{current}} / {{max}} WINS",
+      "winsUntilNext": "{{count}} more wins until the next prize",
       "progressToNext": "{{count}} wins · next prize at {{next}}",
       "allBadgesEarned": "{{count}} wins this month — all prizes earned!",
+      "statsLabel": "Your stats",
+      "statStreak": "Streak",
+      "statMonthlyWins": "Month wins",
+      "statBestStreak": "Best streak",
       "prevMonth": "Previous month",
       "nextMonth": "Next month",
       "weekdays": {
@@ -1072,6 +1400,7 @@
       },
       "dayLabel": "Day {{day}}",
       "selectDay": "Select a day",
+      "playToday": "PLAY TODAY'S PUZZLE",
       "playDate": "PLAY {{date}}",
       "free": "FREE",
       "unlockPastHint": "Unlock {{date}} to play this puzzle",
@@ -1085,7 +1414,7 @@
   },
   "ko": {
     "app": {
-      "name": "자모들",
+      "name": "자모게임",
       "tagline": "실제 단어를 만들며 한글을 배워요.",
       "taglineKo": "Learn Korean letters by building real words.",
       "description": "실제 단어를 만들며 한글을 배워요."
@@ -1099,7 +1428,7 @@
       "tabLearn": "배우기",
       "tabShop": "상점",
       "tabQuests": "퀘스트",
-      "multiplayer": "멀티플레이"
+      "multiplayer": "2인 대결"
     },
     "menu": {
       "continueLearning": "계속 배우기",
@@ -1110,7 +1439,22 @@
       "learnHangul": "한글 배우기",
       "wordGames": "단어 게임",
       "recommended": "추천",
-      "tutorialMode": "튜토리얼 모드",
+      "tutorialMode": "튜토리얼",
+      "singlePlayer": {
+        "title": "싱글 모드"
+      },
+      "battle": {
+        "title": "배틀 모드",
+        "jamodle": "자모게임",
+        "wordChain": "단어 체인",
+        "multiplayer": "랜덤 매치",
+        "custom": "커스텀",
+        "customSub": "(친구와 대결!)",
+        "practiceSolo": "혼자 연습하기",
+        "pickFriend": "커스텀 대결할 친구를 선택하세요.",
+        "multiplayerTitle": "랜덤 매치",
+        "multiplayerSoon": "온라인 매칭은 곧 추가됩니다. 지금은 커스텀으로 친구에게 도전해 보세요!"
+      },
       "modes": {
         "level-mode": {
           "title": "레벨 모드",
@@ -1128,7 +1472,7 @@
           "subtitleKo": "자모를 끌어 단어를 완성해요"
         },
         "classic": {
-          "title": "Classic",
+          "title": "자모게임 놀이",
           "subtitleKo": "자모를 끌어 단어를 완성해요"
         },
         "match-multi-find": {
@@ -1141,10 +1485,10 @@
           "subtitle": "가로·세로·겹모음을 배워요.",
           "subtitleKo": "ㅏ · ㅓ · ㅗ · ㅜ · ㅘ"
         },
-        "wordle-practice": {
-          "title": "Wordle 연습",
-          "subtitle": "힌트와 함께 한글 단어를 맞혀 보세요.",
-          "subtitleKo": "힌트와 함께 연습하기"
+        "related-words": {
+          "title": "단어 체인",
+          "subtitle": "여러 테마의 연관 단어를 이어 만들어요.",
+          "subtitleKo": "여러 테마의 연관 단어를 이어 만들어요"
         },
         "hard-mode": {
           "title": "하드 모드",
@@ -1158,7 +1502,7 @@
           "subtitleKo": "오늘의 단어"
         },
         "daily-match": {
-          "title": "Daily Match",
+          "title": "데일리 퍼즐",
           "subtitle": "오늘의 단어를 자모로 만들어요",
           "subtitleKo": "오늘의 자모 조합"
         }
@@ -1267,6 +1611,7 @@
       "rotateSuccess": "잘 돌렸어요!",
       "mergeFirst": "합치기 칸을 채운 뒤 결합을 눌러 주세요.",
       "mergeSuccess": "모음이 합쳐졌어요!",
+      "checkPrompt": "맞췄으면 정답 확인을 눌러 보세요!",
       "xpEarned": "+{{n}} XP",
       "steps": {
         "placeSo": {
@@ -1293,19 +1638,129 @@
           "title": "복모음 — 과",
           "body": "받침 없이 모음이 두 칸인 글자도 있어요(복모음). ㄱ을 놓고, 위에 ㅗ·아래에 ㅏ를 넣어 과를 만들어 보세요."
         },
-        "solveSagwa": {
-          "title": "사과 만들기",
-          "body": "지금까지 배운 것을 모두 써서 사과를 만들어 보세요. 모든 칸이 채워지면 확인을 누르세요."
-        },
         "solveHwasal": {
           "title": "마지막 도전 — 화살",
           "body": "화살을 완성하세요. 자모를 돌려야 할 수도 있어요 — 화를 위해 ㅜ를 ㅗ로 바꿔 보세요."
         }
       }
     },
+    "pauseQuit": {
+      "pauseLabel": "일시정지",
+      "title": "정말 나갈까요?",
+      "streakWarning": "연속 {{count}}기록이 사라져요!",
+      "comboWarning": "콤보 {{count}}이 사라져요!",
+      "resume": "계속하기",
+      "saveProgressAd": "진행 저장하고 나가기 (광고)",
+      "quit": "나가기",
+      "saveAdConfirm": "짧은 광고를 보고 진행 상황을 저장할까요? (데모 — 광고는 재생되지 않아요.)"
+    },
+    "relatedWords": {
+      "back": "← 홈",
+      "banner": "단어 연결",
+      "prompt": "다음에 이어질 단어는?",
+      "dockLabel": "음절 고르기",
+      "livesLabel": "남은 기회",
+      "livesAria": "{{total}}번 중 {{used}}번 사용",
+      "slotAria": "답 칸 {{n}}",
+      "chainProgress": "{{total}}단계 중 {{current}}단계",
+      "wrong": "아쉬워요 — 다시 해 보세요!",
+      "tryAgain": "다른 음절을 골라 보세요.",
+      "winTitle": "연결 성공!",
+      "correct": "정답!",
+      "raceSaveFailed": "점수를 저장하지 못했어요. 다시 시도해 주세요.",
+      "winSub": "{{clue}} → {{answer}}",
+      "chainCompleteTitle": "체인 완료!",
+      "chainCompleteSub": "이 체인 {{count}}단계를 모두 마쳤어요.",
+      "newChain": "새 체인 시작",
+      "lossTitle": "기회를 모두 썼어요",
+      "lossSub": "{{clue}} 다음 단어는:",
+      "next": "다음 단계",
+      "retry": "다시 하기",
+      "streak": "🔥 연속 {{count}}개",
+      "comboLabel": "콤보",
+      "bestCombo": "최고 콤보: {{count}}",
+      "recallDockAria": "답에서 {{char}} 되돌리기",
+      "extraGuessTitle": "한 번 더 할까요?",
+      "extraGuessUseToken": "추가 시도권 사용 ({{count}})",
+      "extraGuessBuyCoins": "🪙 {{count}} 코인",
+      "extraGuessWatchAd": "광고 보기 · 무료",
+      "extraGuessAdConfirm": "짧은 광고를 보고 한 번 더 시도할까요? (데모 — 광고는 재생되지 않아요.)",
+      "extraGuessInsufficient": "코인이 부족해요.",
+      "extraGuessGiveUp": "포기하기",
+      "chains": {
+        "foodAnimals": "음식 · 동물",
+        "skySeasons": "하늘 · 계절",
+        "schoolHome": "학교 · 집",
+        "peopleColors": "사람 · 색",
+        "transportCity": "교통 · 도시",
+        "sportsFun": "운동 · 놀이",
+        "kitchenFood": "부엌 · 요리",
+        "clothesSeasons": "옷 · 계절",
+        "animalsNature": "동물 · 자연",
+        "schoolStudy": "학교 · 공부",
+        "musicArt": "음악 · 예술",
+        "farmCountryside": "시골 · 들판"
+      }
+    },
+    "relatedWordsRace": {
+      "pageTitle": "단어 체인 1v1 — 자모게임",
+      "title": "단어 체인 1v1",
+      "modeLabel": "단어 체인 레이스",
+      "backProfile": "← 홈",
+      "backToProfile": "홈으로",
+      "profileLink": "홈",
+      "loading": "불러오는 중…",
+      "noMatchId": "대결 정보를 찾을 수 없어요.",
+      "loginRequired": "로그인이 필요해요. 프로필에서 Google 로그인 후 다시 시도해주세요.",
+      "permissionDenied": "Firestore 권한이 없어요. matches 규칙을 배포했는지 확인해주세요.",
+      "loadFailed": "대결 정보를 불러오지 못했어요.",
+      "matchCancelled": "대결이 취소되었거나 찾을 수 없어요.",
+      "notParticipant": "이 대결에 참여할 수 없어요.",
+      "waitingFor": "{{name}}님의 응답 대기 중…",
+      "challengeSent": "{{mode}} · 25단어 먼저 · 도전을 보냈어요",
+      "challengedYou": "{{name}}님이 도전했어요!",
+      "matchRace": "단어 체인 · {{mode}} · 25단어 먼저",
+      "startingSoon": "곧 시작해요…",
+      "waitingRoom": "대기실",
+      "versus": "{{opp}} vs 나 · {{mode}}",
+      "me": "나",
+      "opponent": "상대",
+      "ready": "준비",
+      "readyDone": "준비 완료!",
+      "readying": "준비 중…",
+      "oppReadying": "상대 준비 중…",
+      "readySaveFailed": "준비 상태를 저장하지 못했어요.",
+      "acceptFailed": "수락하지 못했어요.",
+      "declineFailed": "거절하지 못했어요.",
+      "battleDeclined": "{{name}}님이 대결을 거절했어요!",
+      "opponentAbandoned": "{{name}}님이 대결을 나갔어요.",
+      "go": "시작!",
+      "enemy": "상대",
+      "you": "나",
+      "wordsProgress": "{{current}} / {{target}}단어",
+      "oppWordsAria": "상대가 맞춘 단어: {{count}}개",
+      "oppFinishedFirst": "상대가 먼저 25단어를 맞췄어요!",
+      "oppGotRound": "상대가 먼저 맞췄어요!",
+      "revealAnswer": "정답 보기",
+      "revealUsersPressed": "{{count}}/2명이 눌렀어요",
+      "roundSkipped": "다음 단어로 넘어가요…",
+      "stunned": "기절! 10초 동안 입력할 수 없어요…",
+      "win": "승리! 🎉",
+      "loss": "패배",
+      "draw": "무승부",
+      "chainLabel": "체인",
+      "rematch": "다시 도전",
+      "rematchProgress": "다시 도전 {{ready}}/2",
+      "rematchFailed": "새 대결을 만들지 못했어요.",
+      "timeSec": "{{s}}초",
+      "words": "단어",
+      "points": "점"
+    },
     "multiplayer": {
-      "title": "멀티플레이",
-      "subtitle": "친구를 고르고 플레이 방식을 선택하세요.",
+      "title": "자모게임 대결",
+      "subtitle": "대결할 유저를 선택하세요!",
+      "pickUserTitle": "대결할 유저를 선택하세요!",
+      "pickUserDesc": "유저 먼저, 그다음 모드와 글자 수를 고르세요.",
       "addFriendsHint": "프로필에서 친구 코드로 친구를 추가할 수 있어요.",
       "raceTitle": "레이스",
       "raceDesc": "동시에 플레이 — 먼저 단어를 완성하면 승리!",
@@ -1355,29 +1810,39 @@
       "back": "← 홈"
     },
     "match": {
-      "title": "Korean Match",
-      "titleDaily": "Daily Match",
+      "title": "자모게임 놀이",
+      "titleDaily": "오늘의 자모게임",
       "subtitle": "자모를 끌어 한글 단어를 맞춰 보세요",
       "subtitleDaily": "오늘의 단어 · 자정(KST)에 갱신",
       "buildLabel": "빈 칸에 자모를 놓으세요",
       "jamoLabel": "자모 조각",
-      "reset": "🔄 다시 하기",
-      "check": "✓ 정답 확인",
+      "slotGuideConsonant": "자음",
+      "slotGuideVowel": "모음",
+      "slotGuideBatchim": "받침",
+      "reset": "다시 하기",
+      "check": "정답 확인",
       "guesses": "시도 {{n}}",
       "timer": "시간",
       "feedbackCheck": "자모를 배치한 뒤 정답 확인을 누르세요",
-      "feedbackDaily": "오늘의 Daily Match · 정답 확인",
+      "feedbackDaily": "오늘의 자모게임 · 정답 확인",
+      "feedbackChecking": "사전에서 확인 중…",
+      "feedbackDictionarySuccess": "🎉 {{word}} — 사전에 있는 단어예요!",
+      "feedbackNotInDictionary": "사전에 없는 단어예요. 자모를 다시 배치해 보세요.",
+      "feedbackCantCompose": "아직 완성된 한글 단어가 아니에요.",
+      "feedbackDictionaryOffline": "지금은 사전을 확인할 수 없어요. npm run dev 실행 후 ngrok을 3000번 포트에 연결해 주세요.",
       "feedbackSuccess": "🎉 완벽해요!",
-      "feedbackDailyDone": "🎉 Daily Match 완료!",
+      "feedbackDailyDone": "🎉 오늘의 자모게임 완료!",
       "feedbackPartial": "맞는 자모가 있어요. 계속해 보세요!",
       "feedbackWrong": "아직 맞지 않은 자모가 있어요.",
       "resultsTitle": "맞혔어요!",
-      "resultsDaily": "Daily 완료!",
+      "resultsDaily": "오늘의 자모게임 완료!",
       "keepGoing": "계속하기 →",
       "leave": "나가기",
-      "menu": "← 자모들",
+      "menu": "← 자모게임",
       "dictionary": "📖 사전",
       "bestStreak": "최고 연속 기록: {{n}}",
+      "comboLabel": "콤보",
+      "bestCombo": "최고 콤보: {{n}}",
       "selectTile": "\"{{char}}\" 선택 — 칸을 탭하세요",
       "rotationLabel": "돌리기",
       "mergeLabel": "결합",
@@ -1399,6 +1864,10 @@
         "meaning": "뜻 보기",
         "meaningDone": "영어 뜻을 보여줬어요.",
         "noMeaning": "사전에 정의가 없어요."
+      },
+      "dev": {
+        "showAnswer": "정답 보기",
+        "answer": "정답: {{word}}"
       },
       "modePicker": {
         "title": "글자 수 선택",
@@ -1424,7 +1893,8 @@
         "progress": "{{n}} / {{total}}개 찾음",
         "found": "{{word}} 찾았어요!",
         "alreadyFound": "이미 찾은 단어예요.",
-        "notValid": "이 타일로 만들 수 있는 단어가 아니에요.",
+        "checking": "사전에서 확인 중…",
+        "notValid": "사전에 없는 단어예요.",
         "noneYet": "아직 찾은 단어가 없어요",
         "keepGoing": "계속 찾아보세요!",
         "win": "모두 찾았어요!"
@@ -1517,7 +1987,11 @@
       "developer": {
         "title": "개발자",
         "devMode": "개발 모드",
-        "devModeHint": "메뉴에 튜토리얼 모드를 표시합니다.",
+        "devModeHint": "메뉴의 튜토리얼과 모든 프로필 꾸미기를 테스트용으로 해제합니다.",
+        "devFontPack": "영문 폰트",
+        "devFontPackHint": "라틴 문자를 Junegull과 Jua 사이에서 빠르게 비교합니다.",
+        "devFontPackJunegull": "Junegull",
+        "devFontPackJua": "Jua (이전)",
         "replayTutorial": "튜토리얼 다시 하기",
         "unlockTitle": "개발자 접근",
         "unlockHint": "개발자 비밀번호를 입력하면 개발 도구를 사용할 수 있습니다.",
@@ -1553,11 +2027,10 @@
       "hardLockedFooter": "Korean Match 레벨 5 이후에 추천해요.",
       "modes": {
         "daily": "Daily Wordle",
-        "hard": "Hard Mode",
-        "practice": "Wordle 연습"
+        "hard": "Hard Mode"
       },
       "game": {
-        "pageTitle": "자모들 — 한글 단어 게임",
+        "pageTitle": "자모게임 — 한글 단어 게임",
         "inputPlaceholder": "단어 입력",
         "submit": "확인",
         "hintsTitle": "힌트",
@@ -1605,8 +2078,8 @@
         "syllableHintLine": "{{n}}번째 음절: <span class=\"hint-jamo-val\">{{char}}</span><span class=\"hint-jamo-parts\"> ({{parts}})</span>",
         "howToPlayDailyIntro": "Daily 모드: 오늘 모두 같은 {{n}}글자 단어입니다.\n",
         "howToPlayBody": "{{n}}글자 한글 단어를 추측하세요.\n자음과 모음 두 종류로 채점됩니다.\n\n초록 = 그 칸에 정확한 자모\n주황 = 단어 안에 있지만 다른 칸 (예: ㄱ이 어디든 쓰이면 노란색)\n회색 = 그 글자 종류에 단어에 없음\n\n받침 없는 글자는 칸 2개, 받침 있으면 3개입니다.\n왼쪽 하단 힌트 버튼: 음절 힌트(1토큰)·뜻 힌트(2토큰).\n6번의 기회 안에 맞혀보세요!",
-        "shareHeaderDaily": "자모들 Day {{day}} · {{n}}글자 {{attempts}}/6",
-        "shareHeaderPractice": "자모들 {{n}}글자 {{attempts}}/6 (연습)",
+        "shareHeaderDaily": "자모게임 Day {{day}} · {{n}}글자 {{attempts}}/6",
+        "shareHeaderPractice": "자모게임 {{n}}글자 {{attempts}}/6 (연습)",
         "shareFooter": "자음·모음 단위 한글 워들 🇰🇷",
         "timeSec": "{{s}}초",
         "example2": "사랑",
@@ -1630,6 +2103,12 @@
       "streakStart": "오늘 Korean Learning Streak을 시작해 보세요",
       "longestStreak": "최장 streak: {{days}}일",
       "loadError": "프로필을 불러올 수 없어요. 새로고침해 주세요.",
+      "tabs": {
+        "label": "프로필 메뉴",
+        "friends": "친구",
+        "cosmetics": "꾸미기",
+        "stats": "통계"
+      },
       "levelUp": {
         "title": "레벨 업!",
         "message": "레벨 {{level}}: {{title}}",
@@ -1640,12 +2119,12 @@
         "continue": "좋아요!"
       },
       "levelTitles": {
-        "hangul-starter": "Hangul Starter · 한글 시작",
-        "jamo-learner": "Jamo Learner · 자모 배우기",
-        "syllable-builder": "Syllable Builder · 음절 만들기",
-        "word-explorer": "Word Explorer · 단어 탐험",
-        "korean-pathfinder": "Korean Pathfinder · 한국어 길잡이",
-        "hangul-hero": "Hangul Hero · 한글 영웅"
+        "hangul-starter": "한글 초보",
+        "jamo-learner": "자모 지도자",
+        "syllable-builder": "음절 학살자",
+        "word-explorer": "단어의 왕",
+        "korean-pathfinder": "한국어 전문가",
+        "hangul-hero": "한글의 마스터"
       },
       "xp": {
         "builderComplete": "한글 만들기 완료!",
@@ -1653,7 +2132,7 @@
         "wordChainComplete": "끝말잇기 승리!",
         "vowelComplete": "모음 연습 완료!",
         "tutorialStep": "튜토리얼 단계 완료!",
-        "dailyMatchComplete": "Daily Match 완료!",
+        "dailyMatchComplete": "오늘의 자모게임 완료!",
         "dailyWordleComplete": "Daily Wordle 완료!",
         "wordleComplete": "Wordle 완료!",
         "genericComplete": "학습 활동 완료!"
@@ -1713,13 +2192,59 @@
         }
       },
       "avatars": {
-        "title": "아바타",
-        "default": "기본 꽃",
+        "title": "프로필 아이콘",
+        "default": "꽃",
+        "cherry-blossom": "벚꽃",
         "cat": "고양이",
+        "dog": "강아지",
         "rabbit": "토끼",
-        "star": "별",
+        "butterfly": "나비",
+        "bear": "곰",
+        "fox": "여우",
+        "sun": "해",
         "hangul-tile": "한글 타일",
-        "flame": "Streak 불꽃"
+        "rainbow": "무지개",
+        "panda": "판다",
+        "rocket": "로켓",
+        "owl": "올빼미",
+        "sparkles": "반짝이",
+        "crown": "왕관",
+        "trophy": "트로피",
+        "seedling": "새싹",
+        "star": "별",
+        "clover": "클로버",
+        "flame": "불꽃",
+        "heart": "하트",
+        "moon": "달",
+        "medal": "메달",
+        "book": "책",
+        "pencil": "연필",
+        "puzzle": "퍼즐",
+        "frog": "개구리",
+        "music": "음악",
+        "globe": "지구"
+      },
+      "titles": {
+        "title": "플레이어 칭호",
+        "hint": "레벨업하면 칭호가 열리고, 마음에 드는 칭호를 골라 표시할 수 있어요."
+      },
+      "frames": {
+        "title": "프로필 프레임",
+        "hint": "레벨업과 도전 과제를 완료하면 프레임을 얻을 수 있어요.",
+        "none": "프레임 없음",
+        "bronze": "브론즈",
+        "silver": "실버",
+        "gold": "골드",
+        "ruby": "루비",
+        "diamond": "다이아몬드",
+        "emerald": "에메랄드",
+        "amethyst": "자수정",
+        "obsidian": "흑요석 / 마스터",
+        "pink": "핑크",
+        "sakura": "벚꽃",
+        "neon": "네온",
+        "sunset": "석양",
+        "galaxy": "은하"
       },
       "nickname": {
         "title": "닉네임",
@@ -1760,6 +2285,7 @@
         "friendsLoadFailed": "친구 목록을 불러오지 못했어요",
         "noFriendsYet": "아직 친구가 없어요",
         "challenge": "도전",
+        "challengeChooseUser": "선택",
         "requestAccepted": "친구가 되었어요!",
         "acceptRequestFailed": "친구 요청을 수락하지 못했어요.",
         "declineRequestFailed": "요청을 거절하지 못했어요.",
@@ -1774,8 +2300,21 @@
         "requestSendFailed": "친구 요청을 보내지 못했어요.",
         "challengeTitle": "{{name}}에게 도전",
         "challengePickGame": "1v1 게임을 선택하세요",
+        "challengePickMode": "모드를 선택하세요",
+        "challengeModeJamodle": "자모게임 1v1",
+        "challengePickJamodlePlayMode": "플레이 방식을 선택하세요",
+        "challengePickBattleGame": "게임을 선택하세요",
+        "challengePickWordChain": "단어 체인을 고르세요 — 같은 체인으로 레이스해요",
+        "challengePickWordChainRandom": "랜덤 체인",
+        "challengeBattleJamodle": "자모게임",
+        "challengeBattleRelatedWords": "단어 체인",
+        "challengeJamodleRace": "레이스",
+        "challengeJamodleTurn": "턴제",
+        "challengeModeWordChainUnavailable": "끝말잇기 (현재 준비 중)",
+        "challengeModeWordChainUnavailableNotice": "끝말잇기는 현재 준비 중이에요.",
         "challengeGameWordle": "Wordle 레이스",
-        "challengeGameMatch": "Korean Match 1v1",
+        "challengeGameMatch": "자모게임 — 턴제",
+        "challengeGameRelatedWords": "단어 체인 1v1",
         "challengePickLength": "몇 글자 단어로 레이스할까요?",
         "challengePickMatchMode": "Korean Match 난이도를 선택하세요",
         "challengeLoadFailed": "도전 기능을 불러오지 못했어요. 새로고침 후 다시 시도해주세요.",
@@ -1786,15 +2325,16 @@
         "challengeBannerMatch": "{{name}}님이 Korean Match에 도전했어요! ({{mode}})",
         "challengeBannerTurn": "{{name}}님이 턴제 Match에 초대했어요! ({{mode}})",
         "challengeBannerWordChain": "{{name}}님이 끝말잇기에 초대했어요!",
+        "challengeBannerRelatedWords": "{{name}}님이 단어 체인 1v1에 도전했어요! (25단어)",
         "turnChallengeTitle": "{{name}}님과 턴제 Match",
         "turnChallengePickMode": "노멀 또는 하드코어 선택",
         "acceptChallengeFailed": "수락하지 못했어요.",
         "dailyWordle": "Daily Wordle",
-        "dailyMatch": "Daily Match"
+        "dailyMatch": "오늘의 자모게임"
       }
     },
     "race": {
-      "pageTitle": "1v1 레이스 — 자모들",
+      "pageTitle": "1v1 레이스 — 자모게임",
       "title": "1v1 레이스",
       "backProfile": "← 프로필",
       "backToProfile": "프로필로 돌아가기",
@@ -1822,6 +2362,8 @@
       "readySaveFailed": "준비 상태를 저장하지 못했어요.",
       "acceptFailed": "수락하지 못했어요.",
       "declineFailed": "거절하지 못했어요.",
+      "battleDeclined": "{{name}}님이 대결을 거절했어요!",
+      "opponentAbandoned": "{{name}}님이 대결을 나갔어요.",
       "go": "GO!",
       "racePrompt": "같은 단어를 먼저 맞히세요!",
       "inputPlaceholder": "단어 입력",
@@ -1835,6 +2377,7 @@
       "answer": "정답: {{word}}",
       "answerLabel": "정답",
       "rematch": "다시 도전",
+      "rematchProgress": "다시 도전 {{ready}}/2",
       "rematchFailed": "새 대결을 만들지 못했어요.",
       "pickLengthTitle": "글자 수 선택",
       "timeSec": "{{s}}초",
@@ -1842,7 +2385,7 @@
       "example3": "자전거"
     },
     "matchRace": {
-      "pageTitle": "Korean Match 1v1 — 자모들",
+      "pageTitle": "Korean Match 1v1 — 자모게임",
       "title": "Korean Match 1v1",
       "backProfile": "← 프로필",
       "backToProfile": "프로필로 돌아가기",
@@ -1870,6 +2413,8 @@
       "readySaveFailed": "준비 상태를 저장하지 못했어요.",
       "acceptFailed": "수락하지 못했어요.",
       "declineFailed": "거절하지 못했어요.",
+      "battleDeclined": "{{name}}님이 대결을 거절했어요!",
+      "opponentAbandoned": "{{name}}님이 대결을 나갔어요.",
       "go": "시작!",
       "prompt": "같은 단어를 먼저 완성하세요!",
       "oppAttempts": "{{count}}번 시도",
@@ -1883,6 +2428,7 @@
       "answer": "정답: {{word}}",
       "answerLabel": "정답",
       "rematch": "다시 도전",
+      "rematchProgress": "다시 도전 {{ready}}/2",
       "rematchFailed": "새 대결을 만들지 못했어요.",
       "loadWordFailed": "대결 단어를 불러오지 못했어요. 다시 도전해 보세요.",
       "timeSec": "{{s}}초",
@@ -1893,10 +2439,20 @@
         "hardSubtitle": "긴 단어 · 친구와 레이스"
       }
     },
+    "matchEmotes": {
+      "open": "이모트",
+      "happy": "기쁨",
+      "angry": "화남",
+      "sad": "슬픔",
+      "yawn": "지루함"
+    },
     "matchTurn": {
-      "pageTitle": "턴제 Match — Jamodeul",
-      "title": "턴제 Match",
+      "pageTitle": "자모게임 대결 — Jamodeul",
+      "title": "자모게임 대결",
       "backHome": "← 홈",
+      "loading": "불러오는 중…",
+      "startingSoon": "곧 시작합니다…",
+      "go": "시작!",
       "turnInviteSent": "턴제 {{mode}} · 턴당 {{seconds}}초 · 초대 보냄",
       "turnInvite": "턴제 {{mode}} · 턴당 {{seconds}}초",
       "turnVersus": "{{opp}} vs 나 · 턴제 {{mode}}",
@@ -1910,6 +2466,8 @@
       "turnSwap": "턴 교체!",
       "turns": "턴",
       "turnSubmitFailed": "턴을 제출하지 못했어요. 다시 시도해 주세요.",
+      "battleDeclined": "{{name}}님이 대결을 거절했어요!",
+      "opponentAbandoned": "{{name}}님이 대결을 나갔어요.",
       "waitingHidden": "보드 숨김",
       "waitingForTurn": "{{name}}님이 플레이하는 동안 대기…",
       "waitingForReveal": "{{name}}님이 제출함 — 타이머가 끝나면 결과가 보여요",
@@ -1938,6 +2496,7 @@
       "draw": "무승부",
       "answerLabel": "정답",
       "rematch": "다시 도전",
+      "rematchProgress": "다시 도전 {{ready}}/2",
       "rematchFailed": "새 대결을 만들지 못했어요.",
       "profileLink": "홈",
       "me": "나",
@@ -1993,6 +2552,7 @@
       "loser": "패배",
       "finalChain": "전체 연결",
       "rematch": "다시 도전",
+      "rematchProgress": "다시 도전 {{ready}}/2",
       "rematchFailed": "새 대결을 만들지 못했어요.",
       "me": "나",
       "opponent": "상대",
@@ -2004,33 +2564,62 @@
       "title": "퀘스트",
       "subtitle": "퀘스트를 완료하면 보너스 XP와 코인을 받아요.",
       "dailyTitle": "일일 퀘스트",
-      "dailyHint": "매일 3개 (한국 시간 기준)",
+      "dailyHint": "3개를 모두 완료하고 보상을 받으면 보너스 룰렛! (한국 시간)",
+      "scopeDaily": "일일",
+      "scopeWeekly": "주간",
+      "refreshIn": "갱신까지",
+      "refreshKst": "(KST)",
       "weeklyTitle": "주간 퀘스트",
       "weeklyHint": "더 큰 목표 5개 — 매주 월요일 초기화",
       "progress": "{{current}} / {{target}}",
       "complete": "완료!",
+      "claim": "받기",
       "empty": "퀘스트가 없어요.",
       "rewardToast": "퀘스트 완료! +{{xp}} XP · 🪙 {{coins}}",
       "defs": {
-        "daily-wordle": {
-          "title": "데일리 Wordle",
-          "desc": "오늘의 Daily Wordle 완료"
+        "daily-play": {
+          "title": "오늘의 자모게임",
+          "desc": "오늘의 자모게임 1번 플레이 (승패 무관)"
         },
-        "daily-match": {
-          "title": "데일리 Match",
-          "desc": "오늘의 Daily Match 완료"
+        "daily-related-chain": {
+          "title": "연관 단어",
+          "desc": "연관 단어 링크 1개 풀기"
+        },
+        "classic-play-3": {
+          "title": "자모들 놀이",
+          "desc": "자모들 놀이 {{count}}판 플레이"
+        },
+        "friend-battle": {
+          "title": "친구 대결",
+          "desc": "친구와 1v1 대결 1판 (승패 무관)"
+        },
+        "login-streak-3": {
+          "title": "연속 출석",
+          "desc": "3일 연속 출석"
+        },
+        "daily-under-3": {
+          "title": "오늘의 날카로운 정답",
+          "desc": "오늘의 자모들 3번 시도 이내 정답"
+        },
+        "classic-first-try": {
+          "title": "첫 시도 정답",
+          "desc": "자모들 놀이에서 첫 시도 정답"
+        },
+        "race-win": {
+          "title": "레이스 승리",
+          "desc": "1v1 레이스에서 승리"
+        },
+        "coop-win": {
+          "title": "턴제 승리",
+          "desc": "턴제 모드에서 팀으로 승리"
+        },
+        "total-5-wins": {
+          "title": "오늘의 정답",
+          "desc": "오늘 하루 총 {{count}}번 정답"
         },
         "match-1": {
           "title": "Match 한 판",
           "desc": "Korean Match {{count}}판 승리"
-        },
-        "builder-1": {
-          "title": "글자 만들기",
-          "desc": "Hangul Builder 단어 {{count}}개 완료"
-        },
-        "wordle-1": {
-          "title": "Wordle 연습",
-          "desc": "Wordle 연습 {{count}}판 승리"
         },
         "play-2": {
           "title": "꾸준히 학습",
@@ -2040,13 +2629,25 @@
           "title": "Match 마스터",
           "desc": "이번 주 Korean Match {{count}}판 승리"
         },
-        "weekly-builder-5": {
-          "title": "빌더 스트릭",
-          "desc": "이번 주 Hangul Builder {{count}}개 완료"
+        "weekly-match-3": {
+          "title": "빠른 매치",
+          "desc": "이번 주 Korean Match {{count}}판 승리"
         },
-        "weekly-wordle-5": {
-          "title": "Wordle 워리어",
-          "desc": "이번 주 Wordle {{count}}판 승리"
+        "weekly-jamodle-5": {
+          "title": "자모게임 워리어",
+          "desc": "이번 주 Jamo Game {{count}}판 승리"
+        },
+        "weekly-related-3": {
+          "title": "체인 링커",
+          "desc": "이번 주 연관 단어 체인 {{count}}개 완주"
+        },
+        "weekly-related-links-5": {
+          "title": "링크 수집가",
+          "desc": "이번 주 연관 단어 링크 {{count}}개 풀기"
+        },
+        "weekly-word-chain-2": {
+          "title": "끝말잇기 듀얼",
+          "desc": "이번 주 끝말잇기 {{count}}번 승리"
         },
         "weekly-daily-4": {
           "title": "데일리 헌신",
@@ -2059,11 +2660,31 @@
         "weekly-play-12": {
           "title": "마라톤 학습",
           "desc": "이번 주 활동 {{count}}번 완료"
-        },
-        "weekly-vowel": {
-          "title": "모음 연습",
-          "desc": "모음 연습 레슨 완료"
         }
+      }
+    },
+    "wheel": {
+      "title": "보너스 룰렛!",
+      "subtitle": "일일 퀘스트 완료 — 돌려서 보상 받기!",
+      "bonusTitle": "일일 보너스 룰렛",
+      "lockedDesc": "일일 퀘스트 {{total}}개를 모두 완료하면 잠금 해제 ({{done}}/{{total}})",
+      "readyDesc": "일일 퀘스트 완료 — 룰렛을 돌려보세요!",
+      "claimedDesc": "오늘은 이미 돌렸어요. 내일 다시!",
+      "spin": "돌리기!",
+      "locked": "잠김",
+      "claimed": "완료!",
+      "wonTitle": "당첨!",
+      "continue": "좋아요!",
+      "prizes": {
+        "coins-5": "+5 코인",
+        "coins-10": "+10 코인",
+        "coins-15": "+15 코인",
+        "coins-25": "+25 코인",
+        "coins-50": "+50 코인",
+        "xp-20": "+20 XP",
+        "xp-40": "+40 XP",
+        "hint-1": "힌트 토큰 +1",
+        "extra-1": "추가 시도권 +1"
       }
     },
     "dailyGift": {
@@ -2086,6 +2707,8 @@
       "coins": "코인",
       "balance": "보유 코인",
       "tabCosmetics": "꾸미기",
+      "tabTitles": "칭호",
+      "tabFrames": "프로필 프레임",
       "tabItems": "아이템",
       "buy": "구매",
       "owned": "보유함",
@@ -2114,32 +2737,66 @@
         "hintTokenDesc": "Wordle에서 음절·제거·뜻 힌트에 사용",
         "extraGuess": "추가 시도권",
         "extraGuessDesc": "기회가 끝날 때 한 번 더 추측"
+      },
+      "titles": {
+        "wordsmith": "단어 장인",
+        "wordsmithDesc": "단어를 사랑하는 이들을 위한 칭호",
+        "chain-master": "체인 마스터",
+        "chain-masterDesc": "단어 체인의 달인",
+        "jamodle-pro": "자모게임 프로",
+        "jamodle-proDesc": "데일리 퍼즐 챔피언",
+        "hangul-sage": "한글 현자",
+        "hangul-sageDesc": "한글의 지혜를 품은 칭호"
+      },
+      "frames": {
+        "sakura": "벚꽃",
+        "sakuraDesc": "부드러운 벚꽃 테두리",
+        "neon": "네온",
+        "neonDesc": "밝은 시안 네온 프레임",
+        "sunset": "석양",
+        "sunsetDesc": "따뜻한 오렌지 그라데이션",
+        "galaxy": "은하",
+        "galaxyDesc": "우주 보라색 별 프레임"
       }
     },
     "leaderboard": {
       "title": "Leaderboard",
       "subtitle": "오늘의 Daily 최단 기록 · KST",
+      "subtitleMatch": "오늘의 자모게임 최단 기록 · KST",
+      "subtitleStreak": "단어 체인 솔로 최고 연속 콤보 · 전체 기록",
       "dailyWordle": "Daily Wordle",
-      "dailyMatch": "Daily Match",
+      "dailyMatch": "오늘의 자모게임",
+      "wordChainStreak": "단어 체인 연속",
+      "allTime": "역대 최고",
+      "noStreak": "—",
       "global": "전체",
       "friends": "친구",
       "backHome": "← 홈",
       "loginHint": "로그인하면 순위를 보고 Daily 기록을 등록할 수 있어요.",
       "loginToView": "순위를 보려면 로그인해 주세요.",
       "emptyGlobal": "아직 오늘 기록이 없어요. 첫 번째로 도전해 보세요!",
+      "emptyGlobalStreak": "아직 연속 기록이 없어요. 첫 번째로 콤보를 쌓아 보세요!",
       "emptyFriends": "아직 순위에 올라온 친구가 없어요.",
+      "emptyFriendsStreak": "아직 기록이 있는 친구가 없어요.",
       "loadError": "순위를 불러오지 못했어요.",
       "me": "(나)"
     },
     "dailyCalendar": {
-      "title": "Daily Match",
+      "title": "오늘의 자모게임",
       "close": "닫기",
+      "closeLabel": "캘린더 닫기",
       "tabPuzzles": "퍼즐",
       "tabTrophies": "트로피",
       "monthlyPrizes": "이달의 보상",
       "badgeAt": "{{count}}회 완료",
+      "winsCount": "{{current}} / {{max}}회 완료",
+      "winsUntilNext": "다음 보상까지 {{count}}회 더",
       "progressToNext": "이번 달 {{count}}회 · 다음 보상 {{next}}회",
       "allBadgesEarned": "이번 달 {{count}}회 완료 — 모든 보상 획득!",
+      "statsLabel": "내 기록",
+      "statStreak": "연속",
+      "statMonthlyWins": "이번 달",
+      "statBestStreak": "최고 연속",
       "prevMonth": "이전 달",
       "nextMonth": "다음 달",
       "weekdays": {
@@ -2153,6 +2810,7 @@
       },
       "dayLabel": "{{day}}일",
       "selectDay": "날짜를 선택하세요",
+      "playToday": "오늘의 퍼즐 플레이",
       "playDate": "{{date}} 플레이",
       "free": "무료",
       "unlockPastHint": "{{date}} 퍼즐을 잠금 해제하고 플레이하세요",

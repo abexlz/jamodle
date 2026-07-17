@@ -178,8 +178,8 @@
     const completed = [];
     if (global.AppStorage) {
       global.AppStorage.getPrefixed('jamodeul-match-daily-').forEach((key) => {
-        if (!key.startsWith(prefix)) return;
         const dateKey = key.replace('jamodeul-match-daily-', '');
+        if (!dateKey.startsWith(prefix)) return;
         if (isDateCompleted(dateKey)) completed.push(dateKey);
       });
       return completed.sort();

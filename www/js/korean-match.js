@@ -16,7 +16,36 @@
 
   const t = (key, vars) => global.I18n?.t(key, vars) ?? '';
   const prefs = () => global.UserPreferences;
+  const isDevModeActive = () => global.DevBuild?.isDevModeActive?.() === true;
 
+  function getDropZoneGuideLabel(zoneType) {
+    if (zoneType === 'cho') return t('match.slotGuideConsonant');
+    if (zoneType === 'jong') return t('match.slotGuideBatchim');
+    return t('match.slotGuideVowel');
+  }
+
+  function applyDropZoneGuideLabels(root, options = {}) {
+    const scope = root || document;
+    const guideSyllableIndex = options.guideSyllableIndex ?? 0;
+    scope.querySelectorAll('.drop-zone[data-zone]').forEach((zoneEl) => {
+      const guide = zoneEl.querySelector(':scope > .drop-zone-guide');
+      if (!guide) return;
+      const sylIdx = parseInt(zoneEl.dataset.syllable, 10) || 0;
+      const showGuide = sylIdx === guideSyllableIndex;
+      guide.style.display = showGuide ? '' : 'none';
+      if (showGuide) {
+        guide.textContent = getDropZoneGuideLabel(zoneEl.dataset.zone);
+      }
+    });
+  }
+
+  /** Columns used for block sizing; 5–6 syllable words use the 3-column width. */
+  function layoutSylColumnCount(syllableCount) {
+    const n = Number(syllableCount) || 0;
+    return n > 4 ? 3 : Math.max(n, 1);
+  }
+
+  /** Jamo dock: keep up to 12 tiles on row 1; wrap the 13th+ to the next row. */
   function delay(ms) {
     return new Promise((r) => setTimeout(r, ms));
   }
@@ -64,6 +93,7 @@
       this.placedTileId = null;
       this.locked = false;
       this.hintDisabled = false;
+      this.guideEl = null;
       this.el = this._createElement();
     }
 
@@ -76,6 +106,12 @@
       el.setAttribute('role', 'button');
       el.tabIndex = 0;
       el.setAttribute('aria-label', `${t('builder.charLabel', { n: this.syllableIndex + 1 })} ${this.zoneType}`);
+      const guide = document.createElement('span');
+      guide.className = 'drop-zone-guide';
+      guide.setAttribute('aria-hidden', 'true');
+      guide.textContent = getDropZoneGuideLabel(this.zoneType);
+      el.appendChild(guide);
+      this.guideEl = guide;
       el.addEventListener('click', (e) => {
         if (e.target.closest('.jamo-tile')) return;
         this.onPlace?.(this);
@@ -103,8 +139,13 @@
 
     clear() {
       this.placedTileId = null;
-      this.el.classList.remove('filled', 'correct', 'incorrect', 'drag-over', 'revealing', 'revealing-wrong', 'hint-disabled');
-      this.el.innerHTML = '';
+      this.el.classList.remove('filled', 'correct', 'incorrect', 'drag-over', 'revealing', 'revealing-wrong');
+      if (this.hintDisabled) {
+        this.el.classList.add('hint-disabled');
+      } else {
+        this.el.classList.remove('hint-disabled');
+      }
+      this.el.querySelectorAll('.jamo-tile').forEach((tileEl) => tileEl.remove());
     }
 
     setHintDisabled(on) {
@@ -130,13 +171,26 @@
   }
 
   /* ── JamoTile ── */
+  function jamoGlyphInner(char, zoneType) {
+    if (zoneType === 'jungV') {
+      return `<span class="jamo-glyph-stretch">${char}</span>`;
+    }
+    return char;
+  }
+
+  function jamoTileFaceHtml(char, zoneType) {
+    const inner = jamoGlyphInner(char, zoneType);
+    return `<span class="jamo-tile-face jamo-tile-front">${inner}</span><span class="jamo-tile-face jamo-tile-back">${inner}</span>`;
+  }
+
   class JamoTile {
-    constructor({ id, char, zoneType, syllableIndex, subIndex }) {
+    constructor({ id, char, zoneType, syllableIndex, subIndex, targetChar }) {
       this.id = id;
       this.char = char;
       this.zoneType = zoneType;
       this.syllableIndex = syllableIndex;
       this.subIndex = subIndex ?? 0;
+      this.targetChar = targetChar ?? char;
       this.inBank = true;
       this.zoneRef = null;
       this.locked = false;
@@ -146,7 +200,7 @@
     _createElement() {
       const el = document.createElement('div');
       el.className = 'jamo-tile';
-      el.innerHTML = `<span class="jamo-tile-face jamo-tile-front">${this.char}</span><span class="jamo-tile-face jamo-tile-back">${this.char}</span>`;
+      el.innerHTML = jamoTileFaceHtml(this.char, this.zoneType);
       el.dataset.tileId = this.id;
       el.setAttribute('role', 'button');
       el.tabIndex = 0;
@@ -197,8 +251,9 @@
 
     setChar(char) {
       this.char = char;
-      this.el.querySelector('.jamo-tile-front').textContent = char;
-      this.el.querySelector('.jamo-tile-back').textContent = char;
+      const inner = jamoGlyphInner(char, this.zoneType);
+      this.el.querySelector('.jamo-tile-front').innerHTML = inner;
+      this.el.querySelector('.jamo-tile-back').innerHTML = inner;
       this.el.setAttribute('aria-label', `자모 ${char}`);
     }
   }
@@ -302,6 +357,10 @@
     tile: null,
     ghost: null,
     pointerId: null,
+    lastX: 0,
+    lastY: 0,
+    lastMergeTarget: null,
+    _finishing: false,
 
     _clearPendingListeners() {
       document.removeEventListener('pointermove', this._onPendingMove);
@@ -317,7 +376,7 @@
     onTilePointerDown(e, tile) {
       const game = KoreanMatchGame.instance;
       if (!game || game.checkedComplete || game.checking || game.inspectMode || tile.locked) return;
-      if (!game.canArrangeTiles()) return;
+      if (game.watchMode || !game.canArrangeTiles()) return;
       e.preventDefault();
       if (this.active) return;
       if (this.pending) this._cancelPending();
@@ -393,7 +452,7 @@
     _buildGhost(tile, sourceEl, x, y) {
       const ghost = document.createElement('div');
       ghost.className = 'jamo-ghost';
-      ghost.textContent = tile.char;
+      ghost.innerHTML = `<span class="jamo-ghost-glyphs">${tile.char}</span>`;
       ghost.setAttribute('aria-hidden', 'true');
       const size = this._ghostSize(tile, sourceEl);
       ghost.style.width = `${size}px`;
@@ -406,6 +465,10 @@
     start(x, y, pointerId, tile, sourceEl) {
       KoreanMatchGame.instance?.clearSelection();
       this.active = true;
+      this._finishing = false;
+      this.lastX = x;
+      this.lastY = y;
+      this.lastMergeTarget = null;
       this.tile = tile;
       this.pointerId = pointerId;
       this.sourceFromZone = !tile.inBank && !tile.mergeDockRef;
@@ -429,10 +492,9 @@
 
       if (this.sourceFromZone && tile.zoneRef) {
         const zone = tile.zoneRef;
-        zone.placedTileId = null;
-        zone.el.classList.remove('filled', 'correct', 'incorrect');
-        zone.el.innerHTML = '';
+        zone.clear();
         tile.zoneRef = null;
+        tile.el.classList.remove('in-zone', 'snap-in');
       } else if (tile.mergeDockRef === 'result') {
         game?.mergeDock?.takeResultTileIfDragging(tile);
       } else if (tile.mergeDockRef === 'slot') {
@@ -441,6 +503,7 @@
           game.mergeDock.slotTileIds[idx] = null;
           game.mergeDock.slotEls[idx].classList.remove('filled');
           game.mergeDock.slotEls[idx].innerHTML = '';
+          game.mergeDock.updatePreview?.();
         }
       } else if (tile.inBank) {
         tile.hideInBank();
@@ -465,6 +528,9 @@
         || d.tile.zoneType === 'jungH' || d.tile.zoneType === 'jungV'
       );
       const mergeTarget = isVowelTile ? game?.mergeDock?.findDropTarget(e.clientX, e.clientY) : null;
+      d.lastX = e.clientX;
+      d.lastY = e.clientY;
+      d.lastMergeTarget = mergeTarget;
       const bankEl = game?.canArrangeTiles?.() ? d.findBankEl(e.clientX, e.clientY, game) : null;
       if (mergeTarget) {
         game.mergeDock.highlightTarget(mergeTarget, true);
@@ -494,46 +560,78 @@
 
     _finishDrag(x, y) {
       const d = this;
-      if (!d.active) return;
+      if (!d.active || d._finishing) return;
+      d._finishing = true;
       const game = KoreanMatchGame.instance;
       let placed = false;
       const tile = d.tile;
+      const dropX = Number.isFinite(x) ? x : d.lastX;
+      const dropY = Number.isFinite(y) ? y : d.lastY;
       const isVowelTile = tile && (
         tile.isMerged || tile.isBasic
         || tile.zoneType === 'jungH' || tile.zoneType === 'jungV'
       );
-      const mergeTarget = isVowelTile ? game?.mergeDock?.findDropTarget(x, y) : null;
-      const zone = d.resolveZoneAtPoint(x, y, game);
+      let mergeTarget = isVowelTile ? game?.mergeDock?.findDropTarget(dropX, dropY) : null;
+      if (!mergeTarget && d.lastMergeTarget) {
+        mergeTarget = d.lastMergeTarget;
+      }
+      const zone = mergeTarget ? null : d.resolveZoneAtPoint(dropX, dropY, game);
 
-      if (zone && game?.tryPlaceTile(tile, zone)) {
-        placed = true;
-        game?.mergeDock?.clearMergeSlotRef?.(tile);
-      } else if (d.findBankEl(x, y, game) && tile && !tile.locked) {
-        game.returnTileToBank(tile);
-        placed = true;
-      } else if (mergeTarget && game?.mergeDock?.tryDrop(tile, mergeTarget)) {
+      if (mergeTarget && game?.mergeDock?.tryDrop(tile, mergeTarget)) {
         placed = true;
         game?.updateRotationDockLabel?.();
         game?.onTutorialEvent?.('mergeSlot', { game });
-      } else if (d.findRotationDock(x, y) && game?.rotateTile(d.tile)) {
-        game.returnTileToBank(d.tile);
+        game?.notifyTurnLiveChange?.();
+      } else if (zone && game?.tryPlaceTile(tile, zone)) {
+        placed = true;
+        game?.mergeDock?.clearMergeSlotRef?.(tile);
+      } else if (d.findBankEl(dropX, dropY, game) && tile && !tile.locked) {
+        game.returnTileToBank(tile);
+        placed = true;
+      } else if (d.findRotationDock(dropX, dropY) && game?.rotateTile(d.tile)) {
+        if (!d.tile?.mergeDockRef) {
+          game.returnTileToBank(d.tile);
+        }
+        game?.notifyTurnLiveChange?.();
         placed = true;
       }
       if (!placed) {
-        const src = d.dragSource;
-        if (src?.type === 'merge-result' || src?.type === 'merge-slot'
-            || tile?.mergeDockRef === 'result' || tile?.mergeDockRef === 'slot'
-            || (tile?.isMerged && game?.mergeDock?.resultTileId === tile.id)) {
-          game?.mergeDock?.restoreTile(tile);
-        } else if (src?.type === 'zone' && src.zone && !src.zone.locked && !src.zone.hintDisabled) {
-          if (!game.tryPlaceTile(tile, src.zone)) {
-            game.returnTileToBank(d.tile);
-          }
-        } else {
-          game.returnTileToBank(d.tile);
-        }
+        d.restoreDraggedTile(game);
       }
       d.end();
+    },
+
+    restoreDraggedTile(game) {
+      const tile = this.tile;
+      const src = this.dragSource;
+      if (!tile || !game) {
+        game?.returnTileToBank?.(tile);
+        return;
+      }
+      if (
+        src?.type === 'merge-result' || src?.type === 'merge-slot'
+        || tile.mergeDockRef === 'result' || tile.mergeDockRef === 'slot'
+        || (tile.isMerged && game.mergeDock?.resultTileId === tile.id)
+      ) {
+        game.mergeDock?.restoreTile(tile);
+        if (
+          tile.mergeDockRef === 'slot'
+          || tile.mergeDockRef === 'result'
+          || game.mergeDock?.slotTileIds?.includes(tile.id)
+          || game.mergeDock?.resultTileId === tile.id
+        ) {
+          return;
+        }
+      }
+      if (src?.type === 'zone' && src.zone && !src.zone.locked && !src.zone.hintDisabled) {
+        if (game.tryPlaceTile(tile, src.zone)) return;
+        game.attachTileToZone(tile, src.zone);
+        game.updateCheckButton?.();
+        game.syncDockTileSize?.();
+        game.notifyTurnLiveChange?.();
+        if (tile.zoneRef) return;
+      }
+      game.returnTileToBank(tile);
     },
 
     findZoneEl(x, y) {
@@ -615,9 +713,11 @@
         this.ghost.remove();
       }
       this.active = false;
+      this._finishing = false;
       this.tile = null;
       this.ghost = null;
       this.pointerId = null;
+      this.lastMergeTarget = null;
       document.removeEventListener('pointermove', this._onMove);
       document.removeEventListener('pointerup', this._onUp);
       document.removeEventListener('pointercancel', this._onUp);
@@ -628,6 +728,32 @@
     },
   };
 
+  /** Deterministic RNG so both 1v1 clients build an identical jamo dock. */
+  function createSeededRng(seedStr) {
+    let h = 2166136261 >>> 0;
+    const s = String(seedStr || '');
+    for (let i = 0; i < s.length; i++) {
+      h ^= s.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return function () {
+      h += 0x6D2B79F5;
+      let t = h;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function seededShuffle(list, rng) {
+    const arr = [...list];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(rng() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
   /* ── KoreanMatchGame ── */
   class KoreanMatchGame {
     constructor(rootEl, options = {}) {
@@ -635,6 +761,7 @@
       this.versus = options.versus === true;
       this.raceControlled = options.raceControlled === true;
       this.turnBased = options.turnBased === true;
+      this.sharedSeed = options.sharedSeed || null;
       this.inspectMode = false;
       this.rushMode = false;
       this.fixedWord = options.fixedWord || null;
@@ -642,21 +769,39 @@
       this.tutorialValidator = options.tutorialValidator || null;
       this.onTutorialEvent = options.onTutorialEvent || null;
       this.tutorialStep = null;
+      this.tutorialCheckAllowed = false;
       this.onProgress = options.onProgress || null;
       this.onFinished = options.onFinished || null;
       this.onFinished = options.onFinished || null;
       this.onTurnSubmit = options.onTurnSubmit || null;
+      this.onTurnLiveChange = options.onTurnLiveChange || null;
       this.isMyTurn = true;
       this.turnPrepMode = false;
+      this.watchMode = false;
+      this._lastLiveFingerprint = null;
+      this._liveBroadcastTimer = null;
+      this._suspendLiveBroadcast = false;
+      this._removedTileIds = [];
+      this._liveActionSeq = 0;
+      this._pendingLiveAction = null;
+      this._lastOppFlashSeq = 0;
+      this._watchRevealPlayedKey = null;
+      this._watchRevealBusy = false;
+      this._restoringTurnLocks = false;
+      this._watchLivePrevSnapshot = null;
+      this._watchLiveBank = [];
       this.boardHidden = false;
       this.enabled = true;
       this.isDaily = !this.versus && (options.daily ?? MD?.isDailyModeFromUrl?.() ?? false);
       this.multiFindMode = !this.versus && !this.isDaily && options.multiFind === true;
       this.multiPuzzle = null;
       this.multiFoundWords = [];
-      const wordLength = MatchWords?.normalizeWordLength?.(
-        options.wordLength ?? options.mode ?? options.turnMode
-      ) ?? 4;
+      const dailyLength = MD?.DAILY_WORD_LENGTH ?? 2;
+      const wordLength = this.isDaily
+        ? dailyLength
+        : (MatchWords?.normalizeWordLength?.(
+          options.wordLength ?? options.mode ?? options.turnMode
+        ) ?? 4);
       this.wordLength = wordLength;
       this.matchMode = wordLength;
       this.modeConfig = MatchWords?.getConfigForLength?.(wordLength) || { shuffleRotations: true };
@@ -707,8 +852,12 @@
         ? undefined
         : (this.versus || !this.isDaily ? { n: this.wordLength } : undefined);
 
+      const isJamoSolo = !this.versus && !this.isDaily && !this.tutorialMode && !this.multiFindMode && !this.turnBased;
+
       const headerBack = this.versus
         ? ''
+        : isJamoSolo && global.PauseQuitUI
+        ? global.PauseQuitUI.pauseButtonHtml('match-pause-btn')
         : `<a class="back-link" href="index.html" data-i18n="match.back">${t('match.back')}</a>`;
 
       const headerBadge = this.versus
@@ -717,17 +866,30 @@
           ? `<div class="streak-badge daily-badge" id="match-streak" title="Daily">📅 Day ${dayNum}</div>`
           : `<div class="streak-badge" id="match-streak" title="연속 정답">🔥 0</div>`);
 
-      const learningStreakBar = this.versus
+      const learningStreakBar = '';
+
+      const statsRow = this.versus
+        ? `<div class="live-stats">
+          <span class="live-stat" id="match-timer">0:00</span>
+          <span class="live-stat" id="match-guesses">${t('match.guesses', { n: 0 })}</span>
+        </div>`
+        : this.turnBased
         ? ''
-        : `<div class="learning-streak-bar" id="match-learning-streak">
-          <div class="streak-headline" id="match-streak-headline"></div>
-          <div class="streak-progress" id="match-streak-progress"></div>
+        : `<div class="match-attempts-bar" id="match-attempts-bar" aria-live="polite">
+          <span id="match-guesses">${t('match.guesses', { n: 0 })}</span>
+          <span id="match-timer" class="match-timer-hidden" aria-hidden="true">0:00</span>
         </div>`;
 
       const showEnglish = prefs()?.shouldShowEnglish?.() !== false;
       const meaningBtnHtml = showEnglish
-        ? `<button type="button" class="match-hint-btn match-meaning-btn" id="match-meaning-btn">
-            <span class="app-btn-title" data-i18n="match.hints.meaning">${t('match.hints.meaning')}</span>
+        ? `<button type="button" class="match-hint-btn match-hint-btn--icon match-meaning-btn" id="match-meaning-btn" aria-label="${t('match.hints.meaning')}" title="${t('match.hints.meaning')}">
+            <img class="match-hint-btn-icon" src="assets/hint-meaning.png" alt="" draggable="false">
+          </button>`
+        : '';
+
+      const devAnswerBtnHtml = !this.tutorialMode && isDevModeActive()
+        ? `<button type="button" class="match-hint-btn match-dev-answer-btn" id="match-dev-answer-btn">
+            <span class="app-btn-title" data-i18n="match.dev.showAnswer">${t('match.dev.showAnswer')}</span>
           </button>`
         : '';
 
@@ -737,21 +899,31 @@
           <div class="match-token-counter" id="match-token-counter" aria-live="polite">
             🪙 <span id="match-token-count">${global.HintTokens?.get?.() ?? 5}</span>
           </div>
-          <button type="button" class="match-hint-btn" id="match-orient-hint">
-            <span class="app-btn-title" data-i18n="match.hints.orient">${t('match.hints.orient')}</span>
+          <button type="button" class="match-hint-btn match-hint-btn--icon" id="match-orient-hint" aria-label="${t('match.hints.orient')}" title="${t('match.hints.orient')}">
+            <img class="match-hint-btn-icon" src="assets/hint-orient.png" alt="" draggable="false">
           </button>
-          <button type="button" class="match-hint-btn" id="match-disable-hint">
-            <span class="app-btn-title" data-i18n="match.hints.disable">${t('match.hints.disable')}</span>
+          <button type="button" class="match-hint-btn match-hint-btn--icon" id="match-disable-hint" aria-label="${t('match.hints.disable')}" title="${t('match.hints.disable')}">
+            <img class="match-hint-btn-icon" src="assets/hint-disable-empty.png" alt="" draggable="false">
           </button>
           ${meaningBtnHtml}
+          ${devAnswerBtnHtml}
         </section>`;
 
       const versusMeaningBtn = this.versus && !this.turnBased ? meaningBtnHtml : '';
+      const versusDevAnswerBtn = this.versus && !this.tutorialMode && isDevModeActive() ? devAnswerBtnHtml : '';
+
+      const bankToolsEmote = this.versus
+        ? `<div class="match-emote-row">
+            <div class="match-emote-mount" id="match-emote-mount"></div>
+            <div class="match-emote-self" id="match-emote-self" aria-live="polite"></div>
+          </div>`
+        : '';
 
       const bankSectionHtml = this.turnBased
         ? `<section class="bank-section bank-section--turn" aria-label="Jamo tiles">
           <div class="race-turn-bottom">
             <div class="bank-tools">
+              ${bankToolsEmote}
               <button type="button" class="rotation-dock" id="rotation-dock" aria-label="${t('match.rotationLabel')}" title="${t('match.rotationHint')}">
                 <span class="rotation-dock-icon" aria-hidden="true">↻</span>
                 <span class="rotation-dock-label" data-i18n="match.rotationLabel">${t('match.rotationLabel')}</span>
@@ -760,7 +932,7 @@
             </div>
             <div class="race-turn-dock-stack">
               <div id="race-turn-bar-mount" class="race-turn-bar-mount" aria-live="polite"></div>
-              <div class="jamo-bank" id="match-bank"></div>
+              <div class="jamo-bank jamo-bank--turn" id="match-bank"></div>
             </div>
           </div>
         </section>`
@@ -768,6 +940,7 @@
           <p class="section-label" data-i18n="match.jamoLabel">${t('match.jamoLabel')}</p>
           <div class="bank-row">
             <div class="bank-tools">
+              ${bankToolsEmote}
               <button type="button" class="rotation-dock" id="rotation-dock" aria-label="${t('match.rotationLabel')}" title="${t('match.rotationHint')}">
                 <span class="rotation-dock-icon" aria-hidden="true">↻</span>
                 <span class="rotation-dock-label" data-i18n="match.rotationLabel">${t('match.rotationLabel')}</span>
@@ -778,9 +951,18 @@
           </div>
         </section>`;
 
-      const streakStatRow = (this.isDaily || this.versus)
+      const comboStatsGroup = (this.isDaily || this.versus)
         ? ''
-        : `<div class="results-stat-row"><dt data-i18n="match.streakLabel">${t('match.streakLabel')}</dt><dd id="results-streak"></dd></div>`;
+        : `<div class="results-stats-group results-stats-group--combo">
+            <dl class="results-stats">
+              <div class="results-stat-row"><dt data-i18n="match.comboLabel">${t('match.comboLabel')}</dt><dd id="results-streak"></dd></div>
+            </dl>
+            <p class="results-best" id="results-best"></p>
+          </div>`;
+
+      const dailyBestLine = (this.isDaily || this.versus)
+        ? `<p class="results-best" id="results-best"></p>`
+        : '';
 
       const resultsActions = this.versus
         ? ''
@@ -799,17 +981,23 @@
 
       const resultsOverlay = this.versus
         ? ''
-        : `<div class="results-overlay hidden" id="match-results" role="dialog" aria-modal="true">
+        : `<div class="results-overlay results-overlay--clear hidden" id="match-results" role="dialog" aria-modal="true">
           <div class="results-card">
             <h2 id="results-title" data-i18n="${this.isDaily ? 'match.resultsDaily' : 'match.resultsTitle'}">${t(this.isDaily ? 'match.resultsDaily' : 'match.resultsTitle')}</h2>
-            <p class="results-word" id="results-word"></p>
-            <dl class="results-stats">
-              <div class="results-stat-row"><dt data-i18n="match.time">${t('match.time')}</dt><dd id="results-time"></dd></div>
-              <div class="results-stat-row"><dt data-i18n="match.attemptsLabel">${t('match.attemptsLabel')}</dt><dd id="results-guesses"></dd></div>
-              ${streakStatRow}
-            </dl>
-            <p class="results-best" id="results-best"></p>
-            <div class="results-dict" id="results-dict"></div>
+            <div class="results-word-banner">
+              <p class="results-word" id="results-word"></p>
+            </div>
+            <p class="results-word-meaning" id="results-word-meaning" aria-live="polite"></p>
+            <div class="results-stats-panel">
+              <div class="results-stats-group">
+                <dl class="results-stats">
+                  <div class="results-stat-row"><dt data-i18n="match.time">${t('match.time')}</dt><dd id="results-time"></dd></div>
+                  <div class="results-stat-row"><dt data-i18n="match.attemptsLabel">${t('match.attemptsLabel')}</dt><dd id="results-guesses"></dd></div>
+                </dl>
+              </div>
+              ${comboStatsGroup}
+              ${dailyBestLine}
+            </div>
             ${resultsActions}
           </div>
         </div>`;
@@ -833,10 +1021,7 @@
         </header>
         ${tutorialLessonBar}
         ${learningStreakBar}
-        ${this.turnBased ? '' : `<div class="live-stats">
-          <span class="live-stat" id="match-timer">0:00</span>
-          <span class="live-stat" id="match-guesses">${t('match.guesses', { n: 0 })}</span>
-        </div>`}
+        ${statsRow}
         <section class="hint-area" id="match-hint" aria-label="Word hint"></section>
         <p class="hint-meaning hidden" id="match-meaning" aria-live="polite"></p>
         <section class="blocks-area opp-submission-area hidden" id="match-opp-area" aria-live="polite">
@@ -846,16 +1031,32 @@
         </section>
         <section class="blocks-area match-play-surface" aria-label="Syllable blocks">
           <p class="section-label" data-i18n="match.buildLabel">${t('match.buildLabel')}</p>
+          <div id="watch-reveal-banner" class="watch-reveal-banner hidden" aria-live="polite"></div>
           <div class="syllable-blocks-row" id="match-blocks"></div>
+          ${this.turnBased ? `<div id="turn-answer-banner" class="turn-answer-banner hidden" aria-live="polite">
+            <p class="turn-answer-word" id="turn-answer-word"></p>
+            <p class="turn-answer-meaning hidden" id="turn-answer-meaning"></p>
+          </div>` : ''}
         </section>
         <div class="game-feedback empty" id="match-feedback" role="status">&nbsp;</div>
         ${bankSectionHtml}
         <footer class="match-footer" aria-label="Game controls">
         ${hintDock}
         ${versusMeaningBtn}
+        ${versusDevAnswerBtn}
         <div class="match-actions">
-          <button type="button" class="btn btn-reset" id="match-reset" data-i18n="match.reset">${t('match.reset')}</button>
-          <button type="button" class="btn btn-check" id="match-check" disabled data-i18n="match.check">${t('match.check')}</button>
+          <button type="button" class="btn btn-reset match-action-btn" id="match-reset" data-i18n="match.reset">
+            <span class="match-action-btn__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false"><path fill="currentColor" d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0 0 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 0 0 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
+            </span>
+            <span class="match-action-btn__label">${t('match.reset')}</span>
+          </button>
+          <button type="button" class="btn btn-check match-action-btn match-action-btn--primary" id="match-check" disabled data-i18n="match.check">
+            <span class="match-action-btn__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false"><path fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            </span>
+            <span class="match-action-btn__label">${t('match.check')}</span>
+          </button>
         </div>
         </footer>
         ${resultsOverlay}
@@ -869,19 +1070,24 @@
         oppBlocks: this.root.querySelector('#match-opp-blocks'),
         oppStat: this.root.querySelector('#match-opp-stat'),
         blocks: this.root.querySelector('#match-blocks'),
+        watchRevealBanner: this.root.querySelector('#watch-reveal-banner'),
+        turnAnswerBanner: this.root.querySelector('#turn-answer-banner'),
+        turnAnswerWord: this.root.querySelector('#turn-answer-word'),
+        turnAnswerMeaning: this.root.querySelector('#turn-answer-meaning'),
         bank: this.root.querySelector('#match-bank'),
         feedback: this.root.querySelector('#match-feedback'),
         reset: this.root.querySelector('#match-reset'),
         check: this.root.querySelector('#match-check'),
         results: this.root.querySelector('#match-results'),
         resultsWord: this.root.querySelector('#results-word'),
+        resultsWordMeaning: this.root.querySelector('#results-word-meaning'),
         resultsTime: this.root.querySelector('#results-time'),
         resultsGuesses: this.root.querySelector('#results-guesses'),
         resultsStreak: this.root.querySelector('#results-streak'),
         resultsBest: this.root.querySelector('#results-best'),
-        resultsDict: this.root.querySelector('#results-dict'),
         continue: this.root.querySelector('#match-continue'),
         leave: this.root.querySelector('#match-leave'),
+        pauseBtn: this.root.querySelector('#match-pause-btn'),
         streak: this.root.querySelector('#match-streak'),
         streakHeadline: this.root.querySelector('#match-streak-headline'),
         streakProgress: this.root.querySelector('#match-streak-progress'),
@@ -889,11 +1095,14 @@
         guesses: this.root.querySelector('#match-guesses'),
         subtitle: this.root.querySelector('.title-block p'),
         rotationDock: this.root.querySelector('#rotation-dock'),
+        emoteMount: this.root.querySelector('#match-emote-mount'),
+        emoteSelf: this.root.querySelector('#match-emote-self'),
         mergeDockEl: this.root.querySelector('#vowel-merge-dock'),
         tokenCount: this.root.querySelector('#match-token-count'),
         orientHint: this.root.querySelector('#match-orient-hint'),
         disableHint: this.root.querySelector('#match-disable-hint'),
         meaningBtn: this.root.querySelector('#match-meaning-btn'),
+        devAnswerBtn: this.root.querySelector('#match-dev-answer-btn'),
       };
 
       this.orientHintUsed = false;
@@ -909,7 +1118,7 @@
       this.mergeDock = new global.VowelMergeDock(this.els.mergeDockEl, {
         getTile: (id) => this.tileMap[id],
         returnTileToBank: (tile) => this.returnTileToBank(tile),
-        clearZoneTile: (tile) => this.returnTileToBank(tile),
+        detachZoneTile: (tile) => this.detachZoneTile(tile),
         removeTile: (id) => this.removeTile(id),
         createMergedTile: (opts) => this.createMergedTile(opts),
         createBasicTile: (opts) => this.createBasicTile(opts),
@@ -923,6 +1132,12 @@
           if (e.target.closest('.jamo-tile')) return;
           this.onMergeTargetTap({ type: 'slot', index });
         });
+      });
+
+      this.mergeDock.resultEl?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (e.target.closest('.jamo-tile')) return;
+        this.onMergeTargetTap({ type: 'result' });
       });
 
       this.els.rotationDock.addEventListener('click', (e) => {
@@ -944,8 +1159,13 @@
       this.els.orientHint?.addEventListener('click', () => this.useOrientHint());
       this.els.disableHint?.addEventListener('click', () => this.useDisableHint());
       this.els.meaningBtn?.addEventListener('click', () => this.useMeaningHint());
+      this.els.devAnswerBtn?.addEventListener('click', () => this.devRevealAnswer());
       this.els.continue?.addEventListener('click', () => this.continuePlaying());
       this.els.leave?.addEventListener('click', () => { if (!this.isDaily) this.saveBestOnLeave(); });
+      this.els.pauseBtn?.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.openPauseMenu();
+      });
       this.root.addEventListener('click', (e) => {
         if (!e.target.closest('.jamo-tile') && !e.target.closest('.drop-zone')
           && !e.target.closest('#rotation-dock') && !e.target.closest('.vowel-merge-dock')) {
@@ -963,11 +1183,7 @@
         document.querySelector('.match-hint-dock')?.classList.add('hidden');
         document.querySelector('.live-stats')?.classList.add('hidden');
       } else if (this.isDaily) {
-        const activeDate = MD.getActiveDateKey();
-        this.dailySaved = MD.loadDailySaved(activeDate);
-        const dailyList = MatchWords?.getWordsForLength?.(4) || MATCH_WORDS;
-        const word = MD.pickDailyMatchWord(dailyList.length ? dailyList : MATCH_WORDS, activeDate);
-        this.startRound({ word }, this.dailySaved);
+        this.startDailyFresh();
       } else if (this.multiFindMode) {
         this.els.mergeDockEl?.classList.add('hidden');
         this.startMultiRound(MMP()?.pickPuzzle?.());
@@ -984,8 +1200,10 @@
 
       if (global.I18n) {
         global.I18n.applyToDocument(this.root);
+        applyDropZoneGuideLabels(this.root);
         global.I18n.onChange(() => {
           global.I18n.applyToDocument(this.root);
+          applyDropZoneGuideLabels(this.root);
           this.updateLearningStreakDisplay();
           if (this.multiFindMode && this.multiPuzzle) this.renderMultiHint(this.multiPuzzle);
           else if (this.currentWord) this.renderHint(this.currentWord);
@@ -995,6 +1213,12 @@
         prefs().onChange(() => this.applyMeaningPreference());
       }
       this.applyMeaningPreference();
+
+      if (!this._dockResizeBound) {
+        this._dockResizeBound = true;
+        this._onDockResize = () => this.syncDockTileSize();
+        window.addEventListener('resize', this._onDockResize);
+      }
     }
 
     applyMeaningPreference() {
@@ -1013,6 +1237,14 @@
     async resolveWordMeaning(word) {
       const q = String(word || '').trim();
       if (!q) return '';
+
+      const dictEntry = this.multiDictionaryEntries?.[q]
+        || (q === this.discoveredWord ? this.discoveredDictionaryEntry : null);
+      const dictMeaning = global.DictionaryService?.formatEntryMeaning?.(dictEntry);
+      if (dictMeaning) return dictMeaning;
+
+      const glossary = global.LearningWords?.getWordMeaning?.(q);
+      if (glossary) return glossary;
       const entry = global.LearningWords?.findWordEntry?.(q);
       if (entry) {
         const normalized = global.LearningWords?.getNormalizedWord?.(q)
@@ -1023,7 +1255,10 @@
       try {
         const result = await global.DictionaryService?.lookupWord?.(q);
         if (result?.found && result.entry) {
-          return result.entry.definition || result.entry.englishWord || '';
+          return global.DictionaryService?.formatEntryMeaning?.(result.entry)
+            || result.entry.definition
+            || result.entry.englishWord
+            || '';
         }
       } catch { /* offline or API error */ }
       return '';
@@ -1098,6 +1333,24 @@
       }
     }
 
+    isJamoSoloMode() {
+      return !this.versus && !this.isDaily && !this.tutorialMode && !this.multiFindMode && !this.turnBased;
+    }
+
+    openPauseMenu() {
+      if (!this.isJamoSoloMode() || !global.PauseQuitUI) return;
+      global.PauseQuitUI.show({
+        mode: 'jamo',
+        streak: this.streak,
+        onResume: () => {},
+        onQuit: () => {
+          this.streak = 0;
+          this.saveBestOnLeave();
+          global.location.href = 'index.html';
+        },
+      });
+    }
+
     updateStreakDisplay() {
       if (!this.els.streak) return;
       this.els.streak.textContent = `🔥 ${this.streak}`;
@@ -1139,6 +1392,7 @@
                 zone: zone.zoneType,
                 subIndex: zone.subIndex,
                 char: tile.char,
+                tileId: tile.id,
               });
             }
           }
@@ -1156,6 +1410,16 @@
     saveDailyProgress(over, won) {
       if (!this.isDaily || !MD) return;
       MD.saveDailyProgress(this.serializeDailyState(over, won), MD.getActiveDateKey());
+    }
+
+    startDailyFresh() {
+      if (!this.isDaily || !MD) return;
+      this.els.results?.classList.add('hidden');
+      const activeDate = MD.getActiveDateKey();
+      const dailyLength = MD.DAILY_WORD_LENGTH ?? 2;
+      const dailyList = MatchWords?.getWordsForLength?.(dailyLength) || MATCH_WORDS;
+      const word = MD.pickDailyMatchWord(dailyList.length ? dailyList : MATCH_WORDS, activeDate);
+      this.startRound({ word }, null);
     }
 
     restoreDailyLocked(locked) {
@@ -1192,6 +1456,9 @@
       this.tileMap = {};
       this.selectedTile = null;
       this.currentWord = wordData;
+      this.discoveredWord = null;
+      this.discoveredDictionaryEntry = null;
+      this.multiDictionaryEntries = {};
       const word = typeof wordData?.word === 'string' ? wordData.word.trim() : '';
       if (!word) {
         console.error('[Jamodeul] Korean Match startRound: missing word');
@@ -1221,8 +1488,10 @@
       }
       if (!this.isDaily && this.els.streak) this.updateStreakDisplay();
 
-      this.renderHint(wordData);
+      this.hideTurnAnswerBanner();
       this.prefetchMeaning(word);
+
+      this.renderHint(wordData);
       this.updateMeaningDisplay();
       this.renderBlocks();
       this.renderBank();
@@ -1233,7 +1502,7 @@
         this.restoreDailyLocked(saved.locked);
       }
 
-      if (saved?.over && saved?.won) {
+      if (!this.isDaily && saved?.over && saved?.won) {
         this.checkedComplete = true;
         this.els.check.disabled = true;
         this.els.reset.disabled = true;
@@ -1260,6 +1529,7 @@
 
       this.multiPuzzle = picked;
       this.multiFoundWords = [];
+      this.multiDictionaryEntries = {};
       this.checkedComplete = false;
       this.checking = false;
       this.turnSubmitting = false;
@@ -1314,10 +1584,75 @@
       });
     }
 
-    hasAllMultiTilesPlaced() {
+    /** True when every jamo tile has left the dock (bank). */
+    hasAllDockTilesOnBoard() {
       const tiles = Object.values(this.tileMap);
       if (!tiles.length) return false;
       return tiles.every((tile) => !tile.inBank);
+    }
+
+    hasAllMultiTilesPlaced() {
+      return this.hasAllDockTilesOnBoard();
+    }
+
+    getLocalWordFallback(word) {
+      if (this.multiFindMode) {
+        return !!this.multiPuzzle?.validWords?.includes(word);
+      }
+      return word === (this.currentWord?.word || '');
+    }
+
+    matchesDictionaryEntry(result, word) {
+      return global.DictionaryService?.matchesExactEntry?.(result, word) || false;
+    }
+
+    /** Compose the full word when every syllable block is complete on the board. */
+    getSubmittedBoardWord() {
+      if (!this.blocks.length) return null;
+      const word = this.composeWordFromBlocks();
+      if (!word) return null;
+      const syllables = [...word].filter(HC.isHangulSyllable);
+      if (syllables.length !== this.blocks.length) return null;
+      return word;
+    }
+
+    /** Dictionary alternate answers: regular match only, every dock tile placed. */
+    shouldUseDictionaryCheck() {
+      if (this.tutorialMode || this.isDaily || this.multiFindMode) return false;
+      if (this.turnBased && this.fixedWord) return false;
+      return this.hasAllDockTilesOnBoard();
+    }
+
+    async isDictionaryAcceptedWord(word) {
+      const trimmed = String(word || '').trim();
+      if (!trimmed) return { valid: false, offline: false };
+
+      const DS = global.DictionaryService;
+      if (!DS?.validateWord) return { valid: false, offline: true };
+
+      try {
+        const result = await DS.validateWord(trimmed);
+        const valid = !!(result?.valid || DS.matchesExactEntry?.(result, trimmed));
+        const offline = !!(result?.offline || result?.error || result?.code === 'CONFIG');
+        return { valid, offline: offline && !valid, entry: valid ? (result.entry || null) : null };
+      } catch {
+        return { valid: false, offline: true };
+      }
+    }
+
+    composeWordFromBlocks() {
+      if (!this.blocks.length) return null;
+      const parts = this.blocks.map((block, i) => this.composeSyllableFromBlock(block, i));
+      if (parts.some((part) => !part)) return null;
+      return parts.join('');
+    }
+
+    getResolvedWord() {
+      return this.discoveredWord || this.currentWord?.word || '';
+    }
+
+    async isMultiFindWordAccepted(word) {
+      return this.isDictionaryAcceptedWord(word);
     }
 
     async checkMultiWordAnswer() {
@@ -1325,7 +1660,7 @@
       if (!this.hasAllMultiTilesPlaced() || this.checking || this.checkedComplete) return;
 
       const composed = this.composeSyllableFromBlock(this.blocks[0]);
-      if (!composed || !this.multiPuzzle.validWords.includes(composed)) {
+      if (!composed) {
         this.feedback.show('error', t('match.multiFind.notValid'));
         return;
       }
@@ -1335,6 +1670,21 @@
       }
 
       this.checking = true;
+      this.updateCheckButton();
+      this.feedback.show('info', t('match.multiFind.checking'));
+
+      const accepted = await this.isDictionaryAcceptedWord(composed);
+      if (!accepted.valid) {
+        this.checking = false;
+        this.updateCheckButton();
+        this.feedback.show('error', accepted.offline
+          ? t('match.feedbackDictionaryOffline')
+          : t('match.multiFind.notValid'));
+        return;
+      }
+      if (accepted.entry) {
+        this.multiDictionaryEntries[composed] = accepted.entry;
+      }
       this.guessCount += 1;
       this.multiFoundWords.push(composed);
       this.renderMultiHint(this.multiPuzzle);
@@ -1358,7 +1708,12 @@
         }
         const streakResult = this.recordLearningStreakActivity();
         if (global.XpService?.awardAndCelebrate) {
-          global.XpService.awardAndCelebrate({ mode: 'koreanMatch', wordId: this.multiFoundWords.join('') });
+          global.XpService.awardAndCelebrate({
+            mode: 'koreanMatch',
+            wordId: this.multiFoundWords.join(''),
+            won: true,
+            guessCount: this.guessCount,
+          });
         }
         this.feedback.show('success', t('match.multiFind.win'));
         if (streakResult?.newMilestone) {
@@ -1388,6 +1743,13 @@
 
     renderHint(wordData) {
       if (this.turnBased) {
+        if (this.els.hint) {
+          this.els.hint.innerHTML = '';
+          this.els.hint.classList.add('hidden');
+        }
+        return;
+      }
+      if (!this.versus) {
         if (this.els.hint) {
           this.els.hint.innerHTML = '';
           this.els.hint.classList.add('hidden');
@@ -1430,26 +1792,101 @@
         this.els.blocks.appendChild(block.el);
       });
       this.syncBlocksRowSylCount(this.els.blocks);
+      applyDropZoneGuideLabels(this.els.blocks);
     }
 
     syncBlocksRowSylCount(rowEl) {
       if (!rowEl) return;
       const n = this.syllables?.length || this.blocks.length || 0;
-      const count = String(Math.max(n, 1));
+      const layoutCols = layoutSylColumnCount(n);
       rowEl.dataset.sylCount = String(n);
-      rowEl.style.setProperty('--syl-count', count);
-      this.root?.style?.setProperty('--syl-count', count);
+      rowEl.style.setProperty('--syl-count', String(layoutCols));
+      this.root?.style?.setProperty('--syl-count', String(layoutCols));
     }
 
     renderBank() {
       this.els.bank.innerHTML = '';
+      this._removedTileIds = [];
       let tileCounter = 0;
-      HC.shuffle(HC.buildTilesFromWord(this.syllables)).forEach((def) => {
-        const tile = new JamoTile({ ...def, id: `tile-${tileCounter++}` });
+      const rng = this.sharedSeed ? createSeededRng(this.sharedSeed) : null;
+      const defs = rng
+        ? seededShuffle(HC.buildTilesFromWord(this.syllables), rng)
+        : HC.shuffle(HC.buildTilesFromWord(this.syllables));
+      defs.forEach((def) => {
+        const tile = new JamoTile({ ...def, id: `tile-${tileCounter++}`, targetChar: def.char });
         this.tileMap[tile.id] = tile;
-        if (this.shuffleRotations) this.applyRandomTileRotation(tile);
+        if (this.shuffleRotations) this.applyRandomTileRotation(tile, rng);
         this.els.bank.appendChild(tile.el);
       });
+      this.syncDockTileSize();
+    }
+
+    /** Deterministic replacement for HC.randomRotateJamo when a shared rng is used. */
+    seededRotateJamo(char, rng) {
+      const cycle = [];
+      let cur = HC.rotateJamo(char);
+      while (cur && cur !== char && cycle.length < 6) {
+        cycle.push(cur);
+        cur = HC.rotateJamo(cur);
+      }
+      if (!cycle.length) return char;
+      return cycle[Math.floor(rng() * cycle.length)];
+    }
+
+    syncDockTileSize() {
+      const bank = this.els.bank;
+      if (!bank || (this.versus && !this.turnBased)) return;
+
+      const tiles = bank.querySelectorAll('.jamo-tile:not(.in-zone):not(.hidden-in-bank)');
+      const n = tiles.length;
+      bank.dataset.tileCount = String(n);
+
+      const rootTile = parseFloat(getComputedStyle(this.root).getPropertyValue('--tile-size'));
+      const tileSize = Number.isFinite(rootTile) && rootTile > 0 ? rootTile : 46;
+
+      if (!n) {
+        bank.style.removeProperty('--dock-tile-size');
+        bank.style.removeProperty('--turn-dock-tile-size');
+        bank.style.removeProperty('min-height');
+        bank.style.removeProperty('max-height');
+        bank.classList.remove('jamo-bank--wrap12');
+        bank.removeAttribute('data-dock-fitted');
+        return;
+      }
+
+      const bankStyle = getComputedStyle(bank);
+      const gap = parseFloat(bankStyle.gap) || 6;
+      const padX = (parseFloat(bankStyle.paddingLeft) || 0) + (parseFloat(bankStyle.paddingRight) || 0);
+      const padY = (parseFloat(bankStyle.paddingTop) || 0) + (parseFloat(bankStyle.paddingBottom) || 0);
+
+      let innerW = bank.clientWidth - padX;
+      if (innerW < tileSize && this.turnBased) {
+        const dockStack = bank.closest('.race-turn-dock-stack');
+        if (dockStack?.clientWidth > 0) innerW = dockStack.clientWidth - padX;
+      }
+      innerW = Math.max(innerW, tileSize);
+
+      const cols = Math.max(1, Math.floor((innerW + gap) / (tileSize + gap)));
+      const rows = Math.ceil(n / cols);
+      bank.classList.toggle('jamo-bank--wrap12', rows > 1);
+
+      bank.style.setProperty('--dock-tile-size', `${tileSize}px`);
+      bank.style.setProperty('--turn-dock-tile-size', `${tileSize}px`);
+
+      const fittedH = rows * tileSize + gap * Math.max(rows - 1, 0) + padY;
+      bank.style.minHeight = `${Math.ceil(fittedH)}px`;
+      bank.style.maxHeight = 'none';
+      bank.style.overflowX = 'hidden';
+      bank.style.overflowY = 'visible';
+      bank.dataset.dockFitted = 'true';
+    }
+
+    getVowelSlotSyllableIndex(tile) {
+      if (tile.zoneRef
+        && (tile.zoneRef.zoneType === 'jungH' || tile.zoneRef.zoneType === 'jungV')) {
+        return tile.zoneRef.syllableIndex;
+      }
+      return tile.syllableIndex;
     }
 
     findZone(zoneType, syllableIndex = 0, subIndex = 0) {
@@ -1458,6 +1895,43 @@
       return block.getAllZones().find(
         (z) => z.zoneType === zoneType && (z.subIndex ?? 0) === (subIndex ?? 0)
       ) || null;
+    }
+
+    findVowelTargetZone(syllableIndex, zoneType, preferredSubIndex = 0) {
+      if (zoneType === 'jungH') {
+        return this.findZone('jungH', syllableIndex, 0);
+      }
+      const preferred = this.findZone('jungV', syllableIndex, preferredSubIndex);
+      if (preferred && !preferred.placedTileId) return preferred;
+      const block = this.blocks[syllableIndex];
+      if (!block) return preferred;
+      return block.getAllZones().find(
+        (z) => z.zoneType === 'jungV' && !z.placedTileId
+      ) || preferred;
+    }
+
+    isOtherVowelSlotOccupied(tile) {
+      if (!tile.zoneRef) return false;
+      const block = this.blocks[this.getVowelSlotSyllableIndex(tile)];
+      if (!block) return false;
+      const myZone = tile.zoneRef.zoneType;
+      return block.getAllZones().some((z) => (
+        z.placedTileId
+        && z.placedTileId !== tile.id
+        && ((myZone === 'jungH' && z.zoneType === 'jungV')
+          || (myZone === 'jungV' && z.zoneType === 'jungH'))
+      ));
+    }
+
+    syncSyllableVowelLayout(block) {
+      if (!block?.el) return;
+      const zones = block.getAllZones();
+      const hasH = zones.some((z) => z.zoneType === 'jungH' && z.placedTileId);
+      const hasV = zones.some((z) => z.zoneType === 'jungV' && z.placedTileId);
+      block.el.classList.remove('vowel-layout-stack', 'vowel-layout-side', 'vowel-layout-compound');
+      if (hasH && hasV) block.el.classList.add('vowel-layout-compound');
+      else if (hasH) block.el.classList.add('vowel-layout-stack');
+      else if (hasV) block.el.classList.add('vowel-layout-side');
     }
 
     renderCustomBank(tileDefs) {
@@ -1470,15 +1944,17 @@
           zoneType: def.zoneType,
           syllableIndex: def.syllableIndex ?? 0,
           subIndex: def.subIndex ?? 0,
+          targetChar: def.targetChar ?? def.char,
           id: `tile-${tileCounter++}`,
         });
         if (def.startChar) {
-          tile.setChar(def.startChar);
           tile.zoneType = HC.zoneTypeForRotatedJamo(def.startChar, tile.zoneType);
+          tile.setChar(def.startChar);
         }
         this.tileMap[tile.id] = tile;
         this.els.bank.appendChild(tile.el);
       });
+      this.syncDockTileSize();
     }
 
     applyPrePlaced(placements) {
@@ -1490,13 +1966,13 @@
           zoneType: p.zoneType,
           syllableIndex: p.syllableIndex ?? 0,
           subIndex: p.subIndex ?? 0,
+          targetChar: p.char,
           id: `pre-${p.zoneType}-${p.syllableIndex ?? 0}`,
         });
         this.tileMap[tile.id] = tile;
         this.attachTileToZone(tile, zone);
         if (p.locked) {
-          tile.locked = true;
-          zone.setLocked(true);
+          this.markPlacementLocked(zone, tile);
         }
       });
     }
@@ -1524,7 +2000,8 @@
 
       this.els.mergeDockEl?.classList.toggle('hidden', !!step.hideMerge);
       this.els.rotationDock?.classList.toggle('hidden', !!step.hideRotation);
-      this.els.check?.classList.toggle('hidden', step.type !== 'free-solve');
+      this.els.check?.classList.remove('hidden');
+      this.tutorialCheckAllowed = false;
       this.els.mergeDockEl?.classList.remove('tutorial-merge-focus');
       if (step.type === 'guided-merge') {
         this.els.mergeDockEl?.classList.add('tutorial-merge-focus');
@@ -1562,20 +2039,20 @@
       return toReveal.length;
     }
 
-    applyRandomTileRotation(tile) {
+    applyRandomTileRotation(tile, rng) {
       if (!HC.canRotateJamo(tile.char)) return;
-      const syl = this.syllables[tile.syllableIndex];
-      const expected = syl?.vowelSlots?.find(
-        (vs) => vs.zoneType === tile.zoneType && vs.subIndex === tile.subIndex
-      )?.expected ?? syl?.zones?.[tile.zoneType]?.expected;
+      const expected = tile.targetChar;
       if (!expected) return;
-      const next = HC.randomRotateJamo(tile.char, true);
+      const next = rng
+        ? this.seededRotateJamo(tile.char, rng)
+        : HC.randomRotateJamo(tile.char, true);
       if (next === tile.char) return;
-      tile.setChar(next);
       tile.zoneType = HC.zoneTypeForRotatedJamo(next, tile.zoneType);
+      tile.setChar(next);
     }
 
     getExpectedForTile(tile) {
+      if (tile.targetChar) return tile.targetChar;
       const syl = this.syllables[tile.syllableIndex];
       if (!syl) return null;
       if (tile.zoneType === 'cho') return syl.zones.cho.expected;
@@ -1600,7 +2077,11 @@
       if (this.selectedTile) this.selectedTile.setSelected(false);
       this.selectedTile = tile;
       tile.setSelected(true);
+      global.SoundEffects?.select?.();
+      this.updateRotationDockLabel();
       this.updateSelectionHighlights();
+      this.pulseLiveAction('select');
+      this.notifyTurnLiveChange();
     }
 
     trySwapWithTile(tileA, tileB) {
@@ -1623,6 +2104,30 @@
       return false;
     }
 
+    canSplitMergedInBank(tile) {
+      if (!tile?.isMerged || tile.locked || !tile.inBank || tile.mergeDockRef) return false;
+      if (!HC.isVerticalMergeMedial(tile.char)) return false;
+      if (this.mergeDock?.hasResult?.() || this.mergeDock?.hasSlotTiles?.()) return false;
+      return true;
+    }
+
+    canRotateTile(tile) {
+      if (!tile || tile.locked) return false;
+      if (tile.mergeDockRef === 'slot') {
+        return HC.canRotateJamoInMergeSlot?.(tile.char) === true;
+      }
+      if (tile.mergeDockRef) return false;
+      const inVowelSlot = !!(tile.zoneRef
+        && (tile.zoneRef.zoneType === 'jungH' || tile.zoneRef.zoneType === 'jungV'));
+      if (inVowelSlot) {
+        return HC.canRotateJamoForZone(tile.char, tile.zoneRef.zoneType, {
+          inVowelSlot: true,
+          otherSlotOccupied: this.isOtherVowelSlotOccupied(tile),
+        });
+      }
+      return HC.canRotateJamo(tile.char);
+    }
+
     updateSelectionHighlights() {
       this.clearSelectionHighlights();
       const tile = this.selectedTile;
@@ -1637,8 +2142,14 @@
         });
       });
 
-      if (HC.canRotateJamo(tile.char) && !this.els.rotationDock?.classList.contains('disabled')) {
+      const dockMode = this.getRotationDockMode();
+      if ((dockMode === 'split' || this.canRotateTile(tile))
+          && !this.els.rotationDock?.classList.contains('disabled')) {
         this.els.rotationDock?.classList.add('tap-target');
+      }
+
+      if (tile.mergeDockRef === 'result' || this.canSplitMergedInBank(tile)) {
+        this.els.bank?.classList.add('tap-target');
       }
 
       this.mergeDock?.highlightValidTargetsForTile(tile);
@@ -1651,6 +2162,7 @@
         });
       });
       this.els.rotationDock?.classList.remove('tap-target');
+      this.els.bank?.classList.remove('tap-target');
       this.mergeDock?.clearTapHighlights();
     }
 
@@ -1718,7 +2230,10 @@
       if (this.mergeDock?.tryDrop(this.selectedTile, target)) {
         this.clearSelection();
         this.updateRotationDockLabel();
+        this.mergeDock?.updatePreview?.();
         this.onTutorialEvent?.('mergeSlot', { game: this });
+        this.pulseLiveAction('move');
+        this.notifyTurnLiveChange();
       }
     }
 
@@ -1766,6 +2281,17 @@
       zone.setPlaced(tileEl, tile.id);
       tile.setInZone(zone);
       zone.placedTileId = tile.id;
+      this.pulseLiveAction('move');
+      this.notifyTurnLiveChange();
+    }
+
+    detachZoneTile(tile) {
+      if (!tile?.zoneRef) return;
+      tile.zoneRef.placedTileId = null;
+      tile.zoneRef.clear();
+      tile.zoneRef = null;
+      tile.inBank = false;
+      tile.el.classList.remove('in-zone');
     }
 
     applyTileLocation(tile, loc) {
@@ -1810,16 +2336,19 @@
       this.bounceTile(tileA.el);
       this.bounceTile(tileB.el);
       this.updateRotationDockLabel();
+      this.mergeDock?.updatePreview?.();
       this.updateCheckButton();
+      this.pulseLiveAction('move');
+      this.notifyTurnLiveChange();
       return true;
     }
 
     /** Returns 'merge' | 'split' | 'rotate' depending on merge dock state. */
     getRotationDockMode() {
       if (!this.mergeDock) return 'rotate';
-      const bothSlots = this.mergeDock.slotTileIds[0] && this.mergeDock.slotTileIds[1];
-      if (bothSlots) return 'merge';
-      if (this.mergeDock.resultTileId) return 'split';
+      if (this.mergeDock.canMerge?.()) return 'merge';
+      if (this.mergeDock.canSplit?.()) return 'split';
+      if (this.canSplitMergedInBank(this.selectedTile)) return 'split';
       return 'rotate';
     }
 
@@ -1859,23 +2388,50 @@
       const mode = this.getRotationDockMode();
 
       if (mode === 'merge') {
+        if (!this.mergeDock?.canMerge?.()) {
+          this.feedback?.show('info', t('match.mergeBlocked'));
+          return;
+        }
         if (this.tutorialValidator && !this.tutorialValidator('merge', { game: this })) {
           return;
         }
+        const ingredientIds = [...(this.mergeDock?.slotTileIds || [null, null])];
         this.mergeDock.tryCompose();
         this.updateRotationDockLabel();
         this.updateCheckButton();
         this.onTutorialEvent?.('merge', { game: this });
+        this.pulseLiveAction('merge', { ingredientIds });
+        this.notifyTurnLiveChange();
         return;
       }
 
       if (mode === 'split') {
-        const resultTile = this.mergeDock.getResultTile();
-        if (resultTile) {
-          this.mergeDock.unmergeTile(resultTile);
+        if (this.mergeDock?.canSplit?.()) {
+          const resultTile = this.mergeDock.getResultTile();
+          if (resultTile) {
+            const fromResultId = this.mergeDock.resultTileId;
+            this.mergeDock.unmergeTile(resultTile);
+            this.clearSelection();
+            this.updateRotationDockLabel();
+            this.updateCheckButton();
+            this.syncDockTileSize();
+            this.pulseLiveAction('split', { fromResultId });
+            this.notifyTurnLiveChange();
+          }
+          return;
+        }
+        if (this.canSplitMergedInBank(this.selectedTile)) {
+          const fromResultId = this.selectedTile?.id;
+          this.mergeDock.unmergeTile(this.selectedTile);
+          this.clearSelection();
           this.updateRotationDockLabel();
           this.updateCheckButton();
+          this.syncDockTileSize();
+          this.pulseLiveAction('split', { fromResultId });
+          this.notifyTurnLiveChange();
+          return;
         }
+        this.feedback?.show('info', t('match.splitBlocked'));
         return;
       }
 
@@ -1890,45 +2446,199 @@
       }
       if (this.rotateTile(this.selectedTile)) {
         this.updateSelectionHighlights();
+        this.notifyTurnLiveChange();
       }
     }
 
     rotateTile(tile) {
       if (tile.locked || this.checking || this.checkedComplete) return false;
+
+      if (tile.mergeDockRef === 'slot') {
+        const rotation = HC.rotateJamoInMergeSlot?.(tile.char);
+        if (!rotation || rotation.char === tile.char) return false;
+        const prev = tile.char;
+        const next = rotation.char;
+        if (this.tutorialValidator && !this.tutorialValidator('rotate', { tile, prev, next, game: this })) {
+          return false;
+        }
+        tile.setChar(next);
+        tile.zoneType = 'jungV';
+        this.bounceTile(tile.el);
+        if (!this.tutorialMode) {
+          this.feedback.show('info', t('match.rotateSuccess', { from: prev, to: next }));
+        }
+        this.updateRotationDockLabel();
+        this.mergeDock?.updatePreview?.();
+        this.updateCheckButton();
+        this.onTutorialEvent?.('rotate', { tile, prev, next, game: this });
+        global.SoundEffects?.rotate?.();
+        this.pulseLiveAction('rotate', { tileId: tile.id, at: this.serializeTileLiveRef(tile) });
+        return true;
+      }
+
+      if (tile.mergeDockRef) return false;
       const prev = tile.char;
-      const next = HC.rotateJamo(prev);
-      if (!next) return false;
+      const inVowelSlot = !!(tile.zoneRef
+        && (tile.zoneRef.zoneType === 'jungH' || tile.zoneRef.zoneType === 'jungV'));
+      const prevZone = tile.zoneRef;
+      const sourceSyllableIndex = inVowelSlot
+        ? prevZone.syllableIndex
+        : tile.syllableIndex;
+      const slotZoneType = inVowelSlot ? prevZone.zoneType : tile.zoneType;
+      const rotation = HC.rotateJamoForZone(prev, slotZoneType, {
+        inVowelSlot,
+        otherSlotOccupied: inVowelSlot ? this.isOtherVowelSlotOccupied(tile) : false,
+      });
+      if (!rotation || rotation.char === prev) return false;
+      const next = rotation.char;
       if (this.tutorialValidator && !this.tutorialValidator('rotate', { tile, prev, next, game: this })) {
         return false;
       }
+
       tile.setChar(next);
-      tile.zoneType = HC.zoneTypeForRotatedJamo(next, tile.zoneType);
+      tile.zoneType = rotation.zoneType;
+      if (rotation.zoneType === 'jungH') {
+        tile.subIndex = 0;
+      }
+
+      if (inVowelSlot && prevZone && rotation.zoneType !== prevZone.zoneType) {
+        const targetZone = this.findVowelTargetZone(
+          sourceSyllableIndex,
+          rotation.zoneType,
+          rotation.zoneType === 'jungV' ? (tile.subIndex ?? 0) : 0
+        );
+        if (!targetZone
+          || targetZone.syllableIndex !== sourceSyllableIndex
+          || (targetZone.placedTileId && targetZone.placedTileId !== tile.id)) {
+          tile.setChar(prev);
+          tile.zoneType = prevZone.zoneType;
+          return false;
+        }
+        prevZone.clear();
+        tile.zoneRef = null;
+        this.attachTileToZone(tile, targetZone);
+        tile.syllableIndex = sourceSyllableIndex;
+        if (rotation.zoneType === 'jungV') {
+          tile.subIndex = targetZone.subIndex ?? 0;
+        }
+        this.syncSyllableVowelLayout(this.blocks[sourceSyllableIndex]);
+      } else if (inVowelSlot) {
+        tile.syllableIndex = sourceSyllableIndex;
+        this.syncSyllableVowelLayout(this.blocks[sourceSyllableIndex]);
+      }
+
       this.bounceTile(tile.el);
       if (!this.tutorialMode) {
         this.feedback.show('info', t('match.rotateSuccess', { from: prev, to: next }));
       }
       this.updateCheckButton();
       this.onTutorialEvent?.('rotate', { tile, prev, next, game: this });
+      global.SoundEffects?.rotate?.();
+      this.pulseLiveAction('rotate', { tileId: tile.id, at: this.serializeTileLiveRef(tile) });
       return true;
     }
 
     updateHintButtons() {
       const blocked = this.checkedComplete || this.checking;
       const HT = global.HintTokens;
+      const unlimited = HT?.hasDevUnlimited?.() === true;
       const tokens = HT?.get?.() ?? 0;
       if (this.els.tokenCount && HT) {
-        this.els.tokenCount.textContent = String(tokens);
+        this.els.tokenCount.textContent = unlimited ? '∞' : String(tokens);
       }
       if (this.els.orientHint) {
-        this.els.orientHint.disabled = blocked || this.orientHintUsed || tokens < 2;
+        this.els.orientHint.disabled = blocked || this.orientHintUsed || (!unlimited && tokens < 2);
       }
       if (this.els.disableHint) {
-        this.els.disableHint.disabled = blocked || this.disableHintUsed || tokens < 2;
+        this.els.disableHint.disabled = blocked || this.disableHintUsed || (!unlimited && tokens < 2);
       }
       if (this.els.meaningBtn) {
         const needsTokens = !this.versus;
-        this.els.meaningBtn.disabled = blocked || this.meaningRevealed || (needsTokens && tokens < 2);
+        this.els.meaningBtn.disabled = blocked || this.meaningRevealed
+          || (needsTokens && !unlimited && tokens < 2);
       }
+      if (this.els.devAnswerBtn) {
+        this.els.devAnswerBtn.disabled = blocked || this.multiFindMode || !this.currentWord?.word;
+      }
+    }
+
+    findDevTileForZone(zone) {
+      const expected = zone.expected;
+      if (!expected) return null;
+      const candidates = Object.values(this.tileMap).filter((tile) => !tile.locked);
+      const canUse = (tile) => {
+        const probe = {
+          char: expected,
+          zoneType: zone.zoneType,
+          subIndex: zone.subIndex ?? 0,
+          syllableIndex: zone.syllableIndex,
+          isMerged: zone.zoneType === 'jungV'
+            && (HC.isComposedMedial(expected) || HC.isVerticalMergeMedial(expected)),
+        };
+        return HC.isValidMatchPlacement({ ...tile, ...probe }, zone);
+      };
+      const pick = (list) => list.find(canUse) || null;
+      return pick(candidates.filter((tile) => tile.char === expected))
+        || pick(candidates.filter((tile) => tile.inBank))
+        || pick(candidates)
+        || null;
+    }
+
+    prepareDevTileForZone(tile, zone) {
+      const expected = zone.expected;
+      if (!expected || !tile) return tile;
+      tile.setChar(expected);
+      tile.zoneType = zone.zoneType;
+      tile.subIndex = zone.subIndex ?? 0;
+      tile.syllableIndex = zone.syllableIndex;
+      if (zone.zoneType === 'jungV'
+        && (HC.isComposedMedial(expected) || HC.isVerticalMergeMedial(expected))) {
+        tile.isMerged = true;
+      } else {
+        tile.isMerged = false;
+      }
+      return tile;
+    }
+
+    placeDevAnswerTile(zone) {
+      if (zone.locked || zone.expected === null || this.isZoneCorrect(zone)) return false;
+      const tile = this.findDevTileForZone(zone);
+      if (!tile) return false;
+      this.prepareDevTileForZone(tile, zone);
+      if (tile.mergeDockRef) {
+        this.returnTileToBank(tile);
+        this.prepareDevTileForZone(tile, zone);
+      }
+      return this.tryPlaceTile(tile, zone);
+    }
+
+    async devRevealAnswer() {
+      if (!isDevModeActive() || this.tutorialMode || this.multiFindMode) return;
+      if (this.checkedComplete || this.checking || this.turnSubmitting) return;
+      const word = this.currentWord?.word;
+      if (!word) return;
+
+      if (this.versus && this.els.hint?.querySelector('.hint-letter')) {
+        await this.revealHintWord(word);
+      } else if (this.els.hint) {
+        this.els.hint.classList.remove('hidden');
+        this.els.hint.innerHTML = `
+          <p class="hint-prompt dev-answer-reveal">${escapeHtml(t('match.dev.answer', { word }))}</p>
+        `;
+      }
+
+      this.blocks.forEach((block) => {
+        block.getAllZones().forEach((zone) => {
+          if (this.placeDevAnswerTile(zone)) {
+            this.syncSyllableVowelLayout(this.blocks[zone.syllableIndex]);
+          }
+        });
+      });
+
+      this.clearSelection();
+      this.updateRotationDockLabel();
+      this.updateCheckButton();
+      this.feedback.show('info', t('match.dev.answer', { word }));
     }
 
     useOrientHint() {
@@ -1942,19 +2652,26 @@
 
       let count = 0;
       Object.values(this.tileMap).forEach((tile) => {
-        if (tile.locked) return;
+        if (tile.locked || tile.isMerged) return;
         const expected = this.getExpectedForTile(tile);
-        if (!expected || !HC.canRotateJamo(tile.char)) return;
-        const oriented = HC.orientJamoToTarget(tile.char, expected);
-        if (!oriented || oriented === tile.char) return;
-        tile.setChar(oriented);
-        tile.zoneType = HC.zoneTypeForRotatedJamo(oriented, tile.zoneType);
+        if (!expected) return;
+        const inVowelSlot = !!(tile.zoneRef
+          && (tile.zoneRef.zoneType === 'jungH' || tile.zoneRef.zoneType === 'jungV'));
+        const oriented = HC.orientTileJamo(tile.char, tile.zoneType, expected, {
+          inMergeSlot: tile.mergeDockRef === 'slot',
+          inVowelSlot,
+          otherSlotOccupied: inVowelSlot ? this.isOtherVowelSlotOccupied(tile) : false,
+        });
+        if (!oriented || oriented.char === tile.char) return;
+        tile.zoneType = oriented.zoneType;
+        tile.setChar(oriented.char);
         this.bounceTile(tile.el);
         count += 1;
       });
 
       this.orientHintUsed = true;
       this.hintsUsedThisRound = true;
+      if (count > 0) this.mergeDock?.updatePreview?.();
       this.updateHintButtons();
       this.updateCheckButton();
       this.feedback.show(
@@ -2009,12 +2726,11 @@
         if (existing && !existing.locked) return this.swapTiles(tile, existing);
       }
       if (tile.zoneRef && tile.zoneRef !== zone) {
-        tile.zoneRef.placedTileId = null;
-        tile.zoneRef.el.classList.remove('filled');
-        tile.zoneRef.el.innerHTML = '';
+        tile.zoneRef.clear();
       }
       this.attachTileToZone(tile, zone);
       this.bounceTile(tile.el);
+      global.SoundEffects?.place?.();
       this.updateCheckButton();
       this.onTutorialEvent?.('place', { tile, zone, game: this });
       return true;
@@ -2031,13 +2747,26 @@
         }
         tile.mergeDockRef = null;
         tile.setInBank(this.els.bank);
+        this.mergeDock?.updatePreview?.();
         this.updateRotationDockLabel();
         this.updateCheckButton();
+        this.syncDockTileSize();
+        this.pulseLiveAction('move');
+        this.notifyTurnLiveChange();
+        if (this.tutorialMode) this.onTutorialEvent?.('change', { game: this });
         return;
       }
       if (tile.isMerged && this.mergeDock?.resultTileId === tile.id) {
-        this.mergeDock.restoreTile(tile);
+        this.mergeDock.clearResultTileRef(tile);
+        tile.mergeDockRef = null;
+        tile.setInBank(this.els.bank);
+        this.mergeDock?.updatePreview?.();
+        this.updateRotationDockLabel();
         this.updateCheckButton();
+        this.syncDockTileSize();
+        this.pulseLiveAction('move');
+        this.notifyTurnLiveChange();
+        if (this.tutorialMode) this.onTutorialEvent?.('change', { game: this });
         return;
       }
       if (tile.zoneRef) {
@@ -2047,11 +2776,15 @@
       }
       tile.setInBank(this.els.bank);
       this.updateCheckButton();
+      this.syncDockTileSize();
+      this.pulseLiveAction('move');
+      this.notifyTurnLiveChange();
+      if (this.tutorialMode) this.onTutorialEvent?.('change', { game: this });
     }
 
     createBasicTile({ char, syllableIndex, zoneType }) {
       const id = `tile-basic-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-      const tile = new JamoTile({ id, char, zoneType, syllableIndex, subIndex: 0 });
+      const tile = new JamoTile({ id, char, zoneType, syllableIndex, subIndex: 0, targetChar: char });
       tile.isBasic = true;
       this.tileMap[id] = tile;
       return tile;
@@ -2059,7 +2792,7 @@
 
     createMergedTile({ char, syllableIndex, mergeSources }) {
       const id = `tile-merged-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-      const tile = new JamoTile({ id, char, zoneType: 'jungV', syllableIndex, subIndex: 0 });
+      const tile = new JamoTile({ id, char, zoneType: 'jungV', syllableIndex, subIndex: 0, targetChar: char });
       tile.isMerged = true;
       tile.mergeSources = mergeSources;
       this.tileMap[id] = tile;
@@ -2071,6 +2804,13 @@
       if (!tile) return;
       tile.el?.remove();
       delete this.tileMap[id];
+      if (this.turnBased && !this.watchMode) {
+        this._removedTileIds = this._removedTileIds || [];
+        if (!this._removedTileIds.includes(id)) {
+          this._removedTileIds.push(id);
+          if (this._removedTileIds.length > 60) this._removedTileIds.shift();
+        }
+      }
     }
 
     bounceTile(el) {
@@ -2080,11 +2820,15 @@
     }
 
     clearSelection() {
+      let changed = false;
       if (this.selectedTile) {
         this.selectedTile.setSelected(false);
         this.selectedTile = null;
+        changed = true;
       }
       this.clearSelectionHighlights();
+      this.updateRotationDockLabel();
+      if (changed) this.notifyTurnLiveChange();
     }
 
     hasAnyPlacement() {
@@ -2101,6 +2845,12 @@
         return;
       }
       const canSubmit = this.canSubmitTurn();
+      if (this.tutorialMode && !this.tutorialCheckAllowed) {
+        this.els.check.disabled = true;
+        this.els.rotationDock?.classList.toggle('disabled', this.checkedComplete || this.checking);
+        this.updateHintButtons();
+        return;
+      }
       this.els.check.disabled = !canSubmit || !this.hasAnyPlacement() || this.checkedComplete || this.checking;
       this.els.rotationDock?.classList.toggle('disabled', this.checkedComplete || this.checking);
       this.updateHintButtons();
@@ -2146,6 +2896,8 @@
           this.els.reset.disabled = true;
           this.updateHintButtons();
         }
+        this.applySharedLocked(shared.locked || []);
+        this.updateCheckButton();
         return;
       }
       this.clearUnlockedPlacements();
@@ -2163,6 +2915,10 @@
     resetTurnBoard() {
       this.mergeDock?.reset();
       this.updateRotationDockLabel();
+      this._lastLiveFingerprint = null;
+      this._watchRevealPlayedKey = null;
+      this._suspendLiveBroadcast = false;
+      this.clearWatchRevealVisuals();
       Object.values(this.tileMap).forEach((tile) => {
         tile.locked = false;
         tile.el?.classList.remove(
@@ -2203,58 +2959,146 @@
 
     findBankTileForAutofill(placement) {
       const sub = placement.subIndex ?? 0;
-      const exact = Object.values(this.tileMap).find((tile) => (
-        tile.inBank
-        && !tile.locked
-        && tile.char === placement.char
-        && tile.syllableIndex === placement.syl
+      if (placement.tileId) {
+        const byId = this.tileMap[placement.tileId];
+        if (byId && byId.inBank && !byId.locked && byId.char === placement.char) return byId;
+      }
+      const block = this.blocks[placement.syl];
+      const zone = block?.getAllZones().find((z) => (
+        z.zoneType === placement.zone && (z.subIndex ?? 0) === sub
+      ));
+      const candidates = Object.values(this.tileMap).filter((tile) => (
+        tile.inBank && !tile.locked && tile.char === placement.char
+      ));
+      if (!candidates.length) return null;
+      const exact = candidates.find((tile) => (
+        tile.syllableIndex === placement.syl
         && tile.zoneType === placement.zone
         && (tile.subIndex ?? 0) === sub
       ));
       if (exact) return exact;
-      return Object.values(this.tileMap).find((tile) => (
-        tile.inBank
-        && !tile.locked
-        && tile.char === placement.char
-        && tile.syllableIndex === placement.syl
-      )) || null;
+      if (zone) {
+        const valid = candidates.find((tile) => HC.isValidMatchPlacement(tile, zone));
+        if (valid) return valid;
+      }
+      const sameSyl = candidates.find((tile) => tile.syllableIndex === placement.syl);
+      if (sameSyl) return sameSyl;
+      return candidates[0];
+    }
+
+    markPlacementLocked(zone, tile) {
+      tile.locked = true;
+      zone.setLocked(true);
+      tile.setLocked();
+      tile.el.classList.add('correct-flip');
+      zone.el.classList.add('correct', 'filled');
+    }
+
+    placeLockedPlacement(placement) {
+      const block = this.blocks[placement.syl];
+      if (!block) return false;
+      const sub = placement.subIndex ?? 0;
+      const zone = block.getAllZones().find((z) => (
+        z.zoneType === placement.zone && (z.subIndex ?? 0) === sub
+      ));
+      if (!zone) return false;
+
+      const existing = zone.placedTileId ? this.tileMap[zone.placedTileId] : null;
+      if (zone.locked && existing?.char === placement.char) {
+        this.markPlacementLocked(zone, existing);
+        return true;
+      }
+      if (existing?.char === placement.char && !zone.locked) {
+        this.markPlacementLocked(zone, existing);
+        return true;
+      }
+      if (existing) {
+        if (existing.locked) return false;
+        this.returnTileToBank(existing);
+        zone.clear();
+      }
+
+      const tile = this.findBankTileForAutofill(placement);
+      if (!tile) return false;
+      this.attachTileToZone(tile, zone);
+      this.markPlacementLocked(zone, tile);
+      return true;
+    }
+
+    /** Re-apply cumulative greens after a turn-board reset (shared + optional autofill). */
+    restoreTurnLockedPlacements(locked, turnHistory, myUid) {
+      if (!this.turnBased) return;
+      this._restoringTurnLocks = true;
+      try {
+        this.applySharedLocked(locked);
+        if (myUid) this.applyAutofillFromHistory(turnHistory, myUid);
+      } finally {
+        this._restoringTurnLocks = false;
+      }
     }
 
     applyAutofillFromHistory(turnHistory, myUid) {
       if (!this.turnBased || !prefs()?.shouldTurnAutofillCorrect?.()) return;
       const placements = this.buildAutofillPlacements(turnHistory, myUid);
       placements.forEach((p) => {
-        const block = this.blocks[p.syl];
-        if (!block) return;
-        const zone = block.getAllZones().find((z) => (
-          z.zoneType === p.zone && (z.subIndex ?? 0) === (p.subIndex ?? 0)
-        ));
-        if (!zone || zone.locked) return;
-        const tile = this.findBankTileForAutofill(p);
-        if (!tile) return;
-        this.attachTileToZone(tile, zone);
-        tile.locked = true;
-        zone.setLocked(true);
-        tile.el.classList.add('revealed', 'correct-flip');
+        this.placeLockedPlacement(p);
       });
-      this.mergeDock?.tryCompose?.();
+      this.mergeDock?.tryCompose?.({ playSound: false });
       this.updateCheckButton();
     }
 
-    composeSyllableFromBlock(block) {
+    /** Restore cumulative correct slots from the shared match state. */
+    applySharedLocked(locked) {
+      if (!this.turnBased || !locked?.length) return;
+      locked.forEach((p) => {
+        this.placeLockedPlacement(p);
+      });
+      this.mergeDock?.tryCompose?.({ playSound: false });
+      this.updateCheckButton();
+    }
+
+    composeSyllableFromBlock(block, syllableIndex) {
       let cho = null;
       let jungH = null;
       const jungVSlots = [];
-      let jong = null;
+      let jong = '';
       block.getAllZones().forEach((zone) => {
         const tile = zone.placedTileId ? this.tileMap[zone.placedTileId] : null;
         const char = tile?.char || null;
+        if (!char) return;
         if (zone.zoneType === 'cho') cho = char;
         else if (zone.zoneType === 'jungH') jungH = char;
         else if (zone.zoneType === 'jungV') jungVSlots[zone.subIndex ?? 0] = char;
         else if (zone.zoneType === 'jong') jong = char;
       });
-      return HC.composeSyllableFromZones(cho, jungH, jungVSlots, jong);
+
+      let jungV = jungVSlots.filter((c) => c != null && c !== '');
+
+      if (!jungH && !jungV.length && this.mergeDock && syllableIndex != null) {
+        const merged = this.mergeDock.getResultTile?.();
+        if (merged && Number(merged.syllableIndex) === Number(syllableIndex)) {
+          const parts = HC.decomposeVowel(merged.char);
+          if (parts.h) jungH = parts.h;
+          if (parts.vSlots?.length) jungV = parts.vSlots;
+          else if (parts.v) jungV = [parts.v];
+        } else if (this.mergeDock.slotTileIds?.filter(Boolean).length === 2) {
+          const chars = this.mergeDock.slotTileIds
+            .map((id) => (id ? this.tileMap[id]?.char : null))
+            .filter(Boolean);
+          const slotSyl = this.mergeDock.slotTileIds
+            .map((id) => (id ? this.tileMap[id]?.syllableIndex : null))
+            .find((si) => si != null);
+          if (chars.length === 2 && Number(slotSyl) === Number(syllableIndex)) {
+            const parts = HC.decomposeVowel(HC.tryComposeMedial(chars) || '');
+            if (parts.h) jungH = parts.h;
+            if (parts.vSlots?.length) jungV = parts.vSlots;
+            else if (parts.v) jungV = [parts.v];
+          }
+        }
+      }
+
+      if (!cho || (!jungH && !jungV.length)) return null;
+      return HC.composeSyllableFromZones(cho, jungH, jungV, jong || '');
     }
 
     computeSyllableCorrectMask() {
@@ -2312,6 +3156,7 @@
             char: tile.char,
             correct,
             locked: !!zone.locked,
+            tileId: tile.id,
           });
         });
       });
@@ -2367,32 +3212,971 @@
         block.getAllZones().forEach((zone) => {
           const placement = byPlacement[`${si}:${zone.zoneType}:${zone.subIndex ?? 0}`];
           const char = placement?.char;
-          if (!char) return;
+          if (!char || zone.locked) return;
 
           zone.clear();
           zone.el.classList.add('filled');
           const tileEl = document.createElement('span');
-          tileEl.className = 'jamo-tile opp-reveal-tile';
-          tileEl.innerHTML = `<span class="jamo-tile-face jamo-tile-front">${char}</span>`;
+          tileEl.className = 'jamo-tile opp-reveal-tile in-zone';
+          tileEl.innerHTML = jamoTileFaceHtml(char, zone.zoneType);
           zone.el.appendChild(tileEl);
 
           if (neutral) {
             zone.el.classList.add('turn-neutral');
             tileEl.classList.add('turn-neutral-tile');
           } else if (placement.correct) {
-            zone.el.classList.add('correct');
+            zone.el.classList.add('correct', 'watch-correct');
             tileEl.classList.add('revealed', 'correct-flip');
           } else {
-            zone.el.classList.add('incorrect');
+            zone.el.classList.add('incorrect', 'watch-wrong');
           }
         });
       });
+    }
+
+    hasWatchBoardPlacements() {
+      if (!this.blocks?.length) return false;
+      return this.blocks.some((block) => block.getAllZones().some((zone) => (
+        !zone.locked && zone.el.querySelector('.opp-reveal-tile')
+      )));
+    }
+
+    isWatchPlacementCorrect(placement) {
+      if (!placement?.char) return false;
+      if (typeof placement.correct === 'boolean') return placement.correct;
+      const zone = this.findZone(placement.zone, placement.syl, placement.subIndex ?? 0);
+      return !!(zone && zone.expected !== null && placement.char === zone.expected);
+    }
+
+    buildWatchRevealFromLive(live) {
+      const placements = (live?.placements || []).map((p) => {
+        const correct = this.isWatchPlacementCorrect(p);
+        return { ...p, correct };
+      });
+      const correctCount = placements.filter((p) => p.correct).length;
+      return {
+        byUid: live?.byUid,
+        turnNumber: live?.turnNumber,
+        placements,
+        correctCount,
+        totalPlaced: placements.length,
+        syllableCorrect: this.resolveSyllableCorrectMask({ placements }),
+        syllableTotal: this.blocks.length,
+        timedOut: false,
+      };
+    }
+
+    prefersReducedMotion() {
+      return document.documentElement.classList.contains('reduce-motion')
+        || global.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+    }
+
+    showWatchRevealSummary(reveal, labels = {}) {
+      const banner = this.els.watchRevealBanner;
+      if (!banner) return;
+      const correct = reveal?.correctCount || 0;
+      const total = reveal?.totalPlaced || 0;
+      const syllableCorrect = (reveal?.syllableCorrect || []).filter(Boolean).length;
+      const syllableTotal = reveal?.syllableTotal || reveal?.syllableCorrect?.length || this.blocks.length;
+      const name = labels.name || reveal?.byName || '';
+      const title = labels.title
+        || (name ? t('matchTurn.oppLastTurn', { name }) : t('matchTurn.revealStatsOnly', { correct, total }));
+      const stat = labels.stat || t('matchTurn.revealStatsOnly', { correct, total });
+      const syllableLine = syllableTotal > 0
+        ? t('matchTurn.revealSyllableStats', { correct: syllableCorrect, total: syllableTotal })
+        : '';
+      banner.innerHTML = `
+        <span class="watch-reveal-banner-title">${title}</span>
+        <span class="watch-reveal-banner-stat">${stat}</span>
+        ${syllableLine ? `<span class="watch-reveal-banner-syllables">${syllableLine}</span>` : ''}
+      `;
+      banner.classList.remove('hidden');
+      void banner.offsetWidth;
+      banner.classList.add('watch-reveal-banner--show');
+    }
+
+    hideWatchRevealSummary() {
+      const banner = this.els.watchRevealBanner;
+      if (!banner) return;
+      banner.classList.remove('watch-reveal-banner--show');
+      banner.classList.add('hidden');
+      banner.innerHTML = '';
+    }
+
+    clearWatchRevealVisuals() {
+      this.hideWatchRevealSummary();
+      this.blocks.forEach((block) => {
+        block.el.classList.remove('watch-syl-correct', 'watch-syl-partial', 'watch-syl-wrong');
+        block.getAllZones().forEach((zone) => {
+          zone.el.classList.remove(
+            'watch-correct', 'watch-wrong', 'watch-reveal-pending', 'turn-neutral'
+          );
+        });
+      });
+    }
+
+    applyWatchSyllableHints(reveal) {
+      const mask = this.resolveSyllableCorrectMask(reveal);
+      const placedBySyl = {};
+      (reveal?.placements || []).forEach((p) => {
+        placedBySyl[p.syl] = (placedBySyl[p.syl] || 0) + 1;
+      });
+      this.blocks.forEach((block, si) => {
+        block.el.classList.remove('watch-syl-correct', 'watch-syl-partial', 'watch-syl-wrong');
+        if (!placedBySyl[si]) return;
+        if (mask[si]) block.el.classList.add('watch-syl-correct');
+        else if ((reveal?.placements || []).some((p) => p.syl === si && p.correct)) {
+          block.el.classList.add('watch-syl-partial');
+        } else {
+          block.el.classList.add('watch-syl-wrong');
+        }
+      });
+    }
+
+    applyWatchRevealFinalState(toReveal, toWrong) {
+      toReveal.forEach(({ zone, tileEl }) => {
+        zone.el.classList.remove('turn-neutral', 'revealing', 'watch-reveal-pending');
+        zone.el.classList.add('correct', 'watch-correct', 'filled');
+        tileEl.classList.remove('turn-neutral-tile', 'revealing');
+        tileEl.classList.add('revealed', 'correct-flip');
+      });
+      toWrong.forEach(({ zone, tileEl }) => {
+        zone.el.classList.remove('turn-neutral', 'revealing-wrong');
+        zone.el.classList.add('incorrect', 'watch-wrong', 'filled');
+        tileEl.classList.remove('turn-neutral-tile', 'revealing-wrong');
+      });
+    }
+
+    persistWatchCorrectReveals(toReveal) {
+      (toReveal || []).forEach(({ zone, placement }) => {
+        zone.el.querySelectorAll('.opp-reveal-tile').forEach((el) => el.remove());
+        zone.el.classList.remove('turn-neutral', 'watch-correct', 'watch-reveal-pending', 'revealing');
+        if (placement?.char) {
+          this.placeLockedPlacement(placement);
+        }
+      });
+    }
+
+    hideTurnAnswerBanner() {
+      this.els.turnAnswerBanner?.classList.add('hidden');
+      if (this.els.turnAnswerWord) this.els.turnAnswerWord.textContent = '';
+      if (this.els.turnAnswerMeaning) {
+        this.els.turnAnswerMeaning.textContent = '';
+        this.els.turnAnswerMeaning.classList.add('hidden');
+      }
+    }
+
+    async showTurnAnswerBanner(word) {
+      const banner = this.els.turnAnswerBanner;
+      if (!banner) return;
+      const wordEl = this.els.turnAnswerWord;
+      const meaningEl = this.els.turnAnswerMeaning;
+      if (wordEl) wordEl.textContent = word;
+      if (meaningEl) {
+        meaningEl.textContent = '';
+        meaningEl.classList.add('hidden');
+      }
+      banner.classList.remove('hidden');
+      const meaning = this._meaningPromise
+        ? await this._meaningPromise
+        : await this.resolveWordMeaning(word);
+      if (meaningEl && meaning) {
+        meaningEl.textContent = meaning;
+        meaningEl.classList.remove('hidden');
+      }
+    }
+
+    async flipRevealWatchZone(zone, tileEl, index) {
+      await delay(index * FLIP_STAGGER);
+      global.SoundEffects?.correct?.();
+      zone.el.classList.remove('turn-neutral');
+      zone.el.classList.add('revealing', 'watch-reveal-pending');
+      tileEl.classList.remove('turn-neutral-tile');
+      tileEl.classList.add('revealing');
+      tileEl.style.setProperty('--flip-delay', '0ms');
+      await delay(FLIP_MS);
+      zone.el.classList.remove('revealing', 'watch-reveal-pending');
+      zone.el.classList.add('correct', 'watch-correct');
+      tileEl.classList.remove('revealing');
+      tileEl.classList.add('revealed', 'correct-flip');
+    }
+
+    async flipWrongWatchZone(zone, tileEl, index) {
+      await delay(index * FLIP_STAGGER);
+      global.SoundEffects?.wrong?.();
+      zone.el.classList.remove('turn-neutral');
+      zone.el.classList.add('revealing-wrong', 'watch-wrong');
+      tileEl.classList.remove('turn-neutral-tile');
+      tileEl.classList.add('revealing-wrong');
+      await delay(FLIP_MS);
+      zone.el.classList.remove('revealing-wrong');
+      zone.el.classList.add('incorrect', 'watch-wrong');
+      tileEl.classList.remove('revealing-wrong');
+    }
+
+    collectWatchRevealTargets(reveal) {
+      const byPlacement = {};
+      (reveal?.placements || []).forEach((p) => {
+        byPlacement[`${p.syl}:${p.zone}:${p.subIndex ?? 0}`] = p;
+      });
+      const toReveal = [];
+      const toWrong = [];
+      this.blocks.forEach((block, si) => {
+        block.getAllZones().forEach((zone) => {
+          if (zone.locked) return;
+          const placement = byPlacement[`${si}:${zone.zoneType}:${zone.subIndex ?? 0}`];
+          if (!placement?.char) return;
+          const tileEl = zone.el.querySelector('.opp-reveal-tile');
+          if (!tileEl) return;
+          const correct = this.isWatchPlacementCorrect(placement);
+          if (correct) toReveal.push({ zone, tileEl, placement });
+          else toWrong.push({ zone, tileEl, placement });
+        });
+      });
+      return { toReveal, toWrong };
+    }
+
+    async playWatchTurnReveal(reveal, labels = {}) {
+      if (!this.turnBased || !reveal?.placements?.length) return;
+      const key = `${reveal.byUid || 'opp'}:${reveal.turnNumber ?? ''}`;
+      if (key !== ':') {
+        if (key === this._watchRevealPlayedKey) return;
+        this._watchRevealPlayedKey = key;
+      }
+      if (this._watchRevealBusy) return;
+      this._watchRevealBusy = true;
+
+      try {
+        const { toReveal, toWrong } = this.collectWatchRevealTargets(reveal);
+        if (!toReveal.length && !toWrong.length) return;
+
+        this.root?.classList.add('match-watch-revealing');
+        this.showWatchRevealSummary(reveal, labels);
+        this.applyWatchSyllableHints(reveal);
+
+        if (this.prefersReducedMotion()) {
+          this.applyWatchRevealFinalState(toReveal, toWrong);
+          this.persistWatchCorrectReveals(toReveal);
+          await delay(500);
+        } else {
+          await Promise.all([
+            ...toReveal.map((item, i) => this.flipRevealWatchZone(item.zone, item.tileEl, i)),
+            ...toWrong.map((item, i) => this.flipWrongWatchZone(item.zone, item.tileEl, toReveal.length + i)),
+          ]);
+          await delay(650);
+          this.persistWatchCorrectReveals(toReveal);
+          toWrong.forEach(({ zone }) => {
+            zone.el.classList.remove('incorrect', 'watch-wrong', 'revealing-wrong', 'filled', 'turn-neutral');
+            zone.el.querySelectorAll('.opp-reveal-tile').forEach((el) => el.remove());
+          });
+        }
+
+        await delay(450);
+      } finally {
+        this._watchRevealBusy = false;
+        this.root?.classList.remove('match-watch-revealing');
+        this.hideWatchRevealSummary();
+      }
     }
 
     hideOpponentSubmission() {
       this.els.oppArea?.classList.add('hidden');
       if (this.els.oppBlocks) this.els.oppBlocks.innerHTML = '';
       if (this.els.oppStat) this.els.oppStat.textContent = '';
+    }
+
+    serializeTileLiveRef(tile) {
+      if (!tile) return null;
+      if (tile.zoneRef) {
+        return {
+          type: 'zone',
+          syl: tile.zoneRef.syllableIndex,
+          zone: tile.zoneRef.zoneType,
+          subIndex: tile.zoneRef.subIndex ?? 0,
+        };
+      }
+      if (tile.mergeDockRef === 'slot') {
+        return { type: 'merge-slot', index: tile.mergeDockSlot ?? 0 };
+      }
+      if (tile.mergeDockRef === 'result') {
+        return { type: 'merge-result' };
+      }
+      return { type: 'bank', tileId: tile.id };
+    }
+
+    pulseLiveAction(kind, detail = {}) {
+      if (!this.turnBased || this.watchMode || !this.isMyTurn || this._restoringTurnLocks) return;
+      const seq = ++this._liveActionSeq;
+      const action = { seq, kind, ...detail };
+      if (kind === 'select' && this.selectedTile) {
+        action.selected = this.serializeSelectedLiveState();
+      }
+      this._pendingLiveAction = action;
+    }
+
+    flashLiveElement(el) {
+      if (!el) return;
+      if (document.documentElement.classList.contains('reduce-motion')) return;
+      if (global.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches) return;
+      el.classList.remove('opp-live-flash');
+      void el.offsetWidth;
+      el.classList.add('opp-live-flash');
+      const done = () => el.classList.remove('opp-live-flash');
+      el.addEventListener('animationend', done, { once: true });
+      setTimeout(done, 480);
+    }
+
+    resolveLiveFlashEl(target) {
+      if (!target) return null;
+      if (target.type === 'rotation-dock') return this.els.rotationDock;
+      if (target.type === 'bank' && target.tileId) {
+        const tile = this.tileMap[target.tileId];
+        if (tile?.el?.isConnected) return tile.el;
+        return null;
+      }
+      if (target.type === 'zone') {
+        const zone = this.findZone(target.zone, target.syl, target.subIndex ?? 0);
+        return zone?.el?.querySelector('.jamo-tile, .opp-reveal-tile') || zone?.el;
+      }
+      if (target.type === 'merge-slot') {
+        const idx = target.index ?? 0;
+        const slot = this.mergeDock?.slotEls?.[idx];
+        const tileId = this.mergeDock?.slotTileIds?.[idx];
+        const tile = tileId ? this.tileMap[tileId] : null;
+        return tile?.el || slot?.querySelector('.jamo-tile, .merge-live-glyph') || slot;
+      }
+      if (target.type === 'merge-result') {
+        const dock = this.mergeDock;
+        const tileId = dock?.resultTileId;
+        const tile = tileId ? this.tileMap[tileId] : null;
+        return tile?.el
+          || dock?.resultEl?.querySelector('.jamo-tile, .merge-live-glyph')
+          || dock?.resultEl;
+      }
+      return null;
+    }
+
+    flashLiveTarget(target) {
+      this.flashLiveElement(this.resolveLiveFlashEl(target));
+    }
+
+    captureWatchLiveSnapshot(live) {
+      return {
+        placements: (live?.placements || []).map((p) => ({ ...p })),
+        merge: live?.merge ? JSON.parse(JSON.stringify(live.merge)) : { slots: [null, null], slotIds: [null, null], result: null, resultId: null },
+        bank: (live?.bank || []).map((b) => ({ ...b })),
+        selected: live?.selected ? { ...live.selected } : null,
+      };
+    }
+
+    flashOppMoveFromDiff(prev, live) {
+      const seen = new Set();
+      const flash = (target) => {
+        const key = JSON.stringify(target);
+        if (seen.has(key)) return;
+        seen.add(key);
+        this.flashLiveTarget(target);
+      };
+      const pKey = (p) => `${p.syl}:${p.zone}:${p.subIndex ?? 0}`;
+      const prevP = {};
+      (prev?.placements || []).forEach((p) => { prevP[pKey(p)] = p.char; });
+      const nextP = {};
+      (live?.placements || []).forEach((p) => { nextP[pKey(p)] = p.char; });
+      new Set([...Object.keys(prevP), ...Object.keys(nextP)]).forEach((k) => {
+        if (prevP[k] === nextP[k]) return;
+        const [syl, zone, sub] = k.split(':');
+        flash({ type: 'zone', syl: Number(syl), zone, subIndex: Number(sub) });
+      });
+
+      const prevBank = new Map((prev?.bank || []).map((b) => [b.id, b.char]));
+      const nextBank = new Map((live?.bank || []).map((b) => [b.id, b.char]));
+      new Set([...prevBank.keys(), ...nextBank.keys()]).forEach((id) => {
+        if (prevBank.get(id) !== nextBank.get(id)) flash({ type: 'bank', tileId: id });
+      });
+
+      const prevM = prev?.merge || {};
+      const nextM = live?.merge || {};
+      const prevSlots = Array.isArray(prevM.slotIds) ? prevM.slotIds : [null, null];
+      const nextSlots = Array.isArray(nextM.slotIds) ? nextM.slotIds : [null, null];
+      for (let i = 0; i < 2; i += 1) {
+        if (prevSlots[i] === nextSlots[i] && prevM.slots?.[i] === nextM.slots?.[i]) continue;
+        if (nextSlots[i]) flash({ type: 'bank', tileId: nextSlots[i] });
+        else if (prevSlots[i]) flash({ type: 'bank', tileId: prevSlots[i] });
+        else flash({ type: 'merge-slot', index: i });
+      }
+      if (prevM.resultId !== nextM.resultId || prevM.result !== nextM.result) {
+        if (nextM.resultId) flash({ type: 'bank', tileId: nextM.resultId });
+        else if (prevM.resultId) flash({ type: 'bank', tileId: prevM.resultId });
+        flash({ type: 'merge-result' });
+      }
+    }
+
+    playOppActionFlash(live, prev) {
+      const action = live?.action;
+      if (!action?.seq || action.seq <= this._lastOppFlashSeq) return;
+      this._lastOppFlashSeq = action.seq;
+      const { kind } = action;
+
+      if (kind === 'move') {
+        if (prev) this.flashOppMoveFromDiff(prev, live);
+        return;
+      }
+
+      if (kind === 'select') {
+        const sel = action.selected || live.selected;
+        if (!sel) return;
+        if (sel.type === 'bank' && sel.tileId) this.flashLiveTarget({ type: 'bank', tileId: sel.tileId });
+        else if (sel.type === 'zone') {
+          this.flashLiveTarget({ type: 'zone', syl: sel.syl, zone: sel.zone, subIndex: sel.subIndex ?? 0 });
+        } else if (sel.type === 'merge-slot') {
+          this.flashLiveTarget({ type: 'merge-slot', index: sel.index ?? 0 });
+        } else if (sel.type === 'merge-result') {
+          this.flashLiveTarget({ type: 'merge-result' });
+        }
+        return;
+      }
+
+      if (kind === 'rotate') {
+        this.flashLiveTarget({ type: 'rotation-dock' });
+        const at = action.at;
+        if (at?.type === 'zone') {
+          this.flashLiveTarget({ type: 'zone', syl: at.syl, zone: at.zone, subIndex: at.subIndex ?? 0 });
+        } else if (at?.type === 'merge-slot') {
+          this.flashLiveTarget({ type: 'merge-slot', index: at.index ?? 0 });
+        } else if (at?.type === 'bank' || action.tileId) {
+          this.flashLiveTarget({ type: 'bank', tileId: action.tileId || at?.tileId });
+        }
+        return;
+      }
+
+      if (kind === 'merge') {
+        this.flashLiveTarget({ type: 'rotation-dock' });
+        const ingredientIds = action.ingredientIds || prev?.merge?.slotIds || [];
+        ingredientIds.forEach((id) => {
+          if (id) this.flashLiveTarget({ type: 'bank', tileId: id });
+        });
+        (prev?.merge?.slots || []).forEach((char, i) => {
+          if (char && !ingredientIds[i]) this.flashLiveTarget({ type: 'merge-slot', index: i });
+        });
+        this.flashLiveTarget({ type: 'merge-result' });
+        return;
+      }
+
+      if (kind === 'split') {
+        this.flashLiveTarget({ type: 'rotation-dock' });
+        if (action.fromResultId) this.flashLiveTarget({ type: 'bank', tileId: action.fromResultId });
+        this.flashLiveTarget({ type: 'merge-result' });
+        (live?.merge?.slotIds || []).forEach((id, i) => {
+          if (id) this.flashLiveTarget({ type: 'bank', tileId: id });
+          else if (live?.merge?.slots?.[i]) this.flashLiveTarget({ type: 'merge-slot', index: i });
+        });
+        return;
+      }
+
+      if (kind === 'checking') {
+        return;
+      }
+    }
+
+    serializeSelectedLiveState() {
+      const tile = this.selectedTile;
+      if (!tile || tile.locked) return null;
+      if (tile.zoneRef) {
+        return {
+          type: 'zone',
+          syl: tile.zoneRef.syllableIndex,
+          zone: tile.zoneRef.zoneType,
+          subIndex: tile.zoneRef.subIndex ?? 0,
+        };
+      }
+      if (tile.mergeDockRef === 'slot') {
+        return { type: 'merge-slot', index: tile.mergeDockSlot ?? 0 };
+      }
+      if (tile.mergeDockRef === 'result') {
+        return { type: 'merge-result' };
+      }
+      return { type: 'bank', tileId: tile.id };
+    }
+
+    /** Bank tiles in visual (DOM) order so the watcher can mirror the dock exactly. */
+    serializeBankLiveState() {
+      const out = [];
+      this.els.bank?.querySelectorAll('.jamo-tile').forEach((el) => {
+        const id = el.dataset.tileId;
+        const tile = id ? this.tileMap[id] : null;
+        if (
+          tile
+          && tile.inBank
+          && !tile.locked
+          && !el.classList.contains('hidden-in-bank')
+        ) {
+          out.push({ id: tile.id, char: tile.char });
+        }
+      });
+      return out;
+    }
+
+    serializeTurnLiveState() {
+      const placements = [];
+      this.blocks.forEach((block, si) => {
+        block.getAllZones().forEach((zone) => {
+          const tile = zone.placedTileId ? this.tileMap[zone.placedTileId] : null;
+          if (!tile) return;
+          placements.push({
+            syl: si,
+            zone: zone.zoneType,
+            subIndex: zone.subIndex ?? 0,
+            char: tile.char,
+          });
+        });
+      });
+      const merge = this.mergeDock?.serializeLiveChars?.() || { slots: [null, null], result: null };
+      return {
+        placements,
+        merge,
+        bank: this.serializeBankLiveState(),
+        selected: this.serializeSelectedLiveState(),
+        removed: this._removedTileIds || [],
+        action: this._pendingLiveAction ? { ...this._pendingLiveAction } : null,
+      };
+    }
+
+    /**
+     * Mirror the active player's dock onto the watcher's identical,
+     * seed-generated bank (ids line up because both clients built the dock
+     * from the same sharedSeed):
+     * - rotations → update chars in place
+     * - merges → delete consumed tiles, materialize the merged tile locally
+     * - splits → materialize the new basic tiles locally
+     */
+    applyBankLiveState(live) {
+      if (!this.sharedSeed) return;
+      const bankEntries = Array.isArray(live?.bank) ? live.bank : [];
+      try {
+        (Array.isArray(live?.removed) ? live.removed : []).forEach((id) => {
+          const tile = this.tileMap[id];
+          if (tile && !tile.locked) this.removeTile(id);
+        });
+        bankEntries.forEach((entry) => {
+          if (!entry?.id || !entry.char) return;
+          let tile = this.tileMap[entry.id];
+          if (!tile) {
+            tile = new JamoTile({
+              id: entry.id,
+              char: entry.char,
+              zoneType: HC.zoneTypeForRotatedJamo(entry.char, 'jungV'),
+              syllableIndex: 0,
+              subIndex: 0,
+            });
+            if (HC.getMergePairComponents?.(entry.char)) tile.isMerged = true;
+            this.tileMap[entry.id] = tile;
+            tile.setInBank(this.els.bank);
+            return;
+          }
+          if (tile.locked) return;
+          if (tile.char !== entry.char) {
+            tile.setChar(entry.char);
+            tile.zoneType = HC.zoneTypeForRotatedJamo(entry.char, tile.zoneType);
+          }
+        });
+      } catch (err) {
+        console.warn('[KoreanMatch] bank live sync', err);
+      }
+    }
+
+    /**
+     * Mirror the active player's dock exactly — by tile id, not by char guessing.
+     */
+    syncWatchBankExact(liveBank) {
+      if (!this.turnBased || !this.watchMode || !this.sharedSeed) return;
+      const entries = Array.isArray(liveBank) ? liveBank : [];
+      const liveIds = new Set(entries.map((e) => e.id));
+      const bank = this.els.bank;
+      if (!bank) return;
+
+      Object.values(this.tileMap).forEach((tile) => {
+        if (tile.locked) return;
+        if (liveIds.has(tile.id)) {
+          if (!tile.inBank) {
+            tile.mergeDockRef = null;
+            tile.mergeDockSlot = null;
+            tile.zoneRef = null;
+            tile.setInBank(bank);
+          }
+          tile.showInBank();
+          return;
+        }
+        if (tile.inBank) tile.hideInBank();
+      });
+
+      entries.forEach((entry) => {
+        const tile = this.tileMap[entry.id];
+        if (tile?.el && tile.inBank && !tile.locked) bank.appendChild(tile.el);
+      });
+      this.syncDockTileSize();
+    }
+
+    detachWatchZoneTile(zone) {
+      const tile = zone.placedTileId ? this.tileMap[zone.placedTileId] : null;
+      zone.placedTileId = null;
+      if (!tile) return;
+      if (tile.zoneRef === zone) {
+        tile.zoneRef = null;
+        tile.inBank = false;
+      }
+      if (tile.el?.parentElement === zone.el) tile.el.remove();
+    }
+
+    clearLiveSelectionIndicators() {
+      this.blocks.forEach((block) => {
+        block.getAllZones().forEach((zone) => zone.el.classList.remove('tap-target'));
+      });
+      this.mergeDock?.slotEls?.forEach((slotEl) => slotEl.classList.remove('tap-target'));
+      this.mergeDock?.resultEl?.classList.remove('tap-target');
+      Object.values(this.tileMap).forEach((tile) => tile.el?.classList.remove('selected'));
+    }
+
+    applyLiveSelection(live) {
+      this.clearLiveSelectionIndicators();
+      const selected = live?.selected;
+      if (!selected) return;
+      if (selected.type === 'zone') {
+        const zone = this.findZone(selected.zone, selected.syl, selected.subIndex ?? 0);
+        zone?.el?.classList.add('tap-target');
+        return;
+      }
+      if (selected.type === 'merge-slot') {
+        const idx = selected.index ?? 0;
+        this.mergeDock?.slotEls?.[idx]?.classList.add('tap-target');
+        return;
+      }
+      if (selected.type === 'merge-result') {
+        this.mergeDock?.resultEl?.classList.add('tap-target');
+        return;
+      }
+      if (selected.type === 'bank' && selected.tileId) {
+        this.tileMap[selected.tileId]?.el?.classList.add('selected');
+      }
+    }
+
+    applyWatchMerge(merge) {
+      const dock = this.mergeDock;
+      if (!dock || !this.watchMode) return;
+
+      const nextSlotIds = Array.isArray(merge?.slotIds)
+        ? merge.slotIds.map((id) => id || null)
+        : [null, null];
+      const nextSlots = Array.isArray(merge?.slots) ? merge.slots : [null, null];
+      const nextResultId = merge?.resultId || null;
+      const nextResult = merge?.result || null;
+
+      const releaseWatchTile = (tile, keepIds = []) => {
+        if (!tile) return;
+        tile.mergeDockRef = null;
+        tile.mergeDockSlot = null;
+        if (tile.el?.isConnected && tile.el.parentElement !== this.els.bank) {
+          tile.el.remove();
+        }
+        const keep = keepIds.includes(tile.id)
+          || this.isWatchCharInLiveLayout(tile.char, merge, nextResultId, nextSlotIds);
+        if (!tile.zoneRef && !keep) {
+          tile.inBank = false;
+          if (tile.el?.isConnected) tile.el.remove();
+        } else {
+          tile.inBank = false;
+        }
+      };
+
+      dock.slotTileIds.forEach((id, i) => {
+        const prevId = id;
+        dock.slotTileIds[i] = null;
+        dock.slotEls[i]?.classList.remove('filled');
+        dock.slotEls[i].innerHTML = '';
+        if (prevId && !nextSlotIds.includes(prevId)) {
+          releaseWatchTile(this.tileMap[prevId], nextSlotIds);
+        }
+      });
+
+      const prevResultId = dock.resultTileId;
+      dock.resultTileId = null;
+      dock.resultEl?.classList.remove('filled', 'has-preview', 'drag-over');
+      if (dock.previewEl) dock.previewEl.textContent = '';
+      dock.resultEl?.querySelectorAll('.jamo-tile, .merge-live-glyph').forEach((n) => n.remove());
+      if (prevResultId && prevResultId !== nextResultId) {
+        releaseWatchTile(this.tileMap[prevResultId], [nextResultId, ...nextSlotIds]);
+      }
+
+      nextSlotIds.forEach((id, i) => {
+        if (id) {
+          const char = nextSlots[i] || this.tileMap[id]?.char;
+          const tile = this.ensureWatchTileFromLive(id, char);
+          if (tile) {
+            dock.placeInSlotEmpty(i, tile);
+            return;
+          }
+        }
+        if (nextSlots[i]) dock.showLiveSlotGlyph(i, nextSlots[i]);
+      });
+
+      if (nextResultId || nextResult) {
+        const tile = this.ensureWatchTileFromLive(nextResultId, nextResult);
+        if (tile?.isMerged) {
+          dock.placeInResult(tile);
+        } else if (nextResult) {
+          dock.showLiveResultGlyph(nextResult);
+        }
+      } else {
+        dock.updatePreview?.();
+      }
+    }
+
+    isWatchCharInLiveLayout(char, merge, nextResultId, nextSlotIds) {
+      if (!char) return false;
+      if ((this._watchLivePlacements || []).some((p) => p.char === char)) return true;
+      if (merge?.result === char && nextResultId) return true;
+      const slots = Array.isArray(merge?.slots) ? merge.slots : [];
+      const slotIds = nextSlotIds || merge?.slotIds || [];
+      for (let i = 0; i < slots.length; i += 1) {
+        if (slots[i] === char && slotIds[i]) return true;
+      }
+      return false;
+    }
+
+    ensureWatchTileFromLive(id, char) {
+      if (!id || !char || !this.watchMode) return null;
+      let tile = this.tileMap[id];
+      if (tile) {
+        if (tile.locked) return tile;
+        if (tile.char !== char) {
+          tile.setChar(char);
+          tile.zoneType = HC.zoneTypeForRotatedJamo(char, tile.zoneType);
+        }
+        tile.isMerged = HC.isVerticalMergeMedial?.(char) === true;
+        return tile;
+      }
+      const isMerged = HC.isVerticalMergeMedial?.(char) === true;
+      tile = new JamoTile({
+        id,
+        char,
+        zoneType: 'jungV',
+        syllableIndex: 0,
+        subIndex: 0,
+      });
+      tile.isMerged = isMerged;
+      if (isMerged) tile.mergeSources = HC.getMergePairComponents?.(char) || null;
+      this.tileMap[id] = tile;
+      return tile;
+    }
+
+    applyTurnLiveState(live) {
+      if (!live || !this.turnBased || !this.watchMode) return;
+      const actionSeq = live?.action?.seq ?? 0;
+
+      if (live.action?.kind === 'checking' && actionSeq > this._lastOppFlashSeq) {
+        this._lastOppFlashSeq = actionSeq;
+        const reveal = this.buildWatchRevealFromLive(live);
+        void this.playWatchTurnReveal(reveal);
+        return;
+      }
+
+      const fp = JSON.stringify(live.placements || [])
+        + '|'
+        + JSON.stringify(live.merge || {})
+        + '|'
+        + JSON.stringify(live.bank || [])
+        + '|'
+        + JSON.stringify(live.selected || null)
+        + '|'
+        + JSON.stringify(live.removed || []);
+      const sameFp = fp === this._lastLiveFingerprint;
+      const sameAction = actionSeq <= this._lastOppFlashSeq;
+      if (sameFp && sameAction) return;
+
+      const prevSnap = this._watchLivePrevSnapshot;
+      this._lastLiveFingerprint = fp;
+
+      this.blocks.forEach((block) => {
+        block.getAllZones().forEach((zone) => {
+          if (zone.locked) return;
+          this.detachWatchZoneTile(zone);
+          zone.clear();
+          zone.el.classList.remove('turn-neutral', 'incorrect', 'correct', 'filled');
+          zone.el.querySelectorAll('.opp-reveal-tile').forEach((el) => el.remove());
+        });
+      });
+
+      const filtered = {
+        placements: (live.placements || []).filter((p) => {
+          const zone = this.findZone(p.zone, p.syl, p.subIndex ?? 0);
+          return zone && !zone.locked;
+        }),
+      };
+      this.applyBankLiveState(live);
+      this.renderTurnGuessOnZones(this.blocks, filtered, { neutral: true });
+      const merge = live.merge || {};
+      this._watchLivePlacements = filtered.placements;
+      this._watchLiveBank = Array.isArray(live.bank) ? live.bank : [];
+      this._watchLiveMerge = {
+        slots: Array.isArray(merge.slots) ? [...merge.slots] : [null, null],
+        slotIds: Array.isArray(merge.slotIds) ? [...merge.slotIds] : [null, null],
+        result: merge.result || null,
+        resultId: merge.resultId || null,
+      };
+      if (this.sharedSeed) this.applyWatchMerge(merge);
+      else this.mergeDock?.applyLiveChars?.(merge.slots, merge.result);
+      this.applyLiveSelection(live);
+
+      if (this.sharedSeed) {
+        this.syncWatchBankExact(live.bank || []);
+      } else {
+        this.syncDockUsageVisibility();
+      }
+      this.playOppActionFlash(live, prevSnap);
+      this._watchLivePrevSnapshot = this.captureWatchLiveSnapshot(live);
+    }
+
+    collectDockUsedChars() {
+      const chars = [];
+      if (this.watchMode) {
+        this.blocks.forEach((block) => {
+          block.getAllZones().forEach((zone) => {
+            if (!zone.locked) return;
+            const tile = zone.placedTileId ? this.tileMap[zone.placedTileId] : null;
+            if (tile?.char) chars.push(tile.char);
+          });
+        });
+        (this._watchLivePlacements || []).forEach((p) => {
+          if (p.char) chars.push(p.char);
+        });
+        const merge = this._watchLiveMerge || { slots: [null, null], result: null };
+        (merge.slots || []).forEach((c) => { if (c) chars.push(c); });
+        if (merge.result) chars.push(merge.result);
+        // Merged tiles the opponent parked in their dock exist only in their
+        // tileMap; count their chars too so our source vowels stay hidden.
+        (this._watchLiveBank || []).forEach((entry) => {
+          if (entry?.id && entry.char && !this.tileMap[entry.id]) chars.push(entry.char);
+        });
+        return chars;
+      }
+      this.blocks.forEach((block) => {
+        block.getAllZones().forEach((zone) => {
+          const tile = zone.placedTileId ? this.tileMap[zone.placedTileId] : null;
+          if (tile?.char) chars.push(tile.char);
+        });
+      });
+      const merge = this.mergeDock?.serializeLiveChars?.() || { slots: [null, null], result: null };
+      (merge.slots || []).forEach((c) => { if (c) chars.push(c); });
+      if (merge.result) chars.push(merge.result);
+      return chars;
+    }
+
+    /** While watching opponent live state, mirror bank visibility from live payload. */
+    syncDockUsageVisibility() {
+      if (!this.turnBased || !this.watchMode) return;
+      if (this.sharedSeed && Array.isArray(this._watchLiveBank)) {
+        this.syncWatchBankExact(this._watchLiveBank);
+        return;
+      }
+      const remaining = {};
+      this.collectDockUsedChars().forEach((c) => {
+        if (c) remaining[c] = (remaining[c] || 0) + 1;
+      });
+      const bankTiles = Object.values(this.tileMap).filter((t) => t.inBank && !t.locked);
+      bankTiles.forEach((t) => t.showInBank());
+      bankTiles.forEach((t) => {
+        if (remaining[t.char] > 0) {
+          t.hideInBank();
+          remaining[t.char] -= 1;
+        }
+      });
+      // A merged vowel (e.g. ㅘ) has no matching bank tile here — hide its
+      // component vowels instead so they don't look "returned" to the dock.
+      Object.keys(remaining).forEach((char) => {
+        let count = remaining[char];
+        if (count <= 0) return;
+        const pair = HC.getMergePairComponents?.(char);
+        if (!pair || pair.length !== 2) return;
+        while (count > 0) {
+          pair.forEach((component) => {
+            const tile = bankTiles.find((t) => (
+              t.char === component && !t.el.classList.contains('hidden-in-bank')
+            ));
+            tile?.hideInBank();
+          });
+          count -= 1;
+        }
+        remaining[char] = 0;
+      });
+      this.syncDockTileSize();
+    }
+
+    /** @deprecated use syncDockUsageVisibility */
+    syncWatchDockVisibility(usedChars) {
+      if (Array.isArray(usedChars)) {
+        const remaining = {};
+        usedChars.forEach((c) => { if (c) remaining[c] = (remaining[c] || 0) + 1; });
+        const bankTiles = Object.values(this.tileMap).filter((t) => t.inBank && !t.locked);
+        bankTiles.forEach((t) => t.showInBank());
+        bankTiles.forEach((t) => {
+          if (remaining[t.char] > 0) {
+            t.hideInBank();
+            remaining[t.char] -= 1;
+          }
+        });
+        this.syncDockTileSize();
+        return;
+      }
+      this.syncDockUsageVisibility();
+    }
+
+    /** Restore every un-locked bank tile to visible (used when regaining control). */
+    restoreDockVisibility() {
+      Object.values(this.tileMap).forEach((tile) => {
+        if (tile.inBank && !tile.locked) tile.showInBank();
+      });
+    }
+
+    notifyTurnLiveChange() {
+      if (!this.turnBased || !this.onTurnLiveChange || !this.isMyTurn || this.watchMode || this.turnSubmitting) return;
+      if (this._suspendLiveBroadcast || this._restoringTurnLocks) return;
+      if (this._liveBroadcastTimer) return;
+      this._liveBroadcastTimer = setTimeout(() => {
+        this._liveBroadcastTimer = null;
+        try {
+          this.onTurnLiveChange(this.serializeTurnLiveState());
+        } catch (err) {
+          console.warn('[KoreanMatch] turn live broadcast', err);
+        }
+      }, 400);
+    }
+
+    /**
+     * Stop broadcasting live turn state. Called the instant a turn submission
+     * starts so the debounced updateTurnLive write can't collide with the
+     * submitTurn transaction (which caused stacking failed-precondition errors
+     * and left the turn stuck).
+     */
+    suspendLiveBroadcast() {
+      this._suspendLiveBroadcast = true;
+      if (this._liveBroadcastTimer) {
+        clearTimeout(this._liveBroadcastTimer);
+        this._liveBroadcastTimer = null;
+      }
+    }
+
+    setWatchMode(on) {
+      this.watchMode = !!on;
+      this.root?.classList.toggle('match-watch-mode', !!on);
+      if (on) {
+        this.turnPrepMode = false;
+        this.isMyTurn = false;
+        this.clearSelection();
+        this._lastOppFlashSeq = 0;
+        this._watchLivePrevSnapshot = null;
+        this.setEnabled(false);
+        this.els.check.disabled = true;
+        this.els.reset.disabled = true;
+      }
     }
 
     _fillReplayZone(zoneEl, si, byPlacement) {
@@ -2408,13 +4192,13 @@
       if (!char) return;
       zoneEl.classList.add('filled');
       const tile = document.createElement('span');
-      tile.className = 'jamo-tile opp-reveal-tile';
-      tile.innerHTML = `<span class="jamo-tile-face jamo-tile-front">${char}</span>`;
+      tile.className = 'jamo-tile opp-reveal-tile in-zone';
+      tile.innerHTML = jamoTileFaceHtml(char, zoneType);
       if (placement.correct) {
-        zoneEl.classList.add('correct');
+        zoneEl.classList.add('correct', 'watch-correct');
         tile.classList.add('revealed', 'correct-flip');
       } else {
-        zoneEl.classList.add('incorrect');
+        zoneEl.classList.add('incorrect', 'watch-wrong');
       }
       zoneEl.appendChild(tile);
     }
@@ -2428,8 +4212,9 @@
       });
       const row = document.createElement('div');
       row.className = 'syllable-blocks-row race-turn-previous-blocks';
-      row.dataset.sylCount = String(this.blocks.length);
-      row.style.setProperty('--syl-count', String(this.blocks.length));
+      const n = this.blocks.length;
+      row.dataset.sylCount = String(n);
+      row.style.setProperty('--syl-count', String(layoutSylColumnCount(n)));
       this.blocks.forEach((block, si) => {
         const clone = block.el.cloneNode(true);
         clone.classList.add('race-turn-previous-block');
@@ -2498,16 +4283,44 @@
       this.updateCheckButton();
     }
 
-    /** Submit whatever is on the board when the turn timer expires. */
-    async submitTurnOnTimeout() {
-      if (!this.turnBased || this.inspectMode || this.rushMode) return false;
-      if (!this.canSubmitTurn() || this.checkedComplete || this.turnSubmitting) return false;
+    /** When the turn timer hits zero — same outcome as tapping Check. */
+    async expireMyTurn() {
+      if (!this.turnBased || this.inspectMode || this.rushMode || this.watchMode) return false;
+      if (!this.isMyTurn || this.turnPrepMode || this.checkedComplete) return false;
+      if (this.checking || this.turnSubmitting) return false;
       if (!this.onTurnSubmit) return false;
-      if (this.checking) return false;
-      if (!this.hasAnyPlacement()) return false;
+
+      if (!this.hasAnyPlacement()) {
+        this.suspendLiveBroadcast();
+        this.turnSubmitting = true;
+        const submission = this.serializeTurnSubmission();
+        try {
+          await this.onTurnSubmit({
+            ...submission,
+            won: false,
+            guessCount: this.guessCount,
+          });
+          this.freezeOwnTurnResult();
+          return true;
+        } catch (err) {
+          if (err?.message === 'turn-not-applied') {
+            this.turnSubmitting = false;
+            return false;
+          }
+          console.error('[KoreanMatch] turn timeout submit failed', err);
+          this.turnSubmitting = false;
+          this.feedback.show('error', t('matchTurn.turnSubmitFailed') || 'Could not submit turn.');
+          return false;
+        }
+      }
 
       await this.checkAnswer();
       return this.turnSubmitting || this.checkedComplete;
+    }
+
+    /** @deprecated use expireMyTurn */
+    async submitTurnOnTimeout() {
+      return this.expireMyTurn();
     }
 
     /** After own submit — keep flip feedback on board, lock interaction. */
@@ -2519,7 +4332,16 @@
 
     setMyTurn(isMine) {
       this.isMyTurn = !!isMine;
-      if (isMine) this.turnPrepMode = false;
+      if (isMine) {
+        this.turnPrepMode = false;
+        this.watchMode = false;
+        this.root?.classList.remove('match-watch-mode');
+        this._lastLiveFingerprint = null;
+        this._watchLivePlacements = null;
+        this._watchLiveMerge = null;
+        this._suspendLiveBroadcast = false;
+        this.restoreDockVisibility();
+      }
       const canPlay = !this.inspectMode
         && (this.rushMode || this.isMyTurn)
         && !this.checkedComplete
@@ -2545,10 +4367,10 @@
     }
 
     canArrangeTiles() {
-      if (this.checking || this.inspectMode) return false;
+      if (this.checking || this.inspectMode || this.watchMode) return false;
       if (this.turnBased) {
         if (this.rushMode) return !this.checkedComplete;
-        if (this.turnPrepMode) return true;
+        if (this.turnPrepMode && !this.raceControlled) return true;
         return this.isMyTurn && !this.checkedComplete && !this.boardHidden;
       }
       return this.enabled && !this.checkedComplete;
@@ -2568,6 +4390,7 @@
 
     async flipRevealZone(zone, tile, index) {
       await delay(index * FLIP_STAGGER);
+      global.SoundEffects?.correct?.();
       zone.el.classList.add('revealing');
       tile.el.classList.add('revealing');
       tile.el.style.setProperty('--flip-delay', '0ms');
@@ -2582,12 +4405,23 @@
 
     async flipWrongZone(zone, tile, index) {
       await delay(index * FLIP_STAGGER);
+      global.SoundEffects?.wrong?.();
       zone.el.classList.add('revealing-wrong');
       if (tile) tile.el.classList.add('revealing-wrong');
       await delay(FLIP_MS);
       zone.el.classList.remove('revealing-wrong');
       zone.el.classList.add('incorrect');
       if (tile) tile.el.classList.remove('revealing-wrong');
+    }
+
+    returnWrongTilesToBank(entries) {
+      (entries || []).forEach(({ zone, tile }) => {
+        if (!tile || zone.locked) return;
+        zone.el.classList.remove('incorrect', 'revealing-wrong');
+        zone.clear();
+        this.returnTileToBank(tile);
+      });
+      this.syncDockTileSize();
     }
 
     async checkAnswer() {
@@ -2598,40 +4432,102 @@
       if (!this.canSubmitTurn() || !this.hasAnyPlacement() || this.checking || this.checkedComplete || this.turnSubmitting) return;
       if (this.turnBased && this.inspectMode) return;
 
+      if (this.turnBased && this.onTurnLiveChange) {
+        this._liveActionSeq += 1;
+        this._pendingLiveAction = { seq: this._liveActionSeq, kind: 'checking' };
+        try {
+          this.onTurnLiveChange(this.serializeTurnLiveState());
+        } catch (err) {
+          console.warn('[KoreanMatch] live checking broadcast', err);
+        }
+        this._pendingLiveAction = null;
+      }
+      if (this.turnBased) this.suspendLiveBroadcast();
       this.checking = true;
       this.guessCount++;
       if (this.els.guesses) {
         this.els.guesses.textContent = t('match.guesses', { n: this.guessCount });
       }
+      if (this.isDaily && this.guessCount === 1) {
+        try {
+          global.QuestService?.recordActivity?.('dailyMatch', { won: false });
+        } catch (err) {
+          console.warn('[KoreanMatch] daily quest progress failed', err);
+        }
+      }
       this.els.check.disabled = true;
+
+      const composedWord = this.shouldUseDictionaryCheck() ? this.getSubmittedBoardWord() : null;
+      const fullBoardSubmit = !!composedWord;
+      let dictionaryWin = false;
+      let dictionaryOffline = false;
+
+      if (composedWord) {
+        if (!this.turnBased) {
+          this.feedback.show('info', t('match.feedbackChecking'));
+        }
+        const dictResult = await this.isDictionaryAcceptedWord(composedWord);
+        dictionaryWin = dictResult.valid;
+        dictionaryOffline = dictResult.offline;
+        if (dictionaryWin) {
+          this.discoveredWord = composedWord;
+          this.discoveredDictionaryEntry = dictResult.entry || null;
+          const dictMeaning = global.DictionaryService?.formatEntryMeaning?.(this.discoveredDictionaryEntry);
+          if (dictMeaning) {
+            this._meaningPromise = Promise.resolve(dictMeaning);
+          }
+        }
+      }
 
       const toReveal = [];
       const toWrong = [];
 
-      this.blocks.forEach((block) => {
-        block.getAllZones().forEach((zone) => {
-          if (zone.locked) return;
-          const tile = zone.placedTileId ? this.tileMap[zone.placedTileId] : null;
-          const placed = tile ? tile.char : null;
-          const ok = this.isZoneCorrect(zone);
-          if (placed && ok && zone.expected !== null) {
-            toReveal.push({ zone, tile });
-          } else if (placed && !ok) {
-            toWrong.push({ zone, tile });
-          }
+      if (dictionaryWin) {
+        this.blocks.forEach((block) => {
+          block.getAllZones().forEach((zone) => {
+            if (zone.locked) return;
+            const tile = zone.placedTileId ? this.tileMap[zone.placedTileId] : null;
+            if (tile) toReveal.push({ zone, tile });
+          });
         });
-      });
+      } else {
+        this.blocks.forEach((block) => {
+          block.getAllZones().forEach((zone) => {
+            if (zone.locked) return;
+            const tile = zone.placedTileId ? this.tileMap[zone.placedTileId] : null;
+            const placed = tile ? tile.char : null;
+            const ok = this.isZoneCorrect(zone);
+            if (placed && ok && zone.expected !== null) {
+              toReveal.push({ zone, tile });
+            } else if (placed && !ok) {
+              toWrong.push({ zone, tile });
+            }
+          });
+        });
+      }
 
-      await Promise.all([
-        ...toReveal.map((item, i) => this.flipRevealZone(item.zone, item.tile, i)),
-        ...toWrong.map((item, i) => this.flipWrongZone(item.zone, item.tile, toReveal.length + i)),
-      ]);
+      if (toReveal.length || toWrong.length) {
+        await Promise.all([
+          ...toReveal.map((item, i) => this.flipRevealZone(item.zone, item.tile, i)),
+          ...toWrong.map((item, i) => this.flipWrongZone(item.zone, item.tile, toReveal.length + i)),
+        ]);
+      }
 
-      const wordComplete = this.blocks.every((block) =>
+      if (this.turnBased && !dictionaryWin) {
+        this.returnWrongTilesToBank(toWrong);
+      }
+
+      const allZonesCorrect = this.blocks.every((block) =>
         block.getAllZones().every((zone) => this.isZoneCorrect(zone))
+      );
+      const wordComplete = dictionaryWin || (
+        this.turnBased
+          ? allZonesCorrect
+          : (!fullBoardSubmit && allZonesCorrect)
       );
 
       if (wordComplete) {
+        global.SoundEffects?.win?.();
         this.checkedComplete = true;
         this.stopTimer();
         const elapsed = this.getElapsedMs();
@@ -2642,6 +4538,10 @@
         }
         if (this.turnBased && this.onTurnSubmit) {
           this.turnSubmitting = true;
+          const resolvedWord = this.getResolvedWord();
+          void this.showTurnAnswerBanner(resolvedWord);
+          this.freezeOwnTurnResult();
+          this.checking = false;
           const submission = this.serializeTurnSubmission();
           try {
             await this.onTurnSubmit({
@@ -2650,6 +4550,13 @@
               guessCount: this.guessCount,
             });
           } catch (err) {
+            if (err?.message === 'turn-not-applied') {
+              this.turnSubmitting = false;
+              this.checkedComplete = false;
+              this.checking = false;
+              this.updateCheckButton();
+              return;
+            }
             console.error('[KoreanMatch] turn submit failed', err);
             this.turnSubmitting = false;
             this.feedback.show('error', t('matchTurn.turnSubmitFailed') || 'Could not submit turn.');
@@ -2658,9 +4565,6 @@
             this.updateCheckButton();
             return;
           }
-          this.feedback.show('success', t('match.feedbackSuccess'));
-          this.freezeOwnTurnResult();
-          this.checking = false;
           return;
         }
         if (this.versus) {
@@ -2670,7 +4574,15 @@
           if (this.onFinished) {
             await this.onFinished({ won: true, guessCount: this.guessCount, elapsedMs: elapsed });
           }
-          this.feedback.show('success', t('match.feedbackSuccess'));
+          const resolvedWord = this.getResolvedWord();
+          const targetWord = this.currentWord?.word || '';
+          const versusKey = dictionaryWin && resolvedWord && targetWord && resolvedWord !== targetWord
+            ? 'match.feedbackDictionarySuccess'
+            : 'match.feedbackSuccess';
+          const versusVars = versusKey === 'match.feedbackDictionarySuccess'
+            ? { word: resolvedWord }
+            : undefined;
+          this.feedback.show('success', t(versusKey, versusVars));
           this.els.check.disabled = true;
           this.els.reset.disabled = true;
           this.checking = false;
@@ -2693,20 +4605,32 @@
         if (global.XpService?.awardAndCelebrate) {
           global.XpService.awardAndCelebrate({
             mode: this.isDaily ? 'dailyMatch' : 'koreanMatch',
-            wordId: this.currentWord.word,
+            wordId: this.getResolvedWord(),
             usedHint: this.hintsUsedThisRound,
             isDailyChallenge: this.isDaily,
+            won: true,
+            guessCount: this.guessCount,
           });
         }
-        this.feedback.show('success', this.isDaily ? t('match.feedbackDailyDone') : t('match.feedbackSuccess'));
+        const resolvedWord = this.getResolvedWord();
+        const targetWord = this.currentWord?.word || '';
+        const successKey = dictionaryWin && resolvedWord && targetWord && resolvedWord !== targetWord
+          ? 'match.feedbackDictionarySuccess'
+          : (this.isDaily ? 'match.feedbackDailyDone' : 'match.feedbackSuccess');
+        const successVars = successKey === 'match.feedbackDictionarySuccess'
+          ? { word: resolvedWord }
+          : undefined;
+        this.feedback.show('success', t(successKey, successVars));
         if (streakResult?.newMilestone) {
           setTimeout(() => {
             this.feedback.show('success', `${streakResult.newMilestone.badge} ${streakResult.newMilestone.message}`);
           }, 1200);
         }
-        await this.revealHintWord(this.currentWord.word);
+        await this.revealHintWord(resolvedWord);
         this.spawnConfetti();
         this.showResults(elapsed);
+      } else if (!composedWord && this.hasAllDockTilesOnBoard() && this.shouldUseDictionaryCheck()) {
+        this.feedback.show('error', t('match.feedbackCantCompose'));
       } else if (toReveal.length && toWrong.length) {
         this.feedback.show('success', t('match.feedbackPartial'));
         if (!this.turnBased) {
@@ -2723,6 +4647,10 @@
             toWrong.forEach(({ zone }) => zone.el.classList.remove('incorrect'));
           }, 900);
         }
+      } else if (fullBoardSubmit && !dictionaryWin) {
+        this.feedback.show('error', dictionaryOffline
+          ? t('match.feedbackDictionaryOffline')
+          : t('match.feedbackNotInDictionary'));
       } else {
         this.feedback.show('info', t('match.feedbackCheck'));
       }
@@ -2742,6 +4670,10 @@
           });
           this.freezeOwnTurnResult();
         } catch (err) {
+          if (err?.message === 'turn-not-applied') {
+            this.turnSubmitting = false;
+            return;
+          }
           console.error('[KoreanMatch] turn submit failed', err);
           this.turnSubmitting = false;
           this.feedback.show('error', t('matchTurn.turnSubmitFailed') || 'Could not submit turn.');
@@ -2782,44 +4714,97 @@
       });
     }
 
+    getResultsMeaningText(words) {
+      const list = (Array.isArray(words) ? words : [words])
+        .map((w) => String(w || '').trim())
+        .filter(Boolean);
+      const formatDict = (entry) => global.DictionaryService?.formatEntryMeaning?.(entry) || '';
+      return list
+        .map((w) => {
+          const dictEntry = this.multiDictionaryEntries?.[w]
+            || (w === this.discoveredWord ? this.discoveredDictionaryEntry : null);
+          const dictText = formatDict(dictEntry);
+          if (dictText) return dictText;
+          return global.LearningWords?.getWordMeaning?.(w)
+            || global.MatchWordMeanings?.[w]
+            || '';
+        })
+        .filter(Boolean)
+        .join(' · ');
+    }
+
+    ensureResultsMeaningEl() {
+      if (this.els.resultsWordMeaning?.isConnected) return this.els.resultsWordMeaning;
+      const banner = this.els.resultsWord?.closest('.results-word-banner');
+      if (!banner) return null;
+      let el = banner.parentElement?.querySelector('#results-word-meaning');
+      if (!el) {
+        el = document.createElement('p');
+        el.className = 'results-word-meaning';
+        el.id = 'results-word-meaning';
+        el.setAttribute('aria-live', 'polite');
+        banner.insertAdjacentElement('afterend', el);
+      }
+      this.els.resultsWordMeaning = el;
+      return el;
+    }
+
+    updateResultsMeaning(words) {
+      const meaningEl = this.ensureResultsMeaningEl();
+      if (!meaningEl) return;
+      const meaningWords = Array.isArray(words)
+        ? words
+        : String(words || '').split('·').map((w) => w.trim()).filter(Boolean);
+      const syncText = this.getResultsMeaningText(meaningWords);
+      meaningEl.textContent = syncText;
+      meaningEl.hidden = !syncText;
+      meaningEl.classList.toggle('hidden', !syncText);
+      if (syncText) return;
+      const fallbackWord = meaningWords[0] || this.getResolvedWord();
+      if (!fallbackWord) return;
+      const fillAsync = async () => {
+        const useCached = fallbackWord === this.discoveredWord
+          || fallbackWord === this.currentWord?.word;
+        const text = await (useCached && this._meaningPromise
+          ? this._meaningPromise
+          : this.resolveWordMeaning(fallbackWord));
+        if (!text || !meaningEl.isConnected) return;
+        meaningEl.textContent = text;
+        meaningEl.hidden = false;
+        meaningEl.classList.remove('hidden');
+      };
+      fillAsync().catch(() => {});
+    }
+
     destroy() {
       KoreanMatchDrag.end();
       this.stopTimer();
+      if (this._dockResizeBound && this._onDockResize) {
+        window.removeEventListener('resize', this._onDockResize);
+        this._dockResizeBound = false;
+      }
       if (KoreanMatchGame.instance === this) {
         KoreanMatchGame.instance = null;
       }
     }
 
     showResults(elapsed) {
-      this.els.resultsWord.textContent = this.multiFindMode
+      const word = this.multiFindMode
         ? this.multiFoundWords.join(' · ')
-        : (this.currentWord?.word || '');
+        : this.getResolvedWord();
+      this.els.resultsWord.textContent = word;
+      this.updateResultsMeaning(this.multiFindMode ? this.multiFoundWords : word);
       this.els.resultsTime.textContent = formatTime(elapsed);
       this.els.resultsGuesses.textContent = String(this.guessCount);
       if (this.els.resultsStreak) {
-        this.els.resultsStreak.textContent = `${this.streak} 🔥`;
+        this.els.resultsStreak.textContent = String(this.streak);
       }
       if (this.isDaily) {
         this.els.resultsBest.textContent = `Daily Day ${MD.getDayNumber()} · 내일 자정(KST)에 새 단어`;
-      } else {
+      } else if (!this.versus) {
         this.els.resultsBest.textContent = this.bestStreak > 0
-          ? t('match.bestStreak', { n: this.bestStreak })
+          ? t('match.bestCombo', { n: this.bestStreak })
           : '';
-      }
-
-      if (this.els.resultsDict) {
-        this.els.resultsDict.innerHTML = '';
-        if (global.DictionaryModal && this.currentWord?.word) {
-          const dictBtn = global.DictionaryModal.createButton(t('match.dictionary'));
-          dictBtn.addEventListener('click', () => {
-            const entry = global.LearningWords?.findWordEntry?.(this.currentWord.word);
-            const normalized = global.LearningWords?.getNormalizedWord?.(this.currentWord.word)
-              || (entry && global.LearningWordModel?.normalizeLearningWord?.(entry));
-            global.DictionaryModal.open(this.currentWord.word, normalized || { word: this.currentWord.word });
-          });
-          this.els.resultsDict.appendChild(dictBtn);
-          global.DictionaryService?.prefetchWord?.(this.currentWord.word);
-        }
       }
 
       this.els.results.classList.remove('hidden');
@@ -2836,7 +4821,7 @@
 
     spawnConfetti() {
       if (prefs()?.shouldReduceMotion?.()) return;
-      const colors = ['#FFB8D0', '#A8D4F5', '#FFD0A8', '#CFC0F5', '#98DDB8', '#FFEAA0'];
+      const colors = ['#FFB8D0', '#5FD4E8', '#FFE566', '#FFD0A8', '#F5A0C8', '#7BE0F0'];
       for (let i = 0; i < 36; i++) {
         const piece = document.createElement('div');
         piece.className = 'confetti-piece';
@@ -2858,7 +4843,9 @@
     window.addEventListener('pageshow', (e) => {
       if (!e.persisted) return;
       KoreanMatchDrag.end();
-      KoreanMatchGame.instance?.restoreVisibleTiles?.();
+      const game = KoreanMatchGame.instance;
+      game?.restoreVisibleTiles?.();
+      if (game?.isDaily) game.startDailyFresh();
     });
   }
 })(typeof window !== 'undefined' ? window : globalThis);

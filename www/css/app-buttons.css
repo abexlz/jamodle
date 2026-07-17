@@ -6,22 +6,43 @@
 :root {
   --app-btn-radius: 24px;
   --app-btn-border: 2px;
-  --app-btn-shadow:
-    inset 0 2px 0 rgba(255, 255, 255, 0.45),
-    0 6px 0 #C87A00,
-    0 8px 18px rgba(0, 0, 0, 0.2);
-  --app-btn-shadow-active: 0 2px 0 #C87A00;
-  --app-btn-text-shadow: 0 2px 0 rgba(140, 70, 0, 0.4);
+  --app-btn-gloss-overlay: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.32) 0%,
+    rgba(255, 255, 255, 0.1) 20%,
+    transparent 44%,
+    rgba(0, 0, 0, 0.05) 100%
+  );
+  --app-btn-gloss-inset: inset 0 1px 0 rgba(255, 255, 255, 0.4), inset 0 -2px 5px rgba(0, 0, 0, 0.07);
+  --app-btn-gloss-ambient: 0 8px 16px rgba(0, 40, 50, 0.16);
+  --app-btn-shadow: var(--app-btn-gloss-inset), 0 6px 0 #C4A82D, var(--app-btn-gloss-ambient);
+  --app-btn-shadow-active: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 2px 0 #C4A82D, 0 4px 8px rgba(0, 40, 50, 0.1);
+  --app-btn-text-shadow: 0 2px 0 rgba(120, 80, 0, 0.45);
   --app-btn-title-size: clamp(17px, 4.2vw, 22px);
   --app-btn-desc-size: clamp(10px, 2.4vw, 12px);
   --app-btn-icon-size: clamp(22px, 5.5vw, 28px);
   --app-btn-min-h: 56px;
   --app-btn-max-h: 76px;
+  --app-btn-press-shift: 4px;
+  --app-btn-press-scale: 0.976;
+  --app-btn-hover-lift: -2px;
+  --app-btn-press-duration: 0.18s;
+  --app-btn-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --app-btn-press-ease: cubic-bezier(0.32, 0.94, 0.6, 1);
 }
 
 [data-theme="dark"] {
-  --app-btn-shadow: 0 4px 0 rgba(0, 0, 0, 0.28), 0 6px 18px rgba(0, 0, 0, 0.2);
-  --app-btn-shadow-active: 0 1px 0 rgba(0, 0, 0, 0.22);
+  --app-btn-gloss-overlay: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.22) 0%,
+    rgba(255, 255, 255, 0.06) 20%,
+    transparent 44%,
+    rgba(0, 0, 0, 0.08) 100%
+  );
+  --app-btn-gloss-inset: inset 0 1px 0 rgba(255, 255, 255, 0.28), inset 0 -2px 5px rgba(0, 0, 0, 0.12);
+  --app-btn-gloss-ambient: 0 8px 16px rgba(0, 0, 0, 0.28);
+  --app-btn-shadow: var(--app-btn-gloss-inset), 0 6px 0 #A86800, var(--app-btn-gloss-ambient);
+  --app-btn-shadow-active: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 2px 0 #A86800, 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* ── Shared tile shape ── */
@@ -51,8 +72,6 @@ button.ghost,
 #share-btn,
 #modal-btn,
 .syl-pick-btn,
-.language-option,
-.theme-option,
 .confirm-actions button,
 .match-mode-cancel,
 .length-cancel,
@@ -73,15 +92,22 @@ button.ghost,
   overflow: hidden;
   border-radius: var(--app-btn-radius);
   border: var(--app-btn-border) solid var(--border, #E8E4E0);
-  background: var(--card, #fff);
+  background-color: var(--card, #fff);
+  background-image: var(--app-btn-gloss-overlay);
   color: var(--text, #5D6470);
   font-family: 'Jua', 'Noto Sans KR', sans-serif;
   cursor: pointer;
   text-decoration: none;
   box-shadow: var(--app-btn-shadow);
   touch-action: manipulation;
-  transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+  transition:
+    transform 0.18s var(--app-btn-ease),
+    box-shadow 0.18s var(--app-btn-ease),
+    border-color 0.14s ease,
+    background 0.14s ease,
+    filter 0.12s ease;
   -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 
 .featured-continue-cta {
@@ -106,8 +132,6 @@ button.ghost,
 .btn-continue,
 .btn-leave,
 .profile-modal-btn,
-.language-option,
-.theme-option,
 .done-lesson-btn,
 .settings-back {
   font-family: 'Jua', 'Noto Sans KR', sans-serif;
@@ -142,51 +166,83 @@ button.ghost,
 
 .app-btn-icon,
 .mode-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
   font-family: 'Jua', sans-serif;
   font-size: var(--app-btn-icon-size);
   line-height: 1;
-  flex-shrink: 0;
+  background: transparent;
 }
 
-/* ── Hover / active ── */
-.app-btn:hover:not(:disabled):not([aria-disabled="true"]),
-.learning-mode-card:hover:not(.is-locked),
-.daily-challenge-card:hover,
-.featured-continue-cta:hover,
-.length-btn:hover,
-button.ghost:hover:not(:disabled),
-.hint-dock-btn:hover:not(:disabled),
-.match-hint-btn:hover:not(:disabled),
-.rotation-dock:hover:not(.disabled),
-#submit-btn:hover:not(:disabled),
-.modal button:hover,
-.language-option:hover,
-.theme-option:hover {
-  transform: translateY(-2px);
+/* ── Hover / active / pressed ── */
+@media (hover: hover) {
+  .app-btn:hover:not(:disabled):not([aria-disabled="true"]),
+  .learning-mode-card:hover:not(.is-locked),
+  .daily-challenge-card:hover,
+  .featured-continue-cta:hover,
+  .length-btn:hover,
+  button.ghost:hover:not(:disabled),
+  .hint-dock-btn:hover:not(:disabled),
+  .match-hint-btn:hover:not(:disabled),
+  .rotation-dock:hover:not(.disabled),
+  #submit-btn:hover:not(:disabled),
+  .modal button:hover,
+  .language-option:hover,
+  .theme-option:hover,
+  .app-pressable:hover:not(:disabled):not([aria-disabled="true"]):not(.disabled) {
+    transform: translateY(var(--app-btn-hover-lift));
+  }
 }
 
 .app-btn:active:not(:disabled):not([aria-disabled="true"]),
+.app-btn.is-pressed:not(:disabled):not([aria-disabled="true"]),
 .learning-mode-card:active:not(.is-locked),
+.learning-mode-card.is-pressed:not(.is-locked),
 .daily-challenge-card:active,
+.daily-challenge-card.is-pressed,
 .featured-continue-cta:active,
+.featured-continue-cta.is-pressed,
 .match-mode-btn:active,
+.match-mode-btn.is-pressed,
 .match-actions .btn:active:not(:disabled),
+.match-actions .btn.is-pressed:not(:disabled),
 .btn-soft:active,
+.btn-soft.is-pressed,
 .btn-warn:active,
+.btn-warn.is-pressed,
 .length-btn:active,
+.length-btn.is-pressed,
 button.ghost:active:not(:disabled),
+button.ghost.is-pressed:not(:disabled),
 .hint-dock-btn:active:not(:disabled),
+.hint-dock-btn.is-pressed:not(:disabled),
 .match-hint-btn:active:not(:disabled),
+.match-hint-btn.is-pressed:not(:disabled),
 .rotation-dock:active:not(.disabled),
+.rotation-dock.is-pressed:not(.disabled),
 #submit-btn:active:not(:disabled),
+#submit-btn.is-pressed:not(:disabled),
 .modal button:active,
+.modal button.is-pressed,
 .done-lesson-btn:active,
+.done-lesson-btn.is-pressed,
 .syl-pick-btn:active:not(.revealed),
+.syl-pick-btn.is-pressed:not(.revealed),
 .language-option:active,
+.language-option.is-pressed,
 .theme-option:active,
-.confirm-actions button:active {
-  transform: translateY(3px);
+.theme-option.is-pressed,
+.confirm-actions button:active,
+.confirm-actions button.is-pressed,
+.app-pressable:active:not(:disabled):not([aria-disabled="true"]):not(.disabled),
+.app-pressable.is-pressed:not(:disabled):not([aria-disabled="true"]):not(.disabled) {
+  transform: translateY(var(--app-btn-press-shift)) scale(var(--app-btn-press-scale));
   box-shadow: var(--app-btn-shadow-active);
+  filter: brightness(0.96);
+  transition-duration: 0.07s;
+  transition-timing-function: var(--app-btn-press-ease);
 }
 
 .app-btn:disabled,
@@ -209,10 +265,12 @@ button.ghost:disabled,
 .accent-lavender { background: var(--lavender, #E8DEFF); border-color: var(--lavender-btn, #CFC0F5); }
 .accent-yellow { background: var(--yellow, #FFF6C8); border-color: var(--yellow-btn, #FFEAA0); }
 .accent-pink { background: var(--pink, #FFD6E8); border-color: var(--pink-btn, #FFB8D0); }
+.accent-battle { background: var(--lavender, #E8DEFF); border-color: var(--lavender-btn, #CFC0F5); }
+.accent-muted { background: var(--bg-soft, #FFF0EB); border-color: var(--border, #E8E4E0); }
 
 .learning-mode-card.is-recommended {
-  border-color: #E09500 !important;
-  box-shadow: var(--app-btn-shadow, 0 5px 0 #C87A00) !important;
+  border-color: #E6B82E !important;
+  box-shadow: var(--app-btn-gloss-inset), 0 6px 0 #C4A82D, var(--app-btn-gloss-ambient) !important;
 }
 
 .daily-challenge-card.is-complete {
@@ -651,10 +709,67 @@ button.ghost:disabled,
 }
 
 /* ── Settings / profile ── */
+.settings-app .language-option,
+.settings-app .theme-option,
+.language-option,
+.theme-option {
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  text-align: left !important;
+  gap: 12px !important;
+  width: 100%;
+  aspect-ratio: auto !important;
+  max-height: none !important;
+  min-height: 46px !important;
+  padding: 10px 16px !important;
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: clamp(18px, 4.8vw, 22px) !important;
+  line-height: 1.15;
+  border-radius: var(--app-btn-radius);
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.settings-app .language-option > span:first-child,
+.settings-app .theme-option > span:first-child,
+.language-option > span:first-child,
+.theme-option > span:first-child {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+
+.language-check {
+  flex-shrink: 0;
+  font-size: clamp(20px, 5vw, 24px);
+  line-height: 1;
+  font-weight: 700;
+}
+
+.settings-app .btn-soft,
+.settings-app .btn-warn,
+.settings-app .btn-warn-outline,
+.confirm-actions .btn-soft,
+.confirm-actions .btn-warn {
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  aspect-ratio: auto !important;
+  max-height: none !important;
+  min-height: 46px;
+  --app-btn-radius: 16px;
+  padding: 10px 16px;
+  font-size: clamp(17px, 4.5vw, 20px);
+  line-height: 1.15;
+  white-space: normal;
+}
+
 .language-option.selected,
 .theme-option.selected {
   border-color: #E09500 !important;
-  box-shadow: var(--app-btn-shadow, 0 5px 0 #C87A00) !important;
+  box-shadow: var(--app-btn-gloss-inset), 0 6px 0 #C87A00, var(--app-btn-gloss-ambient) !important;
 }
 
 .btn-warn {
@@ -685,6 +800,7 @@ button.ghost:disabled,
   width: auto;
   min-height: 48px;
   max-height: 56px;
+  --app-btn-radius: 16px;
   aspect-ratio: auto;
   padding: 10px 20px;
   font-size: clamp(15px, 4vw, 17px);
@@ -695,9 +811,14 @@ button.ghost:disabled,
 }
 
 .match-mode-cancel:active,
+.match-mode-cancel.is-pressed,
 .length-cancel:active,
-#syl-picker-cancel:active {
+.length-cancel.is-pressed,
+#syl-picker-cancel:active,
+#syl-picker-cancel.is-pressed {
   box-shadow: none;
+  transform: translateY(2px) scale(0.98);
+  filter: brightness(0.94);
 }
 
 /* ── Syl picker chips ── */
@@ -722,12 +843,14 @@ button.ghost:disabled,
   height: 48px;
   border-width: 3px;
   font-size: 22px;
-  box-shadow: var(--app-btn-shadow);
+  box-shadow: var(--app-btn-gloss-inset), 0 5px 0 #C4A82D, var(--app-btn-gloss-ambient);
 }
 
-.top-nav-btn:active {
-  transform: translateY(2px);
+.top-nav-btn:active,
+.top-nav-btn.is-pressed {
+  transform: translateY(3px) scale(var(--app-btn-press-scale));
   box-shadow: var(--app-btn-shadow-active);
+  filter: brightness(0.96);
 }
 
 .done-lesson-btn {
@@ -765,8 +888,9 @@ button.ghost:disabled,
   flex-shrink: 0;
 }
 
-.back-link:active {
-  transform: translateY(3px);
+.back-link:active,
+.back-link.is-pressed {
+  transform: translateY(3px) scale(var(--app-btn-press-scale));
   box-shadow: var(--app-btn-shadow-active);
 }
 
@@ -801,7 +925,7 @@ button.ghost:disabled,
 }
 
 #menu-screen .menu-sections {
-  gap: 10px;
+  gap: 8px;
 }
 
 #menu-screen .section-header {
@@ -833,25 +957,325 @@ button.ghost:disabled,
 #menu-screen .featured-continue-cta {
   --app-btn-min-h: 40px;
   --app-btn-max-h: 48px;
+  --app-btn-radius: 16px;
   aspect-ratio: 2.6 / 1;
 }
 
 #menu-screen .menu-top-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+#menu-screen .menu-top-classic.daily-challenge-card,
+#menu-screen .menu-top-daily.daily-challenge-card {
+  aspect-ratio: auto !important;
+  max-height: none !important;
+}
+
+#menu-screen .menu-top-classic,
+#menu-screen .menu-top-daily {
+  min-height: 60px !important;
+  padding: 14px 18px !important;
+  --app-btn-min-h: 60px;
+}
+
+#menu-screen .menu-top-daily-row .menu-top-daily {
+  min-height: 64px !important;
+  --app-btn-min-h: 64px;
+}
+
+/* Daily puzzle bar — striped yellow + calendar date badge */
+#menu-screen .menu-daily-puzzle-bar {
+  display: grid !important;
+  grid-template-columns: 1fr auto;
+  align-items: stretch !important;
+  justify-content: stretch !important;
+  gap: 0 !important;
+  padding: 0 !important;
+  overflow: hidden;
+  min-height: clamp(58px, 15vw, 68px) !important;
+  background-color: #ffd739 !important;
+  background-image: var(--app-btn-gloss-overlay), repeating-linear-gradient(
+    135deg,
+    #ffd739 0,
+    #ffd739 10px,
+    #ffe566 10px,
+    #ffe566 20px
+  ) !important;
+  border: 2px solid #e6b82e !important;
+  box-shadow: var(--app-btn-gloss-inset), 0 6px 0 #c4a82d, var(--app-btn-gloss-ambient) !important;
+}
+
+#menu-screen .menu-daily-puzzle-bar .menu-daily-puzzle-main {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: 10px 14px;
+}
+
+#menu-screen .menu-daily-puzzle-bar .mode-name {
+  width: auto;
+  text-align: center;
+  text-transform: uppercase;
+  font-size: clamp(20px, 5.4vw, 26px) !important;
+  line-height: 1.1;
+  color: #ffffff !important;
+  text-shadow: 0 2px 0 rgba(120, 80, 0, 0.45) !important;
+  white-space: nowrap;
+}
+
+#menu-screen .menu-daily-calendar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(58px, 15vw, 72px);
+  padding: 8px 10px;
+  background: #f0b020;
+  border-left: 2px solid rgba(160, 100, 0, 0.22);
+  box-sizing: border-box;
+}
+
+#menu-screen .menu-daily-calendar-sheet {
+  width: min(100%, 50px);
+  aspect-ratio: 1;
+  background: #ffffff;
+  border-radius: 7px;
+  box-shadow: 0 2px 0 rgba(120, 80, 0, 0.32);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  overflow: hidden;
+}
+
+#menu-screen .menu-daily-calendar-month {
+  flex-shrink: 0;
+  padding: 3px 2px 2px;
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: clamp(8px, 2.2vw, 10px);
+  font-weight: 400;
+  line-height: 1;
+  text-align: center;
+  color: #8a8f98;
+  border-bottom: 1px solid #e8e4e0;
+  text-transform: uppercase;
+}
+
+#menu-screen .menu-daily-calendar-day {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: clamp(18px, 5vw, 24px);
+  font-weight: 400;
+  line-height: 1;
+  color: #f0a818;
+}
+
+/* Game mode bars — combo pocket left, title right */
+#menu-screen .menu-word-chain-bar.accent-mint.menu-single-player-game-btn,
+#menu-screen .menu-jamo-game-bar.menu-jamo-game-btn {
+  display: grid !important;
+  grid-template-columns: auto 1fr;
+  align-items: stretch !important;
+  justify-content: stretch !important;
+  gap: 0 !important;
+  padding: 0 !important;
+  overflow: hidden;
+  min-height: clamp(52px, 14vw, 60px) !important;
+}
+
+#menu-screen .menu-word-chain-bar.accent-mint.menu-single-player-game-btn {
+  background-color: #ffd739 !important;
+  background-image: var(--app-btn-gloss-overlay), repeating-linear-gradient(
+    135deg,
+    #ffd739 0,
+    #ffd739 10px,
+    #ffe566 10px,
+    #ffe566 20px
+  ) !important;
+  border: 2px solid #e6b82e !important;
+  box-shadow: var(--app-btn-gloss-inset), 0 6px 0 #c4a82d, var(--app-btn-gloss-ambient) !important;
+}
+
+#menu-screen .menu-game-combo {
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(48px, 12.5vw, 56px);
+  padding: 6px 5px;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+#menu-screen .menu-word-chain-bar .menu-game-combo {
+  background: #f0b020;
+  border-right: 2px solid rgba(160, 100, 0, 0.22);
+}
+
+#menu-screen .menu-jamo-game-bar .menu-game-combo {
+  background: transparent;
+  border-right: 2px solid rgba(255, 255, 255, 0.24);
+  border-radius: 0;
+  align-self: stretch;
+}
+
+#menu-screen .menu-game-combo-sheet {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  min-height: 0;
+  height: 100%;
+  padding: 4px 3px;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+}
+
+#menu-screen .menu-game-combo-count {
+  position: relative;
+  z-index: 1;
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: clamp(22.5px, 6.3vw, 28.5px);
+  font-weight: 400;
+  line-height: 1;
+  color: #fff;
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  -webkit-text-fill-color: #fff;
+  filter: none;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.22);
+}
+
+#menu-screen .menu-game-combo-label {
+  position: relative;
+  z-index: 1;
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: clamp(10.5px, 2.85vw, 12px);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  color: #fff;
+  text-transform: uppercase;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.18);
+}
+
+#menu-screen .menu-jamo-game-bar .menu-jamo-game-main {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: 8px 6px;
+}
+
+#menu-screen .menu-jamo-game-bar .mode-name,
+#menu-screen .menu-jamo-game-bar .app-btn-title {
+  width: 100%;
+  text-align: center;
+  text-transform: uppercase;
+  font-size: clamp(13px, 3.4vw, 16px) !important;
+  line-height: 1.05;
+  color: #ffffff !important;
+  text-shadow: 0 2px 0 rgba(140, 40, 55, 0.45) !important;
+  white-space: normal;
+  overflow: visible;
+  word-break: keep-all;
+}
+
+#menu-screen .menu-jamo-game-bar:active,
+#menu-screen .menu-jamo-game-bar.is-pressed {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 2px 0 #c94a5c, 0 4px 8px rgba(0, 40, 50, 0.1) !important;
+}
+
+#menu-screen .menu-word-chain-bar .menu-word-chain-main {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: 8px 6px;
+}
+
+#menu-screen .menu-word-chain-bar .mode-name,
+#menu-screen .menu-word-chain-bar .app-btn-title {
+  width: 100%;
+  text-align: center;
+  text-transform: uppercase;
+  font-size: clamp(13px, 3.4vw, 16px) !important;
+  line-height: 1.05;
+  color: #ffffff !important;
+  text-shadow: 0 2px 0 rgba(120, 80, 0, 0.45) !important;
+  white-space: normal;
+  overflow: visible;
+  word-break: keep-all;
+}
+
+#menu-screen .menu-word-chain-bar:active,
+#menu-screen .menu-word-chain-bar.is-pressed {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 2px 0 #c4a82d, 0 4px 8px rgba(0, 40, 50, 0.1) !important;
+}
+
+#menu-screen .menu-daily-puzzle-bar:active,
+#menu-screen .menu-daily-puzzle-bar.is-pressed {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 2px 0 #c4a82d, 0 4px 8px rgba(0, 40, 50, 0.1) !important;
+}
+
+#menu-screen .menu-daily-puzzle-bar.is-complete .menu-daily-puzzle-main .mode-name::after {
+  content: ' ✓';
 }
 
 #menu-screen .menu-top-classic {
   display: grid !important;
   grid-template-columns: auto 1fr;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
+}
+
+#menu-screen .menu-top-icon-box {
+  width: auto;
+  min-width: 0;
+  font-size: clamp(32px, 8vw, 40px);
+  border-radius: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+#menu-screen .menu-top-classic-label {
+  text-transform: uppercase;
+  font-size: clamp(22px, 5.8vw, 28px);
+  line-height: 1.1;
 }
 
 #menu-screen .menu-top-daily .mode-name {
   text-align: center;
   width: 100%;
+  text-transform: uppercase;
+  font-size: clamp(22px, 5.8vw, 28px);
+  line-height: 1.1;
+}
+
+#menu-screen .menu-top-daily-row {
+  gap: 10px;
+}
+
+#menu-screen .menu-top-daily-row .daily-leaderboard-btn {
+  width: clamp(52px, 14vw, 60px);
+  min-width: clamp(52px, 14vw, 60px);
+  min-height: 64px;
+}
+
+#menu-screen .featured-continue-cta,
+#menu-screen .featured-continue-title {
+  text-transform: uppercase;
 }
 
 #menu-screen .daily-challenges-grid {
@@ -860,20 +1284,68 @@ button.ghost:disabled,
   gap: 8px;
 }
 
-#menu-screen .daily-challenges-grid > * {
+#menu-screen .menu-top-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+#menu-screen .menu-top-grid > :not(.menu-play-game-btn) {
+  grid-column: 1 / -1;
+}
+
+#menu-screen .menu-play-game-btn {
+  min-height: 60px !important;
+  --app-btn-min-h: 60px;
+}
+
+#menu-screen .menu-play-game-btn .daily-challenge-content {
+  justify-content: center;
+}
+
+#menu-screen .menu-play-game-btn .mode-name {
+  text-align: center;
+  white-space: normal;
+  font-size: clamp(16px, 4.2vw, 20px) !important;
+}
+
+#menu-screen .menu-single-player-grid.daily-challenges-grid,
+#menu-screen .menu-battle-grid.daily-challenges-grid,
+#menu-screen .word-games-grid.daily-challenges-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+#menu-screen .menu-mode-panel.daily-challenges-grid {
+  gap: 2px;
+  padding-top: 8px !important;
+}
+
+#menu-screen .menu-single-player-grid.daily-challenges-grid > :not(.menu-single-player-game-btn),
+#menu-screen .menu-battle-grid.daily-challenges-grid > :not(.menu-battle-game-btn),
+#menu-screen .word-games-grid.daily-challenges-grid > :not(.menu-battle-game-btn) {
+  grid-column: 1 / -1;
+}
+
+#menu-screen .menu-single-player-grid > .menu-single-player-game-btn,
+#menu-screen .menu-battle-grid > .menu-battle-game-btn,
+#menu-screen .word-games-grid > * {
   grid-column: auto;
   width: 100%;
-  --app-btn-min-h: 48px;
+  --app-btn-min-h: 46px;
   --app-btn-max-h: none;
+  --app-btn-radius: 16px;
   aspect-ratio: auto;
-  padding: 10px 12px;
+  padding: 8px 12px;
+  min-height: 46px;
 }
 
 #menu-screen .daily-challenge-bar {
   flex-direction: row !important;
   align-items: center !important;
   justify-content: flex-start !important;
-  gap: 12px !important;
+  gap: 10px !important;
 }
 
 #menu-screen .daily-challenge-bar .mode-icon {
@@ -889,9 +1361,16 @@ button.ghost:disabled,
 }
 
 #menu-screen .daily-challenge-bar .mode-name {
-  font-size: clamp(16px, 4vw, 20px);
+  font-size: clamp(18px, 4.8vw, 22px);
+  text-transform: uppercase;
   white-space: nowrap;
   text-align: left;
+}
+
+#menu-screen .menu-top-daily.daily-challenge-bar .mode-name,
+#menu-screen .menu-top-classic-label {
+  font-size: clamp(22px, 5.8vw, 28px) !important;
+  line-height: 1.1;
 }
 
 #menu-screen .learning-modes-list {
@@ -902,15 +1381,26 @@ button.ghost:disabled,
 #menu-screen .learning-modes-list > * {
   grid-column: span 1;
   width: 100%;
-  --app-btn-min-h: 52px;
+  --app-btn-min-h: 46px;
   --app-btn-max-h: none;
+  --app-btn-radius: 16px;
   aspect-ratio: auto;
-  padding: 10px 14px;
+  padding: 8px 12px;
+  min-height: 46px;
 }
 
-#menu-screen .mode-icon {
-  display: flex !important;
+#menu-screen .mode-icon,
+#menu-screen .daily-challenge-bar .mode-icon {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+  width: auto;
+  height: auto;
+  min-width: 0;
+  font-size: clamp(26px, 6.2vw, 32px);
+  line-height: 1;
+  background: transparent !important;
 }
 
 #menu-screen .mode-status {
@@ -939,7 +1429,8 @@ button.ghost:disabled,
 }
 
 #menu-screen .mode-name {
-  font-size: clamp(15px, 3.8vw, 18px);
+  font-size: clamp(18px, 4.8vw, 22px);
+  text-transform: uppercase;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -950,7 +1441,132 @@ button.ghost:disabled,
   display: none !important;
 }
 
+.home-bottom-bar .home-tab-btn > span:not(.home-tab-icon) {
+  text-transform: uppercase;
+}
+
+/* ── Universal press feel (race, shop, profile, wheel, quests, etc.) ── */
+.app-pressable,
+.race-btn,
+.race-results-btn,
+.home-tab-btn,
+.home-nav-btn,
+.shop-buy-btn,
+.shop-tab-btn,
+.quest-claim-btn,
+.quest-tab-btn,
+.profile-tab-btn,
+.wheel-spin-btn,
+.daily-gift-btn,
+.daily-calendar-day,
+.leaderboard-tab-btn,
+.related-words-btn,
+.word-chain-btn,
+.level-mode-btn,
+.dictionary-btn,
+.settings-row-btn,
+.menu-icon-btn,
+.player-hud-btn,
+.hint-token-btn,
+.vowel-merge-btn,
+.syl-pick-btn,
+.length-pick-btn,
+.dock-key,
+.tile-btn,
+.key,
+button:not([disabled]):not(.no-press),
+a.btn:not([disabled]),
+a[role="button"]:not([disabled]) {
+  transition:
+    transform var(--app-btn-press-duration) var(--app-btn-press-ease),
+    box-shadow var(--app-btn-press-duration) var(--app-btn-press-ease),
+    filter var(--app-btn-press-duration) var(--app-btn-press-ease),
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.app-pressable:active,
+.app-pressable.is-pressed,
+.race-btn:active:not(:disabled),
+.race-btn.is-pressed,
+.race-results-btn:active:not(:disabled),
+.race-results-btn.is-pressed,
+.home-tab-btn:active:not(:disabled),
+.home-tab-btn.is-pressed,
+.home-nav-btn:active:not(:disabled),
+.home-nav-btn.is-pressed,
+.shop-buy-btn:active:not(:disabled),
+.shop-buy-btn.is-pressed,
+.shop-tab-btn:active:not(:disabled),
+.shop-tab-btn.is-pressed,
+.quest-claim-btn:active:not(:disabled),
+.quest-claim-btn.is-pressed,
+.quest-tab-btn:active:not(:disabled),
+.quest-tab-btn.is-pressed,
+.profile-tab-btn:active:not(:disabled),
+.profile-tab-btn.is-pressed,
+.wheel-spin-btn:active:not(:disabled),
+.wheel-spin-btn.is-pressed,
+.daily-gift-btn:active:not(:disabled),
+.daily-gift-btn.is-pressed,
+.daily-calendar-day:active:not(.daily-calendar-day--locked),
+.daily-calendar-day.is-pressed:not(.daily-calendar-day--locked),
+.leaderboard-tab-btn:active:not(:disabled),
+.leaderboard-tab-btn.is-pressed,
+.related-words-btn:active:not(:disabled),
+.related-words-btn.is-pressed,
+.word-chain-btn:active:not(:disabled),
+.word-chain-btn.is-pressed,
+.level-mode-btn:active:not(:disabled),
+.level-mode-btn.is-pressed,
+.dictionary-btn:active:not(:disabled),
+.dictionary-btn.is-pressed,
+.settings-row-btn:active:not(:disabled),
+.settings-row-btn.is-pressed,
+.menu-icon-btn:active:not(:disabled),
+.menu-icon-btn.is-pressed,
+.player-hud-btn:active:not(:disabled),
+.player-hud-btn.is-pressed,
+.hint-token-btn:active:not(:disabled),
+.hint-token-btn.is-pressed,
+.vowel-merge-btn:active:not(:disabled),
+.vowel-merge-btn.is-pressed,
+.syl-pick-btn:active:not(:disabled),
+.syl-pick-btn.is-pressed,
+.length-pick-btn:active:not(:disabled),
+.length-pick-btn.is-pressed,
+.dock-key:active:not(:disabled),
+.dock-key.is-pressed,
+.tile-btn:active:not(:disabled),
+.tile-btn.is-pressed,
+.key:active:not(:disabled),
+.key.is-pressed,
+button:not([disabled]):not(.no-press):not(.match-mode-cancel):not(.length-cancel):not(#syl-picker-cancel):not(button.ghost):active,
+button:not([disabled]):not(.no-press):not(.match-mode-cancel):not(.length-cancel):not(#syl-picker-cancel):not(button.ghost).is-pressed,
+a.btn:not([disabled]):active,
+a.btn:not([disabled]).is-pressed,
+a[role="button"]:not([disabled]):active,
+a[role="button"]:not([disabled]).is-pressed {
+  transform: translateY(var(--app-btn-press-shift)) scale(var(--app-btn-press-scale));
+  box-shadow: var(--app-btn-shadow-active);
+  filter: brightness(0.96);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .app-pressable:hover:not(:disabled):not(.is-pressed),
+  .race-btn:hover:not(:disabled):not(.is-pressed),
+  .home-tab-btn:hover:not(:disabled):not(.is-pressed),
+  .shop-buy-btn:hover:not(:disabled):not(.is-pressed),
+  button:not([disabled]):not(.no-press):hover:not(.is-pressed) {
+    transform: translateY(calc(-1 * var(--app-btn-hover-lift)));
+  }
+}
+
 html.reduce-motion .app-btn,
+html.reduce-motion .app-pressable,
 html.reduce-motion .learning-mode-card,
 html.reduce-motion .match-mode-btn,
 html.reduce-motion button.ghost,
@@ -958,6 +1574,19 @@ html.reduce-motion .match-hint-btn,
 html.reduce-motion .hint-dock-btn,
 html.reduce-motion .rotation-dock,
 html.reduce-motion #submit-btn,
-html.reduce-motion .top-nav-btn {
+html.reduce-motion .top-nav-btn,
+html.reduce-motion .race-btn,
+html.reduce-motion .home-tab-btn,
+html.reduce-motion button:not(.no-press) {
   transition: none;
+}
+
+html.reduce-motion .app-btn:active,
+html.reduce-motion .app-btn.is-pressed,
+html.reduce-motion .app-pressable:active,
+html.reduce-motion .app-pressable.is-pressed,
+html.reduce-motion button:not(.no-press):active,
+html.reduce-motion button:not(.no-press).is-pressed {
+  transform: none;
+  filter: none;
 }

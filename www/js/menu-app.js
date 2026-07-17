@@ -23,6 +23,10 @@
   }
 
   function updateTabBarUI() {
+    if (global.HomeNav?.setActiveTab) {
+      global.HomeNav.setActiveTab(activeHomeTab);
+      return;
+    }
     document.querySelectorAll('[data-home-tab]').forEach((btn) => {
       const isActive = btn.dataset.homeTab === activeHomeTab;
       btn.classList.toggle('is-active', isActive);
@@ -31,14 +35,35 @@
   }
 
   function bindHomeTabBar() {
+    if (global.HomeNav?.bind) {
+      global.HomeNav.bind();
+      return;
+    }
     const bar = document.getElementById('home-bottom-bar');
     if (!bar || bar.dataset.bound === '1') return;
     bar.dataset.bound = '1';
     bar.addEventListener('click', (e) => {
       const btn = e.target.closest('[data-home-tab]');
-      if (!btn) return;
+      if (!btn || btn.dataset.homeTab === 'settings') return;
       setHomeTab(btn.dataset.homeTab);
     });
+  }
+
+  function bindMenuSounds() {
+    const root = document.getElementById('menu-root');
+    if (!root || root.dataset.soundsBound === '1') return;
+    root.dataset.soundsBound = '1';
+    root.addEventListener('click', (e) => {
+      const card = e.target.closest(
+        'a.learning-mode-card, a.daily-challenge-card, a.featured-continue-cta, '
+        + 'a.menu-tutorial-btn, a.menu-top-classic, button.learning-mode-card, '
+        + 'button.word-game-card, button.menu-battle-game-btn, a.menu-single-player-game-btn, button.battle-mode-action-btn'
+      );
+      if (!card || card.disabled || card.classList.contains('is-locked')) return;
+      global.SoundEffects?.nav?.();
+    });
+    const profileNav = document.querySelector('.menu-profile-nav');
+    profileNav?.addEventListener('click', () => global.SoundEffects?.nav?.());
   }
 
   function normalizeHomeTab(tab) {
@@ -52,9 +77,16 @@
     screen.classList.toggle('is-quests-tab', tab === 'quests');
   }
 
+  function updateHomeTabBodyClass(tab) {
+    const next = normalizeHomeTab(tab);
+    document.body.classList.remove('home-tab-menu', 'home-tab-learn', 'home-tab-quests', 'home-tab-shop');
+    document.body.classList.add(`home-tab-${next}`);
+  }
+
   function setHomeTab(tab) {
     const next = normalizeHomeTab(tab);
     if (next === activeHomeTab) return;
+    global.SoundEffects?.nav?.();
     activeHomeTab = next;
     try {
       sessionStorage.setItem(HOME_TAB_KEY, next);
@@ -67,6 +99,7 @@
       global.QuestUI?.bindSection?.(root);
     }
     updateMenuScreenTabClass(next);
+    updateHomeTabBodyClass(next);
     updateTabBarUI();
     global.MultiplayerUI?.mount?.();
   }
@@ -87,11 +120,12 @@
     global.ShopUI?.bindSection?.(root);
     global.QuestUI?.bindSection?.(root);
     bindHomeTabBar();
+    bindMenuSounds();
     updateMenuScreenTabClass(activeHomeTab);
+    updateHomeTabBodyClass(activeHomeTab);
     updateTabBarUI();
     global.MultiplayerUI?.mount?.();
     global.QuestUI?.updateTabBadge?.();
-    global.TutorialOnboardingUI?.mount?.();
   }
 
   function refreshMenu() {
@@ -126,9 +160,6 @@
       } else if (action === 'daily-match') {
         e.preventDefault();
         handlers.openDailyMatchCalendar?.();
-      } else if (action === 'wordle-practice') {
-        e.preventDefault();
-        handlers.openLengthPicker?.('practice');
       }
     });
   }

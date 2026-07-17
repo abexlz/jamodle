@@ -58,13 +58,14 @@ module.exports = async function handler(req, res) {
 
   try {
     const result = await dict.validateWord(apiKey, word, { allowException });
+    console.log(`[dictionary] validate ← ${word}: valid=${result.valid}`);
     return json(res, 200, {
       valid: result.valid || allowException,
       word,
       hasDictionaryEntry: result.valid,
       exceptionAllowed: allowException,
       entry: result.entry,
-      candidates: result.candidates?.slice(0, 5) || [],
+      candidates: result.candidates?.slice(0, 10) || [],
       flag: !result.valid && !allowException ? 'NO_DICTIONARY_MATCH' : null,
     });
   } catch (err) {

@@ -96,15 +96,6 @@
       ],
     },
     {
-      id: 'solve-sagwa',
-      type: 'free-solve',
-      word: '사과',
-      wordLength: 2,
-      titleKey: 'tutorial.steps.solveSagwa.title',
-      bodyKey: 'tutorial.steps.solveSagwa.body',
-      hideMerge: false,
-    },
-    {
       id: 'solve-hwasal',
       type: 'free-solve',
       word: '화살',

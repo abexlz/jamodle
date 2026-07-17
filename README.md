@@ -42,6 +42,24 @@ Open:
 - Dictionary API: http://localhost:3000/api/dictionary/search?word=고양이
 - Word import tool: http://localhost:3000/admin/word-import.html
 
+### Share on your phone (ngrok)
+
+The dictionary API only works through `npm run dev` (port 3000), not a static file server.
+
+```bash
+npm run dev
+# in another terminal:
+ngrok http 3000
+```
+
+Or run both together:
+
+```bash
+npm run share
+```
+
+Open the **https://….ngrok-free.app** URL (not localhost). Tunnel must point to **port 3000** so `/api/dictionary/*` is available.
+
 For Capacitor mobile builds, deploy the API to Vercel (or similar) and set the base URL before loading games:
 
 ```html
@@ -73,7 +91,7 @@ Open `/admin/word-import.html` (optionally `?token=YOUR_ADMIN_IMPORT_TOKEN`):
 1. Search the official dictionary
 2. Select the best entry
 3. Add emoji, category, difficulty, English meaning
-4. Export JSON and paste into `LEARNING_WORDS` in `learning-words.js`
+4. Export JSON and paste into `RAW_WORDS` in `www/js/learning-words.js` (the single word bank for Builder and Match)
 
 Validate all curated words:
 

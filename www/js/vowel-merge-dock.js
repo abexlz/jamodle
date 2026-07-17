@@ -1,6 +1,6 @@
 /**
  * Vowel merge dock — combine two basic vowel jamo into a compound medial.
- * Dropping a merged result back onto the dock un-merges it.
+ * Left slot + right slot (order matters). Preview shows faint result before merge.
  */
 (function (global) {
   'use strict';
@@ -13,6 +13,7 @@
       this.callbacks = callbacks;
       this.slotEls = [];
       this.resultEl = null;
+      this.previewEl = null;
       this.slotTileIds = [null, null];
       this.resultTileId = null;
       this._mount();
@@ -20,19 +21,24 @@
 
     _mount() {
       this.root.innerHTML = `
-        <div class="merge-stack">
-          <div class="merge-slot" data-merge-slot="0" aria-label="Merge slot 1"></div>
-          <span class="merge-op" aria-hidden="true">+</span>
-          <div class="merge-slot" data-merge-slot="1" aria-label="Merge slot 2"></div>
+        <div class="merge-machine">
+          <div class="merge-input-row">
+            <div class="merge-slot" data-merge-slot="0" aria-label="Merge left slot"></div>
+            <span class="merge-op" aria-hidden="true">+</span>
+            <div class="merge-slot" data-merge-slot="1" aria-label="Merge right slot"></div>
+          </div>
+          <span class="merge-op merge-arrow" aria-hidden="true">⇅</span>
+          <div class="merge-result" data-merge-result aria-label="Merged vowel">
+            <span class="merge-preview-glyphs" aria-hidden="true"></span>
+          </div>
         </div>
-        <span class="merge-op merge-eq" aria-hidden="true">=</span>
-        <div class="merge-result" data-merge-result aria-label="Merged vowel"></div>
       `;
       this.slotEls = [
         this.root.querySelector('[data-merge-slot="0"]'),
         this.root.querySelector('[data-merge-slot="1"]'),
       ];
       this.resultEl = this.root.querySelector('[data-merge-result]');
+      this.previewEl = this.root.querySelector('.merge-preview-glyphs');
     }
 
     reset() {
@@ -42,8 +48,38 @@
         el.classList.remove('filled', 'drag-over');
         el.innerHTML = '';
       });
-      this.resultEl.classList.remove('filled', 'drag-over');
+      this.resultEl.classList.remove('filled', 'drag-over', 'has-preview');
       this.resultEl.innerHTML = '';
+      const preview = document.createElement('span');
+      preview.className = 'merge-preview-glyphs';
+      preview.setAttribute('aria-hidden', 'true');
+      this.resultEl.appendChild(preview);
+      this.previewEl = preview;
+      this.updatePreview();
+    }
+
+    getOrderedMergePreview() {
+      if (this.resultTileId) return null;
+      const left = this.slotTileIds[0]
+        ? this.callbacks.getTile(this.slotTileIds[0])?.char
+        : null;
+      const right = this.slotTileIds[1]
+        ? this.callbacks.getTile(this.slotTileIds[1])?.char
+        : null;
+      if (!left || !right) return null;
+      return HC()?.tryComposeVerticalMedial?.(left, right) || null;
+    }
+
+    updatePreview() {
+      if (!this.previewEl) return;
+      const merged = this.getOrderedMergePreview();
+      if (merged) {
+        this.previewEl.textContent = merged;
+        this.resultEl.classList.add('has-preview');
+      } else {
+        this.previewEl.textContent = '';
+        this.resultEl.classList.remove('has-preview');
+      }
     }
 
     findDropTarget(x, y) {
@@ -104,7 +140,11 @@
     highlightValidTargetsForTile(tile) {
       if (!tile || tile.locked) return;
       if (tile.isMerged && tile.mergeDockRef === 'result') {
-        this.slotEls.forEach((el) => el.classList.add('tap-target'));
+        this.resultEl.classList.add('tap-target');
+        return;
+      }
+      if (tile.isMerged && tile.inBank && !this.hasResult() && !this.hasSlotTiles()) {
+        this.resultEl.classList.add('tap-target');
         return;
       }
       if (!this.canAcceptInSlot(tile)) return;
@@ -115,6 +155,26 @@
       this.slotEls.forEach((el) => el.classList.remove('tap-target'));
       this.resultEl.classList.remove('tap-target');
       this.root.classList.remove('tap-target');
+    }
+
+    hasSlotTiles() {
+      return this.slotTileIds.some(Boolean);
+    }
+
+    hasBothSlots() {
+      return !!(this.slotTileIds[0] && this.slotTileIds[1]);
+    }
+
+    hasResult() {
+      return !!this.resultTileId;
+    }
+
+    canMerge() {
+      return this.hasBothSlots() && !this.hasResult() && !!this.getOrderedMergePreview();
+    }
+
+    canSplit() {
+      return this.hasResult() && !this.hasSlotTiles();
     }
 
     canAcceptInSlot(tile) {
@@ -128,16 +188,25 @@
       if (!tile || tile.locked) return false;
 
       if (tile.isMerged) {
-        if (tile.mergeDockRef === 'result') {
-          if (target.type === 'slot') return this.unmergeTile(tile);
-          return false;
+        if (target.type === 'result') {
+          if (this.hasSlotTiles()) return false;
+          if (this.hasResult() && this.resultTileId !== tile.id) return false;
+          return this.placeInResult(tile);
         }
-        if (target.type === 'dock' || target.type === 'slot' || target.type === 'result') {
+        if (!this.canSplit()) return false;
+        if (tile.mergeDockRef === 'result' && target.type === 'slot') {
           return this.unmergeTile(tile);
         }
+        return false;
       }
 
       if (!this.canAcceptInSlot(tile)) return false;
+
+      if (target.type === 'dock') {
+        const emptyIdx = this.slotTileIds.findIndex((id) => !id);
+        if (emptyIdx < 0) return false;
+        return this.placeInSlot(emptyIdx, tile);
+      }
 
       if (target.type === 'slot') {
         return this.placeInSlot(target.index, tile);
@@ -152,21 +221,26 @@
       if (existingId && existingId !== tile.id) {
         const existing = this.callbacks.getTile(existingId);
         if (existing && this.callbacks.swapTiles) {
-          return this.callbacks.swapTiles(tile, existing);
+          const ok = this.callbacks.swapTiles(tile, existing);
+          if (ok) this.updatePreview();
+          return ok;
         }
       }
-      return this.placeInSlotEmpty(index, tile);
+      const ok = this.placeInSlotEmpty(index, tile);
+      if (ok) this.updatePreview();
+      return ok;
     }
 
     placeInSlotEmpty(index, tile) {
       if (!this.canAcceptInSlot(tile)) return false;
+      if (this.hasResult() && tile.mergeDockRef !== 'slot') return false;
 
       if (tile.mergeDockRef === 'result') this.clearResultTileRef(tile);
       if (tile.mergeDockRef === 'slot') {
         const prevIdx = tile.mergeDockSlot;
         if (this.slotTileIds[prevIdx] === tile.id) this.slotTileIds[prevIdx] = null;
       }
-      if (tile.zoneRef) this.callbacks.clearZoneTile?.(tile);
+      if (tile.zoneRef) this.callbacks.detachZoneTile?.(tile);
 
       this.slotTileIds[index] = tile.id;
       tile.inBank = false;
@@ -175,36 +249,57 @@
       tile.zoneRef = null;
 
       const el = this.callbacks.renderTileInSlot?.(tile) || tile.el;
-      el.classList?.remove('hidden-in-bank', 'dragging', 'selected');
+      el.classList?.remove('hidden-in-bank', 'dragging', 'selected', 'in-zone', 'snap-in');
+      el.style.removeProperty('transform');
+      el.style.removeProperty('left');
+      el.style.removeProperty('top');
+      el.style.removeProperty('width');
+      el.style.removeProperty('height');
       this.slotEls[index].classList.add('filled');
       this.slotEls[index].innerHTML = '';
       this.slotEls[index].appendChild(el);
 
+      global.SoundEffects?.mergeSlot?.();
       return true;
     }
 
     placeInResult(tile) {
       if (!tile?.isMerged) return false;
       if (this.resultTileId && this.resultTileId !== tile.id) return false;
+      if (this.hasSlotTiles()) return false;
+      if (tile.zoneRef) {
+        tile.zoneRef.placedTileId = null;
+        tile.zoneRef.clear();
+        tile.zoneRef = null;
+      }
       this.resultTileId = tile.id;
       tile.mergeDockRef = 'result';
       tile.inBank = false;
       tile.zoneRef = null;
       const el = this.callbacks.renderTileInSlot?.(tile) || tile.el;
-      el.classList?.remove('hidden-in-bank', 'dragging', 'selected');
+      el.classList?.remove('hidden-in-bank', 'dragging', 'selected', 'in-zone', 'snap-in');
+      el.style.removeProperty('transform');
+      el.style.removeProperty('left');
+      el.style.removeProperty('top');
+      el.style.removeProperty('width');
+      el.style.removeProperty('height');
       this.resultEl.classList.add('filled');
-      this.resultEl.innerHTML = '';
+      this.resultEl.classList.remove('has-preview');
+      if (this.previewEl) this.previewEl.textContent = '';
+      this.resultEl.querySelectorAll('.jamo-tile').forEach((n) => n.remove());
       this.resultEl.appendChild(el);
       return true;
     }
 
-    tryCompose() {
+    tryCompose(options = {}) {
+      if (!this.canMerge()) return;
+
+      const playSound = options.playSound !== false;
+
       const chars = this.slotTileIds.map((id) => {
         const t = id ? this.callbacks.getTile(id) : null;
         return t ? t.char : null;
       });
-      if (!chars[0] || !chars[1]) return;
-
       const merged = HC().tryComposeVerticalMedial(chars[0], chars[1]);
       if (!merged) return;
 
@@ -229,35 +324,50 @@
       mergedTile.inBank = false;
 
       this.resultEl.classList.add('filled');
-      this.resultEl.innerHTML = '';
+      this.resultEl.classList.remove('has-preview');
+      if (this.previewEl) this.previewEl.textContent = '';
+      this.resultEl.querySelectorAll('.jamo-tile').forEach((n) => n.remove());
       const el = this.callbacks.renderTileInSlot?.(mergedTile) || mergedTile.el;
       el.classList?.remove('hidden-in-bank', 'dragging');
       this.resultEl.appendChild(el);
+      if (playSound) global.SoundEffects?.merge?.();
     }
 
     unmergeTile(mergedTile) {
-      const pair = HC().getMergePairComponents(mergedTile.char);
+      if (!mergedTile?.isMerged) return false;
+
+      const pair = (mergedTile.mergeSources?.length === 2
+        ? mergedTile.mergeSources
+        : HC().getMergePairComponents(mergedTile.char));
       if (!pair || pair.length !== 2) return false;
 
-      this.clearSlotsAndResult();
+      const fromResult = mergedTile.mergeDockRef === 'result';
+      const syllableIndex = mergedTile.syllableIndex;
+
+      if (fromResult) {
+        if (!this.canSplit()) return false;
+        this.clearResult();
+      } else if (mergedTile.inBank && !mergedTile.mergeDockRef) {
+        if (this.hasResult() || this.hasSlotTiles()) return false;
+        this.callbacks.removeTile?.(mergedTile.id);
+      } else {
+        return false;
+      }
 
       pair.forEach((char, i) => {
         const basic = this.callbacks.createBasicTile({
           char,
-          syllableIndex: mergedTile.syllableIndex,
+          syllableIndex,
           zoneType: 'jungV',
         });
-        this.slotTileIds[i] = basic.id;
-        basic.mergeDockRef = 'slot';
-        basic.mergeDockSlot = i;
-        basic.inBank = false;
-        this.slotEls[i].classList.add('filled');
-        this.slotEls[i].innerHTML = '';
-        const el = this.callbacks.renderTileInSlot?.(basic) || basic.el;
-        this.slotEls[i].appendChild(el);
+        if (fromResult) {
+          this.placeInSlotEmpty(i, basic);
+        } else {
+          this.callbacks.returnTileToBank?.(basic);
+        }
       });
 
-      this.callbacks.removeTile?.(mergedTile.id);
+      this.updatePreview();
       return true;
     }
 
@@ -267,14 +377,16 @@
       if (t) this.callbacks.removeTile?.(this.resultTileId);
       this.resultTileId = null;
       this.resultEl.classList.remove('filled');
-      this.resultEl.innerHTML = '';
+      this.resultEl.querySelectorAll('.jamo-tile').forEach((n) => n.remove());
+      this.updatePreview();
     }
 
     clearResultTileRef(tile) {
       if (this.resultTileId === tile.id) {
         this.resultTileId = null;
         this.resultEl.classList.remove('filled');
-        this.resultEl.innerHTML = '';
+        this.resultEl.querySelectorAll('.jamo-tile, .merge-live-glyph').forEach((n) => n.remove());
+        this.updatePreview();
       }
     }
 
@@ -291,7 +403,7 @@
     takeResultTileIfDragging(tile) {
       if (this.resultTileId !== tile.id) return;
       this.resultEl.classList.remove('filled');
-      this.resultEl.innerHTML = '';
+      this.resultEl.querySelectorAll('.jamo-tile, .merge-live-glyph').forEach((n) => n.remove());
     }
 
     onTapSlot(index) {
@@ -303,6 +415,7 @@
       this.slotEls[index].classList.remove('filled');
       this.slotEls[index].innerHTML = '';
       if (tile) tile.mergeDockRef = null;
+      this.updatePreview();
       return tile;
     }
 
@@ -310,9 +423,10 @@
       if (!tile) return;
       if (tile.isMerged && this.resultTileId === tile.id) {
         this.resultEl.classList.add('filled');
-        this.resultEl.innerHTML = '';
+        this.resultEl.classList.remove('has-preview');
+        this.resultEl.querySelectorAll('.jamo-tile').forEach((n) => n.remove());
         const el = this.callbacks.renderTileInSlot?.(tile) || tile.el;
-        el.classList?.remove('hidden-in-bank', 'dragging', 'snap-in', 'selected');
+        el.classList?.remove('hidden-in-bank', 'dragging', 'snap-in', 'selected', 'in-zone');
         this.resultEl.appendChild(el);
         tile.mergeDockRef = 'result';
         tile.inBank = false;
@@ -328,6 +442,63 @@
       return this.resultTileId ? this.callbacks.getTile(this.resultTileId) : null;
     }
 
+    serializeLiveChars() {
+      const slots = this.slotTileIds.map((id) => (
+        id ? this.callbacks.getTile(id)?.char ?? null : null
+      ));
+      const result = this.resultTileId
+        ? this.callbacks.getTile(this.resultTileId)?.char ?? null
+        : null;
+      return {
+        slots,
+        slotIds: [...this.slotTileIds],
+        result,
+        resultId: this.resultTileId || null,
+      };
+    }
+
+    /** Plain glyph fallback when the watcher cannot resolve a tile id. */
+    _liveGlyphEl(char) {
+      const el = document.createElement('span');
+      el.className = 'merge-live-glyph';
+      el.setAttribute('aria-hidden', 'true');
+      el.textContent = char;
+      return el;
+    }
+
+    showLiveSlotGlyph(index, char) {
+      const el = this.slotEls[index];
+      if (!el || !char) return;
+      el.classList.add('filled');
+      el.innerHTML = '';
+      el.appendChild(this._liveGlyphEl(char));
+    }
+
+    showLiveResultGlyph(char) {
+      if (!char) return;
+      this.resultEl.classList.add('filled');
+      this.resultEl.classList.remove('has-preview');
+      if (this.previewEl) this.previewEl.textContent = '';
+      this.resultEl.querySelectorAll('.jamo-tile, .merge-live-glyph').forEach((n) => n.remove());
+      const tile = document.createElement('span');
+      tile.className = 'jamo-tile opp-reveal-tile in-zone';
+      tile.innerHTML = `<span class="jamo-tile-face jamo-tile-front">${char}</span>`;
+      this.resultEl.appendChild(tile);
+    }
+
+    applyLiveChars(slots = [null, null], result = null) {
+      this.slotEls.forEach((el, i) => {
+        el.classList.remove('filled');
+        el.innerHTML = '';
+        if (slots[i]) this.showLiveSlotGlyph(i, slots[i]);
+      });
+      this.resultEl.classList.remove('filled', 'has-preview');
+      this.resultEl.querySelectorAll('.jamo-tile, .merge-live-glyph').forEach((n) => n.remove());
+      if (this.previewEl) this.previewEl.textContent = '';
+      if (result) this.showLiveResultGlyph(result);
+      else this.updatePreview();
+    }
+
     /** Clear merge dock bookkeeping when a tile leaves for the syllable grid */
     clearMergeSlotRef(tile) {
       if (!tile) return;
@@ -337,6 +508,7 @@
           this.slotTileIds[idx] = null;
           this.slotEls[idx]?.classList.remove('filled');
           this.slotEls[idx].innerHTML = '';
+          this.updatePreview();
         }
       }
       if (tile.mergeDockRef === 'result' && this.resultTileId === tile.id) {

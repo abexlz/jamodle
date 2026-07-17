@@ -10,6 +10,7 @@
   'use strict';
 
   const PROGRESS_KEY = 'jamodeul-learning-progress';
+  const RW_PROGRESS_KEY = 'jamodeul-related-words-progress';
   const DAILY_LAUNCH = '2024-01-01';
   const DAILY_TZ = 'Asia/Seoul';
 
@@ -173,6 +174,56 @@
     return !!(saved && saved.over && saved.won);
   }
 
+  function getComboFireTier(streak) {
+    const n = Math.max(0, Number(streak) || 0);
+    if (n <= 0) return 0;
+    if (n >= 100) return 100;
+    if (n >= 75) return 75;
+    if (n >= 50) return 50;
+    if (n >= 40) return 40;
+    if (n >= 30) return 30;
+    if (n >= 10) return 10;
+    if (n >= 5) return 5;
+    if (n >= 3) return 3;
+    return 1;
+  }
+
+  function getMatchBestCombo() {
+    const key = 'jamodeul-match-best-streak';
+    if (global.AppStorage) {
+      return Math.max(0, parseInt(global.AppStorage.getString(key), 10) || 0);
+    }
+    try {
+      return Math.max(0, parseInt(localStorage.getItem(key), 10) || 0);
+    } catch {
+      return 0;
+    }
+  }
+
+  function getWordChainBestCombo() {
+    const store = global.AppStorage;
+    let data = {};
+    if (store) {
+      data = store.get(RW_PROGRESS_KEY, {}) || {};
+    } else {
+      try {
+        data = JSON.parse(localStorage.getItem(RW_PROGRESS_KEY) || '{}');
+      } catch {
+        data = {};
+      }
+    }
+    const soloStreak = Math.max(0, parseInt(data.soloStreak, 10) || 0);
+    const hasBest = data.bestSoloStreak != null && data.bestSoloStreak !== '';
+    const storedBest = hasBest
+      ? Math.max(0, parseInt(data.bestSoloStreak, 10) || 0)
+      : 0;
+    const profileBest = Math.max(
+      0,
+      parseInt(global.ProfileService?.loadProfile?.()?.wordChainBestStreak, 10) || 0
+    );
+    return Math.max(storedBest, soloStreak, profileBest);
+  }
+
   function resetAllProgress() {
     const prefixes = ['jamodeul-daily-', 'jamodeul-match-daily-'];
     const exact = [
@@ -213,6 +264,9 @@
     isDailyWordleComplete,
     getDailyMatchProgress,
     isDailyMatchComplete,
+    getWordChainBestCombo,
+    getMatchBestCombo,
+    getComboFireTier,
     resetAllProgress,
   };
 })(typeof window !== 'undefined' ? window : globalThis);

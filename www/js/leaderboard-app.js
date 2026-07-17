@@ -6,7 +6,7 @@
 
   global.addEventListener('DOMContentLoaded', () => {
     const params = new URLSearchParams(global.location.search);
-    const initialGame = params.get('game') === 'match' ? 'match' : 'wordle';
+    const initialGame = params.get('game') === 'streak' ? 'streak' : 'match';
 
     (async function init() {
       if (global.AppNav?.initPage) {

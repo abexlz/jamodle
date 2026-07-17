@@ -1,15 +1,280 @@
-/* Home multiplayer entry + friends picker */
+/* Home mode panels — glass box, decorative heading, side-by-side game buttons */
+
+.menu-mode-panel {
+  position: relative;
+  padding: 8px 10px 10px;
+  gap: 2px;
+  background: var(--w-panel-bg, rgba(0, 70, 85, 0.42));
+  border: 2px solid var(--w-panel-border, rgba(123, 207, 255, 0.55));
+  border-radius: 20px;
+  box-shadow:
+    var(--w-panel-shadow, 0 4px 0 rgba(0, 40, 50, 0.35)),
+    0 0 16px rgba(123, 207, 255, 0.18);
+}
+
+.menu-mode-heading-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(2px, 1.2vw, 6px);
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 0 2px 2px;
+}
+
+.menu-mode-heading {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+}
+
+.menu-mode-heading-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(5px, 1.8vw, 8px);
+  min-height: 30px;
+  padding: 4px clamp(12px, 3.5vw, 18px);
+  background: linear-gradient(180deg, rgba(0, 98, 115, 0.92) 0%, rgba(0, 72, 86, 0.98) 100%);
+  border: 2px solid rgba(255, 214, 120, 0.72);
+  border-radius: 999px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 2px 0 rgba(0, 40, 50, 0.32);
+}
+
+.menu-mode-heading-text {
+  font-family: 'Jua', sans-serif;
+  font-size: clamp(19px, 5vw, 21px);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #ffffff;
+  text-shadow: 0 1px 0 rgba(0, 40, 50, 0.35);
+  white-space: nowrap;
+}
+
+.menu-mode-heading-blossom-svg {
+  flex-shrink: 0;
+  color: rgba(255, 220, 235, 0.95);
+  filter: drop-shadow(0 1px 0 rgba(120, 40, 70, 0.25));
+}
+
+.menu-mode-heading-cloud {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  color: rgba(190, 230, 245, 0.88);
+  opacity: 0.92;
+}
+
+.menu-mode-heading-cloud--right {
+  transform: scaleX(-1);
+}
+
+.menu-battle-title {
+  margin: 4px 0 2px;
+  padding: 0 4px;
+  font-family: 'Jua', sans-serif;
+  font-size: clamp(16px, 4.2vw, 18px);
+  font-weight: 400;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #ffffff;
+  text-shadow: 0 1px 0 rgba(0, 40, 50, 0.35);
+}
+
+#menu-screen .menu-mode-panel .menu-battle-game-btn,
+#menu-screen .menu-mode-panel .menu-single-player-game-btn {
+  position: relative;
+  z-index: 1;
+  aspect-ratio: auto;
+  min-height: clamp(55px, 15vw, 65px);
+  padding: 10px 12px;
+  overflow: hidden;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 8px !important;
+}
+
+#menu-screen .menu-mode-panel .menu-battle-game-btn {
+  min-height: clamp(64px, 17vw, 74px);
+  padding: 4px 10px;
+}
+
+#menu-screen .menu-mode-panel .menu-battle-game-btn .mode-icon,
+#menu-screen .menu-mode-panel .menu-single-player-game-btn .mode-icon {
+  flex-shrink: 0;
+  font-size: clamp(28px, 7.5vw, 35px);
+  line-height: 1;
+}
+
+#menu-screen .menu-mode-panel .menu-battle-game-btn .menu-mode-icon-img {
+  width: clamp(60px, 16.1vw, 69px);
+  height: clamp(60px, 16.1vw, 69px);
+  aspect-ratio: 1;
+  object-fit: contain;
+  display: block;
+  flex-shrink: 0;
+  margin: -6px;
+}
+
+#menu-screen .menu-mode-panel .menu-battle-game-btn .daily-challenge-content,
+#menu-screen .menu-mode-panel .menu-single-player-game-btn .daily-challenge-content {
+  flex: 1;
+  min-width: 0;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0;
+}
+
+#menu-screen .menu-mode-panel .menu-battle-game-btn .daily-challenge-content {
+  padding-left: 0;
+  margin-left: 0;
+  justify-content: flex-start !important;
+}
+
+#menu-screen .menu-mode-panel .menu-battle-game-btn .mode-name,
+#menu-screen .menu-mode-panel .menu-single-player-game-btn .mode-name {
+  text-align: left;
+  white-space: normal;
+  font-size: clamp(25px, 6.5vw, 29px) !important;
+  line-height: 1.08;
+  text-transform: none;
+}
+
+#menu-screen .menu-mode-panel .menu-battle-game-btn .mode-name {
+  line-height: 1.05;
+  text-align: left !important;
+  white-space: normal !important;
+  overflow: visible;
+  text-overflow: unset;
+  margin-left: 4px;
+}
+
+#menu-screen .menu-battle-game-btn,
+#menu-screen .menu-single-player-game-btn {
+  aspect-ratio: auto;
+  min-height: 46px;
+  padding: 8px 12px;
+}
+
+#menu-screen .menu-battle-game-btn .daily-challenge-content,
+#menu-screen .menu-single-player-game-btn .daily-challenge-content {
+  justify-content: center;
+}
+
+#menu-screen .menu-battle-game-btn .mode-name,
+#menu-screen .menu-single-player-game-btn .mode-name {
+  text-align: center;
+  white-space: normal;
+}
+
+#menu-screen .menu-tutorial-bottom {
+  margin-top: 2px;
+}
+
+/* Battle mode picker — centered, flat */
+.battle-mode-overlay {
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 16px !important;
+  padding-bottom: 16px !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.battle-mode-modal {
+  width: 100%;
+  max-width: 360px;
+  background: var(--w-panel-bg, rgba(0, 70, 85, 0.42)) !important;
+  background-image: none !important;
+  border: 2px solid var(--w-panel-border, rgba(123, 207, 255, 0.55)) !important;
+  border-radius: 24px !important;
+  box-shadow: var(--w-panel-shadow, 0 4px 0 rgba(0, 40, 50, 0.35)) !important;
+}
+
+.battle-mode-modal .multiplayer-modal-header {
+  background: rgba(0, 55, 68, 0.35) !important;
+  background-image: none !important;
+  border-bottom: 2px solid var(--w-panel-border, rgba(123, 207, 255, 0.55)) !important;
+}
+
+.battle-mode-modal .multiplayer-modal-title {
+  color: #ffffff !important;
+  text-shadow: none !important;
+}
+
+.battle-mode-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 16px 16px;
+}
+
+.battle-mode-action-btn {
+  aspect-ratio: auto !important;
+  min-height: 46px !important;
+  max-height: none !important;
+  width: 100%;
+  padding: 8px 12px !important;
+}
+
+.battle-mode-action-btn .daily-challenge-content {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.battle-mode-action-btn .mode-name {
+  text-align: center;
+  white-space: normal;
+}
+
+.battle-mode-action-btn--custom {
+  min-height: 56px !important;
+}
+
+.battle-mode-action-btn .app-btn-desc {
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: clamp(11px, 3vw, 13px);
+  line-height: 1.2;
+  opacity: 0.92;
+  text-transform: none;
+}
+
+.battle-placeholder-modal {
+  padding-bottom: 16px;
+}
+
+.battle-placeholder-sub {
+  padding: 8px 16px 16px;
+  text-align: center;
+}
+
+.battle-placeholder-ok {
+  display: block;
+  width: calc(100% - 32px);
+  margin: 0 16px;
+}
 
 .menu-multiplayer-btn {
   width: 100%;
 }
 
-/* Multiplayer — distinct purple, separate from practice modes */
+/* Multiplayer — flat purple (only purple action button on home menu) */
 .menu-multiplayer-btn,
 #menu-screen .menu-multiplayer-btn {
-  background: linear-gradient(180deg, #D4C4F5 0%, #B098E8 45%, #9378DC 100%) !important;
-  border-color: #7B62C8 !important;
-  box-shadow: 0 4px 0 #6B52B8, 0 8px 20px rgba(107, 82, 184, 0.3) !important;
+  background: #9B6FFF !important;
+  background-image: none !important;
+  border-color: #7B4FE8 !important;
+  box-shadow: 0 5px 0 #6238D0 !important;
   color: #ffffff !important;
 }
 
@@ -22,7 +287,7 @@
 
 .menu-multiplayer-btn:active,
 #menu-screen .menu-multiplayer-btn:active {
-  box-shadow: 0 2px 0 #6B52B8, 0 4px 12px rgba(107, 82, 184, 0.25) !important;
+  box-shadow: 0 2px 0 #6238D0 !important;
 }
 
 .multiplayer-overlay {
@@ -216,4 +481,80 @@ body.multiplayer-open {
 
 .multiplayer-section--wordchain .multiplayer-section-title {
   color: #3A9870;
+}
+
+/* Temporary dev-only bot fight entry */
+.multiplayer-bot-section {
+  padding: 12px 16px 16px;
+  border-top: 2px dashed var(--lavender-btn, #CFC0F5);
+}
+
+.multiplayer-bot-section.hidden {
+  display: none;
+}
+
+.multiplayer-bot-section .multiplayer-section-title {
+  color: #6B52B8;
+}
+
+.multiplayer-bot-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.multiplayer-bot-label {
+  font-size: 12px;
+  color: var(--text-soft, #9AA3AD);
+}
+
+.multiplayer-bot-row input[type="range"] {
+  width: 100%;
+  accent-color: #9378DC;
+}
+
+.multiplayer-bot-chain {
+  width: 100%;
+  max-width: 220px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.92);
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 14px;
+}
+
+.multiplayer-bot-speed {
+  display: flex;
+  gap: 6px;
+}
+
+.multiplayer-bot-speed-btn {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 8px 6px;
+  border: 2px solid var(--lavender-btn, #CFC0F5);
+  border-radius: 10px;
+  background: var(--card, #fff);
+  color: var(--text, #5D6470);
+  font-family: 'Jua', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.1s;
+}
+
+.multiplayer-bot-speed-btn.is-active {
+  background: linear-gradient(180deg, #E8DFFB 0%, #CFC0F5 100%);
+  border-color: #9378DC;
+  color: #4A3880;
+  box-shadow: 0 2px 0 #7B62C8;
+}
+
+.multiplayer-bot-speed-btn:active {
+  transform: translateY(1px);
+}
+
+.multiplayer-bot-section .race-opt {
+  width: 100%;
 }

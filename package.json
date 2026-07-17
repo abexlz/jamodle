@@ -5,12 +5,13 @@
   "private": true,
   "scripts": {
     "dev": "node scripts/dev-server.js",
+    "share": "node scripts/dev-share.js",
     "sync": "npx cap sync",
     "copy": "npx cap copy",
     "open:ios": "npx cap open ios",
     "open:android": "npx cap open android",
     "build:android": "cd android && ./gradlew bundleRelease",
-    "test": "node tests/hangul-compose.test.js && node tests/korean-dictionary.test.js && node tests/daily-calendar.test.js && node tests/tutorial-progress.test.js",
+    "test": "node tests/hangul-compose.test.js && node tests/korean-dictionary.test.js && node tests/daily-calendar.test.js && node tests/tutorial-progress.test.js && node tests/related-words-dock.test.js && node tests/related-words-race-finalize.test.js && node tests/related-words-round-points.test.js",
     "validate-words": "node scripts/validate-words.js",
     "sync-i18n": "node scripts/sync-i18n-messages.js"
   },

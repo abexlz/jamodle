@@ -1,5 +1,5 @@
 /**
- * Tutorial progress — first-login interactive onboarding.
+ * Tutorial progress — tracks step completion; tutorial starts only from the menu.
  */
 (function (global) {
   'use strict';
@@ -95,6 +95,7 @@
     return stepIndex <= getCurrentStepIndex();
   }
 
+  /** Progress flag only — never used to auto-start or gate app entry. */
   function mustCompleteOnboarding() {
     const p = load();
     if (p.onboardingComplete) return false;

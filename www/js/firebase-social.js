@@ -11,6 +11,9 @@
     storageBucket: 'korean-wordle-d30a3.firebasestorage.app',
     messagingSenderId: '736210860951',
     appId: '1:736210860951:web:07cee34d068953e21f22d2',
+    // Set after creating Realtime Database in Firebase Console (Build → Realtime Database).
+    // Example: https://korean-wordle-d30a3-default-rtdb.asia-southeast1.firebasedatabase.app
+    databaseURL: 'https://korean-wordle-d30a3-default-rtdb.asia-southeast1.firebasedatabase.app',
   };
 
   const FRIEND_CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -35,6 +38,7 @@
 
   let auth = null;
   let db = null;
+  let rtdb = null;
   let currentUser = null;
   let userProfile = null;
   let gameHooks = {};
@@ -48,8 +52,13 @@
   let pendingChallengeFriendUid = null;
   let pendingChallengeFriendName = '';
   let pendingChallengeIsTurn = false;
+  let pendingChallengeFlow = 'legacy';
+  let pendingMenuBattleGame = 'jamodle';
+  let pendingWordChainBackStep = 'game';
   const shownChallengeIds = new Set();
+  const syncedAcceptedRequestIds = new Set();
   let authReadyWaiters = [];
+  let idleListenersPaused = false;
 
   function getTodayKey() {
     return new Intl.DateTimeFormat('en-CA', {
@@ -162,6 +171,21 @@
     }
     auth = firebase.auth();
     db = firebase.firestore();
+    if (firebaseConfig.databaseURL && typeof firebase.database === 'function') {
+      rtdb = firebase.database();
+    } else if (firebaseConfig.databaseURL) {
+      console.warn('[Firebase] Realtime Database SDK not loaded — RTDB features disabled');
+    }
+    try {
+      firebase.firestore.setLogLevel('error');
+      db.settings({
+        experimentalForceLongPolling: true,
+        experimentalAutoDetectLongPolling: false,
+        merge: true,
+      });
+    } catch (err) {
+      console.warn('[Firebase] Firestore transport settings skipped', err);
+    }
     coreReady = true;
 
     auth.onAuthStateChanged(async (user) => {
@@ -170,6 +194,8 @@
       if (user) {
         try {
           userProfile = await ensureUserDoc(user);
+          pushLocalPublicProfile().catch(() => {});
+          pushLocalWordChainBestStreak().catch(() => {});
         } catch (err) {
           console.error('[Firebase] user profile load failed', err);
           userProfile = null;
@@ -193,13 +219,20 @@
       }
       authReadyWaiters.splice(0).forEach((resolve) => resolve(user));
       if (user) {
-        startIncomingChallengeListener();
-        startFriendRequestListeners();
+        idleListenersPaused = false;
+        if (isActiveMatchPage()) {
+          pauseIdleFirestoreListeners();
+        } else {
+          startIncomingChallengeListener();
+          startFriendRequestListeners();
+        }
       } else {
+        idleListenersPaused = false;
         stopIncomingChallengeListener();
         stopFriendRequestListeners();
         removeChallengeBanner();
         shownChallengeIds.clear();
+        syncedAcceptedRequestIds.clear();
       }
     });
 
@@ -285,6 +318,45 @@
     return userProfile;
   }
 
+  async function syncPublicProfile(fields) {
+    if (!currentUser || !db || !fields || typeof fields !== 'object') return;
+    const patch = {};
+    if (typeof fields.avatarId === 'string') patch.avatarId = fields.avatarId;
+    if (typeof fields.frameId === 'string') {
+      patch.frameId = fields.frameId === 'platinum' ? 'ruby' : fields.frameId;
+    }
+    if (typeof fields.totalXp === 'number' && Number.isFinite(fields.totalXp)) {
+      patch.totalXp = Math.max(0, Math.floor(fields.totalXp));
+    }
+    if (!Object.keys(patch).length) return;
+    try {
+      await db.collection('users').doc(currentUser.uid).update(patch);
+    } catch (err) {
+      console.warn('[Firebase] sync public profile', err);
+    }
+  }
+
+  function pushLocalPublicProfile() {
+    let payload = null;
+    if (global.ProfileService?.getPublicProfilePayload) {
+      payload = global.ProfileService.getPublicProfilePayload();
+    } else {
+      try {
+        const raw = global.AppStorage?.get?.('jamodeul-user-profile', null)
+          || JSON.parse(localStorage.getItem('jamodeul-user-profile') || 'null');
+        if (raw && typeof raw === 'object') {
+          payload = {
+            avatarId: typeof raw.avatarId === 'string' ? raw.avatarId : 'default',
+            frameId: raw.frameId === 'platinum' ? 'ruby' : (raw.frameId || 'none'),
+            totalXp: Math.max(0, parseInt(raw.totalXp, 10) || 0),
+          };
+        }
+      } catch (_) { /* ignore */ }
+    }
+    if (!payload) return Promise.resolve();
+    return syncPublicProfile(payload);
+  }
+
   function requireAuthMessage() {
     alert(socialT('social.loginRequired'));
   }
@@ -340,13 +412,14 @@
       cancelFriendRequest(el.dataset.requestId);
     } else if (action === 'open-leaderboard') {
       e.preventDefault();
-      openLeaderboard(el.dataset.leaderboardGame || 'wordle');
+      openLeaderboard(el.dataset.leaderboardGame || 'match');
     } else if (action === 'leaderboard-tab') {
       e.preventDefault();
       const game = el.dataset.leaderboardTab;
       if (game && game !== activeLeaderboardGame) {
-        activeLeaderboardGame = game === 'match' ? 'match' : 'wordle';
+        activeLeaderboardGame = game === 'streak' ? 'streak' : 'match';
         updateLeaderboardPageTabs();
+        updateLeaderboardPageHeader();
         refreshLeaderboardPage().catch((err) => {
           console.error('[Firebase] leaderboard tab failed', err);
         });
@@ -368,6 +441,13 @@
       e.preventDefault();
       pendingChallengeIsTurn = false;
       openChallengeGamePicker(el.dataset.friendUid, el.dataset.friendName || '');
+    } else if (action === 'challenge-friend-menu') {
+      e.preventDefault();
+      if (pendingChallengeFlow === 'menu-battle-custom') {
+        openBattleCustomFriendFlow(el.dataset.friendUid, el.dataset.friendName || '');
+      } else {
+        openChallengeMenuFlow(el.dataset.friendUid, el.dataset.friendName || '');
+      }
     } else if (action === 'challenge-friend-turn') {
       e.preventDefault();
       openTurnChallengePicker(el.dataset.friendUid, el.dataset.friendName || '');
@@ -379,7 +459,23 @@
       showChallengeWordleStep();
     } else if (action === 'challenge-game-match') {
       e.preventDefault();
-      showChallengeMatchStep();
+      pendingChallengeIsTurn = true;
+      showChallengeTurnMatchStep();
+    } else if (action === 'challenge-mode-jamodle') {
+      e.preventDefault();
+      pendingChallengeIsTurn = true;
+      showChallengeTurnMatchStep();
+    } else if (action === 'challenge-related-words-race') {
+      e.preventDefault();
+      if (pendingChallengeFlow === 'menu-battle-custom' && pendingMenuBattleGame === 'word-chain') {
+        startRelatedWordsRaceChallenge(pendingChallengeFriendUid);
+      } else {
+        showWordChainPickStep();
+      }
+    } else if (action === 'challenge-word-chain-pick') {
+      e.preventDefault();
+      const chainId = el.dataset.chainId;
+      if (chainId) startRelatedWordsRaceChallenge(pendingChallengeFriendUid, chainId);
     } else if (action === 'challenge-length') {
       e.preventDefault();
       const len = Number(el.dataset.wordLength);
@@ -387,13 +483,43 @@
     } else if (action === 'challenge-korean-length') {
       e.preventDefault();
       const len = Number(el.dataset.wordLength);
-      if (len >= 2 && len <= 6) {
-        if (pendingChallengeIsTurn) startTurnChallenge(pendingChallengeFriendUid, len);
-        else startMatchChallenge(pendingChallengeFriendUid, len);
+      const lengths = global.MatchWords?.LETTER_LENGTHS || [1, 2, 3, 4, 5, 6];
+      if (lengths.includes(len)) {
+        startTurnChallenge(pendingChallengeFriendUid, len);
       }
     } else if (action === 'challenge-back') {
       e.preventDefault();
-      if (pendingChallengeIsTurn) showChallengeTurnMatchStep();
+      const wordChainVisible = !document.querySelector('#challenge-step-word-chain')?.classList.contains('hidden');
+      if (wordChainVisible) {
+        showChallengeStep(pendingWordChainBackStep);
+        return;
+      }
+      if (pendingChallengeFlow === 'menu-user-first') {
+        const battleGameVisible = !document.querySelector('#challenge-step-battle-game')?.classList.contains('hidden');
+        const lengthVisible = !document.querySelector('#challenge-step-korean-length')?.classList.contains('hidden');
+        if (lengthVisible) {
+          showChallengeBattleGameStep();
+          return;
+        }
+        if (battleGameVisible) {
+          closeChallengeLengthPicker();
+          openMultiplayerPicker();
+          return;
+        }
+        showChallengeBattleGameStep();
+      } else if (pendingChallengeFlow === 'menu-battle-custom') {
+        const lengthVisible = !document.querySelector('#challenge-step-korean-length')?.classList.contains('hidden');
+        if (lengthVisible) {
+          pendingChallengeFriendUid = null;
+          pendingChallengeFriendName = '';
+          pendingChallengeIsTurn = true;
+          document.getElementById('race-length-overlay')?.classList.add('hidden');
+          document.body.classList.remove('challenge-open');
+          openMultiplayerPicker();
+          return;
+        }
+        closeChallengeLengthPicker();
+      } else if (pendingChallengeIsTurn) showChallengeTurnMatchStep();
       else showChallengeGameStep();
     } else if (action === 'challenge-cancel') {
       e.preventDefault();
@@ -412,7 +538,25 @@
     } else if (action === 'multiplayer-close') {
       e.preventDefault();
       closeMultiplayerPicker();
+    } else if (action === 'bot-fight-related-words') {
+      e.preventDefault();
+      startRelatedWordsBotFight();
     }
+  }
+
+  /** Temporary dev-only shortcut: local Related Words match vs a simulated bot. */
+  function startRelatedWordsBotFight() {
+    if (global.DevBuild?.isDevModeActive?.() !== true) return;
+    const overlay = document.getElementById('multiplayer-overlay');
+    const slider = overlay?.querySelector('[data-bot-winrate]');
+    const winrate = Number(slider?.value);
+    const wr = Number.isFinite(winrate) ? Math.min(100, Math.max(0, winrate)) : 50;
+    const speed = overlay?.querySelector('[data-multiplayer-bot-section]')?.dataset.selectedSpeed || 'medium';
+    const chainId = overlay?.querySelector('[data-bot-chain]')?.value || '';
+    const safeSpeed = ['slow', 'medium', 'fast'].includes(speed) ? speed : 'medium';
+    closeMultiplayerPicker();
+    const chainParam = chainId ? `&chain=${encodeURIComponent(chainId)}` : '';
+    global.location.href = `related-words-race.html?bot=1&winrate=${wr}&speed=${safeSpeed}${chainParam}`;
   }
 
   function onDocumentKeydown(e) {
@@ -514,6 +658,35 @@
     return added;
   }
 
+  function renderIncomingFriendRequestsFromSnap(snap) {
+    const block = profileSocialRoot?.querySelector('[data-social-incoming-requests]');
+    const listEl = profileSocialRoot?.querySelector('[data-social-incoming-list]');
+    if (!block || !listEl || !currentUser) return;
+
+    if (!snap || snap.empty) {
+      block.hidden = true;
+      listEl.innerHTML = '';
+      return;
+    }
+    block.hidden = false;
+    listEl.innerHTML = '';
+    snap.forEach((doc) => {
+      const data = doc.data();
+      const li = document.createElement('li');
+      li.className = 'profile-friend-request-row';
+      li.innerHTML = `
+        <span class="friend-request-name">${escapeHtml(data.fromName || socialT('social.unknown') || '알 수 없음')}</span>
+        <div class="friend-request-actions">
+          <button type="button" class="profile-social-btn" data-social-action="accept-friend-request"
+            data-request-id="${escapeHtml(doc.id)}">${escapeHtml(commonT('accept'))}</button>
+          <button type="button" class="profile-social-btn profile-social-btn--muted" data-social-action="decline-friend-request"
+            data-request-id="${escapeHtml(doc.id)}">${escapeHtml(commonT('decline'))}</button>
+        </div>
+      `;
+      listEl.appendChild(li);
+    });
+  }
+
   async function renderIncomingFriendRequests() {
     const block = profileSocialRoot?.querySelector('[data-social-incoming-requests]');
     const listEl = profileSocialRoot?.querySelector('[data-social-incoming-list]');
@@ -524,28 +697,7 @@
         .where('toUid', '==', currentUser.uid)
         .where('status', '==', 'pending')
         .get();
-      if (snap.empty) {
-        block.hidden = true;
-        listEl.innerHTML = '';
-        return;
-      }
-      block.hidden = false;
-      listEl.innerHTML = '';
-      snap.forEach((doc) => {
-        const data = doc.data();
-        const li = document.createElement('li');
-        li.className = 'profile-friend-request-row';
-        li.innerHTML = `
-          <span class="friend-request-name">${escapeHtml(data.fromName || socialT('social.unknown') || '알 수 없음')}</span>
-          <div class="friend-request-actions">
-            <button type="button" class="profile-social-btn" data-social-action="accept-friend-request"
-              data-request-id="${escapeHtml(doc.id)}">${escapeHtml(commonT('accept'))}</button>
-            <button type="button" class="profile-social-btn profile-social-btn--muted" data-social-action="decline-friend-request"
-              data-request-id="${escapeHtml(doc.id)}">${escapeHtml(commonT('decline'))}</button>
-          </div>
-        `;
-        listEl.appendChild(li);
-      });
+      renderIncomingFriendRequestsFromSnap(snap);
     } catch (err) {
       console.error('[Firebase] incoming friend requests failed', err);
     }
@@ -648,8 +800,8 @@
       .where('toUid', '==', currentUser.uid)
       .where('status', '==', 'pending')
       .onSnapshot(
-        () => {
-          renderIncomingFriendRequests();
+        (snap) => {
+          renderIncomingFriendRequestsFromSnap(snap);
         },
         (err) => console.error('[Firebase] incoming friend request listener', err)
       );
@@ -659,13 +811,42 @@
       .where('status', '==', 'accepted')
       .onSnapshot(
         (snap) => {
-          snap.docs.forEach((doc) => {
-            const toUid = doc.data()?.toUid;
+          snap.docChanges().forEach((change) => {
+            if (change.type !== 'added') return;
+            if (syncedAcceptedRequestIds.has(change.doc.id)) return;
+            syncedAcceptedRequestIds.add(change.doc.id);
+            const toUid = change.doc.data()?.toUid;
             if (toUid) addFriendToOwnProfile(toUid);
           });
         },
         (err) => console.error('[Firebase] accepted friend sync listener', err)
       );
+  }
+
+  function pauseIdleFirestoreListeners() {
+    if (idleListenersPaused) return;
+    idleListenersPaused = true;
+    stopIncomingChallengeListener();
+    stopFriendRequestListeners();
+  }
+
+  function resumeIdleFirestoreListeners() {
+    if (!idleListenersPaused || !currentUser) return;
+    idleListenersPaused = false;
+    startIncomingChallengeListener();
+    startFriendRequestListeners();
+  }
+
+  function isActiveMatchPage() {
+    const path = String(global.location?.pathname || '');
+    if (!/(?:^|\/)(?:match-turn|match-race|race)\.html$/i.test(path)) return false;
+    return Boolean(new URLSearchParams(global.location?.search || '').get('match'));
+  }
+
+  function syncIdleListenerVisibility() {
+    if (!currentUser) return;
+    if (isActiveMatchPage() || global.document?.hidden) pauseIdleFirestoreListeners();
+    else resumeIdleFirestoreListeners();
   }
 
   function stopFriendRequestListeners() {
@@ -681,17 +862,21 @@
 
   async function populateFriendsList(listEl, mode) {
     if (!listEl) return;
-    const listMode = mode === 'turn' ? 'turn' : mode === 'wordchain' ? 'wordchain' : 'race';
+    const listMode = mode === 'turn' ? 'turn' : mode === 'wordchain' ? 'wordchain' : mode === 'menu-user' ? 'menu-user' : 'race';
     const action = listMode === 'turn'
       ? 'challenge-friend-turn'
       : listMode === 'wordchain'
         ? 'challenge-friend-wordchain'
-        : 'challenge-friend';
+        : listMode === 'menu-user'
+          ? 'challenge-friend-menu'
+          : 'challenge-friend';
     const btnLabel = listMode === 'turn'
       ? (global.I18n?.t('multiplayer.inviteTurn') || 'Invite')
       : listMode === 'wordchain'
         ? (global.I18n?.t('multiplayer.inviteWordChain') || 'Invite')
-        : socialT('social.challenge');
+        : listMode === 'menu-user'
+          ? (socialT('social.challengeChooseUser') || socialT('social.challenge'))
+          : socialT('social.challenge');
     const btnClass = listMode === 'turn'
       ? 'profile-challenge-btn profile-challenge-btn--turn'
       : listMode === 'wordchain'
@@ -931,11 +1116,14 @@
 
   function formatElapsed(ms) {
     if (ms == null || !Number.isFinite(ms)) return '—';
-    const sec = Math.max(0, Math.floor(ms / 1000));
-    const m = Math.floor(sec / 60);
-    const s = sec % 60;
-    if (m > 0) return `${m}:${String(s).padStart(2, '0')}`;
-    return `${s}s`;
+    const totalCs = Math.max(0, Math.floor(ms / 10));
+    const cs = totalCs % 100;
+    const totalSec = Math.floor(totalCs / 100);
+    const s = totalSec % 60;
+    const totalMin = Math.floor(totalSec / 60);
+    const m = totalMin % 60;
+    const h = Math.floor(totalMin / 60);
+    return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}.${String(cs).padStart(2, '0')}`;
   }
 
   function extractGameResult(data, gameType) {
@@ -954,7 +1142,7 @@
     return null;
   }
 
-  let activeLeaderboardGame = 'wordle';
+  let activeLeaderboardGame = 'match';
   let activeLeaderboardScope = 'global';
 
   function leaderboardT(key) {
@@ -975,7 +1163,75 @@
     return map;
   }
 
+  const RW_PROGRESS_KEY = 'jamodeul-related-words-progress';
+
+  function readLocalWordChainBestStreak() {
+    try {
+      const data = global.AppStorage
+        ? global.AppStorage.get(RW_PROGRESS_KEY, {})
+        : JSON.parse(localStorage.getItem(RW_PROGRESS_KEY) || '{}');
+      const solo = Math.max(0, parseInt(data.soloStreak, 10) || 0);
+      const hasBest = data.bestSoloStreak != null && data.bestSoloStreak !== '';
+      const best = hasBest
+        ? Math.max(0, parseInt(data.bestSoloStreak, 10) || 0)
+        : solo;
+      return Math.max(best, solo);
+    } catch {
+      return 0;
+    }
+  }
+
+  async function syncWordChainBestStreak(streak) {
+    if (!currentUser || !db) return;
+    const next = Math.max(0, Math.floor(Number(streak) || 0));
+    if (!next) return;
+    try {
+      const ref = db.collection('users').doc(currentUser.uid);
+      const snap = await ref.get();
+      const remote = snap.exists
+        ? Math.max(0, parseInt(snap.data().wordChainBestStreak, 10) || 0)
+        : 0;
+      const merged = Math.max(remote, next);
+      if (merged > remote) {
+        await ref.set({ wordChainBestStreak: merged }, { merge: true });
+      }
+      if (userProfile) {
+        userProfile = { ...userProfile, wordChainBestStreak: merged };
+      }
+    } catch (err) {
+      console.warn('[Firebase] sync word chain streak failed', err);
+    }
+  }
+
+  async function pushLocalWordChainBestStreak() {
+    const local = readLocalWordChainBestStreak();
+    if (local > 0) {
+      await syncWordChainBestStreak(local);
+    }
+  }
+
   async function fetchFriendsLeaderboardEntries(gameType) {
+    if (gameType === 'streak') {
+      const uids = [currentUser.uid, ...(userProfile.friends || [])];
+      const userSnaps = await Promise.all(uids.map((uid) => db.collection('users').doc(uid).get()));
+      return uids.map((uid, i) => {
+        const data = userSnaps[i].exists ? userSnaps[i].data() : null;
+        const name = data
+          ? getPublicName(data)
+          : (socialT('social.unknown') || '알 수 없음');
+        const streak = data
+          ? Math.max(0, parseInt(data.wordChainBestStreak, 10) || 0)
+          : 0;
+        return {
+          uid,
+          displayName: name,
+          streak,
+          won: streak > 0,
+          notPlayed: streak <= 0,
+        };
+      });
+    }
+
     const today = getTodayKey();
     const uids = [currentUser.uid, ...(userProfile.friends || [])];
     const userSnaps = await Promise.all(uids.map((uid) => db.collection('users').doc(uid).get()));
@@ -1005,6 +1261,27 @@
   }
 
   async function fetchGlobalLeaderboardEntries(gameType) {
+    if (gameType === 'streak') {
+      const snap = await db.collection('users')
+        .orderBy('wordChainBestStreak', 'desc')
+        .limit(100)
+        .get();
+      const raw = [];
+      snap.forEach((doc) => {
+        const data = doc.data();
+        const streak = Math.max(0, parseInt(data.wordChainBestStreak, 10) || 0);
+        if (streak <= 0) return;
+        raw.push({
+          uid: doc.id,
+          displayName: getPublicName(data),
+          streak,
+          won: true,
+          notPlayed: false,
+        });
+      });
+      return raw;
+    }
+
     const today = getTodayKey();
     const snap = await db.collection('dailyResults').where('date', '==', today).limit(100).get();
     const raw = [];
@@ -1038,30 +1315,42 @@
     }));
   }
 
-  function renderLeaderboardList(listEl, entries, { friendsMode }) {
+  function renderLeaderboardList(listEl, entries, { friendsMode, gameType }) {
     if (!listEl) return;
 
-    if (!entries.length) {
+    const isStreak = gameType === 'streak';
+    const rankedEntries = isStreak
+      ? entries.filter((entry) => entry.streak > 0)
+      : entries.filter((entry) => entry.won && !entry.notPlayed);
+
+    if (!rankedEntries.length) {
       listEl.innerHTML = '<li class="leaderboard-empty">' + escapeHtml(
         friendsMode
-          ? (leaderboardT('emptyFriends') || '아직 순위에 올라온 친구가 없어요.')
-          : (leaderboardT('emptyGlobal') || '아직 오늘 기록이 없어요. 첫 번째로 도전해 보세요!')
+          ? (isStreak
+            ? (leaderboardT('emptyFriendsStreak') || '아직 기록이 있는 친구가 없어요.')
+            : (leaderboardT('emptyFriends') || '아직 순위에 올라온 친구가 없어요.'))
+          : (isStreak
+            ? (leaderboardT('emptyGlobalStreak') || '아직 연속 기록이 없어요. 첫 번째로 도전해 보세요!')
+            : (leaderboardT('emptyGlobal') || '아직 오늘 기록이 없어요. 첫 번째로 도전해 보세요!'))
       ) + '</li>';
       return;
     }
 
-    sortLeaderboardEntries(entries);
+    sortLeaderboardEntries(entries, gameType);
     listEl.innerHTML = '';
     let rank = 0;
 
     entries.forEach((entry) => {
-      if (entry.won && !entry.notPlayed) rank += 1;
+      const isRanked = isStreak
+        ? entry.streak > 0
+        : (entry.won && !entry.notPlayed);
+      if (isRanked) rank += 1;
       const li = document.createElement('li');
       if (currentUser && entry.uid === currentUser.uid) li.classList.add('me');
 
       const rankSpan = document.createElement('span');
       rankSpan.className = 'leaderboard-rank';
-      rankSpan.textContent = (entry.won && !entry.notPlayed) ? String(rank) : '—';
+      rankSpan.textContent = isRanked ? String(rank) : '—';
 
       const nameSpan = document.createElement('span');
       nameSpan.className = 'leaderboard-name';
@@ -1072,8 +1361,11 @@
 
       const scoreSpan = document.createElement('span');
       scoreSpan.className = 'leaderboard-score';
+      if (!isStreak && Number.isFinite(entry.elapsedMs)) {
+        scoreSpan.classList.add('leaderboard-score--time');
+      }
       if (entry.notPlayed) scoreSpan.classList.add('pending');
-      scoreSpan.textContent = formatLeaderboardScore(entry);
+      scoreSpan.textContent = formatLeaderboardScore(entry, gameType);
 
       li.appendChild(rankSpan);
       li.appendChild(nameSpan);
@@ -1126,13 +1418,16 @@
     }
 
     const today = getTodayKey();
-    const gameLabel = activeLeaderboardGame === 'match'
-      ? (leaderboardT('dailyMatch') || socialT('social.dailyMatch') || 'Daily Match')
-      : (leaderboardT('dailyWordle') || socialT('social.dailyWordle') || 'Daily Wordle');
+    const isStreak = activeLeaderboardGame === 'streak';
+    const gameLabel = isStreak
+      ? (leaderboardT('wordChainStreak') || 'Word Chain Streak')
+      : (leaderboardT('dailyMatch') || socialT('social.dailyMatch') || 'Daily Match');
     const scopeLabel = activeLeaderboardScope === 'friends'
       ? (leaderboardT('friends') || 'Friends')
       : (leaderboardT('global') || 'Global');
-    dateEl.textContent = scopeLabel + ' · ' + gameLabel + ' · Day ' + getDayNumber() + ' · ' + today;
+    dateEl.textContent = isStreak
+      ? scopeLabel + ' · ' + gameLabel + ' · ' + (leaderboardT('allTime') || 'All-time best')
+      : scopeLabel + ' · ' + gameLabel + ' · Day ' + getDayNumber() + ' · ' + today;
     listEl.innerHTML = '<li class="leaderboard-empty">' + escapeHtml(
       socialT('social.loading') || '불러오는 중…'
     ) + '</li>';
@@ -1143,6 +1438,7 @@
         : await fetchGlobalLeaderboardEntries(activeLeaderboardGame);
       renderLeaderboardList(listEl, entries, {
         friendsMode: activeLeaderboardScope === 'friends',
+        gameType: activeLeaderboardGame,
       });
     } catch (err) {
       console.error('[Firebase] leaderboard page failed', err);
@@ -1156,10 +1452,12 @@
     leaderboardPageRoot = document.getElementById('leaderboard-page');
     if (!leaderboardPageRoot) return;
 
-    activeLeaderboardGame = opts?.initialGame === 'match' ? 'match' : 'wordle';
+    const initialGame = opts?.initialGame === 'streak' ? 'streak' : 'match';
+    activeLeaderboardGame = initialGame;
     activeLeaderboardScope = 'global';
     ensureCore();
     updateLeaderboardPageTabs();
+    updateLeaderboardPageHeader();
     updateLeaderboardLoginState();
 
     if (authReady) {
@@ -1168,7 +1466,26 @@
       });
     }
   }
-  function sortLeaderboardEntries(entries) {
+
+  function updateLeaderboardPageHeader() {
+    const subEl = leaderboardPageRoot?.querySelector('.leaderboard-page-sub');
+    if (!subEl) return;
+    const key = activeLeaderboardGame === 'streak' ? 'subtitleStreak' : 'subtitleMatch';
+    subEl.setAttribute('data-i18n', 'leaderboard.' + key);
+    subEl.textContent = leaderboardT(key) || subEl.textContent;
+  }
+
+  function sortLeaderboardEntries(entries, gameType) {
+    if (gameType === 'streak') {
+      return entries.sort((a, b) => {
+        const aStreak = a.streak || 0;
+        const bStreak = b.streak || 0;
+        if (aStreak > 0 && bStreak <= 0) return -1;
+        if (aStreak <= 0 && bStreak > 0) return 1;
+        if (aStreak !== bStreak) return bStreak - aStreak;
+        return a.displayName.localeCompare(b.displayName, 'ko');
+      });
+    }
     return entries.sort((a, b) => {
       if (a.notPlayed && !b.notPlayed) return 1;
       if (!a.notPlayed && b.notPlayed) return -1;
@@ -1187,7 +1504,13 @@
     });
   }
 
-  function formatLeaderboardScore(entry) {
+  function formatLeaderboardScore(entry, gameType) {
+    if (gameType === 'streak') {
+      if (entry.notPlayed || !(entry.streak > 0)) {
+        return leaderboardT('noStreak') || '—';
+      }
+      return String(entry.streak);
+    }
     if (entry.notPlayed) return socialT('social.notPlayed') || '아직 안 함';
     if (entry.won) {
       if (Number.isFinite(entry.elapsedMs)) return formatElapsed(entry.elapsedMs);
@@ -1197,17 +1520,18 @@
     return socialT('social.failed') || '실패';
   }
 
-  function openLeaderboard(gameType) {
-    const game = gameType === 'match' ? 'match' : 'wordle';
+  function openLeaderboard(game) {
+    const nextGame = game === 'streak' ? 'streak' : 'match';
     if (global.location.pathname.endsWith('leaderboard.html')) {
-      activeLeaderboardGame = game;
+      activeLeaderboardGame = nextGame;
       updateLeaderboardPageTabs();
+      updateLeaderboardPageHeader();
       refreshLeaderboardPage().catch((err) => {
         console.error('[Firebase] leaderboard refresh failed', err);
       });
       return;
     }
-    global.location.href = 'leaderboard.html?game=' + encodeURIComponent(game);
+    global.location.href = 'leaderboard.html?game=' + encodeURIComponent(nextGame);
   }
 
   function closeLeaderboard() {
@@ -1290,6 +1614,16 @@
     return db;
   }
 
+  function getRtdb() {
+    ensureCore();
+    return rtdb;
+  }
+
+  function hasRtdb() {
+    ensureCore();
+    return !!rtdb;
+  }
+
   function getCurrentUid() {
     return currentUser?.uid || null;
   }
@@ -1316,7 +1650,7 @@
     overlay.innerHTML = `
       <div class="multiplayer-modal">
         <div class="multiplayer-modal-header">
-          <h2 class="multiplayer-modal-title" data-i18n="multiplayer.title">Multiplayer</h2>
+          <h2 class="multiplayer-modal-title" data-i18n="multiplayer.title">Jamo Game Battle</h2>
           <button type="button" class="multiplayer-close-btn" data-social-action="multiplayer-close"
             data-i18n-aria="common.close" aria-label="Close">✕</button>
         </div>
@@ -1327,27 +1661,49 @@
         </div>
         <div class="multiplayer-sections hidden" data-multiplayer-sections>
           <section class="multiplayer-section">
-            <h3 class="multiplayer-section-title" data-i18n="multiplayer.raceTitle">Race</h3>
-            <p class="multiplayer-section-desc" data-i18n="multiplayer.raceDesc">Play side-by-side — first to finish wins.</p>
-            <ul class="multiplayer-friends-list profile-friends-list" data-multiplayer-friends-race></ul>
-          </section>
-          <section class="multiplayer-section multiplayer-section--turn">
-            <h3 class="multiplayer-section-title" data-i18n="multiplayer.turnTitle">Turn-based Match</h3>
-            <p class="multiplayer-section-desc" data-i18n="multiplayer.turnDesc">Same word · 20 seconds per turn · take turns submitting.</p>
-            <ul class="multiplayer-friends-list profile-friends-list" data-multiplayer-friends-turn></ul>
-          </section>
-          <section class="multiplayer-section multiplayer-section--wordchain">
-            <h3 class="multiplayer-section-title" data-i18n="multiplayer.wordChainTitle">Word Chain (끝말잇기)</h3>
-            <p class="multiplayer-section-desc" data-i18n="multiplayer.wordChainDesc">Take turns · 20 seconds · dictionary-valid words only.</p>
-            <ul class="multiplayer-friends-list profile-friends-list" data-multiplayer-friends-wordchain></ul>
+            <h3 class="multiplayer-section-title" data-i18n="multiplayer.pickUserTitle">Pick a user to verse!</h3>
+            <p class="multiplayer-section-desc" data-i18n="multiplayer.pickUserDesc">User first, then mode and letters.</p>
+            <ul class="multiplayer-friends-list profile-friends-list" data-multiplayer-friends></ul>
           </section>
         </div>
         <p class="multiplayer-add-hint" data-multiplayer-add-hint data-i18n="multiplayer.addFriendsHint"></p>
+        <section class="multiplayer-section multiplayer-bot-section hidden" data-multiplayer-bot-section data-selected-speed="medium">
+          <h3 class="multiplayer-section-title">🤖 Bot fight (dev)</h3>
+          <div class="multiplayer-bot-row">
+            <label class="multiplayer-bot-label" for="bot-winrate-slider">
+              Bot win rate: <strong data-bot-winrate-value>50</strong>%
+            </label>
+            <input type="range" id="bot-winrate-slider" min="0" max="100" step="5" value="50" data-bot-winrate>
+          </div>
+          <div class="multiplayer-bot-row">
+            <span class="multiplayer-bot-label">Bot speed</span>
+            <div class="multiplayer-bot-speed" data-bot-speed-group role="group" aria-label="Bot speed">
+              <button type="button" class="multiplayer-bot-speed-btn" data-bot-speed="slow">Slow</button>
+              <button type="button" class="multiplayer-bot-speed-btn is-active" data-bot-speed="medium">Medium</button>
+              <button type="button" class="multiplayer-bot-speed-btn" data-bot-speed="fast">Fast</button>
+            </div>
+          </div>
+          ${botChainSelectHtml()}
+          <button type="button" class="race-opt race-opt--purple" data-social-action="bot-fight-related-words">Word Chain vs Bot</button>
+        </section>
       </div>
     `;
     document.body.appendChild(overlay);
     overlay.addEventListener('click', (e) => {
       if (e.target === overlay) closeMultiplayerPicker();
+    });
+    overlay.querySelector('[data-bot-winrate]')?.addEventListener('input', (e) => {
+      const label = overlay.querySelector('[data-bot-winrate-value]');
+      if (label) label.textContent = String(e.target.value);
+    });
+    overlay.querySelector('[data-bot-speed-group]')?.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-bot-speed]');
+      if (!btn || !btn.closest('[data-bot-speed-group]')) return;
+      overlay.querySelectorAll('[data-bot-speed-group] [data-bot-speed]').forEach((b) => {
+        b.classList.toggle('is-active', b === btn);
+      });
+      const section = overlay.querySelector('[data-multiplayer-bot-section]');
+      if (section) section.dataset.selectedSpeed = btn.dataset.botSpeed;
     });
     return overlay;
   }
@@ -1358,28 +1714,34 @@
 
     const loginPanel = overlay.querySelector('[data-multiplayer-login-panel]');
     const sections = overlay.querySelector('[data-multiplayer-sections]');
-    const raceList = overlay.querySelector('[data-multiplayer-friends-race]');
-    const turnList = overlay.querySelector('[data-multiplayer-friends-turn]');
-    const wordChainList = overlay.querySelector('[data-multiplayer-friends-wordchain]');
+    const friendsList = overlay.querySelector('[data-multiplayer-friends]');
     const addHint = overlay.querySelector('[data-multiplayer-add-hint]');
+    const botSection = overlay.querySelector('[data-multiplayer-bot-section]');
     const loggedIn = !!currentUser;
 
     loginPanel?.classList.toggle('hidden', loggedIn);
     sections?.classList.toggle('hidden', !loggedIn);
     addHint?.classList.toggle('hidden', !loggedIn);
+    const hideBotForJamoCustom = pendingChallengeFlow === 'menu-battle-custom'
+      && pendingMenuBattleGame === 'jamodle';
+    // Temporary dev-only bot matchmaking entry (works even when logged out).
+    botSection?.classList.toggle('hidden',
+      global.DevBuild?.isDevModeActive?.() !== true || hideBotForJamoCustom);
 
     if (!loggedIn) return;
-    await Promise.all([
-      populateFriendsList(raceList, 'race'),
-      populateFriendsList(turnList, 'turn'),
-      populateFriendsList(wordChainList, 'wordchain'),
-    ]);
+    await populateFriendsList(friendsList, 'menu-user');
   }
 
   async function openMultiplayerPicker() {
     if (!ensureCore()) return;
     await whenAuthReady();
     const overlay = ensureMultiplayerOverlay();
+    const sub = overlay.querySelector('.multiplayer-modal-sub');
+    if (sub) {
+      sub.textContent = pendingChallengeFlow === 'menu-battle-custom'
+        ? (global.I18n?.t('menu.battle.pickFriend') || socialT('social.challengeChooseUser') || 'Pick a friend to play.')
+        : (global.I18n?.t('multiplayer.subtitle') || 'Pick a friend to play.');
+    }
     overlay.classList.remove('hidden');
     document.body.classList.add('multiplayer-open');
     global.I18n?.applyToDocument?.(overlay);
@@ -1389,6 +1751,41 @@
   function closeMultiplayerPicker() {
     document.getElementById('multiplayer-overlay')?.classList.add('hidden');
     document.body.classList.remove('multiplayer-open');
+    if (pendingChallengeFlow === 'menu-battle-custom' && !pendingChallengeFriendUid) {
+      pendingChallengeFlow = 'legacy';
+    }
+  }
+
+  function wordChainPickButtonsHtml() {
+    const chains = global.RelatedWordsChains?.getAllChains?.() || [];
+    const colors = ['purple', 'yellow', 'peach', 'blue', 'mint', 'peach'];
+    const labelFn = global.RelatedWordsChains?.chainLabel;
+    const randomLabel = global.I18n?.t('social.challengePickWordChainRandom')
+      || global.I18n?.t('social.challengePickWordChain')
+      || 'Random chain';
+    const randomBtn = `<button type="button" class="race-opt race-opt--purple" data-social-action="challenge-word-chain-pick" data-chain-id="">${escapeHtml(randomLabel)}</button>`;
+    if (chains.length > 24) {
+      return randomBtn;
+    }
+    return randomBtn + chains.map((chain, i) => {
+      const label = labelFn ? labelFn(chain) : (global.I18n?.t(chain.titleKey) || chain.id);
+      return `<button type="button" class="race-opt race-opt--${colors[i % colors.length]}" data-social-action="challenge-word-chain-pick" data-chain-id="${escapeHtml(chain.id)}">${escapeHtml(label)}</button>`;
+    }).join('');
+  }
+
+  function botChainSelectHtml() {
+    const chains = global.RelatedWordsChains?.getAllChains?.() || [];
+    if (!chains.length) return '';
+    const labelFn = global.RelatedWordsChains?.chainLabel;
+    const options = chains.map((chain) => {
+      const label = labelFn ? labelFn(chain) : (global.I18n?.t(chain.titleKey) || chain.id);
+      return `<option value="${escapeHtml(chain.id)}">${escapeHtml(label)}</option>`;
+    }).join('');
+    return `
+      <div class="multiplayer-bot-row">
+        <label class="multiplayer-bot-label" for="bot-chain-select">Word chain</label>
+        <select id="bot-chain-select" class="multiplayer-bot-chain" data-bot-chain>${options}</select>
+      </div>`;
   }
 
   function koreanLetterLengthButtonsHtml() {
@@ -1396,13 +1793,30 @@
     const lengths = global.MatchWords?.LETTER_LENGTHS || [1, 2, 3, 4, 5, 6];
     return lengths.map((n, i) => {
       const label = global.I18n?.t('match.modes.letterCount', { n }) || `${n} letters`;
-      return `<button type="button" class="race-opt race-opt--${colors[i % colors.length]}" data-social-action="challenge-korean-length" data-word-length="${n}">${escapeHtml(label)}</button>`;
+      return `<button type="button" class="race-opt race-opt--${colors[i % colors.length]}" data-social-action="challenge-korean-length" data-word-length="${n}" aria-label="${escapeHtml(label)}">${n}</button>`;
     }).join('');
+  }
+
+  function challengeActionsHtml() {
+    return `
+      <div class="race-length-actions">
+        <button type="button" class="race-btn race-btn--ghost" id="challenge-back-btn" data-social-action="challenge-back">${escapeHtml(commonT('back'))}</button>
+        <button type="button" class="race-btn race-btn--ghost" id="challenge-cancel-btn" data-social-action="challenge-cancel">${escapeHtml(commonT('cancel'))}</button>
+      </div>`;
   }
 
   function ensureChallengeOverlay() {
     let overlay = document.getElementById('race-length-overlay');
-    if (overlay && !overlay.querySelector('[data-social-action="challenge-korean-length"]')) {
+    if (overlay && (
+      !overlay.querySelector('[data-social-action="challenge-korean-length"]')
+      || !overlay.querySelector('#challenge-step-battle-game')
+      || !overlay.querySelector('#challenge-step-word-chain')
+      || overlay.querySelector('#challenge-step-menu-mode')
+      || overlay.querySelector('#challenge-step-jamodle-playmode')
+      || !overlay.querySelector('.race-length-actions')
+      || !overlay.querySelector('.race-length-options--grid-3')
+      || overlay.querySelector('#challenge-step-korean-length [data-social-action="challenge-back"]')
+    )) {
       overlay.remove();
       overlay = null;
     }
@@ -1414,10 +1828,22 @@
       <div class="race-length-card">
         <h3 id="race-length-title"></h3>
         <p id="race-length-sub"></p>
+        <div id="challenge-step-battle-game" class="challenge-step hidden">
+          <div class="race-length-options race-length-options--stack">
+            <button type="button" class="race-opt race-opt--peach" data-social-action="challenge-mode-jamodle">${escapeHtml(socialT('social.challengeBattleJamodle'))}</button>
+            <button type="button" class="race-opt race-opt--purple" data-social-action="challenge-related-words-race">${escapeHtml(socialT('social.challengeBattleRelatedWords'))}</button>
+          </div>
+        </div>
         <div id="challenge-step-game" class="challenge-step">
-          <div class="race-length-options">
+          <div class="race-length-options race-length-options--stack">
             <button type="button" class="race-opt race-opt--blue" data-social-action="challenge-game-wordle">${escapeHtml(socialT('social.challengeGameWordle'))}</button>
             <button type="button" class="race-opt race-opt--peach" data-social-action="challenge-game-match">${escapeHtml(socialT('social.challengeGameMatch'))}</button>
+            <button type="button" class="race-opt race-opt--purple" data-social-action="challenge-related-words-race">${escapeHtml(socialT('social.challengeGameRelatedWords'))}</button>
+          </div>
+        </div>
+        <div id="challenge-step-word-chain" class="challenge-step hidden">
+          <div class="race-length-options race-length-options--grid race-length-options--word-chain">
+            ${wordChainPickButtonsHtml()}
           </div>
         </div>
         <div id="challenge-step-wordle" class="challenge-step hidden">
@@ -1425,15 +1851,13 @@
             <button type="button" class="race-opt race-opt--mint" data-social-action="challenge-length" data-word-length="2">${escapeHtml(global.I18n?.t('wordle.twoLetters') || '2 letters')}</button>
             <button type="button" class="race-opt race-opt--yellow" data-social-action="challenge-length" data-word-length="3">${escapeHtml(global.I18n?.t('wordle.threeLetters') || '3 letters')}</button>
           </div>
-          <button type="button" class="race-btn race-btn--ghost" data-social-action="challenge-back">${escapeHtml(commonT('back'))}</button>
         </div>
         <div id="challenge-step-korean-length" class="challenge-step hidden">
-          <div class="race-length-options race-length-options--grid">
+          <div class="race-length-options race-length-options--grid-3">
             ${koreanLetterLengthButtonsHtml()}
           </div>
-          <button type="button" class="race-btn race-btn--ghost" data-social-action="challenge-back">${escapeHtml(commonT('back'))}</button>
         </div>
-        <button type="button" class="race-btn race-btn--ghost" id="challenge-cancel-btn" data-social-action="challenge-cancel">${escapeHtml(commonT('cancel'))}</button>
+        ${challengeActionsHtml()}
       </div>
     `;
     document.body.appendChild(overlay);
@@ -1445,8 +1869,34 @@
     overlay.querySelectorAll('.challenge-step').forEach((el) => el.classList.add('hidden'));
     const panel = overlay.querySelector(`#challenge-step-${step}`);
     if (panel) panel.classList.remove('hidden');
+    const backBtn = overlay.querySelector('#challenge-back-btn');
     const cancelBtn = overlay.querySelector('#challenge-cancel-btn');
-    if (cancelBtn) cancelBtn.classList.toggle('hidden', step !== 'game');
+    if (backBtn) backBtn.classList.toggle('hidden', step === 'game');
+    if (cancelBtn) cancelBtn.classList.remove('hidden');
+  }
+
+  function showChallengeBattleGameStep() {
+    const overlay = ensureChallengeOverlay();
+    const title = overlay.querySelector('#race-length-title');
+    const sub = overlay.querySelector('#race-length-sub');
+    if (title) title.textContent = socialT('social.challengeTitle', { name: pendingChallengeFriendName || socialT('social.friend') });
+    if (sub) sub.textContent = socialT('social.challengePickBattleGame');
+    showChallengeStep('battle-game');
+  }
+
+  function showWordChainPickStep() {
+    const overlay = ensureChallengeOverlay();
+    const visible = ['battle-game', 'game'].find(
+      (step) => !overlay.querySelector(`#challenge-step-${step}`)?.classList.contains('hidden')
+    );
+    pendingWordChainBackStep = visible || 'game';
+    const title = overlay.querySelector('#race-length-title');
+    const sub = overlay.querySelector('#race-length-sub');
+    if (title) title.textContent = socialT('social.challengeTitle', { name: pendingChallengeFriendName || socialT('social.friend') });
+    if (sub) sub.textContent = socialT('social.challengePickWordChain');
+    const grid = overlay.querySelector('#challenge-step-word-chain .race-length-options--word-chain');
+    if (grid) grid.innerHTML = wordChainPickButtonsHtml();
+    showChallengeStep('word-chain');
   }
 
   function showChallengeGameStep() {
@@ -1467,7 +1917,11 @@
 
   function showChallengeMatchStep() {
     const overlay = ensureChallengeOverlay();
+    const title = overlay.querySelector('#race-length-title');
     const sub = overlay.querySelector('#race-length-sub');
+    if (title && (pendingChallengeFlow === 'menu-user-first' || pendingChallengeFlow === 'menu-battle-custom')) {
+      title.textContent = socialT('social.challengeTitle', { name: pendingChallengeFriendName || socialT('social.friend') });
+    }
     if (sub) sub.textContent = socialT('social.challengePickLength');
     showChallengeStep('korean-length');
   }
@@ -1491,6 +1945,7 @@
     pendingChallengeFriendUid = friendUid;
     pendingChallengeFriendName = friendName || '';
     pendingChallengeIsTurn = true;
+    pendingChallengeFlow = 'legacy';
     const overlay = ensureChallengeOverlay();
     overlay.classList.remove('hidden');
     openChallengeOverlay();
@@ -1507,10 +1962,62 @@
     pendingChallengeFriendUid = friendUid;
     pendingChallengeFriendName = friendName || '';
     pendingChallengeIsTurn = false;
+    pendingChallengeFlow = 'legacy';
     const overlay = ensureChallengeOverlay();
     overlay.classList.remove('hidden');
     openChallengeOverlay();
     showChallengeGameStep();
+  }
+
+  function setMenuBattleGame(game) {
+    pendingMenuBattleGame = game === 'word-chain' ? 'word-chain' : 'jamodle';
+  }
+
+  function openBattleCustomPicker(game) {
+    if (!ensureCore()) return;
+    setMenuBattleGame(game);
+    pendingChallengeFlow = 'menu-battle-custom';
+    openMultiplayerPicker();
+  }
+
+  function openBattleCustomFriendFlow(friendUid, friendName) {
+    if (!currentUser) {
+      requireAuthMessage();
+      return;
+    }
+    if (!friendUid) return;
+    closeMultiplayerPicker();
+    pendingChallengeFriendUid = friendUid;
+    pendingChallengeFriendName = friendName || '';
+    pendingChallengeIsTurn = true;
+
+    if (pendingMenuBattleGame === 'word-chain') {
+      startRelatedWordsRaceChallenge(friendUid);
+      return;
+    }
+
+    pendingChallengeFlow = 'menu-battle-custom';
+    const overlay = ensureChallengeOverlay();
+    overlay.classList.remove('hidden');
+    openChallengeOverlay();
+    showChallengeTurnMatchStep();
+  }
+
+  function openChallengeMenuFlow(friendUid, friendName) {
+    if (!currentUser) {
+      requireAuthMessage();
+      return;
+    }
+    if (!friendUid) return;
+    closeMultiplayerPicker();
+    pendingChallengeFriendUid = friendUid;
+    pendingChallengeFriendName = friendName || '';
+    pendingChallengeIsTurn = false;
+    pendingChallengeFlow = 'menu-user-first';
+    const overlay = ensureChallengeOverlay();
+    overlay.classList.remove('hidden');
+    openChallengeOverlay();
+    showChallengeBattleGameStep();
   }
 
   function openChallengeOverlay() {
@@ -1521,6 +2028,7 @@
     pendingChallengeFriendUid = null;
     pendingChallengeFriendName = '';
     pendingChallengeIsTurn = false;
+    pendingChallengeFlow = 'legacy';
     document.getElementById('race-length-overlay')?.classList.add('hidden');
     document.body.classList.remove('challenge-open');
   }
@@ -1606,6 +2114,34 @@
     }
   }
 
+  async function startRelatedWordsRaceChallenge(friendUid, chainId) {
+    closeChallengeLengthPicker();
+    if (!friendUid || !global.RaceService) {
+      alert(socialT('social.challengeLoadFailed'));
+      return;
+    }
+    disableChallengeButtons();
+    try {
+      await refreshUserProfile();
+      const matchOpts = {
+        gameType: global.RaceService.GAME_TYPES.relatedWords,
+      };
+      if (chainId && global.RelatedWordsChains?.getChain?.(chainId)) {
+        matchOpts.chainId = chainId;
+      }
+      const matchId = await global.RaceService.createMatch(friendUid, matchOpts);
+      global.location.href = global.RaceService.getMatchPageUrl(matchId, {
+        gameType: global.RaceService.GAME_TYPES.relatedWords,
+      });
+    } catch (err) {
+      console.error('[Firebase] related words race challenge failed', err);
+      const msg = err?.code === 'permission-denied'
+        ? socialT('social.challengeRulesFailed')
+        : socialT('social.challengeSendFailed');
+      alert(msg);
+    }
+  }
+
   async function startMatchChallenge(friendUid, wordLength) {
     closeChallengeLengthPicker();
     if (!friendUid || !global.RaceService) {
@@ -1650,6 +2186,9 @@
       const n = global.RaceService.getMatchWordLength?.(match) ?? 4;
       const mode = global.I18n?.t('match.modes.letterCount', { n }) || `${n} letters`;
       return socialT('social.challengeBannerTurn', { name, mode });
+    }
+    if (global.RaceService?.isRelatedWords?.(match)) {
+      return socialT('social.challengeBannerRelatedWords', { name });
     }
     if (global.RaceService?.isKoreanMatch?.(match)) {
       const n = global.RaceService.getMatchWordLength?.(match) ?? 4;
@@ -1775,17 +2314,27 @@
 
   document.addEventListener('click', onDocumentClick);
   document.addEventListener('keydown', onDocumentKeydown);
+  global.document?.addEventListener('visibilitychange', syncIdleListenerVisibility);
+  global.addEventListener('pagehide', pauseIdleFirestoreListeners);
 
   global.I18n?.onChange?.(() => {
     if (profileSocialRoot) {
       renderProfileSocial();
+    }
+    if (leaderboardPageRoot) {
+      updateLeaderboardPageHeader();
+      global.I18n?.applyToDocument?.(leaderboardPageRoot);
     }
     const challengeOverlay = document.getElementById('race-length-overlay');
     if (challengeOverlay && !challengeOverlay.classList.contains('hidden') && pendingChallengeFriendUid) {
       const friendBtn = profileSocialRoot?.querySelector(
         `[data-social-action="challenge-friend"][data-friend-uid="${pendingChallengeFriendUid}"]`
       );
-      openChallengeGamePicker(pendingChallengeFriendUid, friendBtn?.dataset.friendName || pendingChallengeFriendName);
+      if (pendingChallengeFlow === 'menu-user-first') {
+        openChallengeMenuFlow(pendingChallengeFriendUid, friendBtn?.dataset.friendName || pendingChallengeFriendName);
+      } else {
+        openChallengeGamePicker(pendingChallengeFriendUid, friendBtn?.dataset.friendName || pendingChallengeFriendName);
+      }
     }
   });
 
@@ -1798,8 +2347,14 @@
     openLeaderboard,
     getPublicName,
     getDb,
+    getRtdb,
+    hasRtdb,
     getCurrentUid,
     getUserProfile,
+    syncWordChainBestStreak,
+    syncLocalWordChainBestStreak: pushLocalWordChainBestStreak,
+    syncPublicProfile,
+    syncLocalPublicProfile: pushLocalPublicProfile,
     whenAuthReady,
     getCurrentNickname() {
       return currentUser ? getPublicName(userProfile) : null;
@@ -1811,5 +2366,7 @@
     },
     openMultiplayerPicker,
     closeMultiplayerPicker,
+    setMenuBattleGame,
+    openBattleCustomPicker,
   };
 })(typeof window !== 'undefined' ? window : globalThis);

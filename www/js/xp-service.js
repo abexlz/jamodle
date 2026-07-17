@@ -11,8 +11,8 @@
     vowelPractice: 10,
     dailyMatch: 25,
     dailyWordle: 15,
-    wordlePractice: 15,
     tutorial: 12,
+    relatedWords: 12,
     newWordBonus: 5,
     noHintBonus: 5,
     streakBonus: 5,
@@ -25,8 +25,8 @@
     vowelPractice: 'profile.xp.vowelComplete',
     dailyMatch: 'profile.xp.dailyMatchComplete',
     dailyWordle: 'profile.xp.dailyWordleComplete',
-    wordlePractice: 'profile.xp.wordleComplete',
     tutorial: 'profile.xp.tutorialStep',
+    relatedWords: 'profile.xp.relatedWordsComplete',
   };
 
   function t(key, vars) {
@@ -63,7 +63,7 @@
 
   /**
    * @param {{
-   *   mode: 'hangulBuilder'|'koreanMatch'|'wordChain'|'vowelPractice'|'dailyMatch'|'dailyWordle'|'wordlePractice',
+   *   mode: 'hangulBuilder'|'koreanMatch'|'wordChain'|'vowelPractice'|'dailyMatch'|'dailyWordle',
    *   wordId?: string,
    *   usedHint?: boolean,
    *   isDailyChallenge?: boolean,
@@ -128,7 +128,7 @@
       profile.completedWordsEver.push(wordId);
     }
 
-    if (!safe.usedHint && mode !== 'vowelPractice' && mode !== 'hangulBuilder' && mode !== 'tutorial') {
+    if (!safe.usedHint && mode !== 'vowelPractice' && mode !== 'hangulBuilder' && mode !== 'tutorial' && mode !== 'relatedWords') {
       xpEarned += XP_REWARDS.noHintBonus;
       breakdown.push({ type: 'noHint', amount: XP_REWARDS.noHintBonus });
     }
@@ -185,6 +185,11 @@
       if (!profile.unlockedAvatarIds.includes(id)) profile.unlockedAvatarIds.push(id);
     });
 
+    const newFrames = global.BadgeService?.checkNewFrames?.(profile) || [];
+    newFrames.forEach((id) => {
+      if (!profile.unlockedFrameIds.includes(id)) profile.unlockedFrameIds.push(id);
+    });
+
     const newLevel = global.LevelUtils?.getLevelFromTotalXp(profile.totalXp)?.level || 1;
     const leveledUp = newLevel > prevLevel;
     const coinsGranted = leveledUp
@@ -233,6 +238,16 @@
     global.ProfileService?.saveProfile?.(profile);
   }
 
+  const MATCH_XP_MODES = new Set(['koreanMatch', 'dailyMatch', 'wordChain', 'relatedWords']);
+
+  function getResultMode(result) {
+    return result?.breakdown?.find((b) => b.type === 'base')?.mode || '';
+  }
+
+  function isMatchXpMode(mode) {
+    return MATCH_XP_MODES.has(mode);
+  }
+
   function shouldShowLevelUp(result) {
     if (!result?.leveledUp) return false;
     const profile = global.ProfileService?.loadProfile?.();
@@ -242,20 +257,39 @@
 
   function handleRewards(result) {
     if (!result?.awarded || !global.ProfileUI) return result;
-    global.ProfileUI.showXpToast(result);
-    if (shouldShowLevelUp(result)) {
-      global.ProfileUI.showLevelUpModal(result);
-      if (result.coinsGranted > 0) {
-        global.ShopUI?.showLevelCoinToast?.(result.coinsGranted);
+    const mode = getResultMode(result);
+    const isMatch = isMatchXpMode(mode);
+    let badgeDelay = 0;
+
+    if (isMatch) {
+      setTimeout(() => { void global.ProfileUI.showMatchXpCelebration(result); }, 320);
+      if (shouldShowLevelUp(result)) {
+        if (result.coinsGranted > 0) {
+          setTimeout(() => global.ShopUI?.showLevelCoinToast?.(result.coinsGranted), 1800);
+        }
+        markLevelCelebrated(result.level);
+        badgeDelay = 3400;
+      } else {
+        badgeDelay = 2000;
       }
-      markLevelCelebrated(result.level);
+    } else {
+      global.ProfileUI.showXpToast(result);
+      if (shouldShowLevelUp(result)) {
+        global.ProfileUI.showLevelUpModal(result);
+        if (result.coinsGranted > 0) {
+          global.ShopUI?.showLevelCoinToast?.(result.coinsGranted);
+        }
+        markLevelCelebrated(result.level);
+        badgeDelay = 800;
+      }
     }
+
     if (result.uncelebratedBadges?.length) {
       result.uncelebratedBadges.forEach((badge, i) => {
         setTimeout(() => {
           global.ProfileUI.showBadgeModal(badge);
           markBadgesCelebrated([badge.id]);
-        }, i * 400 + (result.leveledUp ? 800 : 0));
+        }, i * 400 + badgeDelay);
       });
     }
     return result;
@@ -267,8 +301,15 @@
       const mode = resolveMode(safe);
       const result = awardLearningXp(safe);
       try {
-        const questRewards = global.QuestService?.recordActivity?.(mode) || [];
+        const questResult = global.QuestService?.recordActivity?.(mode, {
+          won: safe.won === true,
+          guessCount: safe.guessCount,
+        }) || {};
+        const questRewards = questResult.rewards || [];
         if (questRewards.length) global.QuestUI?.showQuestCompleteToast?.(questRewards);
+        if (questResult.wheelAvailable) {
+          setTimeout(() => global.WheelUI?.tryShow?.(), questRewards.length ? 1200 : 400);
+        }
       } catch (questErr) {
         console.warn('[Jamodeul] Quest progress failed safely.', questErr);
       }
@@ -287,6 +328,8 @@
     markLevelCelebrated,
     markBadgesCelebrated,
     shouldShowLevelUp,
+    isMatchXpMode,
+    getResultMode,
     handleRewards,
   };
 })(typeof window !== 'undefined' ? window : globalThis);

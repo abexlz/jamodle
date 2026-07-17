@@ -1,0 +1,214 @@
+.wheel-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 850;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  background: rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  transition: opacity 0.28s ease;
+}
+
+.wheel-overlay.visible {
+  opacity: 1;
+}
+
+.wheel-modal {
+  width: 100%;
+  max-width: 340px;
+  padding: 24px 20px 28px;
+  border-radius: 24px;
+  background: var(--card, #fff);
+  border: 2px solid var(--border, #E8E4E0);
+  box-shadow: var(--shadow, 0 12px 32px rgba(0, 0, 0, 0.18));
+  text-align: center;
+}
+
+.wheel-title {
+  margin: 0 0 4px;
+  font-family: 'Junegull', sans-serif;
+  font-size: 22px;
+  color: var(--heading, #7B8FD4);
+}
+
+.wheel-sub {
+  margin: 0 0 18px;
+  font-size: 13px;
+  color: var(--text-soft, #9AA3AD);
+}
+
+.wheel-stage {
+  position: relative;
+  width: 240px;
+  height: 240px;
+  margin: 0 auto 20px;
+}
+
+.wheel-pointer {
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  font-size: 22px;
+  color: var(--heading, #7B8FD4);
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.15));
+  line-height: 1;
+}
+
+.wheel-disc {
+  width: 100%;
+  height: 100%;
+  transform: rotate(0deg);
+  will-change: transform;
+}
+
+.wheel-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.wheel-spin-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 160px;
+  padding: 14px 28px;
+  border-radius: 999px;
+  border: 2px solid var(--lavender-btn, #CFC0F5);
+  background: linear-gradient(180deg, var(--lavender, #E8DEFF) 0%, #D8C8F8 100%);
+  font-family: 'Junegull', sans-serif;
+  font-size: 18px;
+  color: var(--heading, #7B8FD4);
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(123, 143, 212, 0.25);
+}
+
+.wheel-spin-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.wheel-spin-btn:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+.wheel-reveal-icon {
+  display: block;
+  font-size: 52px;
+  margin-bottom: 8px;
+  animation: wheel-pop 0.5s ease;
+}
+
+@keyframes wheel-pop {
+  0% { transform: scale(0.4); opacity: 0; }
+  70% { transform: scale(1.12); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.wheel-reveal-title {
+  margin: 0 0 6px;
+  font-family: 'Junegull', sans-serif;
+  font-size: 20px;
+  color: var(--heading, #7B8FD4);
+}
+
+.wheel-reveal-prize {
+  margin: 0 0 18px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text, #5D6470);
+}
+
+.wheel-done-btn {
+  padding: 12px 32px;
+  border-radius: 999px;
+  border: 2px solid var(--mint-btn, #98DDB8);
+  background: var(--mint, #C8F0E0);
+  font-family: 'Junegull', sans-serif;
+  font-size: 16px;
+  color: var(--heading, #7B8FD4);
+  cursor: pointer;
+}
+
+.wheel-done-btn:active {
+  transform: scale(0.97);
+}
+
+/* Daily bonus card in quest tab */
+.quest-daily-bonus {
+  margin: 12px 0 16px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 2px dashed var(--lavender-btn, #CFC0F5);
+  background: linear-gradient(135deg, rgba(232, 222, 255, 0.5) 0%, rgba(255, 232, 212, 0.35) 100%);
+  text-align: center;
+}
+
+.quest-daily-bonus.is-ready {
+  border-style: solid;
+  border-color: var(--mint-btn, #98DDB8);
+  background: linear-gradient(135deg, rgba(200, 240, 224, 0.45) 0%, rgba(232, 222, 255, 0.35) 100%);
+  animation: bonus-glow 2s ease-in-out infinite;
+}
+
+@keyframes bonus-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(152, 221, 184, 0); }
+  50% { box-shadow: 0 0 16px 2px rgba(152, 221, 184, 0.35); }
+}
+
+.quest-daily-bonus.is-claimed {
+  opacity: 0.75;
+  border-style: solid;
+  border-color: var(--border-soft, #F0ECE8);
+  background: var(--bg, #FFF8F5);
+  animation: none;
+}
+
+.quest-daily-bonus-icon {
+  font-size: 28px;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.quest-daily-bonus-title {
+  margin: 0 0 4px;
+  font-family: 'Junegull', sans-serif;
+  font-size: 15px;
+  color: var(--heading, #7B8FD4);
+}
+
+.quest-daily-bonus-desc {
+  margin: 0 0 10px;
+  font-size: 12px;
+  color: var(--text-soft, #9AA3AD);
+}
+
+.quest-daily-bonus-btn {
+  padding: 10px 22px;
+  border-radius: 999px;
+  border: 2px solid var(--lavender-btn, #CFC0F5);
+  background: var(--lavender, #E8DEFF);
+  font-family: 'Junegull', sans-serif;
+  font-size: 14px;
+  color: var(--heading, #7B8FD4);
+  cursor: pointer;
+}
+
+.quest-daily-bonus.is-ready .quest-daily-bonus-btn {
+  border-color: var(--mint-btn, #98DDB8);
+  background: var(--mint, #C8F0E0);
+}
+
+.quest-daily-bonus-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+body.wheel-open {
+  overflow: hidden;
+}

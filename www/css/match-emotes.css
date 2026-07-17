@@ -1,0 +1,269 @@
+/* 1v1 match emotes */
+
+.race-opp-hud {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 8px;
+  min-height: 0;
+}
+
+.race-opp-hud.hidden {
+  display: none;
+}
+
+.race-opp-card-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.race-opp-battle-card {
+  width: 100px;
+  flex-shrink: 0;
+}
+
+.race-opp-profile-card {
+  width: 100%;
+}
+
+.race-opp-profile-card.menu-profile-card {
+  margin: 0;
+  padding-top: 10px;
+}
+
+.race-opp-profile-card .profile-badge-card--menu {
+  width: 100%;
+}
+
+.race-opp-battle-card-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 100%;
+  min-height: 56px;
+  padding: 6px 8px 8px;
+  border-radius: 12px;
+  border: 2px solid var(--blue-btn, #7BCFFF);
+  background: linear-gradient(180deg, #ffffff 0%, var(--blue, #C8E6FF) 100%);
+  box-shadow: 0 3px 0 rgba(90, 140, 200, 0.22);
+  box-sizing: border-box;
+}
+
+.race-opp-battle-card-inner--gold { border-color: #d0a010; background: linear-gradient(180deg, #fff8e8 0%, #ffe8a0 100%); }
+.race-opp-battle-card-inner--ruby { border-color: #c02840; background: linear-gradient(180deg, #fff0f2 0%, #ffc0c8 100%); }
+.race-opp-battle-card-inner--diamond { border-color: #2898d8; background: linear-gradient(180deg, #f0f8ff 0%, #b8e8ff 100%); }
+
+.race-opp-battle-avatar {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.race-opp-battle-level {
+  font-family: 'Jua', sans-serif;
+  font-size: 11px;
+  color: var(--heading);
+  line-height: 1;
+}
+
+.race-opp-name-hud {
+  margin: 0;
+  font-family: 'Jua', sans-serif;
+  font-size: 12px;
+  color: #fff;
+  text-align: center;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+.race-opp-emote {
+  flex: 1;
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.82);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+}
+
+.race-opp-emote.hidden {
+  display: none;
+}
+
+.race-opp-emote.is-visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.race-opp-emote-img,
+.match-emote-self-img {
+  width: min(52px, 16vw);
+  height: min(52px, 16vw);
+  object-fit: contain;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.18));
+  animation: matchEmotePop 0.28s ease;
+}
+
+.match-emote-self-img {
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.match-emote-self.is-visible .match-emote-self-img {
+  opacity: 1;
+  transform: scale(1);
+}
+
+@keyframes matchEmotePop {
+  0% { transform: scale(0.6); opacity: 0; }
+  70% { transform: scale(1.06); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Player emote row — top of tools: button left, used emote right; then rotate, then merge */
+.match-emote-row {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 6px;
+  width: 100%;
+  min-height: 44px;
+  flex-shrink: 0;
+  overflow: visible;
+}
+
+.match-emote-mount {
+  position: relative;
+  flex: 0 0 44px;
+  width: 44px;
+  overflow: visible;
+}
+
+.match-emote-self {
+  flex: 1 1 0;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: transparent;
+  border: none;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.match-emote-self.is-visible {
+  background: transparent;
+}
+
+.match-emote-wrap {
+  position: relative;
+  width: 44px;
+}
+
+.match-emote-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 4px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: linear-gradient(180deg, #ffffff 0%, var(--zone-bg, #f8f6f4) 100%);
+  box-shadow: var(--shadow-tile), var(--shadow-sm);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.match-emote-btn.is-open,
+.match-emote-btn:active {
+  transform: translateY(2px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+.match-emote-btn-icon {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.match-emote-picker {
+  position: absolute;
+  left: calc(100% + 6px);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  padding: 6px;
+  border-radius: 14px;
+  border: 2px solid var(--yellow-btn, #FFD743);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 4px 0 rgba(140, 70, 0, 0.22), var(--shadow-sm);
+  z-index: 20;
+}
+
+.match-emote-picker.hidden {
+  display: none;
+}
+
+.match-emote-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 0.12s ease, border-color 0.12s ease;
+}
+
+.match-emote-option img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.match-emote-option:hover,
+.match-emote-option:focus-visible {
+  border-color: var(--yellow-btn, #FFD743);
+  transform: scale(1.05);
+}
+
+body.match-turn-page .bank-tools,
+body.match-race-page .bank-tools {
+  overflow: visible;
+}
+
+body.match-turn-page .match-emote-row,
+body.match-race-page .match-emote-row {
+  overflow: visible;
+}
+
+html.reduce-motion .race-opp-emote,
+html.reduce-motion .race-opp-emote-img,
+html.reduce-motion .match-emote-self,
+html.reduce-motion .match-emote-self-img {
+  animation: none !important;
+  transition: none !important;
+}

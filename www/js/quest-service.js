@@ -8,25 +8,105 @@
   const WEEKLY_COUNT = 5;
 
   const QUEST_DEFS = {
-    'daily-wordle': {
-      id: 'daily-wordle',
+    'daily-play': {
+      id: 'daily-play',
       scope: 'daily',
-      type: 'complete_daily_wordle',
+      type: 'daily_match_play',
       target: 1,
       xp: 15,
       coins: 8,
-      icon: '📝',
+      icon: '📅',
       tier: 'daily',
     },
-    'daily-match': {
-      id: 'daily-match',
+    'daily-related-chain': {
+      id: 'daily-related-chain',
       scope: 'daily',
-      type: 'complete_daily_match',
+      type: 'related_words_link',
       target: 1,
-      xp: 20,
+      xp: 18,
       coins: 10,
-      icon: '🧩',
+      icon: '🔗',
       tier: 'daily',
+    },
+    'classic-play-3': {
+      id: 'classic-play-3',
+      scope: 'daily',
+      type: 'korean_match_play',
+      target: 3,
+      xp: 15,
+      coins: 8,
+      icon: '🎯',
+      tier: 'daily',
+    },
+    'friend-battle': {
+      id: 'friend-battle',
+      scope: 'daily',
+      type: 'friend_battle_play',
+      target: 1,
+      xp: 15,
+      coins: 8,
+      icon: '⚔️',
+      tier: 'daily',
+    },
+    'login-streak-3': {
+      id: 'login-streak-3',
+      scope: 'daily',
+      type: 'login_streak',
+      target: 3,
+      xp: 15,
+      coins: 8,
+      icon: '🔥',
+      tier: 'daily',
+    },
+    'daily-under-3': {
+      id: 'daily-under-3',
+      scope: 'daily',
+      type: 'daily_match_under_3',
+      target: 1,
+      xp: 50,
+      coins: 25,
+      icon: '⚡',
+      tier: 'daily-medium',
+    },
+    'classic-first-try': {
+      id: 'classic-first-try',
+      scope: 'daily',
+      type: 'korean_match_first_try',
+      target: 1,
+      xp: 50,
+      coins: 25,
+      icon: '💫',
+      tier: 'daily-medium',
+    },
+    'race-win': {
+      id: 'race-win',
+      scope: 'daily',
+      type: 'race_win',
+      target: 1,
+      xp: 50,
+      coins: 25,
+      icon: '🏁',
+      tier: 'daily-medium',
+    },
+    'coop-win': {
+      id: 'coop-win',
+      scope: 'daily',
+      type: 'coop_win',
+      target: 1,
+      xp: 50,
+      coins: 25,
+      icon: '🤝',
+      tier: 'daily-medium',
+    },
+    'total-5-wins': {
+      id: 'total-5-wins',
+      scope: 'daily',
+      type: 'total_wins_today',
+      target: 5,
+      xp: 50,
+      coins: 25,
+      icon: '🏆',
+      tier: 'daily-medium',
     },
     'match-1': {
       id: 'match-1',
@@ -36,26 +116,6 @@
       xp: 12,
       coins: 6,
       icon: '🎯',
-      tier: 'daily',
-    },
-    'builder-1': {
-      id: 'builder-1',
-      scope: 'daily',
-      type: 'hangul_builder_win',
-      target: 1,
-      xp: 10,
-      coins: 5,
-      icon: '🔤',
-      tier: 'daily',
-    },
-    'wordle-1': {
-      id: 'wordle-1',
-      scope: 'daily',
-      type: 'wordle_practice_win',
-      target: 1,
-      xp: 12,
-      coins: 6,
-      icon: '✏️',
       tier: 'daily',
     },
     'play-2': {
@@ -78,24 +138,54 @@
       icon: '🏆',
       tier: 'weekly',
     },
-    'weekly-builder-5': {
-      id: 'weekly-builder-5',
+    'weekly-match-3': {
+      id: 'weekly-match-3',
       scope: 'weekly',
-      type: 'hangul_builder_win',
-      target: 5,
-      xp: 60,
-      coins: 30,
-      icon: '🔤',
+      type: 'korean_match_win',
+      target: 3,
+      xp: 45,
+      coins: 22,
+      icon: '🎯',
       tier: 'weekly',
     },
-    'weekly-wordle-5': {
-      id: 'weekly-wordle-5',
+    'weekly-jamodle-5': {
+      id: 'weekly-jamodle-5',
       scope: 'weekly',
-      type: 'wordle_any_win',
+      type: 'korean_match_win',
       target: 5,
       xp: 70,
       coins: 35,
       icon: '📝',
+      tier: 'weekly',
+    },
+    'weekly-related-3': {
+      id: 'weekly-related-3',
+      scope: 'weekly',
+      type: 'complete_related_chain',
+      target: 3,
+      xp: 75,
+      coins: 38,
+      icon: '🔗',
+      tier: 'weekly',
+    },
+    'weekly-related-links-5': {
+      id: 'weekly-related-links-5',
+      scope: 'weekly',
+      type: 'related_words_link',
+      target: 5,
+      xp: 65,
+      coins: 32,
+      icon: '🧩',
+      tier: 'weekly',
+    },
+    'weekly-word-chain-2': {
+      id: 'weekly-word-chain-2',
+      scope: 'weekly',
+      type: 'word_chain_win',
+      target: 2,
+      xp: 55,
+      coins: 28,
+      icon: '⛓️',
       tier: 'weekly',
     },
     'weekly-daily-4': {
@@ -128,34 +218,50 @@
       icon: '⭐',
       tier: 'weekly',
     },
-    'weekly-vowel': {
-      id: 'weekly-vowel',
-      scope: 'weekly',
-      type: 'vowel_practice_complete',
-      target: 1,
-      xp: 50,
-      coins: 25,
-      icon: '🔀',
-      tier: 'weekly',
-    },
   };
 
+  const RETIRED_WEEKLY_QUEST_IDS = new Set([
+    'weekly-builder-5',
+    'weekly-vowel',
+  ]);
+
+  const RETIRED_DAILY_QUEST_IDS = new Set([
+    'daily-jamodle',
+    'daily-match',
+    'classic-jamodle-3',
+  ]);
+
   const DAILY_POOL = [
-    'daily-wordle', 'daily-match', 'match-1', 'builder-1', 'wordle-1', 'play-2',
+    'daily-play',
+    'classic-play-3',
+    'friend-battle',
+    'login-streak-3',
+    'daily-under-3',
+    'classic-first-try',
+    'race-win',
+    'coop-win',
+    'total-5-wins',
+    'daily-related-chain',
+    'match-1',
+    'play-2',
   ];
 
   const WEEKLY_POOL = [
-    'weekly-match-8', 'weekly-builder-5', 'weekly-wordle-5',
-    'weekly-daily-4', 'weekly-days-4', 'weekly-play-12', 'weekly-vowel',
+    'weekly-match-8', 'weekly-match-3', 'weekly-jamodle-5', 'weekly-related-3',
+    'weekly-related-links-5', 'weekly-word-chain-2', 'weekly-daily-4',
+    'weekly-days-4', 'weekly-play-12',
   ];
 
   const EVENT_TYPES = {
-    hangulBuilder: ['hangul_builder_win', 'any_activity'],
-    koreanMatch: ['korean_match_win', 'any_activity'],
-    vowelPractice: ['vowel_practice_complete', 'any_activity'],
-    dailyMatch: ['complete_daily_match', 'complete_daily_any', 'any_activity'],
-    dailyWordle: ['complete_daily_wordle', 'complete_daily_any', 'wordle_any_win', 'any_activity'],
-    wordlePractice: ['wordle_practice_win', 'wordle_any_win', 'any_activity'],
+    hangulBuilder: ['any_activity'],
+    koreanMatch: ['korean_match_play', 'korean_match_win', 'any_activity'],
+    vowelPractice: ['any_activity'],
+    dailyMatch: ['daily_match_play', 'complete_daily_match', 'complete_daily_any', 'any_activity'],
+    relatedWords: ['related_words_link', 'any_activity'],
+    relatedWordsChain: ['complete_related_chain', 'any_activity'],
+    wordChain: ['word_chain_win', 'any_activity'],
+    tutorial: ['any_activity'],
+    battle: [],
   };
 
   function getTodayKey() {
@@ -192,6 +298,101 @@
     return items.slice(0, count);
   }
 
+  function resolveQuestEvents(mode, meta) {
+    const events = [];
+    const add = (type, amount = 1) => {
+      if (!type || amount <= 0) return;
+      events.push({ type, amount });
+    };
+
+    const won = !!meta?.won;
+    const guessCount = meta?.guessCount != null ? meta.guessCount : null;
+
+    (EVENT_TYPES[mode] || []).forEach((type) => add(type));
+
+    if (mode === 'dailyMatch') {
+      if (won) {
+        add('total_wins_today');
+        if (guessCount != null && guessCount <= 3) add('daily_match_under_3');
+      }
+    } else if (mode === 'koreanMatch') {
+      if (won) {
+        add('total_wins_today');
+        if (guessCount === 1) add('korean_match_first_try');
+      }
+    } else if (mode === 'wordChain' && won) {
+      add('total_wins_today');
+    } else if (mode === 'relatedWords' && won) {
+      add('total_wins_today');
+    }
+
+    if (meta?.friendBattle) add('friend_battle_play');
+    if (meta?.raceWin) add('race_win');
+    if (meta?.coopWin) add('coop_win');
+
+    return events;
+  }
+
+  function syncLoginStreakQuests(list) {
+    const streak = global.LearningStreak?.loadStreak?.()?.currentStreak || 0;
+    list.forEach((entry) => {
+      const def = QUEST_DEFS[entry.questId];
+      if (!def || def.type !== 'login_streak' || entry.claimed) return;
+      entry.progress = Math.min(def.target, streak);
+    });
+  }
+
+  function purgeRetiredWeeklyQuests(qs, week) {
+    const kept = (qs.weekly || []).filter((entry) => !RETIRED_WEEKLY_QUEST_IDS.has(entry.questId));
+    const have = new Set(kept.map((entry) => entry.questId));
+    const replacements = WEEKLY_POOL.filter((id) => !have.has(id));
+    let seed = hashString(`weekly-migrate:${week}:${kept.map((q) => q.questId).join(',')}`);
+    while (kept.length < WEEKLY_COUNT && replacements.length) {
+      seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+      const idx = seed % replacements.length;
+      const questId = replacements.splice(idx, 1)[0];
+      const def = QUEST_DEFS[questId];
+      if (!def) continue;
+      kept.push({
+        questId,
+        progress: 0,
+        claimed: false,
+        target: def.target,
+      });
+      have.add(questId);
+    }
+    qs.weekly = kept.slice(0, WEEKLY_COUNT);
+  }
+
+  function buildDailyQuestIds(today) {
+    return pickFromPool(DAILY_POOL, DAILY_COUNT, `daily:${today}`);
+  }
+
+  function syncDailyQuestList(qs, today) {
+    const expectedIds = buildDailyQuestIds(today);
+    const byId = Object.fromEntries((qs.daily || []).map((q) => [q.questId, q]));
+    qs.daily = expectedIds.map((id) => {
+      const def = QUEST_DEFS[id];
+      const existing = byId[id];
+      if (!def) return null;
+      if (existing) {
+        return {
+          questId: id,
+          progress: Math.min(def.target, existing.progress || 0),
+          claimed: !!existing.claimed,
+          target: def.target,
+        };
+      }
+      return {
+        questId: id,
+        progress: 0,
+        claimed: false,
+        target: def.target,
+      };
+    }).filter(Boolean);
+    syncLoginStreakQuests(qs.daily);
+  }
+
   function emptyQuestState() {
     return {
       dailyKey: '',
@@ -199,6 +400,7 @@
       weeklyKey: '',
       weekly: [],
       weeklyPlayDays: [],
+      dailyWheelClaimed: false,
     };
   }
 
@@ -221,18 +423,30 @@
     if (!Array.isArray(qs.daily)) qs.daily = [];
     if (!Array.isArray(qs.weekly)) qs.weekly = [];
     if (!Array.isArray(qs.weeklyPlayDays)) qs.weeklyPlayDays = [];
+    if (typeof qs.dailyWheelClaimed !== 'boolean') qs.dailyWheelClaimed = false;
 
     const today = getTodayKey();
     const week = getWeekKey();
 
     if (qs.dailyKey !== today) {
       qs.dailyKey = today;
-      qs.daily = pickFromPool(DAILY_POOL, DAILY_COUNT, `daily:${today}`).map((id) => ({
+      qs.dailyWheelClaimed = false;
+      qs.daily = buildDailyQuestIds(today).map((id) => ({
         questId: id,
         progress: 0,
         claimed: false,
         target: QUEST_DEFS[id].target,
       }));
+      syncLoginStreakQuests(qs.daily);
+    } else {
+      const expected = buildDailyQuestIds(today);
+      const currentIds = qs.daily.map((q) => q.questId);
+      const hasRetired = qs.daily.some((q) => RETIRED_DAILY_QUEST_IDS.has(q.questId));
+      if (hasRetired || currentIds.length !== expected.length || expected.some((id) => !currentIds.includes(id))) {
+        syncDailyQuestList(qs, today);
+      } else {
+        syncLoginStreakQuests(qs.daily);
+      }
     }
 
     if (qs.weeklyKey !== week) {
@@ -244,6 +458,8 @@
         claimed: false,
         target: QUEST_DEFS[id].target,
       }));
+    } else {
+      purgeRetiredWeeklyQuests(qs, week);
     }
 
     return qs;
@@ -256,24 +472,44 @@
   function getQuestSnapshot() {
     const profile = global.ProfileService?.loadProfile?.();
     if (!profile) {
-      return { daily: [], weekly: [], dailyKey: '', weeklyKey: '' };
+      return { daily: [], weekly: [], dailyKey: '', weeklyKey: '', dailyWheelClaimed: false };
     }
     const qs = ensureQuestState(profile);
     global.ProfileService?.saveProfile?.(profile);
     return {
       dailyKey: qs.dailyKey,
       weeklyKey: qs.weeklyKey,
+      dailyWheelClaimed: qs.dailyWheelClaimed,
       daily: qs.daily.map((q) => ({ ...q, def: getQuestDef(q.questId) })),
       weekly: qs.weekly.map((q) => ({ ...q, def: getQuestDef(q.questId) })),
     };
   }
 
-  function incrementQuestList(list, types, amount) {
+  function allDailyComplete(qs) {
+    const daily = qs.daily || [];
+    if (!daily.length) return false;
+    return daily.every((q) => q.claimed && q.progress >= q.target);
+  }
+
+  function isDailyWheelAvailable(profile) {
+    if (!profile) return false;
+    const qs = ensureQuestState(profile);
+    return allDailyComplete(qs) && !qs.dailyWheelClaimed;
+  }
+
+  function incrementQuestList(list, events) {
     const completed = [];
+    const counts = {};
+    events.forEach(({ type, amount }) => {
+      counts[type] = (counts[type] || 0) + amount;
+    });
+
     list.forEach((entry) => {
       if (entry.claimed) return;
       const def = QUEST_DEFS[entry.questId];
-      if (!def || !types.includes(def.type)) return;
+      if (!def) return;
+      const amount = counts[def.type];
+      if (!amount) return;
       entry.progress = Math.min(entry.target, entry.progress + amount);
       if (entry.progress >= entry.target) completed.push(entry);
     });
@@ -299,57 +535,126 @@
     return results;
   }
 
+  function refreshQuestUi() {
+    global.PlayerHud?.refresh?.();
+    const menuRoot = document.getElementById('menu-root');
+    if (menuRoot) global.QuestUI?.refreshSection?.(menuRoot);
+  }
+
   /**
    * Record game activity for quest progress.
-   * @param {'hangulBuilder'|'koreanMatch'|'vowelPractice'|'dailyMatch'|'dailyWordle'|'wordlePractice'} mode
+   * @param {string} mode
+   * @param {{ won?: boolean, guessCount?: number, friendBattle?: boolean, raceWin?: boolean, coopWin?: boolean }} [meta]
    */
-  function recordActivity(mode) {
+  function recordActivity(mode, meta) {
     const profile = global.ProfileService?.loadProfile?.();
-    if (!profile) return [];
+    if (!profile) return { rewards: [], wheelAvailable: false };
 
     const qs = ensureQuestState(profile);
-    const types = EVENT_TYPES[mode];
-    if (!types?.length) {
+    const events = resolveQuestEvents(mode, meta || {});
+    if (!events.length) {
       global.ProfileService?.saveProfile?.(profile);
-      return [];
+      return { rewards: [], wheelAvailable: false };
     }
 
     const today = getTodayKey();
     if (!qs.weeklyPlayDays.includes(today)) {
       qs.weeklyPlayDays.push(today);
-      incrementQuestList(qs.weekly, ['learning_days'], 1);
+      events.push({ type: 'learning_days', amount: 1 });
     }
 
-    const readyDaily = incrementQuestList(qs.daily, types, 1);
-    const readyWeekly = incrementQuestList(qs.weekly, types, 1);
-    const toClaim = [...readyDaily, ...readyWeekly];
-    const rewards = claimQuestRewards(profile, toClaim);
+    syncLoginStreakQuests(qs.daily);
+
+    const readyDaily = incrementQuestList(qs.daily, events);
+    const readyWeekly = incrementQuestList(qs.weekly, events);
+    const readyToClaim = [...readyDaily, ...readyWeekly];
 
     global.ProfileService?.saveProfile?.(profile);
 
-    if (rewards.length) {
-      global.PlayerHud?.refresh?.();
-      const menuRoot = document.getElementById('menu-root');
-      if (menuRoot) global.QuestUI?.refreshSection?.(menuRoot);
+    if (readyToClaim.length) refreshQuestUi();
+
+    return { rewards: [], readyToClaim, wheelAvailable: false };
+  }
+
+  function claimQuest(questId) {
+    const profile = global.ProfileService?.loadProfile?.();
+    if (!profile) return { ok: false, rewards: [], wheelAvailable: false };
+
+    const qs = ensureQuestState(profile);
+    const entry = [...qs.daily, ...qs.weekly].find((q) => q.questId === questId);
+    if (!entry || entry.claimed || entry.progress < entry.target) {
+      global.ProfileService?.saveProfile?.(profile);
+      return { ok: false, rewards: [], wheelAvailable: false };
     }
 
-    return rewards;
+    const rewards = claimQuestRewards(profile, [entry]);
+    global.ProfileService?.saveProfile?.(profile);
+    global.PlayerHud?.refresh?.();
+
+    const wheelAvailable = isDailyWheelAvailable(profile);
+    const menuRoot = document.getElementById('menu-root');
+    if (menuRoot) global.QuestUI?.refreshSection?.(menuRoot);
+
+    return { ok: true, rewards, wheelAvailable };
   }
 
   function countIncomplete(snapshot) {
     const all = [...(snapshot?.daily || []), ...(snapshot?.weekly || [])];
-    return all.filter((q) => !q.claimed && q.progress < q.target).length;
+    let count = all.filter((q) => !q.claimed).length;
+    if (global.WheelService?.isDailyWheelAvailable?.(global.ProfileService?.loadProfile?.())) {
+      count += 1;
+    }
+    return count;
+  }
+
+  function msUntilDailyReset() {
+    const today = getTodayKey();
+    const anchor = new Date(`${today}T12:00:00+09:00`);
+    anchor.setUTCDate(anchor.getUTCDate() + 1);
+    const nextKey = anchor.toISOString().slice(0, 10);
+    const resetAt = new Date(`${nextKey}T00:00:00+09:00`);
+    return Math.max(0, resetAt.getTime() - Date.now());
+  }
+
+  function msUntilWeeklyReset() {
+    const weekKey = getWeekKey();
+    const nextMonday = new Date(`${weekKey}T12:00:00+09:00`);
+    nextMonday.setUTCDate(nextMonday.getUTCDate() + 7);
+    const resetKey = nextMonday.toISOString().slice(0, 10);
+    const resetAt = new Date(`${resetKey}T00:00:00+09:00`);
+    return Math.max(0, resetAt.getTime() - Date.now());
+  }
+
+  function formatRefreshCountdown(ms) {
+    const totalSec = Math.max(0, Math.floor(ms / 1000));
+    const hours = Math.floor(totalSec / 3600);
+    const minutes = Math.floor((totalSec % 3600) / 60);
+    const seconds = totalSec % 60;
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+  }
+
+  function getRefreshMs(scope) {
+    return scope === 'weekly' ? msUntilWeeklyReset() : msUntilDailyReset();
   }
 
   global.QuestService = {
     DAILY_COUNT,
     WEEKLY_COUNT,
     QUEST_DEFS,
+    DAILY_POOL,
     getTodayKey,
     getWeekKey,
     getQuestDef,
     getQuestSnapshot,
     recordActivity,
+    claimQuest,
     countIncomplete,
+    isDailyWheelAvailable,
+    allDailyComplete,
+    msUntilDailyReset,
+    msUntilWeeklyReset,
+    formatRefreshCountdown,
+    getRefreshMs,
   };
 })(typeof window !== 'undefined' ? window : globalThis);

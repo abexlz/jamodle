@@ -1,0 +1,1062 @@
+/* Word Chain solo — glossy combo badge */
+
+.wc-combo-wrap {
+  display: flex;
+  justify-content: center;
+  margin: 0 0 10px;
+  min-height: 44px;
+}
+
+.wc-combo-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  user-select: none;
+}
+
+.wc-combo-badge__glow {
+  position: absolute;
+  inset: -8px -14px;
+  border-radius: 999px;
+  background:
+    radial-gradient(ellipse 90% 80% at 50% 65%, rgba(96, 255, 238, 0.42) 0%, rgba(0, 196, 196, 0.2) 42%, transparent 72%),
+    radial-gradient(ellipse 70% 50% at 50% 100%, rgba(0, 151, 178, 0.22) 0%, transparent 68%);
+  opacity: 0.62;
+  filter: blur(1px);
+  transition: opacity 0.35s ease, background 0.35s ease, transform 0.35s ease;
+}
+
+.wc-combo-badge__pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 13px 5px 10px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(255, 255, 255, 0.78);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.1) 32%, rgba(0, 0, 0, 0.05) 100%),
+    linear-gradient(145deg, rgba(64, 228, 220, 0.88) 0%, rgba(0, 175, 198, 0.9) 42%, rgba(0, 130, 155, 0.95) 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.55) inset,
+    0 -1px 0 rgba(0, 55, 68, 0.22) inset,
+    0 0 0 1px rgba(255, 255, 255, 0.18),
+    0 3px 0 rgba(0, 72, 88, 0.38),
+    0 8px 22px rgba(0, 151, 178, 0.34),
+    0 0 28px rgba(72, 220, 210, 0.18);
+  backdrop-filter: blur(10px) saturate(1.25);
+  -webkit-backdrop-filter: blur(10px) saturate(1.25);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.wc-combo-badge__pill::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  border-radius: 999px;
+  background: radial-gradient(ellipse 85% 55% at 50% 8%, rgba(255, 255, 255, 0.38) 0%, transparent 72%);
+  pointer-events: none;
+}
+
+.wc-combo-badge__pill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  box-shadow: inset 0 0 14px rgba(160, 255, 248, 0.22);
+  pointer-events: none;
+  transition: box-shadow 0.3s ease;
+}
+
+/* Multiplayer-style flame stack behind the number */
+.wc-combo-badge__count-stack {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: clamp(34px, 10vw, 44px);
+  min-height: clamp(34px, 10vw, 44px);
+}
+
+.wc-combo-badge__flame {
+  position: absolute;
+  left: 50%;
+  bottom: 32%;
+  width: clamp(44px, 13vw, 56px);
+  height: clamp(52px, 15vw, 66px);
+  transform: translateX(-50%);
+  pointer-events: none;
+  opacity: 0;
+  background: url('../assets/combo-fire-1.png') center bottom / contain no-repeat;
+  filter: drop-shadow(0 0 10px rgba(255, 120, 40, 0.45));
+  transition: opacity 0.35s ease, width 0.35s ease, height 0.35s ease;
+  z-index: 0;
+}
+
+.wc-combo-badge__count {
+  position: relative;
+  z-index: 1;
+  font-family: 'Jua', sans-serif;
+  font-size: clamp(26px, 8vw, 34px);
+  font-weight: 400;
+  line-height: 0.92;
+  letter-spacing: -0.02em;
+  color: #fff;
+  text-align: center;
+  text-shadow:
+    0 2px 0 rgba(0, 72, 88, 0.5),
+    0 0 16px rgba(200, 255, 248, 0.55),
+    0 0 32px rgba(96, 255, 238, 0.28);
+  transform-origin: center center;
+  transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+.wc-combo-badge__label {
+  font-family: 'Jua', sans-serif;
+  font-size: clamp(8px, 2.2vw, 10px);
+  font-weight: 400;
+  letter-spacing: 0.22em;
+  line-height: 1;
+  margin-left: 1px;
+  padding-top: 2px;
+  color: rgba(255, 255, 255, 0.88);
+  text-shadow: 0 1px 0 rgba(0, 72, 88, 0.45);
+  opacity: 0.92;
+}
+
+/* Burning — orange rim, orange number, multiplayer flame */
+.wc-combo-badge.is-burning .wc-combo-badge__glow {
+  background:
+    radial-gradient(ellipse 90% 80% at 50% 65%, rgba(255, 170, 60, 0.48) 0%, rgba(255, 120, 40, 0.22) 42%, transparent 72%),
+    radial-gradient(ellipse 70% 50% at 50% 100%, rgba(255, 100, 30, 0.28) 0%, transparent 68%);
+  opacity: 0.88;
+}
+
+.wc-combo-badge.is-burning .wc-combo-badge__pill {
+  border-color: rgba(255, 176, 96, 0.95);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.55) inset,
+    0 -1px 0 rgba(120, 50, 10, 0.2) inset,
+    0 0 0 1px rgba(255, 200, 120, 0.35),
+    0 3px 0 rgba(0, 72, 88, 0.38),
+    0 8px 22px rgba(0, 151, 178, 0.34),
+    0 0 18px rgba(255, 130, 40, 0.55),
+    0 0 32px rgba(255, 100, 30, 0.28);
+}
+
+.wc-combo-badge.is-burning .wc-combo-badge__pill::after {
+  box-shadow: inset 0 0 16px rgba(255, 150, 60, 0.32);
+}
+
+.wc-combo-badge.is-burning .wc-combo-badge__flame {
+  opacity: 1;
+  animation: wcComboFlameFlicker 0.5s ease-in-out infinite alternate;
+}
+
+/* Combo fire tiers — asset grows with streak */
+.wc-combo-badge--tier-1.is-burning .wc-combo-badge__flame {
+  background-image: url('../assets/combo-fire-1.png');
+  width: clamp(44px, 13vw, 56px);
+  height: clamp(52px, 15vw, 66px);
+  bottom: 30%;
+}
+
+.wc-combo-badge--tier-3.is-burning .wc-combo-badge__flame {
+  background-image: url('../assets/combo-fire-3.png');
+  width: clamp(50px, 15vw, 64px);
+  height: clamp(60px, 17vw, 76px);
+  bottom: 28%;
+}
+
+.wc-combo-badge--tier-5.is-burning .wc-combo-badge__flame {
+  background-image: url('../assets/combo-fire-5.png');
+  width: clamp(56px, 17vw, 72px);
+  height: clamp(68px, 19vw, 86px);
+  bottom: 26%;
+}
+
+.wc-combo-badge--tier-10.is-burning .wc-combo-badge__flame {
+  background-image: url('../assets/combo-fire-10.png');
+  width: clamp(64px, 19vw, 82px);
+  height: clamp(78px, 22vw, 98px);
+  bottom: 24%;
+}
+
+.wc-combo-badge--tier-3.is-burning .wc-combo-badge__count-stack {
+  min-width: clamp(38px, 11vw, 48px);
+  min-height: clamp(38px, 11vw, 48px);
+}
+
+.wc-combo-badge--tier-5.is-burning .wc-combo-badge__count-stack {
+  min-width: clamp(42px, 12vw, 52px);
+  min-height: clamp(42px, 12vw, 52px);
+}
+
+.wc-combo-badge--tier-10.is-burning .wc-combo-badge__count-stack {
+  min-width: clamp(46px, 13vw, 58px);
+  min-height: clamp(46px, 13vw, 58px);
+}
+
+.wc-combo-badge--tier-30.is-burning .wc-combo-badge__flame {
+  background-image: url('../assets/combo-fire-30.png');
+  width: clamp(72px, 22vw, 92px);
+  height: clamp(88px, 26vw, 110px);
+  bottom: 22%;
+  filter: drop-shadow(0 0 14px rgba(80, 255, 220, 0.55));
+}
+
+.wc-combo-badge--tier-40.is-burning .wc-combo-badge__flame {
+  background-image: url('../assets/combo-fire-40.png');
+  width: clamp(78px, 23vw, 98px);
+  height: clamp(94px, 27vw, 116px);
+  bottom: 20%;
+  filter: drop-shadow(0 0 16px rgba(120, 100, 255, 0.55));
+}
+
+.wc-combo-badge--tier-50.is-burning .wc-combo-badge__flame {
+  background-image: url('../assets/combo-fire-50.png');
+  width: clamp(84px, 24vw, 104px);
+  height: clamp(100px, 28vw, 122px);
+  bottom: 18%;
+  filter: drop-shadow(0 0 18px rgba(180, 80, 255, 0.62));
+}
+
+.wc-combo-badge--tier-75.is-burning .wc-combo-badge__flame {
+  background-image: url('../assets/combo-fire-75.png');
+  width: clamp(90px, 26vw, 112px);
+  height: clamp(108px, 30vw, 130px);
+  bottom: 16%;
+  filter: drop-shadow(0 0 20px rgba(100, 60, 220, 0.7));
+}
+
+.wc-combo-badge--tier-100.is-burning .wc-combo-badge__flame {
+  background-image: url('../assets/combo-fire-100.png');
+  width: clamp(96px, 28vw, 120px);
+  height: clamp(116px, 32vw, 140px);
+  bottom: 14%;
+  filter: drop-shadow(0 0 22px rgba(255, 120, 200, 0.65)) drop-shadow(0 0 14px rgba(80, 220, 255, 0.45));
+}
+
+.wc-combo-badge--tier-30.is-burning .wc-combo-badge__count-stack {
+  min-width: clamp(52px, 15vw, 64px);
+  min-height: clamp(52px, 15vw, 64px);
+}
+
+.wc-combo-badge--tier-40.is-burning .wc-combo-badge__count-stack {
+  min-width: clamp(56px, 16vw, 68px);
+  min-height: clamp(56px, 16vw, 68px);
+}
+
+.wc-combo-badge--tier-50.is-burning .wc-combo-badge__count-stack {
+  min-width: clamp(60px, 17vw, 72px);
+  min-height: clamp(60px, 17vw, 72px);
+}
+
+.wc-combo-badge--tier-75.is-burning .wc-combo-badge__count-stack {
+  min-width: clamp(64px, 18vw, 76px);
+  min-height: clamp(64px, 18vw, 76px);
+}
+
+.wc-combo-badge--tier-100.is-burning .wc-combo-badge__count-stack {
+  min-width: clamp(68px, 19vw, 80px);
+  min-height: clamp(68px, 19vw, 80px);
+}
+
+.wc-combo-badge--tier-up.is-burning .wc-combo-badge__flame {
+  animation: wcComboFlameTierUp 0.65s cubic-bezier(0.34, 1.4, 0.64, 1),
+    wcComboFlameFlicker 0.5s ease-in-out 0.65s infinite alternate;
+}
+
+.wc-combo-badge--tier-up.is-burning.wc-combo-badge--tier-30 .wc-combo-badge__flame,
+.wc-combo-badge--tier-up.is-burning.wc-combo-badge--tier-40 .wc-combo-badge__flame {
+  animation: wcComboFlameTierUp 0.65s cubic-bezier(0.34, 1.4, 0.64, 1),
+    wcComboFlameFlickerCyan 0.5s ease-in-out 0.65s infinite alternate;
+}
+
+.wc-combo-badge--tier-up.is-burning.wc-combo-badge--tier-50 .wc-combo-badge__flame {
+  animation: wcComboFlameTierUp 0.65s cubic-bezier(0.34, 1.4, 0.64, 1),
+    wcComboFlameFlickerPurple 0.5s ease-in-out 0.65s infinite alternate;
+}
+
+.wc-combo-badge--tier-up.is-burning.wc-combo-badge--tier-75 .wc-combo-badge__flame {
+  animation: wcComboFlameTierUp 0.72s cubic-bezier(0.34, 1.4, 0.64, 1),
+    wcComboFlameFlickerCosmic 0.55s ease-in-out 0.72s infinite alternate;
+}
+
+.wc-combo-badge--tier-up.is-burning.wc-combo-badge--tier-100 .wc-combo-badge__flame {
+  animation: wcComboFlameTierUp 0.78s cubic-bezier(0.34, 1.4, 0.64, 1),
+    wcComboFlameFlickerRainbow 0.6s ease-in-out 0.78s infinite alternate;
+}
+
+@keyframes wcComboFlameTierUp {
+  0% { transform: translateX(-50%) scale(0.75); opacity: 0.5; }
+  45% { transform: translateX(-50%) scale(1.2); opacity: 1; }
+  100% { transform: translateX(-50%) scale(1); opacity: 1; }
+}
+
+.wc-combo-badge.is-burning .wc-combo-badge__count {
+  color: #fff;
+  -webkit-text-stroke: 1.5px rgba(255, 148, 48, 0.92);
+  paint-order: stroke fill;
+  text-shadow:
+    0 0 6px rgba(255, 160, 60, 0.95),
+    0 0 14px rgba(255, 120, 40, 0.75),
+    0 0 26px rgba(255, 90, 20, 0.45),
+    0 2px 0 rgba(0, 72, 88, 0.45);
+}
+
+/* 30+ combo — escalating neon tiers */
+.wc-combo-badge--tier-30.is-burning .wc-combo-badge__glow {
+  background:
+    radial-gradient(ellipse 90% 80% at 50% 65%, rgba(120, 255, 230, 0.5) 0%, rgba(64, 220, 200, 0.24) 42%, transparent 72%),
+    radial-gradient(ellipse 70% 50% at 50% 100%, rgba(40, 180, 255, 0.28) 0%, transparent 68%);
+  opacity: 0.95;
+}
+
+.wc-combo-badge--tier-30.is-burning .wc-combo-badge__pill {
+  border-color: rgba(140, 255, 230, 0.95);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.1) 32%, rgba(0, 0, 0, 0.05) 100%),
+    linear-gradient(145deg, rgba(64, 228, 220, 0.88) 0%, rgba(0, 175, 198, 0.9) 42%, rgba(0, 130, 155, 0.95) 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.55) inset,
+    0 -1px 0 rgba(20, 80, 90, 0.25) inset,
+    0 0 0 1px rgba(160, 255, 240, 0.4),
+    0 3px 0 rgba(0, 72, 88, 0.38),
+    0 8px 22px rgba(0, 151, 178, 0.34),
+    0 0 20px rgba(80, 255, 220, 0.55),
+    0 0 36px rgba(40, 200, 255, 0.35);
+}
+
+.wc-combo-badge--tier-30.is-burning .wc-combo-badge__pill::after {
+  box-shadow: inset 0 0 18px rgba(120, 255, 230, 0.38);
+}
+
+.wc-combo-badge--tier-30.is-burning .wc-combo-badge__count {
+  -webkit-text-stroke: 1.5px rgba(100, 255, 220, 0.95);
+  text-shadow:
+    0 0 8px rgba(120, 255, 230, 0.95),
+    0 0 16px rgba(64, 220, 255, 0.8),
+    0 0 28px rgba(40, 180, 255, 0.5),
+    0 2px 0 rgba(0, 72, 88, 0.45);
+}
+
+.wc-combo-badge--tier-30.is-burning .wc-combo-badge__label {
+  color: rgba(220, 255, 248, 0.95);
+  text-shadow: 0 0 8px rgba(100, 255, 220, 0.45);
+}
+
+.wc-combo-badge--tier-30.is-burning .wc-combo-badge__flame {
+  animation: wcComboFlameFlickerCyan 0.5s ease-in-out infinite alternate;
+}
+
+/* 40+ — purple-tinted pill */
+.wc-combo-badge--tier-40.is-burning .wc-combo-badge__glow {
+  background:
+    radial-gradient(ellipse 90% 80% at 50% 65%, rgba(160, 120, 255, 0.42) 0%, rgba(100, 220, 230, 0.22) 42%, transparent 72%),
+    radial-gradient(ellipse 70% 50% at 50% 100%, rgba(120, 80, 220, 0.26) 0%, transparent 68%);
+  opacity: 0.98;
+}
+
+.wc-combo-badge--tier-40.is-burning .wc-combo-badge__pill {
+  border-color: rgba(180, 140, 255, 0.92);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.48) 0%, rgba(255, 255, 255, 0.08) 32%, rgba(0, 0, 0, 0.06) 100%),
+    linear-gradient(145deg, rgba(90, 210, 230, 0.85) 0%, rgba(100, 120, 220, 0.88) 48%, rgba(80, 60, 180, 0.92) 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.5) inset,
+    0 -1px 0 rgba(40, 30, 90, 0.28) inset,
+    0 0 0 1px rgba(180, 150, 255, 0.38),
+    0 3px 0 rgba(40, 30, 100, 0.4),
+    0 8px 24px rgba(100, 80, 220, 0.38),
+    0 0 22px rgba(140, 100, 255, 0.5),
+    0 0 38px rgba(80, 220, 230, 0.28);
+}
+
+.wc-combo-badge--tier-40.is-burning .wc-combo-badge__pill::after {
+  box-shadow: inset 0 0 20px rgba(160, 130, 255, 0.35);
+}
+
+.wc-combo-badge--tier-40.is-burning .wc-combo-badge__count {
+  -webkit-text-stroke: 1.5px rgba(160, 140, 255, 0.95);
+  text-shadow:
+    0 0 8px rgba(160, 140, 255, 0.95),
+    0 0 16px rgba(100, 220, 255, 0.8),
+    0 0 28px rgba(120, 100, 255, 0.5),
+    0 2px 0 rgba(40, 30, 90, 0.45);
+}
+
+.wc-combo-badge--tier-40.is-burning .wc-combo-badge__label {
+  color: rgba(230, 220, 255, 0.95);
+  text-shadow: 0 0 8px rgba(160, 130, 255, 0.5);
+}
+
+.wc-combo-badge--tier-40.is-burning .wc-combo-badge__flame {
+  animation: wcComboFlameFlickerCyan 0.5s ease-in-out infinite alternate;
+}
+
+/* 50+ — purple neon gradient pill */
+.wc-combo-badge--tier-50.is-burning .wc-combo-badge__glow {
+  background:
+    radial-gradient(ellipse 90% 80% at 50% 65%, rgba(200, 100, 255, 0.5) 0%, rgba(160, 60, 240, 0.26) 42%, transparent 72%),
+    radial-gradient(ellipse 70% 50% at 50% 100%, rgba(120, 40, 220, 0.32) 0%, transparent 68%);
+  opacity: 1;
+}
+
+.wc-combo-badge--tier-50.is-burning .wc-combo-badge__pill {
+  border-color: rgba(220, 140, 255, 0.98);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.42) 0%, rgba(255, 255, 255, 0.06) 30%, rgba(0, 0, 0, 0.08) 100%),
+    linear-gradient(145deg, rgba(180, 80, 255, 0.92) 0%, rgba(130, 50, 220, 0.94) 45%, rgba(80, 30, 170, 0.96) 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.45) inset,
+    0 -1px 0 rgba(50, 20, 90, 0.32) inset,
+    0 0 0 1px rgba(220, 160, 255, 0.45),
+    0 3px 0 rgba(50, 20, 100, 0.45),
+    0 8px 26px rgba(140, 60, 240, 0.45),
+    0 0 26px rgba(200, 100, 255, 0.62),
+    0 0 42px rgba(160, 60, 240, 0.38);
+}
+
+.wc-combo-badge--tier-50.is-burning .wc-combo-badge__pill::after {
+  box-shadow: inset 0 0 22px rgba(200, 120, 255, 0.42);
+}
+
+.wc-combo-badge--tier-50.is-burning .wc-combo-badge__count {
+  -webkit-text-stroke: 1.5px rgba(220, 140, 255, 0.98);
+  text-shadow:
+    0 0 10px rgba(220, 140, 255, 0.98),
+    0 0 18px rgba(180, 80, 255, 0.85),
+    0 0 32px rgba(140, 60, 240, 0.55),
+    0 2px 0 rgba(50, 20, 90, 0.45);
+}
+
+.wc-combo-badge--tier-50.is-burning .wc-combo-badge__label {
+  color: rgba(240, 210, 255, 0.98);
+  text-shadow: 0 0 10px rgba(200, 120, 255, 0.55);
+}
+
+.wc-combo-badge--tier-50.is-burning .wc-combo-badge__flame {
+  animation: wcComboFlameFlickerPurple 0.48s ease-in-out infinite alternate;
+}
+
+/* 75+ — dark cosmic pill */
+.wc-combo-badge--tier-75.is-burning .wc-combo-badge__glow {
+  background:
+    radial-gradient(ellipse 90% 80% at 50% 65%, rgba(100, 60, 200, 0.55) 0%, rgba(60, 30, 140, 0.3) 42%, transparent 72%),
+    radial-gradient(ellipse 70% 50% at 50% 100%, rgba(40, 20, 100, 0.38) 0%, transparent 68%);
+  opacity: 1;
+}
+
+.wc-combo-badge--tier-75.is-burning .wc-combo-badge__pill {
+  border-color: rgba(140, 100, 220, 0.95);
+  background:
+    linear-gradient(180deg, rgba(180, 140, 255, 0.18) 0%, rgba(255, 255, 255, 0.04) 28%, rgba(0, 0, 0, 0.15) 100%),
+    linear-gradient(145deg, rgba(50, 25, 110, 0.95) 0%, rgba(35, 15, 80, 0.97) 50%, rgba(20, 8, 55, 0.98) 100%);
+  box-shadow:
+    0 1px 0 rgba(180, 140, 255, 0.25) inset,
+    0 -1px 0 rgba(10, 5, 30, 0.45) inset,
+    0 0 0 1px rgba(120, 80, 200, 0.4),
+    0 3px 0 rgba(15, 8, 40, 0.55),
+    0 8px 28px rgba(60, 30, 140, 0.5),
+    0 0 28px rgba(100, 60, 200, 0.55),
+    0 0 48px rgba(60, 30, 140, 0.35);
+}
+
+.wc-combo-badge--tier-75.is-burning .wc-combo-badge__pill::after {
+  box-shadow: inset 0 0 24px rgba(120, 80, 220, 0.45);
+}
+
+.wc-combo-badge--tier-75.is-burning .wc-combo-badge__count {
+  -webkit-text-stroke: 1.5px rgba(160, 120, 255, 0.95);
+  text-shadow:
+    0 0 10px rgba(160, 120, 255, 0.95),
+    0 0 20px rgba(100, 60, 220, 0.85),
+    0 0 36px rgba(80, 40, 180, 0.55),
+    0 2px 0 rgba(15, 8, 40, 0.5);
+}
+
+.wc-combo-badge--tier-75.is-burning .wc-combo-badge__label {
+  color: rgba(200, 180, 255, 0.95);
+  text-shadow: 0 0 10px rgba(120, 80, 220, 0.55);
+}
+
+.wc-combo-badge--tier-75.is-burning .wc-combo-badge__flame {
+  animation: wcComboFlameFlickerCosmic 0.52s ease-in-out infinite alternate;
+}
+
+/* 100 — iridescent rainbow */
+.wc-combo-badge--tier-100.is-burning .wc-combo-badge__glow {
+  background:
+    radial-gradient(ellipse 90% 80% at 50% 65%, rgba(255, 120, 200, 0.45) 0%, rgba(120, 220, 255, 0.28) 35%, rgba(180, 255, 120, 0.2) 55%, transparent 72%),
+    radial-gradient(ellipse 70% 50% at 50% 100%, rgba(255, 200, 80, 0.28) 0%, transparent 68%);
+  opacity: 1;
+  animation: wc-combo-rainbow-glow 3s linear infinite;
+}
+
+.wc-combo-badge--tier-100.is-burning .wc-combo-badge__pill {
+  border-color: rgba(255, 255, 255, 0.85);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.08) 30%, rgba(0, 0, 0, 0.06) 100%),
+    linear-gradient(135deg, #ff6ec7 0%, #b47aff 20%, #4de8ff 40%, #7dffd8 60%, #ffe566 80%, #ff6ec7 100%);
+  background-size: 100% 100%, 200% 200%;
+  animation: wc-combo-rainbow-pill 4s linear infinite;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.55) inset,
+    0 -1px 0 rgba(40, 20, 80, 0.3) inset,
+    0 0 0 1px rgba(255, 255, 255, 0.35),
+    0 3px 0 rgba(40, 20, 80, 0.4),
+    0 8px 30px rgba(180, 80, 255, 0.45),
+    0 0 30px rgba(255, 120, 200, 0.55),
+    0 0 50px rgba(80, 220, 255, 0.35);
+}
+
+.wc-combo-badge--tier-100.is-burning .wc-combo-badge__pill::after {
+  box-shadow: inset 0 0 26px rgba(255, 255, 255, 0.35);
+  animation: wc-combo-inner-flash-rainbow 1.2s ease-in-out infinite alternate;
+}
+
+.wc-combo-badge--tier-100.is-burning .wc-combo-badge__count {
+  -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.95);
+  animation: wc-combo-rainbow-text 3s linear infinite;
+}
+
+.wc-combo-badge--tier-100.is-burning .wc-combo-badge__label {
+  color: rgba(255, 255, 255, 0.98);
+  text-shadow: 0 0 10px rgba(255, 200, 120, 0.55);
+}
+
+.wc-combo-badge--tier-100.is-burning .wc-combo-badge__flame {
+  animation: wcComboFlameFlickerRainbow 0.55s ease-in-out infinite alternate;
+}
+
+/* High-tier combo increase flashes */
+.wc-combo-badge--pop.is-burning.wc-combo-badge--tier-30 .wc-combo-badge__count--pulse,
+.wc-combo-badge--pop.is-burning.wc-combo-badge--tier-40 .wc-combo-badge__count--pulse {
+  animation: wc-combo-count-pulse 0.62s cubic-bezier(0.34, 1.5, 0.64, 1),
+    wc-combo-neon-flash-cyan 0.62s ease;
+}
+
+.wc-combo-badge--pop.is-burning.wc-combo-badge--tier-50 .wc-combo-badge__count--pulse {
+  animation: wc-combo-count-pulse 0.62s cubic-bezier(0.34, 1.5, 0.64, 1),
+    wc-combo-neon-flash-purple 0.62s ease;
+}
+
+.wc-combo-badge--pop.is-burning.wc-combo-badge--tier-75 .wc-combo-badge__count--pulse {
+  animation: wc-combo-count-pulse 0.68s cubic-bezier(0.34, 1.5, 0.64, 1),
+    wc-combo-neon-flash-cosmic 0.68s ease;
+}
+
+.wc-combo-badge--pop.is-burning.wc-combo-badge--tier-100 .wc-combo-badge__count--pulse {
+  animation: wc-combo-count-pulse 0.72s cubic-bezier(0.34, 1.5, 0.64, 1),
+    wc-combo-neon-flash-rainbow 0.72s ease;
+}
+
+.wc-combo-badge--glow.is-burning.wc-combo-badge--tier-30 .wc-combo-badge__glow,
+.wc-combo-badge--glow.is-burning.wc-combo-badge--tier-40 .wc-combo-badge__glow {
+  animation: wc-combo-glow-burst-cyan 0.7s ease-out;
+}
+
+.wc-combo-badge--glow.is-burning.wc-combo-badge--tier-50 .wc-combo-badge__glow {
+  animation: wc-combo-glow-burst-purple 0.75s ease-out;
+}
+
+.wc-combo-badge--glow.is-burning.wc-combo-badge--tier-75 .wc-combo-badge__glow {
+  animation: wc-combo-glow-burst-cosmic 0.8s ease-out;
+}
+
+.wc-combo-badge--glow.is-burning.wc-combo-badge--tier-100 .wc-combo-badge__glow {
+  animation: wc-combo-glow-burst-rainbow 0.85s ease-out;
+}
+
+.wc-combo-badge--glow.is-burning.wc-combo-badge--tier-30 .wc-combo-badge__pill::after,
+.wc-combo-badge--glow.is-burning.wc-combo-badge--tier-40 .wc-combo-badge__pill::after {
+  animation: wc-combo-inner-flash-cyan 0.7s ease-out;
+}
+
+.wc-combo-badge--glow.is-burning.wc-combo-badge--tier-50 .wc-combo-badge__pill::after {
+  animation: wc-combo-inner-flash-purple 0.75s ease-out;
+}
+
+.wc-combo-badge--glow.is-burning.wc-combo-badge--tier-75 .wc-combo-badge__pill::after {
+  animation: wc-combo-inner-flash-cosmic 0.8s ease-out;
+}
+
+.wc-combo-badge--glow.is-burning.wc-combo-badge--tier-100 .wc-combo-badge__pill::after {
+  animation: wc-combo-inner-flash-rainbow 0.85s ease-out;
+}
+
+@keyframes wc-combo-neon-flash-cyan {
+  0%, 100% {
+    text-shadow:
+      0 0 8px rgba(120, 255, 230, 0.95),
+      0 0 16px rgba(64, 220, 255, 0.8),
+      0 0 28px rgba(40, 180, 255, 0.5),
+      0 2px 0 rgba(0, 72, 88, 0.45);
+  }
+  40% {
+    text-shadow:
+      0 0 12px rgba(180, 255, 245, 1),
+      0 0 24px rgba(100, 240, 255, 0.95),
+      0 0 40px rgba(64, 200, 255, 0.7),
+      0 2px 0 rgba(0, 72, 88, 0.45);
+  }
+}
+
+@keyframes wc-combo-neon-flash-purple {
+  0%, 100% {
+    text-shadow:
+      0 0 10px rgba(220, 140, 255, 0.98),
+      0 0 18px rgba(180, 80, 255, 0.85),
+      0 0 32px rgba(140, 60, 240, 0.55),
+      0 2px 0 rgba(50, 20, 90, 0.45);
+  }
+  40% {
+    text-shadow:
+      0 0 14px rgba(240, 180, 255, 1),
+      0 0 28px rgba(200, 100, 255, 0.95),
+      0 0 44px rgba(160, 60, 240, 0.75),
+      0 2px 0 rgba(50, 20, 90, 0.45);
+  }
+}
+
+@keyframes wc-combo-neon-flash-cosmic {
+  0%, 100% {
+    text-shadow:
+      0 0 10px rgba(160, 120, 255, 0.95),
+      0 0 20px rgba(100, 60, 220, 0.85),
+      0 0 36px rgba(80, 40, 180, 0.55),
+      0 2px 0 rgba(15, 8, 40, 0.5);
+  }
+  40% {
+    text-shadow:
+      0 0 16px rgba(200, 160, 255, 1),
+      0 0 32px rgba(120, 80, 240, 0.95),
+      0 0 50px rgba(80, 40, 180, 0.75),
+      0 2px 0 rgba(15, 8, 40, 0.5);
+  }
+}
+
+@keyframes wc-combo-neon-flash-rainbow {
+  0%, 100% {
+    text-shadow:
+      0 0 10px rgba(255, 120, 200, 0.95),
+      0 0 20px rgba(120, 220, 255, 0.85),
+      0 0 34px rgba(255, 230, 100, 0.55),
+      0 2px 0 rgba(40, 20, 80, 0.45);
+  }
+  33% {
+    text-shadow:
+      0 0 14px rgba(120, 255, 200, 1),
+      0 0 28px rgba(180, 100, 255, 0.95),
+      0 0 44px rgba(255, 180, 80, 0.7),
+      0 2px 0 rgba(40, 20, 80, 0.45);
+  }
+  66% {
+    text-shadow:
+      0 0 14px rgba(100, 200, 255, 1),
+      0 0 28px rgba(255, 120, 180, 0.95),
+      0 0 44px rgba(180, 255, 120, 0.7),
+      0 2px 0 rgba(40, 20, 80, 0.45);
+  }
+}
+
+@keyframes wc-combo-glow-burst-cyan {
+  0% { transform: scale(0.82); opacity: 0.35; }
+  32% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.95; }
+}
+
+@keyframes wc-combo-glow-burst-purple {
+  0% { transform: scale(0.8); opacity: 0.3; }
+  32% { transform: scale(1.35); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes wc-combo-glow-burst-cosmic {
+  0% { transform: scale(0.78); opacity: 0.28; }
+  32% { transform: scale(1.38); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes wc-combo-glow-burst-rainbow {
+  0% { transform: scale(0.75); opacity: 0.25; }
+  32% { transform: scale(1.42); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes wc-combo-inner-flash-cyan {
+  0% { box-shadow: inset 0 0 16px rgba(120, 255, 230, 0.32); }
+  35% { box-shadow: inset 0 0 26px rgba(160, 255, 245, 0.65); }
+  100% { box-shadow: inset 0 0 18px rgba(120, 255, 230, 0.38); }
+}
+
+@keyframes wc-combo-inner-flash-purple {
+  0% { box-shadow: inset 0 0 18px rgba(200, 120, 255, 0.35); }
+  35% { box-shadow: inset 0 0 30px rgba(220, 150, 255, 0.7); }
+  100% { box-shadow: inset 0 0 22px rgba(200, 120, 255, 0.42); }
+}
+
+@keyframes wc-combo-inner-flash-cosmic {
+  0% { box-shadow: inset 0 0 20px rgba(120, 80, 220, 0.38); }
+  35% { box-shadow: inset 0 0 34px rgba(160, 120, 255, 0.72); }
+  100% { box-shadow: inset 0 0 24px rgba(120, 80, 220, 0.45); }
+}
+
+@keyframes wc-combo-inner-flash-rainbow {
+  0% { box-shadow: inset 0 0 22px rgba(255, 180, 220, 0.35); }
+  50% { box-shadow: inset 0 0 36px rgba(180, 220, 255, 0.65); }
+  100% { box-shadow: inset 0 0 26px rgba(220, 255, 180, 0.4); }
+}
+
+@keyframes wc-combo-rainbow-pill {
+  0% { background-position: 0% 50%, 0% 50%; }
+  100% { background-position: 0% 50%, 200% 50%; }
+}
+
+@keyframes wc-combo-rainbow-glow {
+  0%, 100% { filter: hue-rotate(0deg); }
+  50% { filter: hue-rotate(40deg); }
+}
+
+@keyframes wc-combo-rainbow-text {
+  0%, 100% {
+    text-shadow:
+      0 0 10px rgba(255, 120, 200, 0.95),
+      0 0 20px rgba(120, 220, 255, 0.8),
+      0 0 32px rgba(255, 230, 100, 0.5),
+      0 2px 0 rgba(40, 20, 80, 0.45);
+  }
+  33% {
+    text-shadow:
+      0 0 10px rgba(120, 255, 200, 0.95),
+      0 0 20px rgba(180, 100, 255, 0.8),
+      0 0 32px rgba(255, 180, 80, 0.5),
+      0 2px 0 rgba(40, 20, 80, 0.45);
+  }
+  66% {
+    text-shadow:
+      0 0 10px rgba(100, 200, 255, 0.95),
+      0 0 20px rgba(255, 120, 180, 0.8),
+      0 0 32px rgba(180, 255, 120, 0.5),
+      0 2px 0 rgba(40, 20, 80, 0.45);
+  }
+}
+
+@keyframes wcComboFlameFlicker {
+  from {
+    transform: translateX(-50%) scale(0.96) translateY(2px);
+    filter: drop-shadow(0 0 8px rgba(255, 120, 40, 0.4));
+  }
+  to {
+    transform: translateX(-50%) scale(1.05) translateY(-2px);
+    filter: drop-shadow(0 0 14px rgba(255, 150, 50, 0.65));
+  }
+}
+
+@keyframes wcComboFlameFlickerCyan {
+  from {
+    transform: translateX(-50%) scale(0.96) translateY(2px);
+    filter: drop-shadow(0 0 10px rgba(80, 220, 255, 0.45));
+  }
+  to {
+    transform: translateX(-50%) scale(1.06) translateY(-2px);
+    filter: drop-shadow(0 0 18px rgba(120, 255, 230, 0.75));
+  }
+}
+
+@keyframes wcComboFlameFlickerPurple {
+  from {
+    transform: translateX(-50%) scale(0.96) translateY(2px);
+    filter: drop-shadow(0 0 12px rgba(180, 80, 255, 0.5));
+  }
+  to {
+    transform: translateX(-50%) scale(1.07) translateY(-2px);
+    filter: drop-shadow(0 0 20px rgba(220, 120, 255, 0.8));
+  }
+}
+
+@keyframes wcComboFlameFlickerCosmic {
+  from {
+    transform: translateX(-50%) scale(0.95) translateY(2px);
+    filter: drop-shadow(0 0 14px rgba(100, 60, 220, 0.55));
+  }
+  to {
+    transform: translateX(-50%) scale(1.08) translateY(-3px);
+    filter: drop-shadow(0 0 24px rgba(140, 100, 255, 0.85));
+  }
+}
+
+@keyframes wcComboFlameFlickerRainbow {
+  from {
+    transform: translateX(-50%) scale(0.95) translateY(2px);
+    filter: drop-shadow(0 0 14px rgba(255, 120, 200, 0.55)) drop-shadow(0 0 8px rgba(80, 220, 255, 0.4));
+  }
+  to {
+    transform: translateX(-50%) scale(1.09) translateY(-3px);
+    filter: drop-shadow(0 0 22px rgba(180, 255, 120, 0.7)) drop-shadow(0 0 14px rgba(255, 120, 200, 0.6));
+  }
+}
+
+/* Zero / idle state */
+.wc-combo-badge--zero .wc-combo-badge__glow {
+  opacity: 0.2;
+}
+
+.wc-combo-badge--zero .wc-combo-badge__pill {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.24) 0%, rgba(255, 255, 255, 0.05) 38%, rgba(0, 0, 0, 0.03) 100%),
+    linear-gradient(145deg, rgba(0, 168, 188, 0.48) 0%, rgba(0, 118, 140, 0.58) 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.28) inset,
+    0 2px 0 rgba(0, 72, 88, 0.22),
+    0 5px 14px rgba(0, 151, 178, 0.16);
+}
+
+.wc-combo-badge--zero .wc-combo-badge__count {
+  color: rgba(255, 255, 255, 0.76);
+  text-shadow: 0 1px 0 rgba(0, 72, 88, 0.35);
+}
+
+/* Combo increase — pop / pulse */
+.wc-combo-badge--pop {
+  animation: wc-combo-pop 0.62s cubic-bezier(0.34, 1.5, 0.64, 1);
+}
+
+.wc-combo-badge--pop.is-burning .wc-combo-badge__flame {
+  animation: wcComboFlameBurst 0.55s ease, wcComboFlameFlicker 0.5s ease-in-out 0.55s infinite alternate;
+}
+
+.wc-combo-badge--pop.is-burning.wc-combo-badge--tier-30 .wc-combo-badge__flame,
+.wc-combo-badge--pop.is-burning.wc-combo-badge--tier-40 .wc-combo-badge__flame {
+  animation: wcComboFlameBurst 0.55s ease, wcComboFlameFlickerCyan 0.5s ease-in-out 0.55s infinite alternate;
+}
+
+.wc-combo-badge--pop.is-burning.wc-combo-badge--tier-50 .wc-combo-badge__flame {
+  animation: wcComboFlameBurst 0.58s ease, wcComboFlameFlickerPurple 0.48s ease-in-out 0.58s infinite alternate;
+}
+
+.wc-combo-badge--pop.is-burning.wc-combo-badge--tier-75 .wc-combo-badge__flame {
+  animation: wcComboFlameBurst 0.62s ease, wcComboFlameFlickerCosmic 0.52s ease-in-out 0.62s infinite alternate;
+}
+
+.wc-combo-badge--pop.is-burning.wc-combo-badge--tier-100 .wc-combo-badge__flame {
+  animation: wcComboFlameBurst 0.68s ease, wcComboFlameFlickerRainbow 0.55s ease-in-out 0.68s infinite alternate;
+}
+
+.wc-combo-badge__count--pulse {
+  animation: wc-combo-count-pulse 0.62s cubic-bezier(0.34, 1.5, 0.64, 1);
+}
+
+.wc-combo-badge--pop.is-burning .wc-combo-badge__count--pulse {
+  animation: wc-combo-count-pulse 0.62s cubic-bezier(0.34, 1.5, 0.64, 1),
+    wc-combo-neon-flash 0.62s ease;
+}
+
+@keyframes wc-combo-neon-flash {
+  0%, 100% {
+    text-shadow:
+      0 0 6px rgba(255, 160, 60, 0.95),
+      0 0 14px rgba(255, 120, 40, 0.75),
+      0 0 26px rgba(255, 90, 20, 0.45),
+      0 2px 0 rgba(0, 72, 88, 0.45);
+  }
+  40% {
+    text-shadow:
+      0 0 10px rgba(255, 190, 90, 1),
+      0 0 22px rgba(255, 140, 50, 0.95),
+      0 0 36px rgba(255, 100, 30, 0.65),
+      0 2px 0 rgba(0, 72, 88, 0.45);
+  }
+}
+
+.wc-combo-badge--glow .wc-combo-badge__glow {
+  opacity: 1;
+  animation: wc-combo-glow-burst 0.7s ease-out;
+}
+
+.wc-combo-badge--glow.is-burning .wc-combo-badge__pill::after {
+  animation: wc-combo-inner-flash-orange 0.7s ease-out;
+}
+
+.wc-combo-badge--glow:not(.is-burning) .wc-combo-badge__pill::after {
+  animation: wc-combo-inner-flash 0.7s ease-out;
+}
+
+@keyframes wc-combo-pop {
+  0% { transform: scale(1); }
+  22% { transform: scale(1.16); }
+  48% { transform: scale(0.95); }
+  68% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+@keyframes wc-combo-count-pulse {
+  0% { transform: scale(1); filter: brightness(1); }
+  25% { transform: scale(1.32); filter: brightness(1.4); }
+  50% { transform: scale(0.92); }
+  72% { transform: scale(1.1); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+
+@keyframes wcComboFlameBurst {
+  0% { opacity: 0.85; transform: translateX(-50%) scale(0.9); }
+  35% { opacity: 1; transform: translateX(-50%) scale(1.18); }
+  100% { opacity: 1; transform: translateX(-50%) scale(1); }
+}
+
+@keyframes wc-combo-glow-burst {
+  0% { transform: scale(0.82); opacity: 0.3; }
+  32% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.62; }
+}
+
+.wc-combo-badge--glow.is-burning .wc-combo-badge__glow {
+  animation: wc-combo-glow-burst-orange 0.7s ease-out;
+}
+
+@keyframes wc-combo-glow-burst-orange {
+  0% { transform: scale(0.82); opacity: 0.35; }
+  32% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.88; }
+}
+
+@keyframes wc-combo-inner-flash {
+  0% { box-shadow: inset 0 0 14px rgba(160, 255, 248, 0.22); }
+  35% { box-shadow: inset 0 0 22px rgba(200, 255, 248, 0.55); }
+  100% { box-shadow: inset 0 0 14px rgba(160, 255, 248, 0.22); }
+}
+
+@keyframes wc-combo-inner-flash-orange {
+  0% { box-shadow: inset 0 0 14px rgba(255, 150, 60, 0.28); }
+  35% { box-shadow: inset 0 0 24px rgba(255, 180, 80, 0.62); }
+  100% { box-shadow: inset 0 0 16px rgba(255, 150, 60, 0.32); }
+}
+
+/* Milestone / increase sparks */
+.wc-combo-spark {
+  position: fixed;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 90;
+  background: #fff;
+  box-shadow: 0 0 5px #ffb84d, 0 0 8px #ffe566;
+  animation: wc-combo-spark-fly ease-out forwards;
+}
+
+.wc-combo-spark--star {
+  width: 5px;
+  height: 5px;
+  border-radius: 1px;
+  transform: rotate(45deg);
+  background: linear-gradient(135deg, #fff 0%, #ffe566 100%);
+}
+
+.wc-combo-spark--flame {
+  width: 3px;
+  height: 3px;
+  background: #ffb84d;
+  box-shadow: 0 0 4px #ff8c28;
+}
+
+.wc-combo-spark--cosmic {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff 0%, #a855f7 55%, #6366f1 100%);
+  box-shadow: 0 0 6px #a855f7, 0 0 10px #6366f1;
+}
+
+.wc-combo-spark--rainbow {
+  width: 5px;
+  height: 5px;
+  border-radius: 1px;
+  transform: rotate(45deg);
+  background: hsl(var(--wc-spark-hue, 200), 95%, 72%);
+  box-shadow: 0 0 6px hsl(var(--wc-spark-hue, 200), 95%, 65%), 0 0 10px hsl(calc(var(--wc-spark-hue, 200) + 60), 95%, 65%);
+}
+
+@keyframes wc-combo-spark-fly {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--wc-spark-dx), var(--wc-spark-dy)) scale(0.15);
+  }
+}
+
+html.reduce-motion .wc-combo-badge--pop,
+html.reduce-motion .wc-combo-badge__count--pulse,
+html.reduce-motion .wc-combo-badge--glow .wc-combo-badge__glow,
+html.reduce-motion .wc-combo-badge--glow .wc-combo-badge__pill::after,
+html.reduce-motion .wc-combo-badge__flame,
+html.reduce-motion .wc-combo-badge--tier-100.is-burning .wc-combo-badge__pill,
+html.reduce-motion .wc-combo-badge--tier-100.is-burning .wc-combo-badge__glow,
+html.reduce-motion .wc-combo-badge--tier-100.is-burning .wc-combo-badge__count,
+html.reduce-motion .wc-combo-spark {
+  animation: none !important;
+}
+
+[data-theme="dark"] .wc-combo-badge__pill {
+  border-color: rgba(255, 255, 255, 0.62);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.35) inset,
+    0 -1px 0 rgba(0, 30, 38, 0.35) inset,
+    0 0 0 1px rgba(255, 255, 255, 0.12),
+    0 3px 0 rgba(0, 40, 50, 0.55),
+    0 8px 24px rgba(0, 151, 178, 0.38),
+    0 0 32px rgba(72, 220, 210, 0.22);
+}
+
+[data-theme="dark"] .wc-combo-badge.is-burning .wc-combo-badge__pill {
+  border-color: rgba(255, 160, 70, 0.88);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.35) inset,
+    0 -1px 0 rgba(80, 30, 8, 0.3) inset,
+    0 0 0 1px rgba(255, 180, 100, 0.25),
+    0 3px 0 rgba(0, 40, 50, 0.55),
+    0 8px 24px rgba(0, 151, 178, 0.38),
+    0 0 20px rgba(255, 120, 40, 0.45);
+}
+
+[data-theme="dark"] .wc-combo-badge--tier-30.is-burning .wc-combo-badge__pill {
+  border-color: rgba(120, 240, 220, 0.88);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.35) inset,
+    0 -1px 0 rgba(20, 60, 70, 0.35) inset,
+    0 0 0 1px rgba(140, 255, 230, 0.28),
+    0 3px 0 rgba(0, 40, 50, 0.55),
+    0 8px 24px rgba(0, 151, 178, 0.38),
+    0 0 22px rgba(80, 255, 220, 0.42);
+}
+
+[data-theme="dark"] .wc-combo-badge--tier-40.is-burning .wc-combo-badge__pill,
+[data-theme="dark"] .wc-combo-badge--tier-50.is-burning .wc-combo-badge__pill {
+  border-color: rgba(180, 140, 255, 0.88);
+}
+
+[data-theme="dark"] .wc-combo-badge--tier-75.is-burning .wc-combo-badge__pill {
+  border-color: rgba(140, 100, 220, 0.88);
+}
+
+[data-theme="dark"] .wc-combo-badge--tier-100.is-burning .wc-combo-badge__pill {
+  border-color: rgba(255, 255, 255, 0.75);
+}
+
+[data-theme="dark"] .wc-combo-badge--tier-30.is-burning .wc-combo-badge__count {
+  -webkit-text-stroke: 1.5px rgba(120, 255, 220, 0.92);
+}
+
+[data-theme="dark"] .wc-combo-badge.is-burning.wc-combo-badge--tier-1 .wc-combo-badge__count,
+[data-theme="dark"] .wc-combo-badge.is-burning.wc-combo-badge--tier-3 .wc-combo-badge__count,
+[data-theme="dark"] .wc-combo-badge.is-burning.wc-combo-badge--tier-5 .wc-combo-badge__count,
+[data-theme="dark"] .wc-combo-badge.is-burning.wc-combo-badge--tier-10 .wc-combo-badge__count {
+  -webkit-text-stroke: 1.5px rgba(255, 160, 60, 0.9);
+}

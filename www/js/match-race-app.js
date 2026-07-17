@@ -53,6 +53,10 @@
       this.gameStarted = false;
       this.isP1 = false;
       this._localeOff = null;
+      this._resultsRendered = false;
+      this._activeSeenAtMs = null;
+      this._leftMatch = false;
+      this._emotes = null;
     }
 
     async init() {
@@ -69,6 +73,7 @@
         this.renderError(rt('loginRequired'));
         return;
       }
+      global.FirebaseSocial?.syncLocalPublicProfile?.().catch(() => {});
 
       document.title = rt('pageTitle');
       this.renderShell();
@@ -91,6 +96,8 @@
     }
 
     destroy() {
+      global.RaceRematchUI?.teardown?.();
+      this.leaveMatch();
       if (this._localeOff) {
         this._localeOff();
         this._localeOff = null;
@@ -108,6 +115,9 @@
         this._countdownFallbackTimer = null;
       }
       global.KoreanMatchDrag?.end?.();
+      this._emotes?.destroy();
+      this._emotes = null;
+      global.MatchEmotes?.unsubscribeAllEmotes?.();
       if (this.game) {
         this.game.destroy();
         this.game = null;
@@ -116,6 +126,7 @@
 
     onLocaleChange() {
       document.title = rt('pageTitle');
+      if (this.matchData?.status === 'done') this._resultsRendered = false;
       if (this.matchData) {
         this.onMatchUpdate(this.matchData);
       } else if (this.els?.main) {
@@ -133,15 +144,70 @@
           <h1>${escapeHtml(rt('title'))}</h1>
           <a class="race-settings-link" href="settings.html" aria-label="${escapeHtml(global.I18n?.t('nav.settings') || 'Settings')}">⚙️</a>
         </header>
+        <div id="race-opp-hud" class="race-opp-hud hidden" aria-live="polite">
+          <div class="race-opp-card-col">
+            <div id="race-opp-card" class="race-opp-battle-card" aria-hidden="true"></div>
+            <p id="race-opp-name" class="race-opp-name-hud"></p>
+          </div>
+          <div id="race-opp-emote" class="race-opp-emote hidden" aria-live="polite"></div>
+        </div>
         <div id="race-opponent-bar" class="race-opponent-bar hidden" aria-live="polite"></div>
         <div id="race-main" class="race-main"></div>
         <div id="race-countdown" class="race-countdown hidden" aria-live="assertive"></div>
       `;
       this.els = {
+        oppHud: this.root.querySelector('#race-opp-hud'),
+        oppCard: this.root.querySelector('#race-opp-card'),
+        oppName: this.root.querySelector('#race-opp-name'),
+        oppEmote: this.root.querySelector('#race-opp-emote'),
         opponentBar: this.root.querySelector('#race-opponent-bar'),
         main: this.root.querySelector('#race-main'),
         countdown: this.root.querySelector('#race-countdown'),
       };
+      this.wireLeaveHandlers();
+    }
+
+    wireLeaveHandlers() {
+      this.root.querySelector('.race-back')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.leaveMatchAndGo(e.currentTarget.getAttribute('href') || 'profile.html');
+      });
+    }
+
+    leaveMatch() {
+      if (this._leftMatch) return;
+      const data = this.matchData;
+      if (!this.matchId || !this.myUid || !data) return;
+      if (data.status === 'done' || data.status === 'declined' || data.status === 'abandoned') return;
+      this._leftMatch = true;
+      RS().abandonMatch(this.matchId, this.myUid).catch(() => {});
+    }
+
+    async leaveMatchAndGo(href) {
+      global.RaceRematchUI?.teardown?.();
+      if (!this._leftMatch) {
+        this._leftMatch = true;
+        if (this.matchId && this.myUid) {
+          await RS().abandonMatch(this.matchId, this.myUid).catch(() => {});
+        }
+      }
+      global.location.href = href;
+    }
+
+    mountRematchUi() {
+      global.RaceRematchUI?.mount?.({
+        root: this.els.main,
+        matchId: this.matchId,
+        myUid: this.myUid,
+        getMatchData: () => this.matchData,
+        t: rt,
+        getMatchPageUrl: (id) => RS().getMatchPageUrl(id, { gameType: RS().GAME_TYPES.koreanMatch }),
+        createRematch: (oppUid, data) => RS().createMatch(oppUid, {
+          gameType: RS().GAME_TYPES.koreanMatch,
+          wordLength: RS().getMatchWordLength(data),
+          excludeTarget: data.target,
+        }),
+      });
     }
 
     renderError(msg) {
@@ -196,6 +262,18 @@
         return;
       }
 
+      if (data.status === 'declined') {
+        this.phase = 'declined';
+        this.handleDeclined(data);
+        return;
+      }
+
+      if (data.status === 'abandoned') {
+        this.phase = 'abandoned';
+        this.handleAbandoned(data);
+        return;
+      }
+
       if (data.status === 'ready') {
         this.phase = 'ready';
         RS().tryActivateMatch(this.matchId, data);
@@ -212,13 +290,29 @@
 
       if (data.status === 'done') {
         this.phase = 'done';
+        if (this._resultsRendered) {
+          global.RaceRematchUI?.sync?.();
+          return;
+        }
         this.handleDone(data, isP1);
       }
     }
 
     renderOpponentBar(data) {
       const opp = RS().getOpponent(data, this.myUid);
-      if (!opp || !this.els.opponentBar) return;
+      if (!opp) return;
+
+      if (this.els.oppHud) {
+        this.els.oppHud.classList.remove('hidden');
+        if (this.els.oppName) this.els.oppName.textContent = opp.name || rt('opponent');
+        global.MatchEmotes?.fetchOpponentSummary?.(opp.uid).then((summary) => {
+          if (!summary || !this.els.oppCard) return;
+          global.MatchEmotes.renderOpponentBattleCard(this.els.oppCard, summary);
+          if (this.els.oppName && summary.name) this.els.oppName.textContent = summary.name;
+        });
+      }
+
+      if (!this.els.opponentBar) return;
 
       const count = opp.progress?.guessCount || 0;
       const finished = opp.progress?.finished;
@@ -228,7 +322,6 @@
 
       this.els.opponentBar.classList.remove('hidden');
       this.els.opponentBar.innerHTML = `
-        <span class="race-opp-name">${escapeHtml(opp.name)}</span>
         <span class="race-opp-attempts">${escapeHtml(rt('oppAttempts', { count }))}</span>
         <span class="race-opp-status">${statusText}</span>
       `;
@@ -239,8 +332,45 @@
       }
     }
 
+    setupEmotes(data) {
+      const ME = global.MatchEmotes;
+      const opp = RS().getOpponent(data, this.myUid);
+      if (!ME || !opp?.uid || !this.game?.els?.emoteMount) return;
+      this._emotes?.destroy();
+      this._emotes = new ME.MatchEmotesController({
+        matchId: this.matchId,
+        myUid: this.myUid,
+        oppUid: opp.uid,
+        mountEl: this.game.els.emoteMount,
+        displayEl: this.els.oppEmote,
+        selfDisplayEl: this.game.els.emoteSelf,
+      });
+      this._emotes.mount();
+    }
+
     renderMain(html) {
       if (this.els.main) this.els.main.innerHTML = html;
+    }
+
+    handleDeclined(data) {
+      const decliner = data.declinedByUid === data.player1Uid ? data.player1Name : data.player2Name;
+      this.renderMain(`
+        <div class="race-panel">
+          <p class="race-panel-msg">${escapeHtml(rt('battleDeclined', { name: decliner || rt('opponent') }))}</p>
+          <a class="race-btn" href="profile.html">${escapeHtml(rt('backToProfile'))}</a>
+        </div>
+      `);
+    }
+
+    handleAbandoned(data) {
+      this.game?.setEnabled(false);
+      const abandoner = data.abandonedByUid === data.player1Uid ? data.player1Name : data.player2Name;
+      this.renderMain(`
+        <div class="race-panel">
+          <p class="race-panel-msg">${escapeHtml(rt('opponentAbandoned', { name: abandoner || rt('opponent') }))}</p>
+          <a class="race-btn" href="profile.html">${escapeHtml(rt('backToProfile'))}</a>
+        </div>
+      `);
     }
 
     handlePending(data, isP1) {
@@ -315,20 +445,14 @@
     }
 
     handleActive(data, isP1) {
-      const startMs = RS().startedAtMs(data);
-      if (!startMs) {
-        this.renderMain(`
-          <div class="race-panel">
-            <p class="race-panel-title">${escapeHtml(rt('startingSoon'))}</p>
-          </div>
-        `);
-        return;
-      }
+      const hasStartedPlaying = (data.player1Progress?.guessCount || 0) > 0
+        || (data.player2Progress?.guessCount || 0) > 0
+        || data.player1Progress?.finished
+        || data.player2Progress?.finished;
+      if (!this._activeSeenAtMs) this._activeSeenAtMs = Date.now();
+      const raceStartMs = this._activeSeenAtMs + countdownTotalMs();
 
-      const raceStartMs = startMs + countdownTotalMs();
-      const now = Date.now();
-
-      if (now < raceStartMs) {
+      if (!this.gameStarted && !hasStartedPlaying && Date.now() < raceStartMs) {
         this.renderMain(`
           <div class="race-panel race-countdown-panel">
             <p class="race-panel-title">${escapeHtml(rt('startingSoon'))}</p>
@@ -390,9 +514,14 @@
       });
       this.game.mount();
       this.game.setEnabled(true);
+      this.renderOpponentBar(data);
+      this.setupEmotes(data);
     }
 
     handleDone(data, isP1) {
+      if (this._resultsRendered) return;
+      this._resultsRendered = true;
+
       if (this.game) {
         this.game.setEnabled(false);
       }
@@ -436,6 +565,10 @@
         resultLine,
         resultKind,
         winnerUid: data.winnerUid,
+        battleXpMode: data.winnerUid === this.myUid ? 'koreanMatch' : '',
+        battleMatchId: this.matchId,
+        battleQuestMode: 'race',
+        battleFriend: true,
         players: [
           {
             uid: this.myUid,
@@ -454,19 +587,8 @@
         profileLabel: rt('profileLink'),
       }));
 
-      this.root.querySelector('#race-rematch')?.addEventListener('click', async () => {
-        const oppUid = isP1 ? data.player2Uid : data.player1Uid;
-        try {
-          const newId = await RS().createMatch(oppUid, {
-            gameType: RS().GAME_TYPES.koreanMatch,
-            wordLength: RS().getMatchWordLength(data),
-            excludeTarget: data.target,
-          });
-          global.location.href = RS().getMatchPageUrl(newId, { gameType: RS().GAME_TYPES.koreanMatch });
-        } catch {
-          alert(rt('rematchFailed'));
-        }
-      });
+      RUI.afterResultsMount(this.els.main);
+      this.mountRematchUi();
     }
   }
 

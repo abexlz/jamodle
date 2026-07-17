@@ -1,6 +1,11 @@
 'use strict';
 
-const { normalizeSearchItem, pickBestMatch } = require('../lib/korean-dictionary');
+const {
+  normalizeSearchItem,
+  pickBestMatch,
+  pickExactEntry,
+  hasExactDictionaryMatch,
+} = require('../lib/korean-dictionary');
 
 let passed = 0;
 let failed = 0;
@@ -40,6 +45,9 @@ const items = [
   { word: '물고기', entryId: '2' },
 ];
 assert(pickBestMatch(items, '물').word === '물', 'exact pick');
+assert(hasExactDictionaryMatch(items, '물'), 'exact match 물');
+assert(!hasExactDictionaryMatch(items, '물고'), 'no partial match');
+assert(pickExactEntry(items, '물고기').word === '물고기', 'pick exact entry');
 
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed > 0 ? 1 : 0);

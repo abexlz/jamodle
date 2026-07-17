@@ -15,6 +15,7 @@
     if (p.highContrast) document.documentElement.classList.add('high-contrast');
     if (p.largeText) document.documentElement.classList.add('large-text');
     document.documentElement.lang = p.language === 'ko' ? 'ko' : 'en';
+    document.documentElement.setAttribute('data-font-pack', p.devFontPack === 'jua' ? 'jua' : 'junegull');
   } catch (e) {}
 })();
 </script>
@@ -23,18 +24,19 @@
 <meta name="theme-color" content="#0097B2">
 <title>Korean Match 1v1 — Jamodeul</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Jua&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/app-preferences.css">
-<link rel="stylesheet" href="css/app-buttons.css">
-<link rel="stylesheet" href="css/korean-match.css">
+<link rel="stylesheet" href="css/app-buttons.css?v=10">
+<link rel="stylesheet" href="css/korean-match.css?v=20260713f">
+<link rel="stylesheet" href="css/match-emotes.css">
+<link rel="stylesheet" href="css/profile.css">
 <link rel="stylesheet" href="css/race.css">
-<link rel="stylesheet" href="css/app-theme.css">
-<link rel="stylesheet" href="css/app-wordle-ui.css">
+<link rel="stylesheet" href="css/app-theme.css?v=10">
+<link rel="stylesheet" href="css/app-wordle-ui.css?v=11">
 <style>
   body {
     margin: 0;
     min-height: 100dvh;
-    background: var(--bg);
     color: var(--text);
     font-family: 'Noto Sans KR', sans-serif;
     padding: calc(12px + env(safe-area-inset-top, 0px)) 14px calc(16px + env(safe-area-inset-bottom, 0px));
@@ -74,6 +76,7 @@
     display: none;
   }
 </style>
+<link rel="stylesheet" href="css/app-fonts.css?v=3">
 </head>
 <body class="match-page match-race-page">
 <div id="match-race-root" class="race-app"></div>
@@ -81,26 +84,43 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="js/firebase-social.js?v=8"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="js/firebase-social.js?v=15"></script>
 <script src="js/storage.js"></script>
 <script src="js/user-preferences.js"></script>
-<script src="js/i18n-messages.js"></script>
-<script src="js/i18n.js"></script>
+<script src="js/button-press.js?v=20260706n"></script>
+<script src="js/sound-effects.js"></script>
+<script src="js/i18n-messages.js?v=20260705a"></script>
+<script src="js/i18n.js?v=20260705a"></script>
 <script src="js/app-bootstrap.js"></script>
 <script src="js/app-nav.js"></script>
 <script src="js/hangul-compose.js"></script>
 <script src="js/drag-hit-test.js"></script>
-<script src="js/vowel-merge-dock.js"></script>
+<script src="js/vowel-merge-dock.js?v=20260706b"></script>
 <script src="js/learning-word-model.js"></script>
+<script src="js/match-word-meanings.js"></script>
 <script src="js/learning-words.js"></script>
-<script src="js/match-word-bank.js"></script>
 <script src="js/match-words.js"></script>
 <script src="js/wordle-words.js"></script>
-<script src="js/race-service.js"></script>
+<script src="js/dictionary-service.js"></script>
+<script src="js/word-chain-krdict.js"></script>
+<script src="js/turn-live-rtdb.js?v=20260707u"></script>
+<script src="js/race-service.js?v=20260706a"></script>
 <script src="js/race-results-ui.js"></script>
+<script src="js/race-rematch-ui.js"></script>
 <script src="js/race-countdown.js"></script>
-<script src="js/korean-match.js"></script>
-<script src="js/match-race-app.js"></script>
+<script src="js/dev-build.js"></script>
+<script src="js/hint-tokens.js"></script>
+<script src="js/level-utils.js"></script>
+<script src="js/badge-service.js"></script>
+<script src="js/profile-service.js"></script>
+<script src="js/shop-service.js"></script>
+<script src="js/xp-service.js"></script>
+<script src="js/profile-ui.js"></script>
+<script src="js/rw-score-odometer.js"></script>
+<script src="js/match-emotes.js?v=20260707y"></script>
+<script src="js/korean-match.js?v=20260713a"></script>
+<script src="js/match-race-app.js?v=20260707u"></script>
 <script>
 (async function () {
   FirebaseSocial?.init?.({});

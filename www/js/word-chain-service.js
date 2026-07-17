@@ -179,8 +179,9 @@
     const q = col.where('player2Uid', '==', uid).where('status', '==', 'waiting');
     return q.onSnapshot(
       (snap) => {
-        snap.docs.forEach((doc) => {
-          onMatch({ id: doc.id, ...doc.data() });
+        snap.docChanges().forEach((change) => {
+          if (change.type !== 'added') return;
+          onMatch({ id: change.doc.id, ...change.doc.data() });
         });
       },
       (err) => console.error('[WordChain] incoming challenges', err)

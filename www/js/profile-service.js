@@ -5,7 +5,7 @@
   'use strict';
 
   const PROFILE_KEY = 'jamodeul-user-profile';
-  const PROFILE_VERSION = 3;
+  const PROFILE_VERSION = 4;
   const DAILY_TZ = 'Asia/Seoul';
   const MAX_RECENT_WORDS = 8;
 
@@ -29,6 +29,7 @@
       weeklyKey: '',
       weekly: [],
       weeklyPlayDays: [],
+      dailyWheelClaimed: false,
     };
   }
 
@@ -40,6 +41,7 @@
       totalXp: 0,
       coins: 0,
       ownedThemes: [],
+      purchasedTitleIds: [],
       selectedCosmeticTheme: 'default',
       extraGuessTokens: 0,
       lastDailyGiftDayKey: '',
@@ -57,6 +59,9 @@
       earnedBadges: [],
       celebratedBadgeIds: [],
       unlockedAvatarIds: ['default'],
+      frameId: 'none',
+      unlockedFrameIds: [],
+      titleId: '',
       recentWords: [],
       learningDayKeys: [],
       stats: {
@@ -79,6 +84,7 @@
       weeklyKey: typeof raw.weeklyKey === 'string' ? raw.weeklyKey : '',
       weekly: Array.isArray(raw.weekly) ? raw.weekly : [],
       weeklyPlayDays: normalizeStringArray(raw.weeklyPlayDays),
+      dailyWheelClaimed: !!raw.dailyWheelClaimed,
     };
   }
 
@@ -96,6 +102,7 @@
       totalXp: Math.max(0, parseInt(raw.totalXp, 10) || 0),
       coins: Math.max(0, parseInt(raw.coins, 10) || 0),
       ownedThemes: normalizeStringArray(raw.ownedThemes),
+      purchasedTitleIds: normalizeStringArray(raw.purchasedTitleIds),
       selectedCosmeticTheme: typeof raw.selectedCosmeticTheme === 'string'
         ? raw.selectedCosmeticTheme
         : 'default',
@@ -119,6 +126,9 @@
       unlockedAvatarIds: normalizeStringArray(raw.unlockedAvatarIds).length
         ? normalizeStringArray(raw.unlockedAvatarIds)
         : ['default'],
+      frameId: migrateFrameId(typeof raw.frameId === 'string' ? raw.frameId : 'none'),
+      unlockedFrameIds: normalizeStringArray(raw.unlockedFrameIds).map(migrateFrameId),
+      titleId: typeof raw.titleId === 'string' ? raw.titleId : '',
       recentWords: Array.isArray(raw.recentWords)
         ? raw.recentWords.filter((w) => w && typeof w.word === 'string').slice(0, MAX_RECENT_WORDS)
         : [],
@@ -157,11 +167,32 @@
       } else {
         localStorage.setItem(PROFILE_KEY, JSON.stringify(copy));
       }
+      schedulePublicProfileSync(copy);
       return true;
     } catch (err) {
       console.warn('[Jamodeul] Profile save failed.', err);
       return false;
     }
+  }
+
+  let publicProfileSyncTimer = null;
+
+  function getPublicProfilePayload(profile) {
+    const p = profile || loadProfile();
+    return {
+      avatarId: typeof p.avatarId === 'string' ? p.avatarId : 'default',
+      frameId: migrateFrameId(typeof p.frameId === 'string' ? p.frameId : 'none'),
+      totalXp: Math.max(0, parseInt(p.totalXp, 10) || 0),
+    };
+  }
+
+  function schedulePublicProfileSync(profile) {
+    if (!global.FirebaseSocial?.syncPublicProfile) return;
+    if (publicProfileSyncTimer) clearTimeout(publicProfileSyncTimer);
+    publicProfileSyncTimer = setTimeout(() => {
+      publicProfileSyncTimer = null;
+      global.FirebaseSocial.syncPublicProfile(getPublicProfilePayload(profile)).catch(() => {});
+    }, 400);
   }
 
   function setDisplayName(name) {
@@ -173,12 +204,65 @@
     return profile;
   }
 
+  function hasDevCosmeticsAccess() {
+    return global.DevBuild?.hasDevAccess?.() === true
+      && global.UserPreferences?.get?.()?.devMode === true;
+  }
+
+  function isAvatarUnlocked(profile, avatarId) {
+    if (hasDevCosmeticsAccess()) return true;
+    return (profile.unlockedAvatarIds || []).includes(avatarId);
+  }
+
+  function migrateFrameId(frameId) {
+    return frameId === 'platinum' ? 'ruby' : frameId;
+  }
+
+  function isFrameUnlocked(profile, frameId) {
+    if (frameId === 'none') return true;
+    if (hasDevCosmeticsAccess()) return true;
+    const id = migrateFrameId(frameId);
+    return (profile.unlockedFrameIds || []).includes(id);
+  }
+
   function setAvatarId(avatarId) {
     const profile = loadProfile();
-    if (!(profile.unlockedAvatarIds || []).includes(avatarId)) return profile;
+    if (!isAvatarUnlocked(profile, avatarId)) return profile;
     profile.avatarId = avatarId;
     saveProfile(profile);
     return profile;
+  }
+
+  function setFrameId(frameId) {
+    const profile = loadProfile();
+    const id = migrateFrameId(frameId);
+    if (!isFrameUnlocked(profile, id)) return profile;
+    profile.frameId = id;
+    saveProfile(profile);
+    return profile;
+  }
+
+  function isTitleUnlocked(profile, titleId) {
+    if (hasDevCosmeticsAccess()) return true;
+    if ((profile.purchasedTitleIds || []).includes(titleId)) return true;
+    const level = global.LevelUtils?.getLevelFromTotalXp(profile.totalXp)?.level || 1;
+    return global.LevelUtils?.isTitleUnlocked?.(level, titleId) === true;
+  }
+
+  function setTitleId(titleId) {
+    const profile = loadProfile();
+    if (!isTitleUnlocked(profile, titleId)) return profile;
+    profile.titleId = titleId;
+    saveProfile(profile);
+    return profile;
+  }
+
+  function getDisplayTitleId(profile) {
+    const level = global.LevelUtils?.getLevelFromTotalXp(profile.totalXp)?.level || 1;
+    if (profile.titleId && isTitleUnlocked(profile, profile.titleId)) {
+      return profile.titleId;
+    }
+    return global.LevelUtils?.resolveTitleId?.(level, profile.titleId) || 'hangul-starter';
   }
 
   function addRecentWord(profile, word, mode) {
@@ -211,13 +295,24 @@
       wordsLearned: 0, builderWordsCompleted: 0,
     };
     const t = (key, vars) => global.I18n?.t(key, vars) ?? '';
-    const title = global.LevelUtils?.getLevelTitle(levelInfo.level, t) || '';
+    const autoTitle = global.LevelUtils?.getLevelTitle(levelInfo.level, t) || '';
+    const titleId = getDisplayTitleId(profile);
+    const displayTitle = global.LevelUtils?.getTitleLabel?.(titleId, t) || autoTitle;
+    const unlockedTitleIds = [
+      ...(global.LevelUtils?.getUnlockedTitleIds?.(levelInfo.level) || []),
+      ...(profile.purchasedTitleIds || []),
+    ].filter((id, i, arr) => arr.indexOf(id) === i);
 
     return {
       profile,
       displayName: profile.displayName,
       avatarId: profile.avatarId,
       avatarIcon: global.BadgeService?.getAvatarDef(profile.avatarId)?.icon || '🌸',
+      frameId: profile.frameId || 'none',
+      unlockedFrameIds: profile.unlockedFrameIds || [],
+      titleId,
+      unlockedTitleIds,
+      displayTitle,
       totalXp: profile.totalXp,
       coins: profile.coins || 0,
       extraGuessTokens: profile.extraGuessTokens || 0,
@@ -226,7 +321,7 @@
       level: levelInfo.level,
       xpInLevel: levelInfo.xpInLevel,
       xpToNext: levelInfo.xpToNext,
-      levelTitle: title,
+      levelTitle: autoTitle,
       currentStreak: streak.streakDays,
       longestStreak: streak.longestStreak,
       wordsLearned: progress.wordsLearned,
@@ -258,9 +353,17 @@
     saveProfile,
     setDisplayName,
     setAvatarId,
+    setFrameId,
+    setTitleId,
+    hasDevCosmeticsAccess,
+    isAvatarUnlocked,
+    isFrameUnlocked,
+    isTitleUnlocked,
+    getDisplayTitleId,
     addRecentWord,
     markLearningDay,
     getProfileSummary,
+    getPublicProfilePayload,
     resetProfile,
     emptyProfile,
   };

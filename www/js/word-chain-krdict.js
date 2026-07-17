@@ -7,32 +7,6 @@
 (function (global) {
   'use strict';
 
-  /** Exact written-form match — no 두음법칙 (v2). */
-  function hasExactEntry(result, word) {
-    if (!result?.found) return false;
-    if (result.entry?.word === word) return true;
-    return (result.candidates || []).some((item) => item && String(item.word || '') === word);
-  }
-
-  function isServiceFailure(result) {
-    if (!result) return true;
-    return !!(result.error && !result.found);
-  }
-
-  async function validateViaProxy(word) {
-    const DS = global.DictionaryService;
-    if (!DS?.lookupWord) {
-      return { valid: false, networkError: true };
-    }
-
-    const result = await DS.lookupWord(word);
-    if (isServiceFailure(result)) {
-      return { valid: false, networkError: true };
-    }
-
-    return { valid: hasExactEntry(result, word) };
-  }
-
   /**
    * @returns {Promise<{valid:boolean, networkError?:boolean, reason?:string}>}
    */
@@ -42,8 +16,14 @@
       return { valid: false, reason: 'empty' };
     }
 
+    const DS = global.DictionaryService;
+    if (!DS?.isDictionaryWord) {
+      return { valid: false, networkError: true };
+    }
+
     try {
-      return await validateViaProxy(trimmed);
+      const valid = await DS.isDictionaryWord(trimmed);
+      return { valid };
     } catch {
       return { valid: false, networkError: true };
     }
@@ -51,6 +31,5 @@
 
   global.WordChainKrdict = {
     validateWord,
-    hasExactEntry,
   };
 })(typeof window !== 'undefined' ? window : globalThis);

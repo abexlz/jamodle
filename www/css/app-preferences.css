@@ -9,9 +9,77 @@ html.reduce-motion *::after {
 }
 
 html.reduce-motion .confetti-piece,
+html.reduce-motion .race-results-confetti-fall,
+html.reduce-motion .race-results-confetti,
+html.reduce-motion .race-results-glow,
+html.reduce-motion .race-results-syl-tile--reveal,
+html.reduce-motion .race-results-syl-reveal,
+html.reduce-motion .race-results--win.race-results--ink,
+html.reduce-motion .race-results--win .race-results-heading,
+html.reduce-motion .race-results-heading-letter,
+html.reduce-motion .race-results-victory-crown,
+html.reduce-motion .race-results-sparkle,
+html.reduce-motion .race-results-row-sparkle,
+html.reduce-motion .race-results-victory-shine,
+html.reduce-motion .race-results-victory-petal,
+html.reduce-motion .race-results-rewards-pill,
+html.reduce-motion .race-results-hero-img,
+html.reduce-motion .race-results-hero-aura,
+html.reduce-motion .race-results-hero-shine,
+html.reduce-motion .race-results-hero-petal,
+html.reduce-motion .race-results-hero--loss::before,
+html.reduce-motion .race-results-coach-tip,
+html.reduce-motion .race-results-stats--victory .race-result-row--winner,
+html.reduce-motion .race-results-duel-side--winner .race-results-duel-side-aura,
+html.reduce-motion .race-results-duel-crown,
+html.reduce-motion .rw-race-battle-card--leading::before,
+html.reduce-motion .race-result-row--winner .race-result-crown,
 html.reduce-motion .tile.snap-in,
 html.reduce-motion .drop-zone.correct {
   animation: none !important;
+}
+
+html.reduce-motion .race-results-heading-letter {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+html.reduce-motion .race-results-stats--victory .race-result-row--winner::before {
+  animation: none !important;
+}
+
+html.reduce-motion .race-results-victory-crown {
+  opacity: 1 !important;
+  transform: translateX(-50%) scale(1) !important;
+}
+
+html.reduce-motion .race-results-duel-crown {
+  opacity: 1 !important;
+  transform: translateX(-50%) scale(1) !important;
+}
+
+html.reduce-motion .race-results-duel-side--winner {
+  transform: scale(1) !important;
+}
+
+html.reduce-motion .race-results-duel-side--loser {
+  transform: scale(1) !important;
+  filter: brightness(0.75) saturate(0.85) !important;
+}
+
+html.reduce-motion .race-results-hero-img,
+html.reduce-motion .race-results-coach-tip {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+html.reduce-motion .jamo-tile.revealing,
+html.reduce-motion .jamo-tile.revealing-wrong,
+html.reduce-motion .drop-zone.revealing,
+html.reduce-motion .drop-zone.revealing-wrong,
+html.reduce-motion .hint-letter.hint-flip {
+  animation-duration: 0.42s !important;
+  transition-duration: 0.01ms !important;
 }
 
 html.large-text {

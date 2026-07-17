@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<script>
+(function(){
+  try {
+    var p = JSON.parse(localStorage.getItem('jamodeul-preferences') || '{}');
+    var theme = p.theme || localStorage.getItem('jamodeul-theme') || 'system';
+    var resolved = theme;
+    if (theme === 'system' || (theme !== 'light' && theme !== 'dark')) {
+      resolved = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    document.documentElement.setAttribute('data-theme', resolved);
+    if (p.reduceMotion) document.documentElement.classList.add('reduce-motion');
+    if (p.highContrast) document.documentElement.classList.add('high-contrast');
+    if (p.largeText) document.documentElement.classList.add('large-text');
+    document.documentElement.lang = p.language === 'ko' ? 'ko' : 'en';
+    document.documentElement.setAttribute('data-font-pack', p.devFontPack === 'jua' ? 'jua' : 'junegull');
+  } catch (e) {}
+})();
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#6D28D9">
+<title>Word Chain — 자모들</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app-preferences.css">
+<link rel="stylesheet" href="css/app-buttons.css?v=10">
+<link rel="stylesheet" href="css/app-theme.css?v=10">
+<link rel="stylesheet" href="css/app-wordle-ui.css?v=9">
+<link rel="stylesheet" href="css/related-words.css?v=20260710k">
+<link rel="stylesheet" href="css/word-chain-combo.css?v=6">
+<link rel="stylesheet" href="css/pause-quit.css?v=2">
+<style>
+  :root {
+    --bg: #FFF8F5;
+    --card: #FFFFFF;
+    --text: #5D6470;
+    --text-soft: #9AA3AD;
+    --heading: #7B8FD4;
+    --border: #E8E4E0;
+    --error: #D47870;
+    --shadow: 0 4px 14px rgba(93, 100, 112, 0.08);
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  [data-theme="dark"] {
+    --bg: #1A1D28;
+    --card: #2A2E3E;
+    --text: #E4E8F0;
+    --text-soft: #9AA3B8;
+    --heading: #B8C4F0;
+    --border: #3A3E50;
+    --error: #F87171;
+    --shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    padding: calc(12px + var(--safe-top)) 16px calc(24px + var(--safe-bottom));
+  }
+  .app {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    max-width: 480px;
+    width: 100%;
+    margin: 0 auto;
+  }
+</style>
+<link rel="stylesheet" href="css/app-fonts.css?v=3">
+</head>
+<body>
+
+<div class="top-nav-actions">
+  <a class="top-nav-btn" href="settings.html" id="nav-settings" data-i18n-aria="nav.settings">⚙️</a>
+</div>
+
+<div class="app" id="related-words-app"></div>
+
+<script src="js/storage.js"></script>
+<script src="js/user-preferences.js"></script>
+<script src="js/button-press.js?v=20260706n"></script>
+<script src="js/sound-effects.js"></script>
+<script src="js/i18n-messages.js?v=20260710a"></script>
+<script src="js/i18n.js?v=20260705a"></script>
+<script src="js/app-bootstrap.js"></script>
+<script src="js/app-nav.js"></script>
+<script src="js/learning-streak.js"></script>
+<script src="js/level-utils.js"></script>
+<script src="js/profile-service.js"></script>
+<script src="js/shop-service.js"></script>
+<script src="js/quest-service.js"></script>
+<script src="js/xp-service.js"></script>
+<script src="js/profile-ui.js"></script>
+<script src="js/rw-score-odometer.js"></script>
+<script src="js/related-words-chains.js?v=20260710e"></script>
+<script src="js/related-words-puzzles.js?v=20260709f"></script>
+<script src="js/pause-quit-ui.js?v=2"></script>
+<script src="js/related-words-app.js?v=20260710p"></script>
+<script>
+(async function () {
+  try {
+    await AppNav.initPage({ topNav: false });
+    await I18n?.init?.();
+    const root = document.getElementById('related-words-app');
+    if (!root) return;
+    if (!window.RelatedWordsPuzzles || !window.RelatedWordsGame) {
+      root.innerHTML = '<p style="padding:24px;text-align:center">Unable to load Word Chain.</p>';
+      return;
+    }
+    new RelatedWordsGame(root).mount();
+  } catch (err) {
+    console.error('[Jamodeul] Related words failed to start', err);
+    const root = document.getElementById('related-words-app');
+    if (root) {
+      root.innerHTML = '<p style="padding:24px;text-align:center">Unable to load Word Chain.</p>';
+    }
+  }
+})();
+</script>
+</body>
+</html>

@@ -16,6 +16,7 @@
     if (p.largeText) document.documentElement.classList.add('large-text');
     if (p.tapToPlace) document.documentElement.classList.add('tap-to-place');
     document.documentElement.lang = p.language === 'ko' ? 'ko' : 'en';
+    document.documentElement.setAttribute('data-font-pack', p.devFontPack === 'jua' ? 'jua' : 'junegull');
     try {
       var prof = JSON.parse(localStorage.getItem('jamodeul-user-profile') || '{}');
       if (prof.selectedCosmeticTheme && prof.selectedCosmeticTheme !== 'default') {
@@ -33,9 +34,9 @@
 <title>Jamodeul — Korean Word Game</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/app-preferences.css">
-<link rel="stylesheet" href="css/app-buttons.css">
+<link rel="stylesheet" href="css/app-buttons.css?v=16">
 <style>
   :root{
     --bg: #FFF8F5;
@@ -84,6 +85,13 @@
     --jamo-font-jong: 20px;
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --menu-bar-h: 36px;
+    --menu-header-gap: 40px;
+    --menu-header-fade-h: 84px;
+    --menu-bar-teal-top: #22b5c9;
+    --menu-bar-teal-mid: #1596ae;
+    --menu-bar-teal-low: #0d7f96;
+    --menu-bg-teal: #0097B2;
   }
   [data-theme="dark"]{
     --bg: #1A1D28;
@@ -127,6 +135,7 @@
   html{
     scroll-behavior:smooth;
     -webkit-text-size-adjust: 100%;
+    margin: 0;
   }
 
   body{
@@ -141,6 +150,19 @@
     padding: calc(12px + var(--safe-top)) 14px calc(16px + var(--safe-bottom));
     position:relative;
     overflow-x:hidden;
+  }
+
+  body:has(#menu-screen:not(.hidden)) {
+    padding-top: 0;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  #menu-screen:not(.hidden) {
+    max-width: none;
+    width: 100%;
+    padding: 0 14px;
+    box-sizing: border-box;
   }
   body.overlay-open{
     overflow: hidden;
@@ -165,61 +187,154 @@
     max-width: 420px;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    animation: fadeDown .5s ease both;
-    flex: 1;
+    align-items: stretch;
+    animation: fadeDownMenu .5s ease both;
+    flex: 1 1 0;
     min-height: 0;
-    padding-bottom: calc(72px + var(--safe-bottom));
   }
-  #menu-screen.is-quests-tab{
-    height: calc(100dvh - 12px - var(--safe-top) - 16px - var(--safe-bottom));
-    max-height: calc(100dvh - 12px - var(--safe-top) - 16px - var(--safe-bottom));
-    overflow: hidden;
-    padding-bottom: 0;
+  @keyframes fadeDownMenu {
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
   #menu-screen .menu-inner{
     width: 100%;
-    flex: 1;
+    flex: 1 1 0;
     min-height: 0;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow: visible;
   }
-  #menu-screen.is-quests-tab .menu-inner{
-    padding-bottom: calc(72px + var(--safe-bottom));
+  #menu-screen .menu-header{
+    flex-shrink: 0;
+    overflow: visible;
   }
   #menu-screen #menu-root{
     width: 100%;
-    flex: 1;
+    flex: 1 1 0;
     min-height: 0;
-  }
-  #menu-screen.is-quests-tab #menu-root{
+    overflow-x: hidden;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
   }
+  #menu-screen #menu-root > .menu-sections{
+    box-sizing: border-box;
+  }
 
   .menu-header {
     position: relative;
+    z-index: 25;
     width: 100%;
-    padding-top: calc(8px + var(--safe-top));
-    margin-bottom: 12px;
-    display: grid;
-    grid-template-columns: 1fr auto;
-    grid-template-rows: auto auto auto;
-    row-gap: 10px;
-    column-gap: 12px;
+    margin-bottom: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: visible;
+  }
+
+  .menu-top-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    min-height: calc(var(--menu-bar-h) + var(--safe-top));
+    padding:
+      var(--safe-top)
+      max(12px, env(safe-area-inset-right, 0px))
+      8px
+      max(12px, env(safe-area-inset-left, 0px));
+    background: linear-gradient(180deg,
+      var(--menu-bar-teal-top) 0%,
+      var(--menu-bar-teal-top) 38%,
+      var(--menu-bar-teal-mid) 38%,
+      var(--menu-bar-teal-mid) 72%,
+      var(--menu-bar-teal-low) 72%,
+      var(--menu-bar-teal-low) 100%);
+    border-radius: 0;
+    box-shadow: none;
+    z-index: 20;
+    flex-shrink: 0;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .menu-top-bar .player-hud-slot {
+    pointer-events: auto;
+  }
+
+  .menu-header::before {
+    content: '';
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: calc(var(--menu-bar-h) + var(--safe-top));
+    height: var(--menu-header-fade-h);
+    background: linear-gradient(180deg,
+      var(--menu-bar-teal-low) 0%,
+      #0e8da2 12%,
+      #1097ad 26%,
+      #119faf 40%,
+      rgba(0, 151, 178, 0.9) 56%,
+      rgba(0, 151, 178, 0.55) 74%,
+      rgba(0, 151, 178, 0) 100%);
+    z-index: 18;
+    pointer-events: none;
+  }
+
+  .menu-top-bar-spacer {
+    width: 100%;
+    height: calc(var(--menu-bar-h) + var(--safe-top) + var(--menu-header-gap));
+    flex-shrink: 0;
+    pointer-events: none;
+  }
+
+  [data-theme="dark"] {
+    --menu-bar-teal-top: #1e8a9c;
+    --menu-bar-teal-mid: #186676;
+    --menu-bar-teal-low: #124f5c;
+    --menu-bg-teal: #0d5a68;
+  }
+
+  [data-theme="dark"] .menu-header::before {
+    background: linear-gradient(180deg,
+      var(--menu-bar-teal-low) 0%,
+      #145a66 14%,
+      #16606e 28%,
+      #186676 42%,
+      rgba(13, 90, 104, 0.9) 58%,
+      rgba(13, 90, 104, 0.5) 76%,
+      rgba(13, 90, 104, 0) 100%);
+  }
+
+  .menu-profile-nav {
+    position: relative;
+    z-index: 40;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    border: none;
+    background: transparent;
+    padding: 0;
+    margin: -24px auto 0;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: transform 0.12s ease;
+    isolation: isolate;
+  }
+
+  .menu-profile-nav:active {
+    transform: scale(0.94);
   }
 
   .menu-header .top-nav-actions {
-    position: static;
-    top: auto;
-    right: auto;
-    grid-column: 2;
-    grid-row: 1;
-    justify-self: end;
-    align-self: start;
-    gap: 10px;
+    display: none;
   }
 
   .menu-brand {
@@ -228,22 +343,101 @@
     align-items: center;
     gap: clamp(4px, 1.2vw, 8px);
     width: 100%;
-    margin: 0;
+    margin: 18px 0 0;
     padding: 0 4px;
-    grid-column: 1 / -1;
-    grid-row: 2;
     flex-wrap: nowrap;
+    position: relative;
+    z-index: 22;
+  }
+
+  .menu-brand--jamodeul {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .menu-brand-line1 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: clamp(10px, 3vw, 16px);
+  }
+
+  .menu-brand-line2 {
+    font-family: 'Jua', sans-serif;
+    font-weight: 400;
+    color: #ffffff;
+    text-transform: uppercase;
+    font-size: clamp(20px, 5.5vw, 26px);
+    letter-spacing: 0.05em;
+    text-shadow: 
+      0 2px 0 rgba(0, 0, 0, 0.22),
+      0 4px 10px rgba(0, 40, 50, 0.4);
+    line-height: 1.1;
+    opacity: 0;
+    animation-duration: 0.8s;
+    animation-timing-function: cubic-bezier(0.34, 1.4, 0.64, 1);
+    animation-fill-mode: forwards;
+    animation-delay: 0.98s;
+  }
+
+  .menu-brand--jamodeul.brand-intro .menu-brand-line2 {
+    animation-name: brand-line2-fade-in;
+  }
+
+  @keyframes brand-line2-fade-in {
+    from { opacity: 0; transform: translateY(6px) scale(0.9); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .menu-brand--jamodeul .brand-tile {
+    width: clamp(54px, 15vw, 76px);
+    height: clamp(60px, 16.5vw, 84px);
+    font-size: clamp(36px, 10vw, 52px);
+    opacity: 0;
+    animation-duration: 0.55s;
+    animation-timing-function: cubic-bezier(0.34, 1.4, 0.64, 1);
+    animation-fill-mode: forwards;
+  }
+
+  .menu-brand--jamodeul.brand-intro .brand-tile-ja {
+    animation-name: brand-tile-in-ja;
+    animation-delay: 0.08s;
+  }
+
+  .menu-brand--jamodeul.brand-intro .brand-tile-mo {
+    animation-name: brand-tile-in-mo;
+    animation-delay: 0.38s;
+  }
+
+  .menu-brand--jamodeul.brand-intro .brand-tile-deul {
+    animation-name: brand-tile-in-deul;
+    animation-delay: 0.68s;
+  }
+
+  @keyframes brand-tile-in-ja {
+    from { opacity: 0; transform: scale(0.35) translateY(18px) rotate(-6deg); }
+    70% { opacity: 1; transform: scale(1.06) translateY(-3px) rotate(-6deg); }
+    to { opacity: 1; transform: scale(1) translateY(0) rotate(-6deg); }
+  }
+
+  @keyframes brand-tile-in-mo {
+    from { opacity: 0; transform: scale(0.35) translateY(18px) rotate(4deg); }
+    70% { opacity: 1; transform: scale(1.06) translateY(-3px) rotate(4deg); }
+    to { opacity: 1; transform: scale(1) translateY(0) rotate(4deg); }
+  }
+
+  @keyframes brand-tile-in-deul {
+    from { opacity: 0; transform: scale(0.35) translateY(18px) rotate(5deg); }
+    70% { opacity: 1; transform: scale(1.06) translateY(-3px) rotate(5deg); }
+    to { opacity: 1; transform: scale(1) translateY(0) rotate(5deg); }
   }
 
   .brand-tile {
     flex: 0 0 auto;
-    width: clamp(28px, 7.8vw, 40px);
-    height: clamp(31px, 8.6vw, 44px);
     display: flex;
     align-items: center;
     justify-content: center;
     font-family: 'Jua', sans-serif;
-    font-size: clamp(18px, 5vw, 26px);
     font-weight: 400;
     line-height: 1;
     color: #ffffff;
@@ -253,46 +447,22 @@
       0 3px 0 rgba(0, 0, 0, 0.18);
   }
 
-  .brand-tile-j {
+  .brand-tile-ja {
     background: linear-gradient(180deg, #ff9ec8 0%, #ff6aab 100%);
     border-radius: 50% 50% 42% 42%;
     transform: rotate(-6deg);
   }
 
-  .brand-tile-a {
+  .brand-tile-mo {
     background: linear-gradient(180deg, #ffd966 0%, #ffb800 100%);
     border-radius: 40% 40% 50% 50%;
     transform: rotate(4deg);
   }
 
-  .brand-tile-m {
-    background: linear-gradient(180deg, #8fd4ff 0%, #4db8f0 100%);
-    border-radius: 50% 50% 18% 18%;
-    transform: rotate(-3deg);
-  }
-
-  .brand-tile-o {
+  .brand-tile-deul {
     background: linear-gradient(180deg, #c8b4ff 0%, #9b7ef5 100%);
     border-radius: 50%;
     transform: rotate(5deg);
-  }
-
-  .brand-tile-d {
-    background: linear-gradient(180deg, #8ef0b8 0%, #4fd88a 100%);
-    border-radius: 50% 50% 18% 18%;
-    transform: rotate(-4deg);
-  }
-
-  .brand-tile-l {
-    background: linear-gradient(180deg, #ffd966 0%, #ff9f1a 100%);
-    border-radius: 40% 40% 50% 50%;
-    transform: rotate(3deg);
-  }
-
-  .brand-tile-e {
-    background: linear-gradient(180deg, #ff9a8a 0%, #ff6b6b 100%);
-    border-radius: 50% 50% 42% 42%;
-    transform: rotate(-5deg);
   }
 
   .menu-tagline{
@@ -327,6 +497,10 @@
     display: block;
     margin-bottom: 4px;
   }
+  .learn-tab-section{
+    min-height: 100%;
+    box-sizing: border-box;
+  }
   .section-title{
     font-family: 'Jua', sans-serif;
     font-size: 14px;
@@ -342,25 +516,6 @@
   .mode-icon{
     /* sized in app-buttons.css */
   }
-  .mode-name,
-  .mode-desc,
-  .mode-ko,
-  .mode-arrow{
-    /* app-buttons.css */
-  }
-  .mode-status{
-    font-size: 12px;
-    color: var(--success-text);
-    margin-top: 6px;
-    display: block;
-    font-weight: 700;
-  }
-  .accent-mint .mode-icon{ background: var(--mint); }
-  .accent-peach .mode-icon{ background: var(--peach); }
-  .accent-blue .mode-icon{ background: var(--blue); }
-  .accent-lavender .mode-icon{ background: var(--lavender); }
-  .accent-yellow .mode-icon{ background: var(--yellow); }
-  .accent-pink .mode-icon{ background: var(--pink); }
 
   /* Featured Continue Learning — primary action */
   .featured-continue-card{
@@ -412,36 +567,38 @@
   .menu-top-classic{
     display: grid !important;
     grid-template-columns: auto 1fr;
-    gap: 12px;
+    gap: 14px;
     align-items: center;
     width: 100%;
-    min-height: 56px;
-    padding: 10px 14px !important;
+    min-height: 60px;
+    padding: 14px 18px !important;
     text-decoration: none;
   }
   .menu-top-icon-box{
-    width: clamp(44px, 12vw, 52px);
-    min-width: clamp(44px, 12vw, 52px);
-    aspect-ratio: 1;
+    width: auto;
+    min-width: 0;
+    aspect-ratio: auto;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: clamp(22px, 6vw, 28px);
+    font-size: clamp(32px, 8vw, 40px);
     line-height: 1;
-    border-radius: 14px;
-    background: rgba(255, 255, 255, 0.42);
-    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.55);
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
   }
   .menu-top-classic-label{
     font-family: 'Jua', sans-serif;
-    font-size: clamp(18px, 4.8vw, 22px);
+    font-size: clamp(22px, 5.8vw, 28px);
+    line-height: 1.1;
     text-align: left;
+    text-transform: uppercase;
     color: inherit;
   }
   .menu-top-daily{
     flex: 1;
     min-width: 0;
-    min-height: 52px;
+    min-height: 64px;
     justify-content: center !important;
   }
   .menu-top-daily .daily-challenge-content{
@@ -450,6 +607,9 @@
   .menu-top-daily .mode-name{
     text-align: center;
     width: 100%;
+    font-size: clamp(22px, 5.8vw, 28px);
+    line-height: 1.1;
+    text-transform: uppercase;
   }
 
   .menu-top-daily-row{
@@ -498,16 +658,19 @@
     flex-direction: row !important;
     align-items: center !important;
     justify-content: flex-start !important;
-    gap: 12px !important;
+    gap: 10px !important;
     width: 100%;
-    min-height: 56px;
+    min-height: 46px;
     max-height: none;
     aspect-ratio: auto !important;
-    padding: 12px 16px !important;
+    padding: 8px 12px !important;
   }
   .daily-challenge-bar .mode-icon{
-    display: flex !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
+    background: transparent;
   }
   .daily-challenge-bar .daily-challenge-content{
     flex: 1;
@@ -535,53 +698,7 @@
     /* app-buttons.css */
   }
 
-  /* ── length picker overlay ── */
-  #length-overlay{
-    position: fixed; inset: 0;
-    background: var(--overlay-scrim);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 26;
-    opacity: 0;
-    transition: opacity .25s ease;
-    padding: 16px;
-  }
-  #length-overlay.show{
-    display: flex;
-    opacity: 1;
-  }
-  .length-modal{
-    background: var(--card);
-    border: 2px solid var(--border-soft);
-    border-radius: var(--radius);
-    padding: 32px 28px;
-    text-align: center;
-    width: 100%;
-    max-width: 320px;
-    box-shadow: var(--shadow);
-    animation: popIn .4s ease both;
-  }
-  .length-modal h2{
-    font-family: 'Jua', sans-serif;
-    font-size: 26px;
-    margin: 0 0 8px;
-    color: var(--heading);
-  }
-  .length-modal p{
-    font-size: 14px;
-    color: var(--text-soft);
-    margin: 0 0 22px;
-  }
-  .length-options{
-    /* app-buttons.css */
-  }
-  .length-btn{
-    /* app-buttons.css */
-  }
-  .length-cancel{
-    /* app-buttons.css */
-  }
+  body > *:not(#confetti-canvas):not(#overlay):not(#daily-gift-overlay):not(#wheel-overlay):not(#daily-cal-overlay):not(#multiplayer-overlay):not(#battle-mode-overlay):not(#battle-multiplayer-placeholder):not(#race-length-overlay):not(#race-challenge-overlay):not(#home-bottom-bar):not(#extra-life){ position:relative; z-index:1; }
 
   .mode-badge{
     display: inline-block;
@@ -593,8 +710,6 @@
     color: var(--heading);
     margin-bottom: 8px;
   }
-
-  body > *:not(#confetti-canvas):not(#overlay):not(#length-overlay):not(#daily-gift-overlay):not(#daily-cal-overlay):not(#multiplayer-overlay):not(#race-length-overlay):not(#race-challenge-overlay){ position:relative; z-index:1; }
 
   body.daily-gift-open {
     overflow: hidden;
@@ -1261,6 +1376,7 @@
       --jamo-font-jong: 15px;
     }
     body{ padding: calc(12px + var(--safe-top)) 12px calc(16px + var(--safe-bottom)); }
+    body:has(#menu-screen:not(.hidden)){ padding-top: 0; padding-left: 0; padding-right: 0; }
     .header{ gap: 10px; margin-bottom: 4px; }
     .seal{ width: 44px; height: 44px; font-size: 22px; }
     h1{ font-size: 28px; }
@@ -1283,15 +1399,15 @@
     .hint-icon{ width: 24px; height: 24px; }
     .hi-tile{ font-size: 13px; }
     #token-counter{ font-size: 12px; }
-    footer{ display: none; }
+    footer:not(.daily-cal-footer){ display: none; }
     .menu-tagline{ font-size: 14px; }
     .menu-tagline-ko{ font-size: 12px; margin-bottom: 18px; }
     .featured-continue-card{ padding: 18px 16px; }
     .featured-continue-title{ font-size: 22px; }
     .daily-challenge-card,
-    .learning-mode-card{ padding: 16px 14px; }
-    .mode-icon{ width: 44px; height: 44px; font-size: 20px; }
-    .mode-name{ font-size: 20px; }
+    .learning-mode-card{ padding: 8px 12px; min-height: 46px; }
+    .mode-icon{ width: auto; height: auto; font-size: clamp(26px, 6.2vw, 32px); background: transparent; }
+    .mode-name{ font-size: clamp(18px, 4.8vw, 22px); text-transform: uppercase; }
     .modal{ padding: 28px 22px; }
     .modal-icon{ font-size: 40px; }
     .modal h2{ font-size: 24px; }
@@ -1347,10 +1463,11 @@
     box-shadow: none;
   }
   .leaderboard-tab.active{
-    background: linear-gradient(180deg, #FFE566 0%, #FFB800 100%);
-    border-color: #E09500;
+    background: #FFCC33;
+    border-color: #E6B82E;
     color: #ffffff;
-    text-shadow: 0 1px 0 rgba(140, 70, 0, 0.35);
+    text-shadow: 0 2px 0 rgba(120, 80, 0, 0.45);
+    box-shadow: 0 4px 0 #C4A82D;
   }
   .leaderboard-list li{
     display: grid;
@@ -1402,95 +1519,19 @@
   }
   .panel-close:hover{ color: var(--text); border-color: var(--text-soft); }
 
-  /* ── Home bottom tab bar ── */
-  .home-bottom-bar {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 220;
-    display: flex;
-    justify-content: center;
-    padding: 10px 14px calc(10px + var(--safe-bottom));
-    background: var(--card);
-    border-top: 2px solid var(--border-soft);
-    box-shadow: 0 -4px 20px rgba(93, 100, 112, 0.12);
-    pointer-events: auto;
-  }
-
-  [data-theme="dark"] .home-bottom-bar {
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.25);
-  }
-
-  .home-bottom-bar-inner {
-    width: 100%;
-    max-width: 420px;
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 10px;
-  }
-
-  .home-bottom-bar-inner.home-bottom-bar-inner--4 {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
-  }
-
-  .home-bottom-bar-inner--4 .home-tab-btn {
-    flex-direction: column;
-    gap: 2px;
-    min-height: 48px;
-    padding: 6px 4px;
-    font-size: 11px;
-  }
-
-  .home-bottom-bar-inner--4 .home-tab-icon {
-    font-size: 18px;
-  }
-
-  .home-tab-btn {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    min-height: 52px;
-    padding: 8px 10px;
-    border: 2px solid var(--border-soft);
-    border-radius: var(--radius-sm);
-    background: var(--bg-soft);
-    color: var(--text-soft);
-    font-family: 'Jua', sans-serif;
-    font-size: 13px;
-    line-height: 1.1;
-    cursor: pointer;
-    touch-action: manipulation;
-    transition: background .15s ease, border-color .15s ease, color .15s ease, transform .15s ease;
-  }
-
-  .home-tab-btn:active {
-    transform: scale(0.97);
-  }
-
-  .home-tab-btn.is-active {
-    background: var(--lavender);
-    border-color: var(--lavender-btn);
-    color: var(--heading);
-    box-shadow: var(--shadow-sm);
-  }
-
-  .home-tab-icon {
-    font-size: 20px;
-    line-height: 1;
-  }
 </style>
-<link rel="stylesheet" href="css/app-theme.css">
+<link rel="stylesheet" href="css/home-nav.css?v=3">
+<link rel="stylesheet" href="css/app-theme.css?v=15">
 <link rel="stylesheet" href="css/cosmetic-themes.css">
 <link rel="stylesheet" href="css/shop.css">
-<link rel="stylesheet" href="css/quests.css">
-<link rel="stylesheet" href="css/tutorial.css">
-<link rel="stylesheet" href="css/multiplayer.css">
+<link rel="stylesheet" href="css/profile.css">
+<link rel="stylesheet" href="css/quests.css?v=20260711w">
+<link rel="stylesheet" href="css/wheel.css">
+<link rel="stylesheet" href="css/multiplayer.css?v=18">
 <link rel="stylesheet" href="css/race.css">
-<link rel="stylesheet" href="css/app-wordle-ui.css">
+<link rel="stylesheet" href="css/app-wordle-ui.css?v=17">
+<link rel="stylesheet" href="css/daily-calendar.css?v=7" id="daily-cal-styles">
+<link rel="stylesheet" href="css/app-fonts.css?v=3">
 </head>
 <body>
 
@@ -1499,63 +1540,24 @@
 <div id="menu-screen" class="screen">
   <div class="menu-inner">
     <header class="menu-header">
-      <div class="top-nav-actions">
-        <a class="top-nav-btn" href="profile.html" id="nav-profile" data-i18n-aria="nav.profile">👤</a>
-        <a class="top-nav-btn" href="settings.html" id="nav-settings" data-i18n-aria="nav.settings">⚙️</a>
-        <button type="button" class="top-nav-btn" id="theme-toggle" data-i18n-aria="common.themeToggle">🌙</button>
+      <div class="menu-top-bar">
+        <div class="player-hud-slot" id="player-hud" data-player-hud="compact"></div>
       </div>
-      <h1 class="menu-brand" aria-label="JAMODLE">
-        <span class="brand-tile brand-tile-j" aria-hidden="true">J</span>
-        <span class="brand-tile brand-tile-a" aria-hidden="true">A</span>
-        <span class="brand-tile brand-tile-m" aria-hidden="true">M</span>
-        <span class="brand-tile brand-tile-o" aria-hidden="true">O</span>
-        <span class="brand-tile brand-tile-d" aria-hidden="true">D</span>
-        <span class="brand-tile brand-tile-l" aria-hidden="true">L</span>
-        <span class="brand-tile brand-tile-e" aria-hidden="true">E</span>
+      <div class="menu-top-bar-spacer" aria-hidden="true"></div>
+      <a class="menu-profile-nav" href="profile.html" id="nav-profile" data-i18n-aria="nav.profile">
+        <span class="menu-profile-card" id="menu-profile-card"></span>
+      </a>
+      <h1 class="menu-brand menu-brand--jamodeul brand-intro" aria-label="자모들 JAMO GAME">
+        <div class="menu-brand-line1">
+          <span class="brand-tile brand-tile-ja" aria-hidden="true">자</span>
+          <span class="brand-tile brand-tile-mo" aria-hidden="true">모</span>
+          <span class="brand-tile brand-tile-deul" aria-hidden="true">들</span>
+        </div>
+        <div class="menu-brand-line2">JAMO GAME</div>
       </h1>
-      <div class="player-hud-slot" id="player-hud" data-player-hud="compact"></div>
     </header>
 
     <div id="menu-root" aria-label="Game modes"></div>
-  </div>
-
-  <nav class="home-bottom-bar" id="home-bottom-bar" aria-label="Home sections">
-    <div class="home-bottom-bar-inner home-bottom-bar-inner--4">
-      <button type="button" class="home-tab-btn is-active" data-home-tab="menu" aria-selected="true">
-        <span class="home-tab-icon" aria-hidden="true">🏠</span>
-        <span data-i18n="nav.tabMenu">Menu</span>
-      </button>
-      <button type="button" class="home-tab-btn" data-home-tab="learn" aria-selected="false">
-        <span class="home-tab-icon" aria-hidden="true">📚</span>
-        <span data-i18n="nav.tabLearn">Learn</span>
-      </button>
-      <button type="button" class="home-tab-btn" data-home-tab="quests" aria-selected="false">
-        <span class="home-tab-icon" aria-hidden="true">🎯</span>
-        <span data-i18n="nav.tabQuests">Quests</span>
-      </button>
-      <button type="button" class="home-tab-btn" data-home-tab="shop" aria-selected="false">
-        <span class="home-tab-icon" aria-hidden="true">🛒</span>
-        <span data-i18n="nav.tabShop">Shop</span>
-      </button>
-    </div>
-  </nav>
-</div>
-
-<div id="length-overlay">
-  <div class="length-modal">
-    <h2 id="length-modal-title">Wordle</h2>
-    <p data-i18n="wordle.pickLength">Choose word length</p>
-    <div class="length-options">
-      <button type="button" class="length-btn" data-length="2">
-        <span data-i18n="wordle.twoLetters">2 letters</span>
-        <span data-i18n="wordle.twoLettersKo">Two-syllable words</span>
-      </button>
-      <button type="button" class="length-btn" data-length="3">
-        <span data-i18n="wordle.threeLetters">3 letters</span>
-        <span data-i18n="wordle.threeLettersKo">Three-syllable words</span>
-      </button>
-    </div>
-    <button type="button" class="length-cancel" id="length-cancel-btn" data-i18n="wordle.cancel">Cancel</button>
   </div>
 </div>
 
@@ -1607,7 +1609,6 @@
 
       <div class="menu-col">
         <button class="ghost" id="menu-btn" data-i18n="wordle.game.menu">Menu</button>
-        <button class="ghost" id="new-game-btn" data-i18n="wordle.game.newWord">New word</button>
         <button class="ghost" id="how-btn" data-i18n="wordle.game.howToPlay">How to play</button>
       </div>
     </div>
@@ -1669,31 +1670,32 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="js/firebase-social.js?v=7"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="js/related-words-chains.js?v=20260710e"></script>
+<script src="js/firebase-social.js?v=22"></script>
 <script src="js/wordle-words.js"></script>
 <script src="js/hangul-compose.js"></script>
 <script src="js/learning-word-model.js"></script>
 <script src="js/learning-words.js"></script>
-<script src="js/match-word-bank.js"></script>
 <script src="js/match-words.js"></script>
-<script src="js/race-service.js"></script>
-<script src="js/word-chain-service.js"></script>
+<script src="js/race-service.js?v=20260706a"></script>
+<script src="js/word-chain-service.js?v=20260705a"></script>
 <script src="js/storage.js"></script>
 <script src="js/user-preferences.js"></script>
-<script src="js/i18n-messages.js"></script>
-<script src="js/i18n.js"></script>
+<script src="js/button-press.js?v=20260706n"></script>
+<script src="js/sound-effects.js"></script>
+<script src="js/i18n-messages.js?v=20260708k"></script>
+<script src="js/i18n.js?v=20260705a"></script>
 <script src="js/app-bootstrap.js"></script>
 <script src="js/app-nav.js"></script>
 <script src="js/menu-config.js"></script>
 <script src="js/menu-progress.js"></script>
 <script src="js/dev-build.js"></script>
-<script src="js/tutorial-program.js"></script>
-<script src="js/tutorial-progress-service.js"></script>
-<script src="js/tutorial-onboarding-ui.js"></script>
 <script src="js/match-daily.js"></script>
 <script src="js/daily-calendar-service.js"></script>
 <script src="js/daily-calendar-modal.js"></script>
 <script src="js/menu-components.js"></script>
+<script src="js/home-nav.js"></script>
 <script src="js/menu-app.js"></script>
 <script src="js/multiplayer-ui.js"></script>
 <script src="js/learning-streak.js"></script>
@@ -1709,7 +1711,9 @@
 <script src="js/player-hud.js"></script>
 <script src="js/shop-ui.js"></script>
 <script src="js/quest-service.js"></script>
+<script src="js/wheel-service.js"></script>
 <script src="js/quest-ui.js"></script>
+<script src="js/wheel-ui.js"></script>
 <script src="js/daily-gift-ui.js"></script>
 <script>
 const CHO = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
@@ -2061,7 +2065,7 @@ function migrateTracker(tracker){
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 let state = {
-  gameMode: 'practice',
+  gameMode: 'daily',
   wordLength: 3,
   target: "",
   targetSlots: null,
@@ -2075,7 +2079,6 @@ let state = {
   hintSyllables: [],
   hintDefinitionUsed: false,
   hintElimUsed: false,
-  hardMode: false,
   dailyStartedAt: null,
   elapsedMs: null
 };
@@ -2087,8 +2090,6 @@ function getHintTokenCount(){
 function spendHintTokens(amount){
   return window.HintTokens?.spend?.(amount) === true;
 }
-
-let lengthPickerMode = 'practice';
 
 function hashString(str){
   let h = 0;
@@ -2175,9 +2176,7 @@ function getWordList(){
 }
 
 function pickWord(){
-  if(state.gameMode === 'daily') return pickDailyWord();
-  const list = getWordList();
-  return list[Math.floor(Math.random() * list.length)];
+  return pickDailyWord();
 }
 
 function pickDailyWord(){
@@ -2205,6 +2204,14 @@ function buildGuessGrid(){
   });
 }
 
+function replayMenuBrandIntro() {
+  const brand = document.querySelector('.menu-brand--jamodeul');
+  if (!brand) return;
+  brand.classList.remove('brand-intro');
+  void brand.offsetWidth;
+  brand.classList.add('brand-intro');
+}
+
 function showMenu(){
   state.over = true;
   state.animating = false;
@@ -2216,63 +2223,33 @@ function showMenu(){
   document.getElementById('modal').classList.remove('win');
   document.getElementById('share-btn').classList.remove('copied');
   document.getElementById('share-toast').classList.remove('show');
-  closeLengthPicker();
   document.body.classList.remove('overlay-open');
+  window.HomeNav?.show?.();
   if(window.MenuApp){
     MenuApp.mountMenu('menu-root');
     MenuApp.refreshMenu();
   }
   window.PlayerHud?.refresh?.();
+  replayMenuBrandIntro();
   window.DailyGiftUI?.tryShow?.();
-}
-
-function openLengthPicker(mode){
-  lengthPickerMode = mode;
-  const t = (key) => window.I18n?.t(key) ?? '';
-  const titleKey = mode === 'daily' ? 'wordle.modes.daily' : mode === 'hard' ? 'wordle.modes.hard' : 'wordle.modes.practice';
-  document.getElementById('length-modal-title').textContent = t(titleKey);
-  document.getElementById('length-overlay').classList.add('show');
-  document.body.classList.add('overlay-open');
-}
-
-function closeLengthPicker(){
-  document.getElementById('length-overlay').classList.remove('show');
-  if(!document.getElementById('overlay').classList.contains('show')){
-    document.body.classList.remove('overlay-open');
-  }
 }
 
 function updateGameUI(){
   const n = state.wordLength;
   const day = getDayNumber();
-  if(state.gameMode === 'daily'){
-    document.getElementById('mode-badge').textContent = wt('dailyBadge', { day, n });
-    document.getElementById('subtitle').textContent = wt('dailySubtitle2');
-  } else if(state.hardMode){
-    document.getElementById('mode-badge').textContent = wt('hardBadge', { n });
-    document.getElementById('subtitle').textContent = wt('hardSubtitle');
-  } else {
-    document.getElementById('mode-badge').textContent = wt('practiceBadge', { n });
-    document.getElementById('subtitle').textContent =
-      n === 2 ? wt('practiceSubtitle2') : wt('practiceSubtitle3');
-  }
+  document.getElementById('mode-badge').textContent = wt('dailyBadge', { day, n });
+  document.getElementById('subtitle').textContent = wt('dailySubtitle2');
   const input = document.getElementById('guess-input');
   input.maxLength = n;
   input.value = '';
-  document.getElementById('new-game-btn').style.display =
-    state.gameMode === 'daily' ? 'none' : '';
   const footer = document.getElementById('game-footer');
-  if(footer) footer.textContent =
-    state.gameMode === 'daily'
-      ? wt('dailyFooter')
-      : wt('practiceFooter', { n });
+  if(footer) footer.textContent = wt('dailyFooter');
 }
 
-function startGame(wordLength, mode){
-  state.gameMode = (mode === 'hard') ? 'practice' : (mode || lengthPickerMode);
-  state.hardMode = (mode === 'hard');
+function startGame(wordLength){
+  state.gameMode = 'daily';
   state.wordLength = wordLength;
-  closeLengthPicker();
+  window.HomeNav?.hide?.();
   document.getElementById('menu-screen').classList.add('hidden');
   document.getElementById('game-screen').classList.remove('hidden');
   updateGameUI();
@@ -2394,13 +2371,6 @@ function updateExtraGuessTokenUI(){
 }
 
 function buildSyllableTile(row, syl, guess, isPending){
-  // Hard mode + no guess yet: show a plain blank tile with no structure
-  if(state.hardMode && !guess && !isPending){
-    const sylDiv = document.createElement('div');
-    sylDiv.className = 'syl syl-blank';
-    return sylDiv;
-  }
-
   const { hasJong, vowelType } = state.targetLayout[syl];
   const sylDiv = document.createElement('div');
   sylDiv.className = 'syl' + (hasJong ? ' syl-triple' : ' syl-dual');
@@ -2477,6 +2447,7 @@ async function revealRow(rowIdx, guess){
       cell.classList.remove('pending');
       cell.classList.add('reveal-' + rowIdx, score);
       if(score === 'correct' || score === 'present') cell.classList.add('spark');
+      window.SoundEffects?.flip?.(score);
 
       await sleep(REVEAL_STAGGER);
     }
@@ -2835,12 +2806,13 @@ function showOverlay(won){
         ? wt('modalWinDaily', { count: state.guesses.length, time: formatDailyTime(getDailyElapsedMs()) })
         : wt('modalWinSimple', { count: state.guesses.length }))
     : wt('modalLossSub');
-  modalBtn.textContent = state.gameMode === 'daily' ? wt('modalToMenu') : wt('modalNewWord');
+  modalBtn.textContent = wt('modalToMenu');
   document.getElementById('share-btn').textContent = wt('shareResult');
   document.getElementById('share-btn').classList.remove('copied');
   document.getElementById('share-toast').classList.remove('show');
   modal.classList.toggle('win', won);
   overlay.classList.toggle('loss', !won);
+  window.SoundEffects?.[won ? 'win' : 'lose']?.();
   overlay.classList.remove('show');
   window.scrollTo(0, 0);
   document.documentElement.scrollTop = 0;
@@ -2863,6 +2835,7 @@ async function submitGuess(){
   if(raw.length !== n || ![...raw].every(isHangulSyllable)){
     setMessage(wt('invalidInput', { n, example }), 'error');
     shakeInput();
+    window.SoundEffects?.invalid?.();
     return;
   }
 
@@ -2909,16 +2882,12 @@ async function submitGuess(){
     state.won = true;
     if(state.gameMode === 'daily') saveDailyProgress();
     const usedHint = state.hintSyllables.length > 0 || state.hintDefinitionUsed || state.hintElimUsed;
-    const xpMode = state.gameMode === 'daily' ? 'dailyWordle' : 'wordlePractice';
-    const xpWordId = state.gameMode === 'daily'
-      ? `daily-${getTodayKey()}`
-      : state.target;
     if(window.XpService?.awardAndCelebrate){
       XpService.awardAndCelebrate({
-        mode: xpMode,
-        wordId: xpWordId,
+        mode: 'dailyWordle',
+        wordId: `daily-${getTodayKey()}`,
         usedHint,
-        isDailyChallenge: state.gameMode === 'daily',
+        isDailyChallenge: true,
       });
     }
     setTimeout(() => showOverlay(true), 200);
@@ -2940,12 +2909,6 @@ async function submitGuess(){
   input.focus();
 }
 
-function showHardModeLockedMessage(){
-  const t = (key) => window.I18n?.t(key) ?? '';
-  const hint = window.MenuProgress?.getHardModeUnlockHint?.() || t('wordle.hardLocked');
-  alert(t('wordle.hardLockedTitle') + '\n\n' + hint + '\n\n' + t('wordle.hardLockedFooter'));
-}
-
 document.getElementById('extra-life').addEventListener('click', (e) => {
   if(e.target.closest('#extra-guess-token-btn')) return;
   useExtraLife();
@@ -2954,26 +2917,16 @@ document.getElementById('extra-guess-token-btn')?.addEventListener('click', (e) 
   e.stopPropagation();
   useExtraGuessWithToken();
 });
-document.getElementById('length-cancel-btn').addEventListener('click', closeLengthPicker);
-document.querySelectorAll('.length-btn').forEach(btn => {
-  btn.addEventListener('click', () => startGame(Number(btn.dataset.length), lengthPickerMode));
-});
 document.getElementById('menu-btn').addEventListener('click', showMenu);
 document.getElementById('share-btn').addEventListener('click', copyShareResult);
 document.getElementById('submit-btn').addEventListener('click', submitGuess);
 document.getElementById('guess-input').addEventListener('keydown', (e)=>{
   if(e.key === 'Enter') submitGuess();
 });
-document.getElementById('new-game-btn').addEventListener('click', newGame);
-document.getElementById('modal-btn').addEventListener('click', () => {
-  if(state.gameMode === 'daily') showMenu();
-  else newGame();
-});
+document.getElementById('modal-btn').addEventListener('click', showMenu);
 document.getElementById('how-btn').addEventListener('click', ()=>{
   const n = state.wordLength;
-  const modeLine = state.gameMode === 'daily'
-    ? wt('howToPlayDailyIntro', { n })
-    : '';
+  const modeLine = wt('howToPlayDailyIntro', { n });
   alert(modeLine + wt('howToPlayBody', { n }));
 });
 
@@ -2985,9 +2938,7 @@ document.getElementById('syl-picker').addEventListener('click', e => {
   if(e.target === document.getElementById('syl-picker')) closeSyllablePicker();
 });
 MenuApp?.bindMenuActions?.({
-  openLengthPicker,
-  startDailyWordle: () => startGame(2, 'daily'),
-  showHardModeLockedMessage,
+  startDailyWordle: () => startGame(2),
   openDailyMatchCalendar: () => window.DailyCalendarModal?.open?.(),
 });
 
@@ -3012,7 +2963,6 @@ MenuApp?.bindMenuActions?.({
     console.error('[Jamodeul] MenuApp failed to load — home menu unavailable.');
   }
   showMenu();
-  window.TutorialOnboardingUI?.mount?.();
   window.ShopUI?.bindSection?.(document.getElementById('menu-root'));
   window.MultiplayerUI?.mount?.();
   window.addEventListener('pageshow', (e) => {

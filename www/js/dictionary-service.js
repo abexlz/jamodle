@@ -15,6 +15,24 @@
     return '';
   }
 
+  /** Headers for dev-server API calls (ngrok free tier needs the skip-warning header). */
+  function apiFetchHeaders() {
+    return {
+      Accept: 'application/json',
+      'ngrok-skip-browser-warning': '1',
+    };
+  }
+
+  async function readJsonResponse(res) {
+    const contentType = res.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) {
+      const err = new Error('Dictionary proxy returned a non-JSON response.');
+      err.code = 'BAD_RESPONSE';
+      throw err;
+    }
+    return res.json().catch(() => ({}));
+  }
+
   function cacheKey(word) {
     return CACHE_PREFIX + word.trim();
   }
@@ -49,6 +67,62 @@
     return typeof navigator === 'undefined' ? true : navigator.onLine !== false;
   }
 
+  /** Short English gloss from a dictionary entry (no local word list needed). */
+  function formatEntryMeaning(entry) {
+    if (!entry) return '';
+    const gloss = String(entry.englishWord || '').trim();
+    const definition = String(entry.definition || '').trim();
+    return gloss || definition;
+  }
+
+  function matchesExactEntry(data, word) {
+    const q = String(word || '').trim();
+    if (!q || !data) return false;
+    if (data.exactMatch === true || data.valid === true || data.hasDictionaryEntry === true) return true;
+    if (data.entry?.word === q) return true;
+    return (data.candidates || []).some((item) => item && String(item.word || '') === q);
+  }
+
+  /**
+   * Game validation — exact headword match in the Korean Basic Dictionary.
+   * @param {string} word
+   * @param {() => boolean} [onServiceFailure] offline / API fallback
+   */
+  async function isDictionaryWord(word, onServiceFailure) {
+    const q = String(word || '').trim();
+    if (!q) return false;
+
+    const cached = readCache(q);
+    if (cached && matchesExactEntry(cached, q)) {
+      return true;
+    }
+
+    if (!isOnline()) {
+      return typeof onServiceFailure === 'function' ? !!onServiceFailure(q) : false;
+    }
+
+    try {
+      const result = await validateWord(q);
+      if (result?.valid === true || matchesExactEntry(result, q)) {
+        if (result.valid && (result.entry || result.candidates?.length)) {
+          writeCache(q, {
+            found: true,
+            exactMatch: true,
+            entry: result.entry || null,
+            candidates: result.candidates || [],
+          });
+        }
+        return true;
+      }
+      if (result?.error || result?.offline || result?.code === 'CONFIG') {
+        return typeof onServiceFailure === 'function' ? !!onServiceFailure(q) : false;
+      }
+      return false;
+    } catch {
+      return typeof onServiceFailure === 'function' ? !!onServiceFailure(q) : false;
+    }
+  }
+
   /**
    * @returns {Promise<{found:boolean, entry?:object, error?:string, offline?:boolean, cached?:boolean}>}
    */
@@ -71,8 +145,8 @@
 
     try {
       const url = `${getApiBase()}/api/dictionary/search?word=${encodeURIComponent(q)}`;
-      const res = await fetch(url, { headers: { Accept: 'application/json' } });
-      const data = await res.json().catch(() => ({}));
+      const res = await fetch(url, { headers: apiFetchHeaders() });
+      const data = await readJsonResponse(res);
 
       if (!res.ok) {
         return {
@@ -83,7 +157,8 @@
       }
 
       const result = {
-        found: !!data.found,
+        found: !!data.found && (data.exactMatch === true || matchesExactEntry(data, q)),
+        exactMatch: data.exactMatch === true || matchesExactEntry(data, q),
         entry: data.entry || null,
         candidates: data.candidates || [],
         source: data.source || SOURCE_NAME,
@@ -91,12 +166,15 @@
         cached: !!data.cached,
       };
 
-      if (result.found && result.entry) writeCache(q, result);
+      if (result.found && (result.entry || result.candidates?.length)) writeCache(q, result);
       return result;
-    } catch {
+    } catch (err) {
       return {
         found: false,
-        error: 'Dictionary details are unavailable right now.',
+        offline: true,
+        error: err?.code === 'BAD_RESPONSE'
+          ? 'Dictionary proxy is not reachable. Tunnel ngrok to port 3000 (npm run dev).'
+          : 'Dictionary details are unavailable right now.',
       };
     }
   }
@@ -107,9 +185,10 @@
 
     if (!isOnline()) {
       const cached = readCache(q);
+      const cachedValid = cached && matchesExactEntry(cached, q);
       return {
-        valid: !!cached?.found || allowException,
-        hasDictionaryEntry: !!cached?.found,
+        valid: cachedValid || allowException,
+        hasDictionaryEntry: cachedValid,
         offline: true,
         entry: cached?.entry || null,
       };
@@ -117,10 +196,36 @@
 
     try {
       const url = `${getApiBase()}/api/dictionary/validate?word=${encodeURIComponent(q)}${allowException ? '&exception=1' : ''}`;
-      const res = await fetch(url);
-      return await res.json();
-    } catch {
-      return { valid: allowException, error: 'Validation unavailable right now.' };
+      const res = await fetch(url, { headers: apiFetchHeaders() });
+      const data = await readJsonResponse(res);
+
+      if (!res.ok) {
+        return {
+          valid: allowException,
+          error: data.error || `Dictionary HTTP ${res.status}`,
+          code: data.code,
+        };
+      }
+
+      if (data.valid || data.hasDictionaryEntry) {
+        writeCache(q, {
+          found: true,
+          exactMatch: true,
+          valid: true,
+          entry: data.entry || null,
+          candidates: data.candidates || [],
+        });
+      }
+
+      return data;
+    } catch (err) {
+      return {
+        valid: allowException,
+        error: err?.code === 'BAD_RESPONSE'
+          ? 'Dictionary proxy is not reachable. Tunnel ngrok to port 3000 (npm run dev).'
+          : 'Validation unavailable right now.',
+        offline: true,
+      };
     }
   }
 
@@ -133,6 +238,9 @@
     SOURCE_NAME,
     lookupWord,
     validateWord,
+    isDictionaryWord,
+    matchesExactEntry,
+    formatEntryMeaning,
     prefetchWord,
     readCache,
     getApiBase,

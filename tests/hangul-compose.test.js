@@ -139,9 +139,18 @@ assertEqual(mae.vowelSlots.length, 1, '매 single merged jungV slot');
 assertEqual(mae.vowelSlots[0].expected, 'ㅐ', '매 slot expects ㅐ');
 
 assertEqual(HC.tryComposeVerticalMedial('ㅏ', 'ㅣ'), 'ㅐ', 'vertical merge ㅏ+ㅣ');
-assertEqual(HC.tryComposeVerticalMedial('ㅣ', 'ㅏ'), 'ㅐ', 'vertical merge order-independent');
+assertEqual(HC.tryComposeVerticalMedial('ㅓ', 'ㅣ'), 'ㅔ', 'vertical merge ㅓ+ㅣ');
+assertEqual(HC.tryComposeVerticalMedial('ㅣ', 'ㅓ'), 'ㅐ', 'vertical merge ㅣ+ㅓ');
+assertEqual(HC.tryComposeVerticalMedial('ㅣ', 'ㅏ'), null, 'vertical merge ㅣ+ㅏ rejected');
+assertEqual(HC.tryComposeVerticalMedial('ㅑ', 'ㅣ'), 'ㅒ', 'vertical merge ㅑ+ㅣ');
+assertEqual(HC.tryComposeVerticalMedial('ㅕ', 'ㅣ'), 'ㅖ', 'vertical merge ㅕ+ㅣ');
+assertEqual(HC.tryComposeVerticalMedial('ㅣ', 'ㅕ'), 'ㅒ', 'vertical merge ㅣ+ㅕ');
+assertEqual(HC.tryComposeVerticalMedial('ㅣ', 'ㅑ'), null, 'vertical merge ㅣ+ㅑ rejected');
 assertEqual(HC.tryComposeVerticalMedial('ㅗ', 'ㅏ'), null, 'horizontal+vertical rejected in dock');
-assertDeepEqual(HC.getMergePairComponents('ㅐ'), ['ㅏ', 'ㅣ'], 'unmerge ㅐ');
+assertDeepEqual(HC.getMergePairComponents('ㅐ'), ['ㅏ', 'ㅣ'], 'unmerge ㅐ default pair');
+assertDeepEqual(HC.getMergePairComponents('ㅔ'), ['ㅓ', 'ㅣ'], 'unmerge ㅔ');
+assertDeepEqual(HC.getMergePairComponents('ㅒ'), ['ㅑ', 'ㅣ'], 'unmerge ㅒ default pair');
+assertDeepEqual(HC.getMergePairComponents('ㅖ'), ['ㅕ', 'ㅣ'], 'unmerge ㅖ');
 
 // ── Builder tiles provide component jamo, not pre-composed compounds ──
 
@@ -281,12 +290,166 @@ assertEqual(
   'preview ㅙ'
 );
 
-// ── Korean Match letter swap cycles ──
+// ── Korean Match vowel slot rotation (cycle-based) ──
 
-assertEqual(HC.rotateJamo('ㄱ'), 'ㄴ', 'ㄱ → ㄴ');
-assertEqual(HC.rotateJamo('ㅗ'), 'ㅓ', 'ㅗ → ㅓ');
-assertEqual(HC.zoneTypeForRotatedJamo('ㅓ', 'jungH'), 'jungV', 'ㅓ after swap is jungV');
-assertEqual(HC.orientJamoToTarget('ㅗ', 'ㅏ'), 'ㅏ', 'orient ㅗ→ㅏ via cycle');
+assertEqual(HC.rotateJamo('ㄱ'), 'ㄴ', 'ㄱ → ㄴ (bank consonant)');
+
+assertEqual(HC.rotateJamoInMergeSlot('ㅏ')?.char, 'ㅓ', 'merge slot ㅏ → ㅓ');
+assertEqual(HC.rotateJamoInMergeSlot('ㅕ')?.char, 'ㅑ', 'merge slot ㅕ → ㅑ');
+assertEqual(HC.rotateJamoInMergeSlot('ㅗ'), null, 'merge slot rejects ㅗ');
+assertEqual(HC.rotateJamo('ㅏ'), 'ㅗ', 'bank ㅏ still cycles to ㅗ');
+
+const slotOpts = (otherOccupied) => ({ inVowelSlot: true, otherSlotOccupied: otherOccupied });
+
+// ㅏ/ㅓ cycle — vertical start, empty other slot
+assertEqual(
+  HC.rotateJamoForZone('ㅓ', 'jungV', slotOpts(false))?.char,
+  'ㅏ',
+  'ㅓ → ㅏ vertical pair'
+);
+assertEqual(
+  HC.rotateJamoForZone('ㅓ', 'jungV', slotOpts(false))?.zoneType,
+  'jungV',
+  'ㅓ → ㅏ stays vertical'
+);
+assertEqual(
+  HC.rotateJamoForZone('ㅏ', 'jungV', slotOpts(false))?.char,
+  'ㅗ',
+  'ㅏ crosses to horizontal ㅗ when empty'
+);
+assertEqual(
+  HC.rotateJamoForZone('ㅏ', 'jungV', slotOpts(false))?.zoneType,
+  'jungH',
+  'ㅏ crosses to jungH when empty'
+);
+assertEqual(
+  HC.rotateJamoForZone('ㅏ', 'jungV', slotOpts(true))?.char,
+  'ㅓ',
+  'ㅏ pair-swaps when horizontal occupied'
+);
+assertEqual(
+  HC.rotateJamoForZone('ㅏ', 'jungV', slotOpts(true))?.zoneType,
+  'jungV',
+  'ㅏ stays vertical when horizontal occupied'
+);
+assertEqual(
+  HC.rotateJamoForZone('ㅗ', 'jungH', slotOpts(false))?.char,
+  'ㅜ',
+  'horizontal ㅗ → ㅜ pair'
+);
+assertEqual(
+  HC.rotateJamoForZone('ㅜ', 'jungH', slotOpts(false))?.char,
+  'ㅓ',
+  'ㅜ crosses to vertical ㅓ when empty'
+);
+assertEqual(
+  HC.rotateJamoForZone('ㅜ', 'jungH', slotOpts(false))?.zoneType,
+  'jungV',
+  'ㅜ crosses to jungV when empty'
+);
+assertEqual(
+  HC.rotateJamoForZone('ㅜ', 'jungH', slotOpts(true))?.char,
+  'ㅗ',
+  'ㅜ pair-swaps when vertical occupied'
+);
+
+// ㅑ/ㅕ cycle — vertical start
+assertEqual(
+  HC.rotateJamoForZone('ㅕ', 'jungV', slotOpts(false))?.char,
+  'ㅑ',
+  'ㅕ → ㅑ vertical pair'
+);
+assertEqual(
+  HC.rotateJamoForZone('ㅑ', 'jungV', slotOpts(false))?.char,
+  'ㅛ',
+  'ㅑ crosses to horizontal ㅛ when empty'
+);
+assertEqual(
+  HC.rotateJamoForZone('ㅛ', 'jungH', slotOpts(false))?.char,
+  'ㅠ',
+  'horizontal ㅛ → ㅠ pair'
+);
+assertEqual(
+  HC.rotateJamoForZone('ㅠ', 'jungH', slotOpts(false))?.char,
+  'ㅕ',
+  'ㅠ crosses to vertical ㅕ when empty'
+);
+assertEqual(
+  HC.rotateJamoForZone('ㅛ', 'jungH', slotOpts(true))?.char,
+  'ㅠ',
+  'horizontal ㅛ → ㅠ when vertical occupied'
+);
+
+// ㅣ / ㅡ — unchanged cross-only behavior
+assertEqual(
+  HC.rotateJamoForZone('ㅣ', 'jungV', slotOpts(false))?.char,
+  'ㅡ',
+  'vertical ㅣ crosses to horizontal ㅡ when empty'
+);
+assertEqual(
+  HC.rotateJamoForZone('ㅣ', 'jungV', slotOpts(false))?.zoneType,
+  'jungH',
+  'vertical ㅣ crosses to jungH when empty'
+);
+assertEqual(
+  HC.rotateJamoForZone('ㅣ', 'jungV', slotOpts(true)),
+  null,
+  'vertical ㅣ does not rotate when horizontal occupied'
+);
+assertEqual(
+  HC.rotateJamoForZone('ㅡ', 'jungH', slotOpts(false))?.char,
+  'ㅣ',
+  'horizontal ㅡ crosses to vertical ㅣ when empty'
+);
+assertEqual(
+  HC.rotateJamoForZone('ㅡ', 'jungH', slotOpts(false))?.zoneType,
+  'jungV',
+  'horizontal ㅡ crosses to jungV when empty'
+);
+assertEqual(
+  HC.rotateJamoForZone('ㅡ', 'jungH', slotOpts(true)),
+  null,
+  'horizontal ㅡ does not rotate when vertical occupied'
+);
+
+// Full ㅏ/ㅓ cycle with empty slots
+(function assertAeCycle() {
+  let char = 'ㅓ';
+  let zone = 'jungV';
+  const steps = [
+    ['ㅏ', 'jungV'],
+    ['ㅗ', 'jungH'],
+    ['ㅜ', 'jungH'],
+    ['ㅓ', 'jungV'],
+  ];
+  steps.forEach(([expChar, expZone], i) => {
+    const next = HC.rotateJamoForZone(char, zone, slotOpts(false));
+    assert(next, `ae cycle step ${i + 1} returns result`);
+    assertEqual(next.char, expChar, `ae cycle step ${i + 1} char`);
+    assertEqual(next.zoneType, expZone, `ae cycle step ${i + 1} zone`);
+    char = next.char;
+    zone = next.zoneType;
+  });
+})();
+
+assertEqual(HC.zoneTypeForRotatedJamo('ㅓ', 'jungH'), 'jungV', 'ㅓ maps to jungV zone type');
+assertEqual(HC.orientJamoToTarget('ㅗ', 'ㅏ'), 'ㅏ', 'orient hint still uses legacy cycle');
+assertEqual(HC.orientJamoToTarget('ㅓ', 'ㅏ'), 'ㅏ', 'orient merge pair fallback reaches ㅏ');
+assertEqual(
+  HC.orientTileJamo('ㅓ', 'jungV', 'ㅏ', { inMergeSlot: true })?.char,
+  'ㅏ',
+  'orient tile uses merge slot pair for ㅓ → ㅏ'
+);
+assertEqual(
+  HC.orientTileJamo('ㅜ', 'jungH', 'ㅏ', {})?.char,
+  'ㅏ',
+  'orient tile reaches vertical target from horizontal vowel'
+);
+assertEqual(
+  HC.orientTileJamo('ㅜ', 'jungH', 'ㅏ', {})?.zoneType,
+  'jungV',
+  'orient tile updates zone type for vertical target'
+);
 
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed > 0 ? 1 : 0);

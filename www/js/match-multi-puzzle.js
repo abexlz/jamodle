@@ -1,5 +1,7 @@
 /**
  * Korean Match — "find N words" puzzles from a fixed jamo tile set + rotation.
+ * Answer checking uses the Korean Basic Dictionary API (via WordChainKrdict);
+ * validWords here is used for puzzle selection and offline fallback only.
  */
 (function (global) {
   'use strict';

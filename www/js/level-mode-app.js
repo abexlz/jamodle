@@ -23,12 +23,11 @@
   }
 
   function isRequiredSession() {
-    const q = getQuery();
-    return q.get('required') === '1' || global.TutorialProgress?.mustCompleteOnboarding?.() === true;
+    return getQuery().get('required') === '1';
   }
 
   function canLeavePage() {
-    return global.TutorialProgress?.canSkipTutorial?.() !== false;
+    return !isRequiredSession();
   }
 
   function getLevelCopy(level) {
@@ -180,14 +179,6 @@
       global.location.href = `level-mode.html${q}level=${next}`;
     });
 
-    if (isRequiredSession() && !canLeavePage()) {
-      global.addEventListener('beforeunload', (e) => {
-        if (global.TutorialProgress?.mustCompleteOnboarding?.()) {
-          e.preventDefault();
-          e.returnValue = '';
-        }
-      });
-    }
   }
 
   function mount() {

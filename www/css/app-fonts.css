@@ -1,0 +1,61 @@
+/* Latin UI font — Junegull for English/Latin; Jua for Korean (Hangul). Both self-hosted. */
+
+@font-face {
+  font-family: 'Junegull';
+  src: url('../assets/fonts/Junegull-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Jua';
+  src: url('../assets/fonts/Jua-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --font-latin: 'Junegull', sans-serif;
+  --font-korean: 'Jua', sans-serif;
+}
+
+html,
+body {
+  font-family: var(--font-latin), var(--font-korean), sans-serif;
+}
+
+/* Dev toggle — Jua pack uses Jua for Korean only; Latin stays Junegull */
+html[data-font-pack="jua"] {
+  --font-korean: 'Jua', sans-serif;
+}
+
+/* Override explicit Jua/Junegull/Noto stacks on every page — load this sheet last */
+html *,
+html *::before,
+html *::after {
+  font-family: var(--font-latin), var(--font-korean), sans-serif !important;
+}
+
+/* Hangul tiles / syllable cells — always Jua */
+.jamo,
+.jamo-tile,
+.jamo-tile-front,
+.jamo-tile-back,
+.tkey,
+.syllable-block,
+.syl-pick-btn,
+.hi-tile,
+.rw-dock-face,
+.rw-slot-front,
+.rw-fly-letter,
+.brand-tile,
+.keyboard-key .key-label,
+.match-key,
+.vowel-tile,
+.builder-tile,
+.level-tile,
+.hangul-tile {
+  font-family: 'Jua', sans-serif !important;
+}

@@ -48,7 +48,7 @@ describe('TutorialProgress', () => {
   });
 
   it('finishes onboarding after all tutorial steps', () => {
-    assert.equal(Prog.TOTAL_STEPS, 8);
+    assert.equal(Prog.TOTAL_STEPS, 7);
     Prog.STEPS.forEach((step) => TP.completeStep(step.id));
     const state = TP.load();
     assert.equal(state.onboardingComplete, true);

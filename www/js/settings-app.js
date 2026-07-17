@@ -11,20 +11,6 @@
   const SC = () => global.SettingsComponents;
   const UP = () => global.UserPreferences;
   const I18n = () => global.I18n;
-  const MP = () => global.MenuProgress;
-  const LS = () => global.LearningStreak;
-
-  function getProgressStats() {
-    const progress = MP()?.loadProgress?.() || { wordsLearned: 0, builderWordsCompleted: 0 };
-    const streak = LS()?.loadStreak?.() || { currentStreak: 0, longestStreak: 0 };
-    return {
-      currentStreak: streak.currentStreak,
-      longestStreak: streak.longestStreak,
-      wordsLearned: progress.wordsLearned,
-      matchCompleted: progress.wordsLearned,
-      builderCompleted: progress.builderWordsCompleted || 0,
-    };
-  }
 
   function renderPage(root) {
     if (!UP() || !I18n() || !SC()) {
@@ -37,7 +23,7 @@
 
     root.innerHTML = `
       <header class="settings-header">
-        <a class="settings-back" href="index.html" data-i18n="nav.back">${I18n().t('nav.back')}</a>
+        <a class="settings-back" href="${global.AppNav?.getSettingsReturnUrl?.() || 'index.html'}" data-i18n="nav.back">${I18n().t('nav.back')}</a>
         <h1 data-i18n="settings.title">${I18n().t('settings.title')}</h1>
       </header>
 
@@ -123,6 +109,16 @@
         children: `
           ${SCmp.ToggleSetting({ id: 'pref-dev-mode', labelKey: 'settings.developer.devMode', checked: !!p.devMode })}
           <p class="settings-note" data-i18n="settings.developer.devModeHint">${I18n().t('settings.developer.devModeHint')}</p>
+          ${SCmp.SelectSetting({
+            id: 'pref-dev-font-pack',
+            labelKey: 'settings.developer.devFontPack',
+            value: p.devFontPack === 'jua' ? 'jua' : 'junegull',
+            options: [
+              { value: 'junegull', labelKey: 'settings.developer.devFontPackJunegull' },
+              { value: 'jua', labelKey: 'settings.developer.devFontPackJua' },
+            ],
+          })}
+          <p class="settings-note" data-i18n="settings.developer.devFontPackHint">${I18n().t('settings.developer.devFontPackHint')}</p>
           <div class="settings-actions">
             <a class="btn-soft" href="match-tutorial.html?replay=1" data-i18n="settings.developer.replayTutorial">${I18n().t('settings.developer.replayTutorial')}</a>
           </div>
@@ -138,18 +134,6 @@
             <button type="button" class="btn-soft" id="btn-dev-unlock" data-i18n="settings.developer.unlock">${I18n().t('settings.developer.unlock')}</button>
           </div>
           <p class="settings-toast hidden" id="dev-unlock-toast"></p>
-        `,
-      })}
-
-      ${SCmp.SettingsSection({
-        icon: '🔥',
-        titleKey: 'settings.progress.title',
-        children: `
-          <div id="progress-summary-wrap">${SCmp.ProgressSummary({ stats: getProgressStats() })}</div>
-          <div class="settings-actions">
-            <a class="btn-soft" href="index.html" data-i18n="settings.progress.viewProgress">${I18n().t('settings.progress.viewProgress')}</a>
-            <button type="button" class="btn-warn-outline" id="btn-reset-progress" data-i18n="settings.progress.resetProgress">${I18n().t('settings.progress.resetProgress')}</button>
-          </div>
         `,
       })}
 
@@ -182,13 +166,6 @@
         `,
       })}
 
-      ${SCmp.ConfirmationModal({
-        id: 'reset-confirm-modal',
-        titleKey: 'settings.progress.resetTitle',
-        bodyKey: 'settings.progress.resetBody',
-        confirmKey: 'settings.progress.resetConfirm',
-        cancelKey: 'settings.progress.resetCancel',
-      })}
     `;
 
     bindEvents(root);
@@ -228,6 +205,12 @@
       global.MenuComponents?.rerenderMenu?.();
     });
 
+    root.querySelector('#pref-dev-font-pack')?.addEventListener('change', (e) => {
+      const value = e.target.value === 'jua' ? 'jua' : 'junegull';
+      UP()?.save({ devFontPack: value });
+      UP()?.applyFontPack?.();
+    });
+
     root.querySelector('#btn-dev-unlock')?.addEventListener('click', () => {
       const input = root.querySelector('#dev-access-password');
       const toast = root.querySelector('#dev-unlock-toast');
@@ -251,20 +234,6 @@
     const level = root.querySelector('#pref-learning-level');
     level?.addEventListener('change', () => {
       UP()?.save({ learningLevel: level.value });
-    });
-
-    const resetBtn = root.querySelector('#btn-reset-progress');
-    const modal = root.querySelector('#reset-confirm-modal');
-    resetBtn?.addEventListener('click', () => modal?.classList.remove('hidden'));
-    modal?.querySelector('[data-action="cancel"]')?.addEventListener('click', () => modal.classList.add('hidden'));
-    modal?.querySelector('[data-action="confirm"]')?.addEventListener('click', () => {
-      MP()?.resetAllProgress?.();
-      global.TutorialProgress?.resetProgress?.();
-      modal.classList.add('hidden');
-      const wrap = root.querySelector('#progress-summary-wrap');
-      if (wrap) wrap.innerHTML = SC().ProgressSummary({ stats: getProgressStats() });
-      I18n()?.applyToDocument?.(wrap);
-      showToast(root.querySelector('#data-toast'), I18n().t('settings.progress.resetDone'));
     });
 
     root.querySelector('#btn-clear-dict')?.addEventListener('click', () => {
@@ -346,7 +315,8 @@
     }
 
     renderPage(root);
+    global.AppNav?.wireSettingsBack?.(root);
   }
 
-  global.SettingsApp = { mount, getProgressStats };
+  global.SettingsApp = { mount };
 })(typeof window !== 'undefined' ? window : globalThis);

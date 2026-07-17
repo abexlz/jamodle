@@ -38,12 +38,18 @@
     return save(load() + Math.max(0, parseInt(amount, 10) || 0));
   }
 
+  function hasDevUnlimited() {
+    return global.DevBuild?.hasDevAccess?.() === true;
+  }
+
   function get() {
+    if (hasDevUnlimited()) return 9999;
     return load();
   }
 
   /** @returns {boolean} whether tokens were spent */
   function spend(amount) {
+    if (hasDevUnlimited()) return true;
     const cost = Math.max(0, parseInt(amount, 10) || 0);
     const current = load();
     if (current < cost) return false;
@@ -60,5 +66,6 @@
     grant,
     get,
     spend,
+    hasDevUnlimited,
   };
 })(typeof window !== 'undefined' ? window : globalThis);

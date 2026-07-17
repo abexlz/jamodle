@@ -57,10 +57,11 @@
 
 .leaderboard-tab.active,
 .leaderboard-scope-tab.active {
-  background: linear-gradient(180deg, #FFE566 0%, #FFB800 100%);
+  background: #FFD743;
   border-color: #E09500;
   color: #ffffff;
-  text-shadow: 0 1px 0 rgba(140, 70, 0, 0.35);
+  text-shadow: 0 2px 0 rgba(140, 70, 0, 0.35);
+  box-shadow: 0 4px 0 #C87A00;
 }
 
 .leaderboard-date-line {
@@ -119,7 +120,11 @@
   text-shadow: 0 1px 0 rgba(0, 60, 72, 0.25);
 }
 
-.leaderboard-score.pending {
+.leaderboard-score--time {
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(11px, 2.8vw, 13px);
+  letter-spacing: -0.02em;
+}
   color: rgba(255, 255, 255, 0.55);
   text-shadow: none;
   font-family: 'Noto Sans KR', sans-serif;
@@ -154,16 +159,13 @@
   padding: 0 20px;
   border-radius: 20px;
   border: 2px solid #E09500;
-  background: linear-gradient(180deg, #FFE566 0%, #FFB800 100%);
+  background: #FFD743;
   color: #ffffff;
   font-family: 'Jua', sans-serif;
   font-size: 16px;
   text-shadow: 0 2px 0 rgba(140, 70, 0, 0.35);
   cursor: pointer;
-  box-shadow:
-    inset 0 2px 0 rgba(255, 255, 255, 0.48),
-    0 6px 0 #C87A00,
-    0 8px 18px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 5px 0 #C87A00;
 }
 
 .leaderboard-back {

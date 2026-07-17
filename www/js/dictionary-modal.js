@@ -37,7 +37,7 @@
         to { opacity: 1; transform: scale(1) translateY(0); }
       }
       .dict-card h2 {
-        font-family: 'Jua', 'Noto Sans KR', sans-serif;
+        font-family: 'Junegull', sans-serif;
         font-size: 36px;
         margin: 0 0 4px;
         color: var(--text, #5D6470);
@@ -52,7 +52,7 @@
       .dict-meaning {
         font-size: 18px;
         color: var(--heading, #7B8FD4);
-        font-family: 'Jua', sans-serif;
+        font-family: 'Junegull', sans-serif;
         text-align: center;
         margin: 0 0 16px;
         line-height: 1.45;
@@ -96,7 +96,7 @@
         flex-wrap: wrap;
       }
       .dict-btn {
-        font-family: 'Jua', sans-serif;
+        font-family: 'Junegull', sans-serif;
         font-size: 15px;
         padding: 12px 22px;
         border-radius: 999px;
@@ -117,7 +117,7 @@
         font-size: 15px;
       }
       .dict-open-btn {
-        font-family: 'Jua', sans-serif;
+        font-family: 'Junegull', sans-serif;
         font-size: 15px;
         padding: 10px 20px;
         border-radius: 999px;

@@ -93,9 +93,13 @@
     global.I18n?.applyToDocument?.(overlay);
   }
 
+  function dailyWordLength() {
+    return global.MatchDaily?.DAILY_WORD_LENGTH ?? 2;
+  }
+
   function resolveMode(onReady) {
     if (isDailyMode()) {
-      onReady(MW()?.normalizeWordLength?.(4) || 4);
+      onReady(MW()?.normalizeWordLength?.(dailyWordLength()) || dailyWordLength());
       return;
     }
     const fromUrl = parseLengthFromUrl();

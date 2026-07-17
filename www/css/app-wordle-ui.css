@@ -1,5 +1,5 @@
 /**
- * Wordle-style UI — teal panels, yellow/sky 3D buttons, solid shadows (no glows).
+ * Wordle-style UI — teal panels, yellow/sky 3D buttons, soft gloss on interactive controls.
  * Load last, after page-specific CSS (race.css, multiplayer.css, etc.).
  */
 
@@ -8,14 +8,28 @@
   --w-panel-bg: rgba(0, 70, 85, 0.42);
   --w-panel-border: rgba(123, 207, 255, 0.55);
   --w-panel-shadow: 0 4px 0 rgba(0, 40, 50, 0.35);
-  --w-btn-yellow: linear-gradient(180deg, #FFE566 0%, #FFD743 38%, #FFC820 72%, #FFB800 100%);
-  --w-btn-sky: linear-gradient(180deg, #B8E8FF 0%, #7BCFFF 45%, #5EB0F0 100%);
-  --w-btn-shadow-yellow: inset 0 2px 0 rgba(255, 255, 255, 0.48), inset 0 -3px 0 rgba(255, 170, 0, 0.22), 0 5px 0 #C87A00;
-  --w-btn-shadow-sky: inset 0 2px 0 rgba(255, 255, 255, 0.5), inset 0 -3px 0 rgba(60, 150, 210, 0.25), 0 5px 0 #3A8FC7;
-  --w-btn-shadow-active-yellow: 0 2px 0 #C87A00;
-  --w-btn-shadow-active-sky: 0 2px 0 #3A8FC7;
-  --w-text-shadow: 0 2px 0 rgba(140, 70, 0, 0.42);
-  --w-text-shadow-sky: 0 2px 0 rgba(30, 90, 130, 0.45);
+  --w-btn-yellow: #FFCC33;
+  --w-btn-yellow-border: #E6B82E;
+  --w-btn-sky: #99CCFF;
+  --w-btn-sky-border: #73B5F2;
+  --w-btn-purple: #9B6FFF;
+  --w-btn-purple-border: #7B4FE8;
+  --w-btn-green: #5FD68A;
+  --w-btn-red: #F06868;
+  --w-btn-gloss-inset: inset 0 1px 0 rgba(255, 255, 255, 0.4), inset 0 -2px 5px rgba(0, 0, 0, 0.07);
+  --w-btn-gloss-ambient: 0 8px 16px rgba(0, 40, 50, 0.16);
+  --w-btn-shadow-yellow: var(--w-btn-gloss-inset), 0 6px 0 #C4A82D, var(--w-btn-gloss-ambient);
+  --w-btn-shadow-sky: var(--w-btn-gloss-inset), 0 6px 0 #5A9FDB, var(--w-btn-gloss-ambient);
+  --w-btn-shadow-purple: var(--w-btn-gloss-inset), 0 6px 0 #6238D0, var(--w-btn-gloss-ambient);
+  --w-btn-shadow-green: var(--w-btn-gloss-inset), 0 6px 0 #2A8048, var(--w-btn-gloss-ambient);
+  --w-btn-coral: #FF8A9B;
+  --w-btn-coral-border: #E86578;
+  --w-btn-shadow-coral: var(--w-btn-gloss-inset), 0 6px 0 #C94A5C, var(--w-btn-gloss-ambient);
+  --w-btn-shadow-red: var(--w-btn-gloss-inset), 0 6px 0 #902828, var(--w-btn-gloss-ambient);
+  --w-btn-shadow-active-yellow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 2px 0 #C4A82D, 0 4px 8px rgba(0, 40, 50, 0.1);
+  --w-btn-shadow-active-sky: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 2px 0 #5A9FDB, 0 4px 8px rgba(0, 40, 50, 0.1);
+  --w-text-shadow: 0 2px 0 rgba(120, 80, 0, 0.45);
+  --w-text-shadow-sky: 0 2px 0 rgba(20, 80, 140, 0.48);
 }
 
 /* Multiplayer entry — purple (see multiplayer.css); do not override with sky blue here. */
@@ -54,7 +68,7 @@
 
 .multiplayer-close-btn {
   background: var(--w-btn-yellow) !important;
-  border: 2px solid #E09500 !important;
+  border: 2px solid var(--w-btn-yellow-border, #E6B82E) !important;
   color: #ffffff !important;
   box-shadow: var(--w-btn-shadow-yellow) !important;
 }
@@ -81,17 +95,16 @@
 .profile-challenge-btn,
 .profile-challenge-btn--turn {
   background: var(--w-btn-sky) !important;
-  border: 2px solid #3A9AD4 !important;
+  border: 2px solid var(--w-btn-sky-border, #73B5F2) !important;
   color: #ffffff !important;
   box-shadow: var(--w-btn-shadow-sky) !important;
   text-shadow: var(--w-text-shadow-sky) !important;
-  font-family: 'Jua', sans-serif !important;
 }
 
 /* ── 1v1 race screens ── */
 .race-back {
   background: var(--w-btn-yellow) !important;
-  border: 2px solid #E09500 !important;
+  border: 2px solid var(--w-btn-yellow-border, #E6B82E) !important;
   color: #ffffff !important;
   border-radius: 16px !important;
   box-shadow: var(--w-btn-shadow-yellow) !important;
@@ -117,7 +130,7 @@
 
 .race-dot.filled:nth-child(1) { background: #5FD68A !important; }
 .race-dot.filled:nth-child(2n) { background: #FFD743 !important; }
-.race-dot.filled:nth-child(3n) { background: #7BCFFF !important; }
+.race-dot.filled:nth-child(3n) { background: #99CCFF !important; }
 
 .race-panel,
 .race-length-card,
@@ -126,6 +139,30 @@
   border: 2px solid var(--w-panel-border) !important;
   border-radius: 24px !important;
   box-shadow: var(--w-panel-shadow), var(--shadow-sm) !important;
+}
+
+.race-results--ink.race-results--win,
+.race-results--ink.race-results--loss,
+.race-results--ink.race-results--draw {
+  --w-results-panel-bg: #004a58;
+  --w-results-panel-bg-win: #005868;
+  --w-results-row-bg: #005566;
+  --w-results-row-winner-bg: #006c80;
+  --w-results-row-loser-bg: #003f4d;
+  background: var(--w-results-panel-bg) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.race-results--ink.race-results--win {
+  background: var(--w-results-panel-bg-win) !important;
+}
+
+.race-results--ink.race-results--loss {
+  --w-results-panel-bg: #172141;
+  --w-results-row-bg: #27305f;
+  --w-results-row-winner-bg: #005d66;
+  --w-results-row-loser-bg: #432252;
 }
 
 .race-panel-title,
@@ -144,42 +181,209 @@
 
 .race-results--win .race-results-heading { color: #5FD68A !important; }
 .race-results--loss .race-results-heading { color: #ffb4b4 !important; }
-.race-results--draw .race-results-heading { color: #7BCFFF !important; }
+.race-results--draw .race-results-heading { color: #99CCFF !important; }
+
+.race-results--win .race-results-heading--pop {
+  color: transparent !important;
+  text-shadow: none !important;
+}
+
+.race-results--win .race-results-heading {
+  text-shadow: 0 0 18px rgba(95, 214, 138, 0.55), 0 2px 0 rgba(0, 60, 72, 0.35) !important;
+}
+
+.race-results--win .race-results-heading--pop {
+  text-shadow: none !important;
+}
+
+.race-results-victory-banner {
+  background: linear-gradient(180deg, #007080 0%, #005060 100%) !important;
+  border-color: #FFCC33 !important;
+  box-shadow:
+    0 6px 0 rgba(0, 30, 38, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 0 32px rgba(255, 204, 51, 0.24) !important;
+}
+
+.race-results-hero {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.race-results-hero-img {
+  width: min(100%, 340px) !important;
+  max-width: 100% !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+.race-results-hero .race-results-rewards-pill {
+  background: linear-gradient(180deg, rgba(0, 90, 105, 0.98) 0%, rgba(0, 60, 72, 1) 100%) !important;
+  border-color: rgba(255, 204, 51, 0.82) !important;
+}
 
 .race-results--win.race-results--ink,
 .race-results--loss.race-results--ink,
 .race-results--draw.race-results--ink {
-  background: var(--w-panel-bg) !important;
+  background: var(--w-results-panel-bg, #004a58) !important;
   border-color: var(--w-panel-border) !important;
   box-shadow: var(--w-panel-shadow), var(--shadow-sm) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.race-results--win.race-results--ink {
+  background: var(--w-results-panel-bg-win, #005868) !important;
+  border-color: rgba(95, 214, 138, 0.55) !important;
+  box-shadow: var(--w-panel-shadow), 0 0 24px rgba(95, 214, 138, 0.22) !important;
+}
+
+.race-result-row {
+  background: var(--w-results-row-bg, #005566) !important;
+  border: 2px solid rgba(123, 207, 255, 0.4) !important;
+  box-shadow: none !important;
+}
+
+.race-result-row--winner {
+  background: var(--w-results-row-winner-bg, #006c80) !important;
+  border-color: rgba(95, 214, 138, 0.65) !important;
+  box-shadow: 0 4px 0 rgba(0, 40, 50, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+.race-results-stats--victory .race-result-row--winner {
+  border-color: #FFCC33 !important;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.2),
+    0 0 22px rgba(255, 204, 51, 0.45),
+    0 6px 0 rgba(0, 35, 42, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
+}
+
+.race-results-stats--defeat {
+  background: linear-gradient(180deg, rgba(42, 33, 88, 0.96) 0%, rgba(26, 28, 62, 1) 100%) !important;
+  border-color: rgba(198, 154, 255, 0.38) !important;
+}
+
+.race-results-stats--defeat .race-result-row--winner {
+  background: linear-gradient(135deg, rgba(0, 95, 94, 0.95) 0%, rgba(0, 70, 86, 0.98) 100%) !important;
+  border-color: rgba(95, 214, 138, 0.52) !important;
+}
+
+.race-results-stats--defeat .race-result-row--loser {
+  background: linear-gradient(135deg, rgba(86, 36, 90, 0.98) 0%, rgba(43, 33, 82, 0.98) 100%) !important;
+  border-color: rgba(255, 128, 184, 0.7) !important;
+  box-shadow: 0 0 18px rgba(255, 128, 184, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+.race-result-row--loser {
+  background: var(--w-results-row-loser-bg, #003f4d) !important;
+  border-color: rgba(123, 207, 255, 0.22) !important;
+  opacity: 1 !important;
+}
+
+.race-result-row dt {
+  color: #ffffff !important;
+}
+
+.race-result-row--winner dt {
+  color: #5FD68A !important;
+}
+
+.race-result-row--loser dt {
+  color: rgba(255, 180, 180, 0.95) !important;
+}
+
+.race-result-row dd {
+  color: rgba(255, 255, 255, 0.72) !important;
+}
+
+.race-result-row--winner dd {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* 1v1 results — side-by-side battle cards */
+.race-results-duel {
+  padding: 8px 4px 4px !important;
+}
+
+.race-results-stats--defeat.race-results-duel {
+  padding: 12px 10px !important;
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(42, 33, 88, 0.96) 0%, rgba(26, 28, 62, 1) 100%) !important;
+  border: 2px solid rgba(198, 154, 255, 0.38) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 8px 20px rgba(12, 8, 32, 0.22) !important;
+}
+
+.race-results-duel-name {
+  color: #ffffff !important;
+}
+
+.race-results-duel-stat {
+  color: rgba(255, 255, 255, 0.72) !important;
+}
+
+.race-results-duel-side--winner .race-results-duel-name {
+  color: #5FD68A !important;
+}
+
+.race-results-duel-side--winner .race-results-duel-stat {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.race-results-duel-side--loser .race-results-duel-name {
+  color: rgba(255, 180, 180, 0.95) !important;
+}
+
+.race-results-stats--defeat .race-results-duel-side--loser .race-results-duel-name,
+.race-results-stats--defeat .race-results-duel-side--loser .race-results-duel-stat {
+  color: #ffc0df !important;
+}
+
+.race-results-answer {
+  border-top-color: rgba(123, 207, 255, 0.32) !important;
+}
+
+.race-results-answer-label {
+  color: rgba(255, 255, 255, 0.88) !important;
 }
 
 .race-btn,
 .race-length-options button,
 .race-challenge-banner-actions button {
   background: var(--w-btn-yellow) !important;
-  border: 2px solid #E09500 !important;
+  border: 2px solid var(--w-btn-yellow-border, #E6B82E) !important;
   border-radius: 16px !important;
   color: #ffffff !important;
   box-shadow: var(--w-btn-shadow-yellow) !important;
   text-shadow: var(--w-text-shadow) !important;
-  font-family: 'Jua', sans-serif !important;
 }
 
 .race-btn--primary,
 .race-challenge-banner-actions .accept,
 .race-results-btn.race-btn--rematch {
   background: var(--w-btn-yellow) !important;
-  border-color: #E09500 !important;
+  border-color: #E6B82E !important;
   color: #ffffff !important;
   box-shadow: var(--w-btn-shadow-yellow) !important;
+}
+
+.race-results-btn.race-btn--rematch,
+.race-results-btn.race-btn--home {
+  width: 100% !important;
+  min-height: 52px !important;
+  height: 52px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  padding: 0 16px !important;
 }
 
 .race-btn--blue,
 .race-btn--home,
 .race-results-btn.race-btn--home {
   background: var(--w-btn-sky) !important;
-  border-color: #3A9AD4 !important;
+  border-color: var(--w-btn-sky-border, #73B5F2) !important;
   box-shadow: var(--w-btn-shadow-sky) !important;
   text-shadow: var(--w-text-shadow-sky) !important;
 }
@@ -195,14 +399,20 @@
 }
 
 .race-btn:active,
+.race-btn.is-pressed,
 .race-length-options button:active,
-.race-challenge-banner-actions button:active {
-  transform: translateY(3px) !important;
+.race-length-options button.is-pressed,
+.race-challenge-banner-actions button:active,
+.race-challenge-banner-actions button.is-pressed {
+  transform: translateY(var(--app-btn-press-shift, 3px)) scale(var(--app-btn-press-scale, 0.976)) !important;
   box-shadow: var(--w-btn-shadow-active-yellow) !important;
+  filter: brightness(0.96);
 }
 
 .race-btn--blue:active,
-.race-btn--home:active {
+.race-btn--blue.is-pressed,
+.race-btn--home:active,
+.race-btn--home.is-pressed {
   box-shadow: var(--w-btn-shadow-active-sky) !important;
 }
 
@@ -254,27 +464,23 @@
 }
 
 .race-challenge-btn--accept {
-  background: linear-gradient(180deg, #7AE8A8 0%, #5FD68A 38%, #45C878 72%, #38B868 100%) !important;
+  background: var(--w-btn-green) !important;
   border-color: #2A9850 !important;
-  box-shadow:
-    inset 0 2px 0 rgba(255, 255, 255, 0.45),
-    inset 0 -3px 0 rgba(0, 100, 50, 0.22),
-    0 5px 0 #2A8048 !important;
+  box-shadow: var(--w-btn-shadow-green) !important;
   text-shadow: 0 2px 0 rgba(0, 80, 40, 0.45) !important;
 }
 
 .race-challenge-btn--decline {
-  background: linear-gradient(180deg, #FF8A8A 0%, #F06868 38%, #E04848 72%, #C83838 100%) !important;
+  background: var(--w-btn-red) !important;
   border-color: #A83030 !important;
-  box-shadow:
-    inset 0 2px 0 rgba(255, 255, 255, 0.4),
-    inset 0 -3px 0 rgba(120, 20, 20, 0.25),
-    0 5px 0 #902828 !important;
+  box-shadow: var(--w-btn-shadow-red) !important;
   text-shadow: 0 2px 0 rgba(80, 10, 10, 0.45) !important;
 }
 
-.race-challenge-btn:active {
-  transform: translateY(3px) !important;
+.race-challenge-btn:active,
+.race-challenge-btn.is-pressed {
+  transform: translateY(var(--app-btn-press-shift, 3px)) scale(var(--app-btn-press-scale, 0.976)) !important;
+  filter: brightness(0.96);
 }
 
 /* Challenge banner + overlay (legacy) */
@@ -304,7 +510,7 @@
 .race-opt--pink,
 .race-opt--purple {
   background: var(--w-btn-yellow) !important;
-  border: 2px solid #E09500 !important;
+  border: 2px solid var(--w-btn-yellow-border, #E6B82E) !important;
   color: #ffffff !important;
   box-shadow: var(--w-btn-shadow-yellow) !important;
   text-shadow: var(--w-text-shadow) !important;
@@ -312,7 +518,7 @@
 
 .race-opt--blue {
   background: var(--w-btn-sky) !important;
-  border-color: #3A9AD4 !important;
+  border-color: var(--w-btn-sky-border, #73B5F2) !important;
   box-shadow: var(--w-btn-shadow-sky) !important;
   text-shadow: var(--w-text-shadow-sky) !important;
 }
@@ -350,19 +556,19 @@
 }
 
 .race-turn-bar.is-my-turn .race-turn-progress-fill {
-  background: linear-gradient(90deg, #7BCFFF, #5EB0F0) !important;
+  background: linear-gradient(90deg, #99CCFF, #73B5F2) !important;
 }
 
 .race-turn-previous-nav-btn {
   background: var(--w-btn-yellow) !important;
-  border: 2px solid #E09500 !important;
+  border: 2px solid var(--w-btn-yellow-border, #E6B82E) !important;
   color: #ffffff !important;
   box-shadow: var(--w-btn-shadow-yellow) !important;
 }
 
 body.match-turn-page .rotation-dock {
   background: var(--w-btn-yellow) !important;
-  border: 2px solid #E09500 !important;
+  border: 2px solid var(--w-btn-yellow-border, #E6B82E) !important;
   color: #ffffff !important;
   box-shadow: var(--w-btn-shadow-yellow) !important;
   text-shadow: var(--w-text-shadow) !important;
@@ -370,15 +576,15 @@ body.match-turn-page .rotation-dock {
 }
 
 body.match-turn-page .rotation-dock[data-dock-mode="merge"] {
-  background: linear-gradient(180deg, #7BCFFF 0%, #4FB8F0 100%) !important;
+  background: #99CCFF !important;
   border-color: #2A88C8 !important;
-  box-shadow: 0 4px 0 rgba(0, 60, 100, 0.35) !important;
+  box-shadow: 0 5px 0 #3A8FC7 !important;
 }
 
 body.match-turn-page .rotation-dock[data-dock-mode="split"] {
-  background: linear-gradient(180deg, #B0D4FF 0%, #88B8EE 100%) !important;
+  background: #B0D4FF !important;
   border-color: #5A88CC !important;
-  box-shadow: 0 4px 0 rgba(0, 40, 80, 0.3) !important;
+  box-shadow: 0 5px 0 #4A78B8 !important;
 }
 
 body.match-turn-page .rotation-dock-icon,
@@ -386,15 +592,31 @@ body.match-turn-page .rotation-dock-label {
   color: #ffffff !important;
 }
 
-/* non-turn pages — merge/split teal accent */
+/* non-turn pages — merge/split sky-blue accent */
 .rotation-dock[data-dock-mode="merge"] {
-  background: #C8E6FF !important;
-  border-color: #7BCFFF !important;
+  background: var(--app-btn-fill-sky) !important;
+  border-color: var(--app-btn-border-sky) !important;
+  box-shadow: var(--app-btn-shadow-sky) !important;
+  color: #ffffff !important;
+}
+
+.rotation-dock[data-dock-mode="merge"] .rotation-dock-label,
+.rotation-dock[data-dock-mode="merge"] .rotation-dock-icon {
+  color: #ffffff !important;
+  text-shadow: var(--app-btn-text-shadow-sky) !important;
 }
 
 .rotation-dock[data-dock-mode="split"] {
-  background: #D8EEFF !important;
-  border-color: #A8CCEE !important;
+  background: #B0D4FF !important;
+  border-color: #5A88CC !important;
+  box-shadow: 0 5px 0 #4A78B8 !important;
+  color: #ffffff !important;
+}
+
+.rotation-dock[data-dock-mode="split"] .rotation-dock-label,
+.rotation-dock[data-dock-mode="split"] .rotation-dock-icon {
+  color: #ffffff !important;
+  text-shadow: 0 2px 0 rgba(0, 40, 80, 0.35) !important;
 }
 
 .race-opp-reveal,
@@ -404,9 +626,9 @@ body.match-turn-page .rotation-dock-label {
   border-radius: 16px !important;
 }
 
-/* Korean Match — no glow rings on selection / tap targets */
-.jamo-tile.selected {
-  outline: 3px solid #FFD743 !important;
+/* Korean Match — selection / valid drop targets */
+.jamo-tile.selected:not(.revealing):not(.revealing-wrong) {
+  outline: 5px solid #FFD743 !important;
   outline-offset: 2px !important;
   box-shadow: 0 4px 0 rgba(140, 70, 0, 0.35) !important;
   transform: scale(1.03) !important;
@@ -414,14 +636,23 @@ body.match-turn-page .rotation-dock-label {
 
 .drop-zone.tap-target,
 .merge-slot.tap-target,
-.merge-result.tap-target {
-  border-color: #FFD743 !important;
+.merge-result.tap-target,
+.jamo-bank.tap-target {
+  border: 5px solid #FFD743 !important;
+  border-style: solid !important;
   box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.25), 0 3px 0 rgba(140, 70, 0, 0.3) !important;
   transform: none !important;
 }
 
+.drop-zone:has(> .jamo-tile.selected),
+.merge-slot:has(> .jamo-tile.selected),
+.merge-result:has(> .jamo-tile.selected) {
+  border: 5px solid #FFD743 !important;
+  border-style: solid !important;
+}
+
 #rotation-dock.tap-target {
-  outline: 3px solid #FFD743 !important;
+  outline: 5px solid #FFD743 !important;
   outline-offset: 2px !important;
   box-shadow: var(--w-btn-shadow-yellow) !important;
 }
@@ -476,14 +707,577 @@ body.match-turn-page .rotation-dock-label {
   color: #ffffff !important;
 }
 
-/* Results answer tiles — solid 3D, no colored glow */
+/* Results answer tiles — solid 3D green, uniform */
 .race-results-syl-tile--win {
+  background: #5FD68A !important;
+  color: #ffffff !important;
+  border: 2px solid rgba(255, 255, 255, 0.42) !important;
   box-shadow: 0 4px 0 rgba(0, 40, 50, 0.35) !important;
+  text-shadow: 0 1px 0 rgba(0, 60, 72, 0.25) !important;
 }
 
-/* Remove blur scrims that read as glow */
+.race-results--ink .race-results-wordle-row .jamo.correct {
+  background: #5FD68A !important;
+  color: #ffffff !important;
+}
+
+/* Daily calendar modal — stronger scrim so menu cards barely show through */
+.daily-cal-overlay {
+  background: rgba(0, 30, 38, 0.84) !important;
+  backdrop-filter: blur(16px) saturate(0.8) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(0.8) !important;
+}
+
+/* Daily calendar modal — pinned footer on phones */
+.daily-cal-modal {
+  background: var(--w-panel-bg) !important;
+  border-color: var(--w-panel-border) !important;
+}
+
+.daily-cal-header,
+.daily-cal-footer {
+  background: var(--w-panel-bg) !important;
+  border-color: rgba(123, 207, 255, 0.35) !important;
+}
+
+.daily-cal-close,
+.daily-cal-month-btn,
+.daily-cal-day {
+  background-image: none !important;
+}
+
+.daily-cal-play-btn {
+  background-color: #0097B2 !important;
+  background-image: var(--app-btn-gloss-overlay) !important;
+  border-color: #007A8E !important;
+  box-shadow: var(--w-btn-gloss-inset), 0 5px 0 #006878, var(--w-btn-gloss-ambient) !important;
+  color: #ffffff !important;
+}
+
+.daily-cal-play-btn:active,
+.daily-cal-play-btn.is-pressed {
+  transform: translateY(3px) scale(var(--app-btn-press-scale, 0.976));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 2px 0 #006878, 0 4px 8px rgba(0, 40, 50, 0.1) !important;
+  filter: brightness(0.96);
+}
+
+.daily-cal-prizes-title,
+.daily-cal-month-label,
+.daily-cal-progress-text,
+.daily-cal-wins-count,
+.daily-cal-wins-remaining,
+.daily-cal-weekday,
+.daily-cal-stat-value,
+.daily-cal-stat-label,
+.daily-cal-badge-label {
+  color: #ffffff !important;
+}
+
+.daily-cal-wins-remaining,
+.daily-cal-stat-label {
+  color: rgba(255, 255, 255, 0.82) !important;
+}
+
+.daily-cal-weekday {
+  color: rgba(255, 255, 255, 0.9) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35) !important;
+}
+
+.daily-cal-tab.is-active {
+  background: rgba(0, 151, 178, 0.55) !important;
+  border-color: rgba(123, 207, 255, 0.65) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 12px rgba(123, 207, 255, 0.28) !important;
+}
+
+.daily-cal-tab:not(.is-active) {
+  color: rgba(255, 255, 255, 0.62) !important;
+}
+
+/* Remove blur scrims that read as glow (other modals only) */
 .daily-gift-overlay,
 .profile-modal-overlay {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
+}
+
+/* ── Soft gloss on interactive buttons (panels stay matte) ── */
+.app-btn,
+.learning-mode-card,
+.daily-challenge-card,
+.word-game-card,
+.word-game-bar,
+.battle-mode-action-btn,
+.featured-continue-cta,
+.match-mode-btn,
+.match-actions .btn,
+.actions .btn,
+.btn-soft,
+.btn-warn,
+.btn-warn-outline,
+.btn-next,
+.btn-continue,
+.length-btn,
+button.ghost,
+.match-hint-btn,
+.hint-dock-btn,
+.rotation-dock,
+#submit-btn,
+.modal button,
+#share-btn,
+#modal-btn,
+.syl-pick-btn,
+.language-option,
+.theme-option,
+.confirm-actions button,
+.settings-back,
+.back-link,
+.top-nav-btn,
+.btn-reset,
+.btn-check,
+.done-lesson-btn,
+.profile-modal-btn,
+.daily-leaderboard-btn,
+.daily-cal-play-btn,
+.daily-cal-month-btn,
+.daily-cal-unlock-btn,
+.multiplayer-close-btn,
+.profile-challenge-btn,
+.race-btn,
+.race-length-options button,
+.race-challenge-banner-actions button,
+.race-challenge-btn,
+.race-turn-previous-nav-btn,
+.leaderboard-tab.active,
+.leaderboard-scope-tab.active,
+.leaderboard-login-btn,
+.daily-gift-box,
+.wheel-spin-btn,
+.shop-buy-btn,
+.quest-daily-bonus-btn,
+.home-tab-btn,
+.menu-icon-btn,
+.player-hud-btn {
+  background-image: var(--app-btn-gloss-overlay) !important;
+}
+
+.app-btn,
+.learning-mode-card,
+.daily-challenge-card,
+.word-game-card,
+.word-game-bar,
+.battle-mode-action-btn,
+.featured-continue-cta,
+.match-mode-btn,
+.match-actions .btn,
+.actions .btn,
+.btn-soft,
+.btn-warn,
+.btn-warn-outline,
+.btn-next,
+.btn-continue,
+.length-btn,
+button.ghost,
+.match-hint-btn,
+.hint-dock-btn,
+.rotation-dock,
+#submit-btn,
+.modal button,
+#share-btn,
+#modal-btn,
+.syl-pick-btn,
+.language-option,
+.theme-option,
+.confirm-actions button,
+.settings-back,
+.back-link,
+.top-nav-btn,
+.btn-reset,
+.btn-check,
+.done-lesson-btn,
+.profile-modal-btn,
+.daily-leaderboard-btn,
+.daily-cal-play-btn,
+.multiplayer-close-btn,
+.profile-challenge-btn,
+.race-btn,
+.race-length-options button,
+.race-challenge-banner-actions button,
+.race-challenge-btn,
+.race-turn-previous-nav-btn,
+.leaderboard-tab.active,
+.leaderboard-scope-tab.active,
+.leaderboard-login-btn,
+.daily-gift-box,
+.wheel-spin-btn,
+.shop-buy-btn,
+.quest-daily-bonus-btn,
+.accent-mint:not(.menu-multiplayer-btn):not(.menu-btn-primary):not(.menu-btn-game):not(.accent-battle):not(.accent-muted):not(.menu-battle-game-btn):not(.menu-single-player-game-btn),
+.accent-peach:not(.menu-multiplayer-btn):not(.menu-btn-primary):not(.menu-btn-game):not(.accent-battle):not(.accent-muted),
+.accent-blue:not(.menu-multiplayer-btn):not(.menu-btn-primary):not(.menu-btn-game):not(.accent-battle):not(.accent-muted),
+.accent-lavender:not(.menu-multiplayer-btn):not(.menu-btn-primary):not(.menu-btn-game):not(.accent-battle):not(.accent-muted),
+.accent-yellow:not(.menu-multiplayer-btn):not(.menu-btn-primary):not(.menu-btn-game):not(.accent-battle):not(.accent-muted),
+.accent-pink:not(.menu-multiplayer-btn):not(.menu-btn-primary):not(.menu-btn-game):not(.accent-battle):not(.accent-muted) {
+  background-color: var(--w-btn-yellow, #FFCC33) !important;
+  border: 2px solid var(--w-btn-yellow-border, #E6B82E) !important;
+  box-shadow: var(--w-btn-shadow-yellow, 0 5px 0 #C4A82D) !important;
+}
+
+/* Purple — multiplayer menu entry only */
+.menu-multiplayer-btn,
+#menu-screen .menu-multiplayer-btn {
+  background-color: var(--w-btn-purple, #9B6FFF) !important;
+  background-image: var(--app-btn-gloss-overlay) !important;
+  border-color: var(--w-btn-purple-border, #7B4FE8) !important;
+  box-shadow: var(--w-btn-shadow-purple, 0 6px 0 #6238D0) !important;
+}
+
+.menu-multiplayer-btn .mode-name,
+.menu-multiplayer-btn .app-btn-title {
+  text-shadow: 0 2px 0 rgba(60, 30, 110, 0.45) !important;
+}
+
+/* Dark teal cancel / leave */
+.match-mode-cancel,
+.length-cancel,
+#syl-picker-cancel,
+.btn-leave,
+.race-btn--peach,
+.race-btn--lavender,
+.race-btn--ghost {
+  background-color: #007A8E !important;
+  background-image: var(--app-btn-gloss-overlay) !important;
+  border-color: #005868 !important;
+  box-shadow: var(--w-btn-gloss-inset), 0 5px 0 #004858, var(--w-btn-gloss-ambient) !important;
+}
+
+/* Sky actions (friend challenge, merge/split dock) */
+.profile-challenge-btn,
+.profile-challenge-btn--turn,
+.rotation-dock[data-dock-mode="merge"],
+.rotation-dock[data-dock-mode="split"],
+.race-btn--blue,
+.race-btn--home,
+.race-results-btn.race-btn--home {
+  background-color: var(--w-btn-sky, #99CCFF) !important;
+  border-color: var(--w-btn-sky-border, #73B5F2) !important;
+  box-shadow: var(--w-btn-shadow-sky, 0 5px 0 #5A9FDB) !important;
+}
+
+.race-btn--primary,
+.race-challenge-btn--accept {
+  background-color: var(--w-btn-green, #5FD68A) !important;
+  background-image: var(--app-btn-gloss-overlay) !important;
+  border-color: #2A9850 !important;
+  box-shadow: var(--w-btn-shadow-green, 0 6px 0 #2A8048) !important;
+}
+
+.race-challenge-btn--decline,
+.btn-warn,
+.btn-warn-outline {
+  background-color: var(--w-btn-red, #F06868) !important;
+  background-image: var(--app-btn-gloss-overlay) !important;
+  border-color: #A83030 !important;
+  box-shadow: var(--w-btn-shadow-red, 0 6px 0 #902828) !important;
+}
+
+.app-btn:active:not(:disabled),
+.app-btn.is-pressed:not(:disabled),
+.learning-mode-card:active:not(.is-locked),
+.learning-mode-card.is-pressed:not(.is-locked),
+.daily-challenge-card:active,
+.daily-challenge-card.is-pressed,
+.word-game-card:active,
+.word-game-card.is-pressed,
+.featured-continue-cta:active,
+.featured-continue-cta.is-pressed,
+.match-mode-btn:active,
+.match-mode-btn.is-pressed,
+.match-actions .btn:active:not(:disabled),
+.match-actions .btn.is-pressed:not(:disabled),
+.match-hint-btn:active:not(:disabled),
+.match-hint-btn.is-pressed:not(:disabled),
+.rotation-dock:active:not(.disabled),
+.rotation-dock.is-pressed:not(.disabled),
+#submit-btn:active:not(:disabled),
+#submit-btn.is-pressed:not(:disabled),
+.length-btn:active,
+.length-btn.is-pressed,
+.modal button:active,
+.modal button.is-pressed,
+.daily-leaderboard-btn:active,
+.daily-leaderboard-btn.is-pressed,
+.leaderboard-login-btn:active,
+.leaderboard-login-btn.is-pressed {
+  transform: translateY(var(--app-btn-press-shift, 4px)) scale(var(--app-btn-press-scale, 0.976)) !important;
+  box-shadow: var(--w-btn-shadow-active-yellow, 0 2px 0 #C4A82D) !important;
+  filter: brightness(0.96);
+}
+
+.menu-multiplayer-btn:active,
+.menu-multiplayer-btn.is-pressed {
+  transform: translateY(var(--app-btn-press-shift, 4px)) scale(var(--app-btn-press-scale, 0.976)) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 2px 0 #6238D0, 0 4px 8px rgba(0, 40, 50, 0.1) !important;
+  filter: brightness(0.96);
+}
+
+.race-turn-progress-fill {
+  background: #FFCC33 !important;
+  background-image: none !important;
+}
+
+.race-turn-bar.is-my-turn .race-turn-progress-fill {
+  background: #99CCFF !important;
+  background-image: none !important;
+}
+
+/* ── Global page backgrounds (load after page CSS) ── */
+html body {
+  background-color: #0097B2 !important;
+  background-image: url('../assets/bg-phone-menu.jpg') !important;
+  background-size: cover !important;
+  background-position: center top !important;
+  background-repeat: no-repeat !important;
+  background-attachment: fixed !important;
+}
+
+@media (max-width: 599px) {
+  body.home-tab-learn {
+    background-image: url('../assets/bg-phone-learn.jpg') !important;
+  }
+
+  body.home-tab-quests,
+  body.home-tab-shop {
+    background-image: url('../assets/bg-phone-quests.jpg') !important;
+  }
+}
+
+@media (min-width: 600px) {
+  html body {
+    background-image: url('../assets/bg-landscape.jpg') !important;
+    background-position: center center !important;
+  }
+}
+
+/* Length / mode pickers — translucent scrim so landscape shows through */
+.match-mode-overlay,
+.race-length-overlay,
+#overlay.show,
+#syl-picker.show {
+  background: rgba(0, 60, 72, 0.58) !important;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+/* ── Korean Match tile flip (restore after theme overrides) ── */
+.drop-zone,
+.syllable-block {
+  perspective: 600px;
+}
+
+.jamo-tile {
+  transform-style: preserve-3d !important;
+}
+
+.jamo-tile.revealing,
+.jamo-tile.revealing-wrong,
+.drop-zone.revealing,
+.drop-zone.revealing-wrong,
+.hint-letter.hint-flip {
+  animation-duration: 0.42s !important;
+  animation-timing-function: ease !important;
+  animation-fill-mode: both !important;
+}
+
+.jamo-tile.revealing,
+.drop-zone.revealing {
+  animation-name: jamoFlipReveal !important;
+}
+
+.jamo-tile.revealing-wrong,
+.drop-zone.revealing-wrong {
+  animation-name: jamoFlipWrong !important;
+}
+
+.hint-letter.hint-flip {
+  animation-name: hintFlip !important;
+}
+
+.jamo-tile-back {
+  background: #5FD68A !important;
+  color: #ffffff !important;
+}
+
+.jamo-tile.revealed.correct-flip .jamo-tile-front {
+  background: #5FD68A !important;
+  color: #ffffff !important;
+}
+
+@keyframes jamoFlipReveal {
+  0% { transform: rotateX(0deg); }
+  49% { transform: rotateX(-90deg); }
+  50% { transform: rotateX(-90deg); }
+  100% { transform: rotateX(0deg); }
+}
+
+@keyframes jamoFlipWrong {
+  0%, 100% { transform: rotateX(0deg); }
+  25% { transform: rotateX(-20deg); }
+  75% { transform: rotateX(20deg); }
+}
+
+@keyframes hintFlip {
+  0% { transform: rotateX(0deg); }
+  49% { transform: rotateX(-90deg); opacity: 0.4; }
+  50% { transform: rotateX(-90deg); opacity: 0.4; }
+  100% { transform: rotateX(0deg); opacity: 1; }
+}
+
+/* ── Menu category button colors (soft gloss overlays) ── */
+#menu-screen .menu-btn-primary.daily-challenge-card:not(.menu-daily-puzzle-bar):not(.menu-jamo-game-btn),
+#menu-screen .featured-continue-cta,
+#menu-screen .daily-leaderboard-btn,
+#menu-screen .learning-mode-card:not(.accent-blue):not(.accent-battle):not(.accent-muted):not(.accent-mint),
+#menu-screen .daily-challenge-card:not(.menu-btn-game):not(.accent-battle):not(.accent-muted):not(.accent-mint):not(.menu-battle-game-btn):not(.menu-single-player-game-btn):not(.menu-jamo-game-btn) {
+  background-color: var(--w-btn-yellow, #FFCC33) !important;
+  background-image: var(--app-btn-gloss-overlay) !important;
+  border-color: var(--w-btn-yellow-border, #E6B82E) !important;
+  box-shadow: var(--w-btn-shadow-yellow, 0 6px 0 #C4A82D) !important;
+}
+
+#menu-screen .menu-btn-primary:not(.menu-daily-puzzle-bar) .mode-name,
+#menu-screen .menu-btn-primary:not(.menu-daily-puzzle-bar) .app-btn-title,
+#menu-screen .featured-continue-cta,
+#menu-screen .daily-leaderboard-btn {
+  text-shadow: var(--w-text-shadow) !important;
+}
+
+#menu-screen .menu-btn-game.daily-challenge-card,
+#menu-screen .learning-mode-card.accent-blue {
+  background-color: var(--w-btn-sky, #99CCFF) !important;
+  background-image: var(--app-btn-gloss-overlay) !important;
+  border-color: var(--w-btn-sky-border, #73B5F2) !important;
+  box-shadow: var(--w-btn-shadow-sky, 0 6px 0 #5A9FDB) !important;
+}
+
+#menu-screen .menu-btn-game .mode-name,
+#menu-screen .menu-btn-game .app-btn-title,
+#menu-screen .learning-mode-card.accent-blue .mode-name,
+#menu-screen .learning-mode-card.accent-blue .app-btn-title {
+  text-shadow: var(--w-text-shadow-sky) !important;
+}
+
+#menu-screen .accent-battle.menu-battle-game-btn {
+  background-color: var(--w-btn-purple, #9B6FFF) !important;
+  background-image: var(--app-btn-gloss-overlay) !important;
+  border-color: var(--w-btn-purple-border, #7B4FE8) !important;
+  box-shadow: var(--w-btn-shadow-purple, 0 6px 0 #6238D0) !important;
+}
+
+#menu-screen .accent-mint.menu-battle-game-btn,
+#menu-screen .accent-mint.menu-single-player-game-btn {
+  background-color: var(--w-btn-green, #5FD68A) !important;
+  background-image: var(--app-btn-gloss-overlay) !important;
+  border-color: #2A9850 !important;
+  box-shadow: var(--w-btn-shadow-green, 0 6px 0 #2A8048) !important;
+}
+
+#menu-screen .accent-battle .mode-name,
+#menu-screen .accent-battle .app-btn-title {
+  text-shadow: 0 2px 0 rgba(55, 25, 120, 0.48) !important;
+}
+
+#menu-screen .accent-mint.menu-battle-game-btn .mode-name,
+#menu-screen .accent-mint.menu-battle-game-btn .app-btn-title,
+#menu-screen .accent-mint.menu-single-player-game-btn .mode-name,
+#menu-screen .accent-mint.menu-single-player-game-btn .app-btn-title {
+  text-shadow: 0 2px 0 rgba(0, 80, 40, 0.45) !important;
+}
+
+#menu-screen .menu-jamo-game-btn {
+  background-color: var(--w-btn-coral, #FF8A9B) !important;
+  background-image: var(--app-btn-gloss-overlay) !important;
+  border-color: var(--w-btn-coral-border, #E86578) !important;
+  box-shadow: var(--w-btn-shadow-coral, 0 6px 0 #C94A5C) !important;
+}
+
+#menu-screen .menu-jamo-game-btn .mode-name,
+#menu-screen .menu-jamo-game-btn .app-btn-title {
+  text-shadow: 0 2px 0 rgba(140, 40, 55, 0.45) !important;
+}
+
+#menu-screen .accent-muted.menu-tutorial-btn {
+  background-color: #009BB5 !important;
+  background-image: var(--app-btn-gloss-overlay) !important;
+  border-color: #007A8E !important;
+  box-shadow: var(--w-btn-gloss-inset), 0 5px 0 #006878, var(--w-btn-gloss-ambient) !important;
+}
+
+#menu-screen .accent-muted .mode-name,
+#menu-screen .accent-muted .app-btn-title {
+  text-shadow: none !important;
+  color: rgba(255, 255, 255, 0.92) !important;
+}
+
+#menu-screen .menu-btn-primary.daily-challenge-card:active,
+#menu-screen .menu-btn-primary.daily-challenge-card.is-pressed,
+#menu-screen .featured-continue-cta:active,
+#menu-screen .featured-continue-cta.is-pressed,
+#menu-screen .daily-leaderboard-btn:active,
+#menu-screen .daily-leaderboard-btn.is-pressed,
+#menu-screen .learning-mode-card:not(.accent-blue):not(.accent-battle):not(.accent-muted):not(.accent-mint):active,
+#menu-screen .learning-mode-card:not(.accent-blue):not(.accent-battle):not(.accent-muted):not(.accent-mint).is-pressed {
+  box-shadow: var(--w-btn-shadow-active-yellow, 0 2px 0 #C4A82D) !important;
+}
+
+#menu-screen .menu-btn-game.daily-challenge-card:active,
+#menu-screen .menu-btn-game.daily-challenge-card.is-pressed,
+#menu-screen .learning-mode-card.accent-blue:active,
+#menu-screen .learning-mode-card.accent-blue.is-pressed {
+  box-shadow: var(--w-btn-shadow-active-sky, 0 2px 0 #5A9FDB) !important;
+}
+
+#menu-screen .accent-battle.menu-battle-game-btn:active,
+#menu-screen .accent-battle.menu-battle-game-btn.is-pressed {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 2px 0 #6238D0, 0 4px 8px rgba(0, 40, 50, 0.1) !important;
+}
+
+#menu-screen .accent-mint.menu-battle-game-btn:active,
+#menu-screen .accent-mint.menu-battle-game-btn.is-pressed,
+#menu-screen .accent-mint.menu-single-player-game-btn:active,
+#menu-screen .accent-mint.menu-single-player-game-btn.is-pressed {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 2px 0 #2A8048, 0 4px 8px rgba(0, 40, 50, 0.1) !important;
+}
+
+#menu-screen .menu-jamo-game-btn:active,
+#menu-screen .menu-jamo-game-btn.is-pressed {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 2px 0 #C94A5C, 0 4px 8px rgba(0, 40, 50, 0.1) !important;
+}
+
+#menu-screen .accent-muted.menu-tutorial-btn:active,
+#menu-screen .accent-muted.menu-tutorial-btn.is-pressed {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 2px 0 #006878, 0 4px 8px rgba(0, 40, 50, 0.1) !important;
+}
+
+/* ── Panels & containers stay matte (no button gloss) ── */
+.featured-continue-card,
+.daily-challenges-grid,
+.learning-modes-list,
+.menu-sections,
+.menu-inner,
+.match-hint-dock,
+.settings-section,
+.profile-header-card,
+.profile-section,
+.match-mode-card,
+.length-modal,
+.modal,
+.results-card,
+.confirm-card,
+.section,
+.multiplayer-modal,
+.race-opponent-bar,
+.daily-cal-header,
+.daily-cal-footer {
+  background-image: none !important;
 }

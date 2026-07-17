@@ -16,16 +16,16 @@ const dict = require('../lib/korean-dictionary');
 
 const wordsFile = path.join(__dirname, '../www/js/learning-words.js');
 const src = fs.readFileSync(wordsFile, 'utf8');
-const match = src.match(/const LEARNING_WORDS = \[([\s\S]*?)\];/);
+const match = src.match(/const RAW_WORDS = \[([\s\S]*?)\];\s*\n\s*const LEARNING_WORDS/);
 if (!match) {
-  console.error('Could not parse LEARNING_WORDS from learning-words.js');
+  console.error('Could not parse RAW_WORDS from learning-words.js');
   process.exit(1);
 }
 
-const wordRe = /word:\s*'([^']+)'/g;
+const wordRe = /(?:word:\s*'([^']+)'|'([^']+)')/g;
 const words = [];
 let m;
-while ((m = wordRe.exec(match[1]))) words.push(m[1]);
+while ((m = wordRe.exec(match[1]))) words.push(m[1] || m[2]);
 
 async function main() {
   const apiKey = process.env.KOREAN_DICTIONARY_API_KEY;

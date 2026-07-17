@@ -72,6 +72,66 @@
     }).join('');
   }
 
+  function renderTitlesBlock(inv) {
+    return Object.values(SS().TITLES).map((title) => {
+      const owned = SS().ownsTitle(title.id);
+      const name = t(`shop.titles.${title.id}`);
+      const desc = t(`shop.titles.${title.id}Desc`);
+
+      let action = '';
+      if (owned) {
+        action = `<span class="shop-owned-badge">${escapeHtml(t('shop.owned'))}</span>`;
+      } else {
+        action = `
+          <button type="button" class="shop-buy-btn shop-buy-btn--compact" data-buy-title="${escapeHtml(title.id)}"
+            ${inv.coins >= title.price ? '' : 'disabled'}>
+            🪙 ${title.price}
+          </button>`;
+      }
+
+      return `
+        <article class="shop-item-card shop-item-card--row shop-cosmetic-card${owned ? ' is-owned' : ''}"
+          title="${escapeHtml(desc)}">
+          <span class="shop-item-icon" aria-hidden="true">${title.icon}</span>
+          <div class="shop-item-main">
+            <span class="shop-item-name">${escapeHtml(name)}</span>
+          </div>
+          ${action}
+        </article>
+      `;
+    }).join('');
+  }
+
+  function renderFramesBlock(inv) {
+    return Object.values(SS().FRAMES).map((frame) => {
+      const owned = SS().ownsFrame(frame.id);
+      const name = t(`shop.frames.${frame.id}`);
+      const desc = t(`shop.frames.${frame.id}Desc`);
+
+      let action = '';
+      if (owned) {
+        action = `<span class="shop-owned-badge">${escapeHtml(t('shop.owned'))}</span>`;
+      } else {
+        action = `
+          <button type="button" class="shop-buy-btn shop-buy-btn--compact" data-buy-frame="${escapeHtml(frame.id)}"
+            ${inv.coins >= frame.price ? '' : 'disabled'}>
+            🪙 ${frame.price}
+          </button>`;
+      }
+
+      return `
+        <article class="shop-item-card shop-cosmetic-card shop-frame-card${owned ? ' is-owned' : ''}"
+          title="${escapeHtml(desc)}">
+          <div class="shop-frame-swatch" style="background:${frame.swatch}" aria-hidden="true"></div>
+          <div class="shop-item-main">
+            <span class="shop-item-name">${escapeHtml(name)}</span>
+          </div>
+          ${action}
+        </article>
+      `;
+    }).join('');
+  }
+
   function renderItemsBlock(inv) {
     const items = Object.entries(SS().ITEMS).map(([key, item]) => ({ key, ...item }));
     return items.map((item) => {
@@ -111,6 +171,10 @@
         </div>
         <h3 class="shop-subsection-title">${escapeHtml(t('shop.tabCosmetics'))}</h3>
         <div class="shop-item-grid shop-theme-grid">${renderCosmeticsBlock(inv)}</div>
+        <h3 class="shop-subsection-title">${escapeHtml(t('shop.tabTitles'))}</h3>
+        <div class="shop-item-grid shop-consumables-list">${renderTitlesBlock(inv)}</div>
+        <h3 class="shop-subsection-title">${escapeHtml(t('shop.tabFrames'))}</h3>
+        <div class="shop-item-grid shop-frame-grid">${renderFramesBlock(inv)}</div>
         <h3 class="shop-subsection-title">${escapeHtml(t('shop.tabItems'))}</h3>
         <div class="shop-item-grid shop-consumables-list">${renderItemsBlock(inv)}</div>
         <p class="shop-msg" id="shop-section-msg" hidden></p>
@@ -143,6 +207,30 @@
     section.querySelectorAll('[data-buy-theme]').forEach((btn) => {
       btn.addEventListener('click', () => {
         const result = SS()?.buyTheme?.(btn.dataset.buyTheme);
+        if (result?.ok) {
+          showMessage(section.closest('.menu-sections') || section, t('shop.purchaseSuccess'), 'ok');
+          refreshSection(root);
+        } else if (result?.reason === 'insufficient') {
+          showMessage(section.closest('.menu-sections') || section, t('shop.insufficientCoins'), 'error');
+        }
+      });
+    });
+
+    section.querySelectorAll('[data-buy-title]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const result = SS()?.buyTitle?.(btn.dataset.buyTitle);
+        if (result?.ok) {
+          showMessage(section.closest('.menu-sections') || section, t('shop.purchaseSuccess'), 'ok');
+          refreshSection(root);
+        } else if (result?.reason === 'insufficient') {
+          showMessage(section.closest('.menu-sections') || section, t('shop.insufficientCoins'), 'error');
+        }
+      });
+    });
+
+    section.querySelectorAll('[data-buy-frame]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const result = SS()?.buyFrame?.(btn.dataset.buyFrame);
         if (result?.ok) {
           showMessage(section.closest('.menu-sections') || section, t('shop.purchaseSuccess'), 'ok');
           refreshSection(root);

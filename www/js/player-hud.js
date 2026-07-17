@@ -33,12 +33,6 @@
       container.hidden = false;
       container.innerHTML = `
         <div class="player-hud-compact" role="group" aria-label="${escapeHtml(t('shop.hudLabel'))}">
-          <span class="player-hud-level">${escapeHtml(t('profile.levelShort', { level: summary.level }))}</span>
-          <div class="player-hud-xp" role="progressbar"
-            aria-valuemin="0" aria-valuemax="${summary.xpToNext}" aria-valuenow="${summary.xpInLevel}"
-            aria-label="${escapeHtml(t('profile.xpProgress', { current: summary.xpInLevel, total: summary.xpToNext }))}">
-            <div class="player-hud-xp-fill" style="width:${pct}%"></div>
-          </div>
           <span class="player-hud-coins" aria-label="${escapeHtml(t('shop.coins'))}">🪙 ${summary.coins}</span>
         </div>
       `;
@@ -62,10 +56,31 @@
     `;
   }
 
+  function refreshMenuProfileNav() {
+    const nav = document.getElementById('nav-profile');
+    const card = document.getElementById('menu-profile-card');
+    if (!nav) return;
+    const summary = global.ProfileService?.getProfileSummary?.();
+    if (!summary) return;
+
+    global.ProfileUI?.ensureStyles?.();
+    if (card && global.ProfileUI?.renderMenuProfileCard) {
+      card.innerHTML = global.ProfileUI.renderMenuProfileCard(summary, { variant: 'menu' });
+    } else {
+      const slot = document.getElementById('menu-profile-avatar');
+      const levelEl = document.getElementById('menu-profile-level');
+      if (slot) slot.textContent = summary.avatarIcon || '🌸';
+      if (levelEl) levelEl.textContent = String(summary.level || 1);
+    }
+
+    nav.setAttribute('aria-label', `${summary.displayName || t('nav.profile')} · ${summary.displayTitle || t('profile.levelShort', { level: summary.level })}`);
+  }
+
   function refresh() {
     document.querySelectorAll('[data-player-hud]').forEach((el) => {
       render(el, { compact: el.dataset.playerHud === 'compact' });
     });
+    refreshMenuProfileNav();
   }
 
   function mount(containerId, opts) {
@@ -73,11 +88,13 @@
     if (!el) return;
     if (opts?.compact) el.dataset.playerHud = 'compact';
     render(el, opts);
+    refreshMenuProfileNav();
   }
 
   global.PlayerHud = {
     render,
     refresh,
+    refreshMenuProfileNav,
     mount,
   };
 })(typeof window !== 'undefined' ? window : globalThis);

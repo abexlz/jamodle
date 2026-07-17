@@ -39,6 +39,8 @@
     lavender: 'lavender',
     yellow: 'yellow',
     pink: 'pink',
+    battle: 'battle',
+    muted: 'muted',
   };
 
   const MENU = {
@@ -63,17 +65,7 @@
         type: 'word-games',
         title: 'Word Games',
         titleKo: '단어 게임',
-        modes: [
-          {
-            id: 'wordle-practice',
-            icon: '📝',
-            title: 'Wordle Practice',
-            subtitle: 'Guess random Korean words with hints.',
-            subtitleKo: '힌트와 함께 연습하기',
-            accent: ACCENTS.blue,
-            action: 'wordle-practice',
-          },
-        ],
+        modes: [],
       },
       {
         id: 'learn',
@@ -106,6 +98,16 @@
     ],
     menuTop: [
       {
+        id: 'daily-match',
+        icon: '🎯',
+        title: 'Daily Puzzle',
+        subtitleKo: '오늘의 자모 조합',
+        accent: ACCENTS.peach,
+        action: 'daily-match',
+      },
+    ],
+    menuPlay: [
+      {
         id: 'classic',
         icon: '🎯',
         title: 'Classic',
@@ -114,12 +116,13 @@
         href: 'match.html',
       },
       {
-        id: 'daily-match',
-        icon: '🎯',
-        title: 'Daily Match',
-        subtitleKo: '오늘의 자모 조합',
-        accent: ACCENTS.peach,
-        action: 'daily-match',
+        id: 'related-words',
+        icon: '🔗',
+        title: 'Word Chain',
+        subtitle: 'Link related words across every theme.',
+        subtitleKo: '여러 테마의 연관 단어를 이어 만들어요',
+        accent: ACCENTS.mint,
+        href: 'related-words.html',
       },
     ],
     dailyChallenges: [],

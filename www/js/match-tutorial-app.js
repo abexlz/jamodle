@@ -17,31 +17,24 @@
       this.placementIndex = 0;
       this.rotateDone = false;
       this.mergePlaced = false;
+      this.afterRotatePlaced = false;
+      this.mergePlacementDone = false;
+      this.solveReady = false;
       this._celebrating = false;
     }
 
     mount() {
       this.coach.mount();
       const params = new URLSearchParams(location.search);
+      const start = params.get('start') === '1';
       const replay = params.get('replay') === '1';
-      const required = params.get('required') === '1'
-        || (TP()?.mustCompleteOnboarding?.() && !replay);
 
       if (replay && global.DevBuild?.hasDevAccess?.()) {
         TP()?.resetProgress?.();
       }
 
-      if (required) {
-        window.addEventListener('beforeunload', this._guardLeave = (e) => {
-          if (TP()?.mustCompleteOnboarding?.()) {
-            e.preventDefault();
-            e.returnValue = '';
-          }
-        });
-      }
-
       this.initGame();
-      const startIndex = replay ? 0 : (TP()?.getCurrentStepIndex?.() ?? 0);
+      const startIndex = (replay || start) ? 0 : (TP()?.getCurrentStepIndex?.() ?? 0);
       this.loadStep(startIndex);
 
       global.I18n?.onChange?.(() => {
@@ -96,8 +89,9 @@
         title.dataset.i18n = step.titleKey;
       }
       if (body) {
-        body.textContent = t(step.bodyKey);
-        body.dataset.i18n = step.bodyKey;
+        const bodyKey = this.solveReady ? 'tutorial.checkPrompt' : step.bodyKey;
+        body.textContent = t(bodyKey);
+        body.dataset.i18n = bodyKey;
       }
     }
 
@@ -114,6 +108,9 @@
       this.placementIndex = 0;
       this.rotateDone = false;
       this.mergePlaced = false;
+      this.afterRotatePlaced = false;
+      this.mergePlacementDone = false;
+      this.solveReady = false;
       this.clearTutorialFocus();
       this.coach.stopFinger();
       this.game.els.results?.classList.add('hidden');
@@ -126,32 +123,65 @@
       this.game.loadTutorialStep(step);
     }
 
-    setTutorialFocus(elements) {
+    setTutorialFocus(elements, { checkMode = false } = {}) {
       const root = this.game?.root;
       if (!root) return;
-      root.classList.add('tutorial-guiding');
-      const dimSel = [
+
+      const allGuideTargets = [
         '.drop-zone',
         '.jamo-bank .jamo-tile',
         '.rotation-dock',
         '.merge-slot',
         '.merge-result',
         '.vowel-merge-dock',
-      ].join(', ');
-      root.querySelectorAll(dimSel).forEach((el) => {
+        '.game-feedback',
+        '.title-block',
+      ];
+      root.querySelectorAll(allGuideTargets.join(', ')).forEach((el) => {
+        el.classList.remove('tutorial-dimmed', 'tutorial-focus');
+      });
+
+      root.classList.add('tutorial-guiding');
+      root.classList.toggle('tutorial-check-ready', !!checkMode);
+
+      const dimSel = checkMode
+        ? [
+          '.rotation-dock',
+          '.vowel-merge-dock',
+          '.game-feedback',
+          '.title-block',
+        ]
+        : [
+          '.drop-zone',
+          '.jamo-bank .jamo-tile',
+          '.rotation-dock',
+          '.merge-slot',
+          '.merge-result',
+          '.vowel-merge-dock',
+        ];
+      root.querySelectorAll(dimSel.join(', ')).forEach((el) => {
+        if (el.classList.contains('drop-zone') && el.classList.contains('locked')) return;
+        if (el.classList.contains('jamo-tile') && el.classList.contains('locked')) return;
         el.classList.add('tutorial-dimmed');
-        el.classList.remove('tutorial-focus');
       });
       (elements || []).filter(Boolean).forEach((el) => {
-        el.classList.remove('tutorial-dimmed');
-        el.classList.add('tutorial-focus');
+        const mergeParent = el.closest?.('.merge-result, .merge-slot');
+        const inMergeSlot = el.classList?.contains('jamo-tile') && mergeParent;
+        if (!inMergeSlot) {
+          el.classList.remove('tutorial-dimmed');
+          el.classList.add('tutorial-focus');
+        }
+        if (mergeParent) {
+          mergeParent.classList.remove('tutorial-dimmed');
+          mergeParent.classList.add('tutorial-focus');
+        }
       });
     }
 
     clearTutorialFocus() {
       const root = this.game?.root;
       if (!root) return;
-      root.classList.remove('tutorial-guiding');
+      root.classList.remove('tutorial-guiding', 'tutorial-check-ready');
       root.querySelectorAll('.tutorial-dimmed, .tutorial-focus').forEach((el) => {
         el.classList.remove('tutorial-dimmed', 'tutorial-focus');
       });
@@ -162,14 +192,74 @@
         requestAnimationFrame(() => this.refreshCoach());
         return;
       }
-      if (event === 'mergeSlot') {
-        this.refreshCoach();
-        return;
-      }
       if (event === 'place') this.onPlaced();
       else if (event === 'rotate') this.onRotated(data);
       else if (event === 'merge') this.onMerged();
       else if (event === 'wordComplete') this.onWordSolved();
+
+      if (['place', 'rotate', 'merge', 'mergeSlot', 'change'].includes(event)) {
+        const wasSolveReady = this.solveReady;
+        this.updateSolveReady();
+        if (!this._celebrating && wasSolveReady === this.solveReady
+            && (event === 'mergeSlot' || event === 'change')) {
+          this.refreshCoach();
+        }
+      }
+    }
+
+    isBoardCorrectlySolved() {
+      const game = this.game;
+      if (!game?.blocks?.length) return false;
+      return game.blocks.every((block) =>
+        block.getAllZones().every((zone) => game.isZoneCorrect(zone))
+      );
+    }
+
+    isStepReadyForCheck() {
+      const step = this.step;
+      if (!step) return false;
+      if (step.type === 'free-solve') return true;
+      if (step.type === 'guided-place') {
+        return this.placementIndex >= (step.placements?.length || 0);
+      }
+      if (step.type === 'guided-rotate') {
+        if (step.placements) {
+          return this.placementIndex >= step.placements.length;
+        }
+        if (step.afterRotatePlacement) {
+          return this.afterRotatePlaced;
+        }
+      }
+      if (step.type === 'guided-merge') {
+        return this.mergePlacementDone;
+      }
+      return false;
+    }
+
+    updateSolveReady() {
+      if (this._celebrating || !this.step) return false;
+      const ready = this.isStepReadyForCheck() && this.isBoardCorrectlySolved();
+      const game = this.game;
+      if (ready && !this.solveReady) {
+        this.solveReady = true;
+        if (game) {
+          game.tutorialCheckAllowed = true;
+          game.updateCheckButton();
+        }
+        this.updateLessonBar(this.step);
+        this.refreshCoach();
+        return true;
+      }
+      if (!ready && this.solveReady) {
+        this.solveReady = false;
+        if (game) {
+          game.tutorialCheckAllowed = false;
+          game.updateCheckButton();
+        }
+        this.updateLessonBar(this.step);
+        this.refreshCoach();
+      }
+      return ready;
     }
 
     validateAction(action, payload) {
@@ -241,7 +331,6 @@
       if (step.type === 'guided-place') {
         this.placementIndex++;
         if (this.placementIndex >= (step.placements?.length || 0)) {
-          this.completeCurrentStep();
           return;
         }
         this.refreshCoach();
@@ -251,7 +340,6 @@
       if (step.type === 'guided-rotate' && step.placements) {
         this.placementIndex++;
         if (this.placementIndex >= step.placements.length) {
-          this.completeCurrentStep();
           return;
         }
         this.refreshCoach();
@@ -259,12 +347,13 @@
       }
 
       if (step.type === 'guided-rotate' && step.afterRotatePlacement && this.rotateDone) {
-        this.completeCurrentStep();
+        this.afterRotatePlaced = true;
         return;
       }
 
       if (step.type === 'guided-merge' && this.mergePlaced) {
-        this.completeCurrentStep();
+        this.mergePlacementDone = true;
+        return;
       }
     }
 
@@ -286,8 +375,8 @@
     }
 
     onWordSolved() {
-      if (this.step?.type !== 'free-solve') return;
-      this.completeCurrentStep(true);
+      if (!this.step) return;
+      this.completeCurrentStep(this.step.type === 'free-solve');
     }
 
     async completeCurrentStep(isFinal) {
@@ -319,6 +408,8 @@
       } else {
         await this.game.celebrateTutorialSuccess();
       }
+
+      await delay(TUTORIAL_RESULT_DELAY_MS);
 
       const total = Prog()?.TOTAL_STEPS ?? 6;
       const isLast = this.stepIndex >= total - 1 || isFinal;
@@ -382,10 +473,26 @@
 
       game.clearSelectionHighlights?.();
       this.coach.stopFinger();
+      game.els.check?.classList.remove('tap-target');
+      game.mergeDock?.slotEls?.forEach((el) => el.classList.remove('tap-target'));
+      game.mergeDock?.resultEl?.classList.remove('tap-target');
+
+      if (this.solveReady) {
+        const checkBtn = game.els.check;
+        const dock = game.els.bank;
+        checkBtn?.classList.remove('hidden');
+        checkBtn?.classList.add('tap-target');
+        this.setTutorialFocus([checkBtn], { checkMode: true });
+        if (checkBtn && dock) {
+          this.coach.pointFinger(dock, checkBtn);
+        }
+        return;
+      }
 
       if (step.type === 'free-solve') {
         this.clearTutorialFocus();
         game.els.check?.classList.remove('hidden');
+        if (game.els.check) game.els.check.disabled = true;
         return;
       }
 
@@ -438,14 +545,17 @@
         if (!this.mergePlaced) {
           const both = game.mergeDock?.slotTileIds?.[0] && game.mergeDock?.slotTileIds?.[1];
           if (both && game.els.rotationDock) {
+            const resultEl = game.mergeDock?.resultEl;
             game.els.rotationDock.classList.add('tap-target');
+            if (resultEl) resultEl.classList.add('tap-target');
             this.setTutorialFocus([
               game.mergeDock.slotEls[0],
               game.mergeDock.slotEls[1],
+              resultEl,
               game.els.rotationDock,
               game.els.mergeDockEl,
             ]);
-            this.coach.pointFinger(game.mergeDock.slotEls[0], game.els.rotationDock);
+            this.coach.pointFinger(game.mergeDock.slotEls[1], game.els.rotationDock);
             return;
           }
           const emptyIdx = game.mergeDock?.slotTileIds?.[0] ? 1 : 0;
@@ -453,6 +563,7 @@
           const nextChar = emptyIdx === 0 ? 'ㅏ' : 'ㅣ';
           const tile = this.findBankTile(nextChar, 'jungV');
           if (slot) slot.classList.add('tap-target');
+          if (tile?.el) tile.el.classList.add('selected');
           this.setTutorialFocus([tile?.el, slot, game.els.mergeDockEl]);
           if (tile?.el && slot) this.coach.pointFinger(tile.el, slot);
           return;
@@ -460,12 +571,25 @@
 
         const exp = step.afterMergePlacement;
         const result = game.mergeDock?.getResultTile?.();
+        const resultEl = game.mergeDock?.resultEl;
         const zone = game.findZone(exp.zoneType, exp.syllableIndex ?? 0);
+        if (result) {
+          game.selectedTile = result;
+          result.setSelected?.(true);
+          game.updateSelectionHighlights?.();
+        }
+        if (resultEl) resultEl.classList.add('tap-target');
         if (zone?.el) zone.el.classList.add('tap-target');
-        this.setTutorialFocus([result?.el, zone?.el]);
+        this.setTutorialFocus([resultEl, zone?.el]);
         if (result?.el && zone?.el) this.coach.pointFinger(result.el, zone.el);
       }
     }
+  }
+
+  const TUTORIAL_RESULT_DELAY_MS = 2000;
+
+  function delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   function formatTutorialTime(ms) {

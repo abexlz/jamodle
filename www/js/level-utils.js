@@ -46,9 +46,42 @@
 
   function getLevelTitle(level, t) {
     const id = getLevelTitleId(level);
-    const key = `profile.levelTitles.${id}`;
+    return getTitleLabel(id, t);
+  }
+
+  function getTitleLabel(titleId, t) {
+    const shopTitle = global.ShopService?.TITLES?.[titleId];
+    if (shopTitle) {
+      const shopKey = `shop.titles.${titleId}`;
+      const shopTranslated = t ? t(shopKey) : '';
+      if (shopTranslated && shopTranslated !== shopKey) return shopTranslated;
+    }
+    const key = `profile.levelTitles.${titleId}`;
     const translated = t ? t(key) : '';
-    return translated || id;
+    return translated || titleId;
+  }
+
+  function getUnlockedTitleIds(level, profile) {
+    const lv = Math.max(1, parseInt(level, 10) || 1);
+    const levelTitles = TITLE_RANGES
+      .filter((r) => lv >= r.min)
+      .map((r) => r.id)
+      .reverse();
+    const purchased = profile?.purchasedTitleIds || [];
+    return [...levelTitles, ...purchased.filter((id) => !levelTitles.includes(id))];
+  }
+
+  function isTitleUnlocked(level, titleId, profile) {
+    if (profile && (profile.purchasedTitleIds || []).includes(titleId)) return true;
+    const lv = Math.max(1, parseInt(level, 10) || 1);
+    const match = TITLE_RANGES.find((r) => r.id === titleId);
+    return match ? lv >= match.min : false;
+  }
+
+  function resolveTitleId(level, titleId) {
+    const unlocked = getUnlockedTitleIds(level);
+    if (titleId && unlocked.includes(titleId)) return titleId;
+    return getLevelTitleId(level);
   }
 
   global.LevelUtils = {
@@ -58,6 +91,10 @@
     getLevelFromTotalXp,
     getLevelTitleId,
     getLevelTitle,
+    getTitleLabel,
+    getUnlockedTitleIds,
+    isTitleUnlocked,
+    resolveTitleId,
     TITLE_RANGES,
   };
 })(typeof window !== 'undefined' ? window : globalThis);

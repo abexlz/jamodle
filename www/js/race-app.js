@@ -48,6 +48,9 @@
       this.gameStarted = false;
       this.isP1 = false;
       this._localeOff = null;
+      this._resultsRendered = false;
+      this._activeSeenAtMs = null;
+      this._leftMatch = false;
     }
 
     async init() {
@@ -86,6 +89,8 @@
     }
 
     destroy() {
+      global.RaceRematchUI?.teardown?.();
+      this.leaveMatch();
       if (this._localeOff) {
         this._localeOff();
         this._localeOff = null;
@@ -110,6 +115,7 @@
 
     onLocaleChange() {
       document.title = rt('pageTitle');
+      if (this.matchData?.status === 'done') this._resultsRendered = false;
       if (this.matchData) {
         this.onMatchUpdate(this.matchData);
       } else if (this.els?.main) {
@@ -135,6 +141,49 @@
         main: this.root.querySelector('#race-main'),
         countdown: this.root.querySelector('#race-countdown'),
       };
+      this.wireLeaveHandlers();
+    }
+
+    wireLeaveHandlers() {
+      this.root.querySelector('.race-back')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.leaveMatchAndGo(e.currentTarget.getAttribute('href') || 'profile.html');
+      });
+    }
+
+    leaveMatch() {
+      if (this._leftMatch) return;
+      const data = this.matchData;
+      if (!this.matchId || !this.myUid || !data) return;
+      if (data.status === 'done' || data.status === 'declined' || data.status === 'abandoned') return;
+      this._leftMatch = true;
+      RS().abandonMatch(this.matchId, this.myUid).catch(() => {});
+    }
+
+    async leaveMatchAndGo(href) {
+      global.RaceRematchUI?.teardown?.();
+      if (!this._leftMatch) {
+        this._leftMatch = true;
+        if (this.matchId && this.myUid) {
+          await RS().abandonMatch(this.matchId, this.myUid).catch(() => {});
+        }
+      }
+      global.location.href = href;
+    }
+
+    mountRematchUi() {
+      global.RaceRematchUI?.mount?.({
+        root: this.els.main,
+        matchId: this.matchId,
+        myUid: this.myUid,
+        getMatchData: () => this.matchData,
+        t: rt,
+        getMatchPageUrl: (id) => RS().getMatchPageUrl(id, { gameType: 'wordle' }),
+        createRematch: (oppUid, data) => RS().createMatch(oppUid, {
+          gameType: RS().GAME_TYPES.wordle,
+          wordLength: data.wordLength,
+        }),
+      });
     }
 
     renderError(msg) {
@@ -180,6 +229,18 @@
         return;
       }
 
+      if (data.status === 'declined') {
+        this.phase = 'declined';
+        this.handleDeclined(data);
+        return;
+      }
+
+      if (data.status === 'abandoned') {
+        this.phase = 'abandoned';
+        this.handleAbandoned(data);
+        return;
+      }
+
       if (data.status === 'ready') {
         this.phase = 'ready';
         RS().tryActivateMatch(this.matchId, data);
@@ -196,6 +257,10 @@
 
       if (data.status === 'done') {
         this.phase = 'done';
+        if (this._resultsRendered) {
+          global.RaceRematchUI?.sync?.();
+          return;
+        }
         this.handleDone(data, isP1);
       }
     }
@@ -224,6 +289,27 @@
 
     renderMain(html) {
       if (this.els.main) this.els.main.innerHTML = html;
+    }
+
+    handleDeclined(data) {
+      const decliner = data.declinedByUid === data.player1Uid ? data.player1Name : data.player2Name;
+      this.renderMain(`
+        <div class="race-panel">
+          <p class="race-panel-msg">${escapeHtml(rt('battleDeclined', { name: decliner || rt('opponent') }))}</p>
+          <a class="race-btn" href="profile.html">${escapeHtml(rt('backToProfile'))}</a>
+        </div>
+      `);
+    }
+
+    handleAbandoned(data) {
+      this.game?.setEnabled(false);
+      const abandoner = data.abandonedByUid === data.player1Uid ? data.player1Name : data.player2Name;
+      this.renderMain(`
+        <div class="race-panel">
+          <p class="race-panel-msg">${escapeHtml(rt('opponentAbandoned', { name: abandoner || rt('opponent') }))}</p>
+          <a class="race-btn" href="profile.html">${escapeHtml(rt('backToProfile'))}</a>
+        </div>
+      `);
     }
 
     handlePending(data, isP1) {
@@ -296,31 +382,25 @@
     }
 
     handleActive(data, isP1) {
-      const startMs = RS().startedAtMs(data);
-      if (!startMs) {
-        this.renderMain(`
-          <div class="race-panel">
-            <p class="race-panel-title">${escapeHtml(rt('startingSoon'))}</p>
-          </div>
-        `);
-        return;
-      }
+      const hasStartedPlaying = (data.player1Progress?.guessCount || 0) > 0
+        || (data.player2Progress?.guessCount || 0) > 0
+        || data.player1Progress?.finished
+        || data.player2Progress?.finished;
+      if (!this._activeSeenAtMs) this._activeSeenAtMs = Date.now();
+      const raceStartMs = this._activeSeenAtMs + countdownTotalMs();
 
-      const raceStartMs = startMs + countdownTotalMs();
-      const now = Date.now();
-
-      if (now < raceStartMs) {
+      if (!this.gameStarted && !hasStartedPlaying && Date.now() < raceStartMs) {
         this.renderMain(`
           <div class="race-panel race-countdown-panel">
             <p class="race-panel-title">${escapeHtml(rt('startingSoon'))}</p>
           </div>
         `);
-        this.showCountdown(raceStartMs, () => this.startGame(data, isP1, startMs));
+        this.showCountdown(raceStartMs, () => this.startGame(data, isP1));
         return;
       }
 
       if (!this.gameStarted) {
-        this.startGame(data, isP1, startMs);
+        this.startGame(data, isP1);
       } else if (this.game) {
         this.renderOpponentBar(data);
       }
@@ -336,7 +416,7 @@
       });
     }
 
-    startGame(data, isP1, startMs) {
+    startGame(data, isP1) {
       if (this.gameStarted) return;
       this.gameStarted = true;
       this.els.countdown?.classList.add('hidden');
@@ -365,6 +445,9 @@
     }
 
     handleDone(data, isP1) {
+      if (this._resultsRendered) return;
+      this._resultsRendered = true;
+
       if (this.game) {
         this.game.setEnabled(false);
       }
@@ -425,18 +508,8 @@
         profileLabel: rt('profileLink'),
       }));
 
-      this.root.querySelector('#race-rematch')?.addEventListener('click', async () => {
-        const oppUid = isP1 ? data.player2Uid : data.player1Uid;
-        try {
-          const newId = await RS().createMatch(oppUid, {
-            gameType: RS().GAME_TYPES.wordle,
-            wordLength: data.wordLength,
-          });
-          global.location.href = RS().getMatchPageUrl(newId, { gameType: 'wordle' });
-        } catch {
-          alert(rt('rematchFailed'));
-        }
-      });
+      RUI.afterResultsMount(this.els.main);
+      this.mountRematchUi();
     }
   }
 

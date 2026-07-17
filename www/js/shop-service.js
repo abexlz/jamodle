@@ -12,6 +12,20 @@
     'dark-hanji': { id: 'dark-hanji', price: 50, swatch: '#8A7858' },
   };
 
+  const TITLES = {
+    wordsmith: { id: 'wordsmith', price: 80, icon: '⚔️' },
+    'chain-master': { id: 'chain-master', price: 80, icon: '🔗' },
+    'jamodle-pro': { id: 'jamodle-pro', price: 100, icon: '🎯' },
+    'hangul-sage': { id: 'hangul-sage', price: 120, icon: '📜' },
+  };
+
+  const FRAMES = {
+    sakura: { id: 'sakura', price: 60, swatch: '#FFB8D0' },
+    neon: { id: 'neon', price: 75, swatch: '#68d8f8' },
+    sunset: { id: 'sunset', price: 75, swatch: '#FFB878' },
+    galaxy: { id: 'galaxy', price: 100, swatch: '#9966cc' },
+  };
+
   const ITEMS = {
     hintToken: { id: 'hintToken', price: 15, icon: '🪙', useHintTokens: true },
     extraGuess: { id: 'extraGuess', field: 'extraGuessTokens', price: 40, icon: '❤️' },
@@ -32,12 +46,17 @@
   function getInventory() {
     const p = loadProfile();
     if (!p) {
-      return { coins: 0, extraGuessTokens: 0, ownedThemes: [], selectedCosmeticTheme: 'default' };
+      return {
+        coins: 0, extraGuessTokens: 0, ownedThemes: [],
+        purchasedTitleIds: [], unlockedFrameIds: [], selectedCosmeticTheme: 'default',
+      };
     }
     return {
       coins: p.coins || 0,
       extraGuessTokens: p.extraGuessTokens || 0,
       ownedThemes: [...(p.ownedThemes || [])],
+      purchasedTitleIds: [...(p.purchasedTitleIds || [])],
+      unlockedFrameIds: [...(p.unlockedFrameIds || [])],
       selectedCosmeticTheme: p.selectedCosmeticTheme || 'default',
     };
   }
@@ -54,6 +73,20 @@
     if (!themeId || themeId === 'default') return true;
     const p = loadProfile();
     return !!(p?.ownedThemes || []).includes(themeId);
+  }
+
+  function ownsTitle(titleId) {
+    const p = loadProfile();
+    if (!p) return false;
+    if (global.ProfileService?.isTitleUnlocked?.(p, titleId)) return true;
+    return !!(p.purchasedTitleIds || []).includes(titleId);
+  }
+
+  function ownsFrame(frameId) {
+    if (!frameId || frameId === 'none') return true;
+    const p = loadProfile();
+    if (!p) return false;
+    return global.ProfileService?.isFrameUnlocked?.(p, frameId) === true;
   }
 
   function canAfford(price) {
@@ -105,6 +138,40 @@
     return { ok: true, coins: profile.coins };
   }
 
+  function buyTitle(titleId) {
+    const title = TITLES[titleId];
+    if (!title) return { ok: false, reason: 'unknown' };
+    const profile = loadProfile();
+    if (!profile) return { ok: false, reason: 'no-profile' };
+    if (ownsTitle(titleId)) return { ok: false, reason: 'owned' };
+    if ((profile.coins || 0) < title.price) return { ok: false, reason: 'insufficient' };
+
+    profile.coins -= title.price;
+    if (!profile.purchasedTitleIds) profile.purchasedTitleIds = [];
+    profile.purchasedTitleIds.push(titleId);
+    saveProfile(profile);
+    global.PlayerHud?.refresh?.();
+    return { ok: true, coins: profile.coins };
+  }
+
+  function buyFrame(frameId) {
+    const frame = FRAMES[frameId];
+    if (!frame) return { ok: false, reason: 'unknown' };
+    const profile = loadProfile();
+    if (!profile) return { ok: false, reason: 'no-profile' };
+    if (ownsFrame(frameId)) return { ok: false, reason: 'owned' };
+    if ((profile.coins || 0) < frame.price) return { ok: false, reason: 'insufficient' };
+
+    profile.coins -= frame.price;
+    if (!profile.unlockedFrameIds) profile.unlockedFrameIds = [];
+    if (!profile.unlockedFrameIds.includes(frameId)) {
+      profile.unlockedFrameIds.push(frameId);
+    }
+    saveProfile(profile);
+    global.PlayerHud?.refresh?.();
+    return { ok: true, coins: profile.coins };
+  }
+
   function buyItem(itemId) {
     const item = ITEMS[itemId];
     if (!item) return { ok: false, reason: 'unknown' };
@@ -151,16 +218,22 @@
   global.ShopService = {
     COINS_PER_LEVEL,
     THEMES,
+    TITLES,
+    FRAMES,
     ITEMS,
     getCoins,
     getInventory,
     getItemCount,
     ownsTheme,
+    ownsTitle,
+    ownsFrame,
     canAfford,
     grantCoins,
     grantLevelUpCoins,
     grantLevelUpCoinsOnProfile,
     buyTheme,
+    buyTitle,
+    buyFrame,
     buyItem,
     selectTheme,
     spendExtraGuessToken,

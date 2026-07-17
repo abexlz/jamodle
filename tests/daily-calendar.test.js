@@ -68,7 +68,26 @@ store.set('jamodeul-match-daily-2026-06-02', JSON.stringify({ over: true, won: t
 store.set('jamodeul-match-daily-2026-06-03', JSON.stringify({ over: true, won: true, guessCount: 4 }));
 
 assertEqual(DCS.getMonthWinCount(2026, 6), 3, 'month win count');
-const badges = DCS.onDailyWin('2026-06-03');
+
+sandbox.globalThis.AppStorage = {
+  getPrefixed(prefix) {
+    return [...store.keys()].filter((k) => k.startsWith(prefix));
+  },
+  get(key, fallback) {
+    const raw = store.get(key);
+    if (raw == null) return fallback;
+    try { return JSON.parse(raw); } catch { return fallback; }
+  },
+  set(key, value) {
+    store.set(key, JSON.stringify(value));
+    return true;
+  },
+};
+vm.runInContext(fs.readFileSync(path.join(__dirname, '../www/js/daily-calendar-service.js'), 'utf8'), sandbox);
+const DCS2 = sandbox.globalThis.DailyCalendarService;
+DCS2.getTodayKey = () => TODAY;
+assertEqual(DCS2.getMonthWinCount(2026, 6), 3, 'month win count via AppStorage');
+const badges = DCS2.onDailyWin('2026-06-03');
 assert(badges.length >= 1 && badges[0].threshold === 3, 'bronze badge on 3 wins');
 
 assertEqual(DCS.buildPlayUrl('2026-06-15'), 'match.html?daily=1&date=2026-06-15', 'play url');

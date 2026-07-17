@@ -19,32 +19,26 @@ html[data-theme="dark"] {
   --shadow-sm: 0 4px 12px rgba(0, 40, 50, 0.25);
   --panel-bg: rgba(0, 70, 85, 0.38);
   --panel-border: rgba(123, 207, 255, 0.5);
-  --app-btn-fill: linear-gradient(180deg, #FFE566 0%, #FFD743 38%, #FFC820 72%, #FFB800 100%);
-  --app-btn-fill-hover: linear-gradient(180deg, #FFED80 0%, #FFE255 38%, #FFD430 72%, #FFC820 100%);
-  --app-btn-fill-sky: linear-gradient(180deg, #B8E8FF 0%, #7BCFFF 45%, #5EB0F0 100%);
-  --app-btn-fill-dark: linear-gradient(180deg, #00889E 0%, #007A8E 55%, #006878 100%);
-  --app-btn-border-color: #E09500;
-  --app-btn-border-sky: #3A9AD4;
-  --app-btn-border-dark: #005868;
+  --app-btn-fill: #FFCC33;
+  --app-btn-fill-hover: #FFD966;
+  --app-btn-fill-sky: #99CCFF;
+  --app-btn-fill-purple: #9B6FFF;
+  --app-btn-fill-dark: #009BB5;
+  --app-btn-border-color: #E6B82E;
+  --app-btn-border-sky: #73B5F2;
+  --app-btn-border-purple: #7B4FE8;
+  --app-btn-border-dark: #007A8E;
   --app-btn-text: #ffffff;
-  --app-btn-text-shadow: 0 2px 0 rgba(140, 70, 0, 0.42), 0 1px 2px rgba(0, 0, 0, 0.15);
-  --app-btn-text-shadow-sky: 0 2px 0 rgba(30, 90, 130, 0.45);
-  --app-btn-shadow:
-    inset 0 2px 0 rgba(255, 255, 255, 0.48),
-    inset 0 -3px 0 rgba(255, 170, 0, 0.22),
-    0 6px 0 #C87A00,
-    0 8px 18px rgba(0, 0, 0, 0.22);
-  --app-btn-shadow-sky:
-    inset 0 2px 0 rgba(255, 255, 255, 0.5),
-    inset 0 -3px 0 rgba(60, 150, 210, 0.25),
-    0 6px 0 #3A8FC7,
-    0 8px 18px rgba(0, 0, 0, 0.2);
-  --app-btn-shadow-dark:
-    inset 0 2px 0 rgba(255, 255, 255, 0.12),
-    0 4px 0 #004858,
-    0 6px 14px rgba(0, 0, 0, 0.25);
-  --app-btn-shadow-active: 0 2px 0 #C87A00, inset 0 1px 0 rgba(255, 255, 255, 0.25);
-  --app-btn-shadow-active-sky: 0 2px 0 #3A8FC7, inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  --app-btn-text-shadow: 0 2px 0 rgba(120, 80, 0, 0.45);
+  --app-btn-text-shadow-sky: 0 2px 0 rgba(20, 80, 140, 0.48);
+  --app-btn-text-shadow-purple: 0 2px 0 rgba(55, 25, 120, 0.48);
+  --app-btn-shadow: var(--app-btn-gloss-inset, inset 0 1px 0 rgba(255, 255, 255, 0.4), inset 0 -2px 5px rgba(0, 0, 0, 0.07)), 0 6px 0 #C4A82D, var(--app-btn-gloss-ambient, 0 8px 16px rgba(0, 40, 50, 0.16));
+  --app-btn-shadow-sky: var(--app-btn-gloss-inset, inset 0 1px 0 rgba(255, 255, 255, 0.4), inset 0 -2px 5px rgba(0, 0, 0, 0.07)), 0 6px 0 #5A9FDB, var(--app-btn-gloss-ambient, 0 8px 16px rgba(0, 40, 50, 0.16));
+  --app-btn-shadow-purple: var(--app-btn-gloss-inset, inset 0 1px 0 rgba(255, 255, 255, 0.4), inset 0 -2px 5px rgba(0, 0, 0, 0.07)), 0 6px 0 #6238D0, var(--app-btn-gloss-ambient, 0 8px 16px rgba(0, 40, 50, 0.16));
+  --app-btn-shadow-dark: var(--app-btn-gloss-inset, inset 0 1px 0 rgba(255, 255, 255, 0.28), inset 0 -2px 5px rgba(0, 0, 0, 0.1)), 0 5px 0 #006878, var(--app-btn-gloss-ambient, 0 8px 16px rgba(0, 40, 50, 0.16));
+  --app-btn-shadow-active: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 2px 0 #C4A82D, 0 4px 8px rgba(0, 40, 50, 0.1);
+  --app-btn-shadow-active-sky: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 2px 0 #5A9FDB, 0 4px 8px rgba(0, 40, 50, 0.1);
+  --app-btn-shadow-active-purple: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 2px 0 #6238D0, 0 4px 8px rgba(0, 40, 50, 0.1);
   --app-btn-radius: 24px;
   --mint: rgba(0, 90, 105, 0.5);
   --mint-btn: rgba(123, 207, 255, 0.55);
@@ -60,7 +54,7 @@ html[data-theme="dark"] {
   --pink-btn: rgba(123, 207, 255, 0.55);
   --correct: #5FD68A;
   --correct-text: #ffffff;
-  --present: #FFD743;
+  --present: #FFCC33;
   --present-text: #7A4A00;
   --absent: #8A9AA4;
   --absent-text: rgba(255, 255, 255, 0.92);
@@ -75,14 +69,35 @@ html[data-theme="dark"] {
 
 body {
   background-color: #0097B2 !important;
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='%23006E82' fill-opacity='0.14'%3E%3Cpath d='M30 20c8 12 6 28-4 38-6-14-2-30 4-38zM90 75c10 8 12 24 4 34-12-8-14-24-4-34zM55 95c-4 10-14 16-26 14 8-10 20-14 26-14zM75 25c6-8 18-10 28-4-10 6-20 8-28 4z'/%3E%3C/g%3E%3C/svg%3E"),
-    radial-gradient(ellipse 110% 75% at 50% -8%, rgba(255, 255, 255, 0.22) 0%, transparent 52%),
-    radial-gradient(circle at 12% 88%, rgba(0, 0, 0, 0.07) 0%, transparent 38%),
-    radial-gradient(circle at 88% 72%, rgba(0, 0, 0, 0.06) 0%, transparent 34%),
-    radial-gradient(circle at 50% 120%, rgba(0, 60, 72, 0.35) 0%, transparent 55%),
-    linear-gradient(180deg, #00B4CC 0%, #0097B2 48%, #007A8E 100%) !important;
+  background-image: url('../assets/bg-phone-menu.jpg') !important;
+  background-size: cover !important;
+  background-position: center top !important;
+  background-repeat: no-repeat !important;
+  background-attachment: fixed !important;
   color: #ffffff !important;
+}
+
+/* Phone — one background per home tab */
+@media (max-width: 599px) {
+  body.home-tab-menu {
+    background-image: url('../assets/bg-phone-menu.jpg') !important;
+  }
+
+  body.home-tab-learn {
+    background-image: url('../assets/bg-phone-learn.jpg') !important;
+  }
+
+  body.home-tab-quests,
+  body.home-tab-shop {
+    background-image: url('../assets/bg-phone-quests.jpg') !important;
+  }
+}
+
+@media (min-width: 600px) {
+  body {
+    background-image: url('../assets/bg-landscape.jpg') !important;
+    background-position: center center !important;
+  }
 }
 
 /* ── Typography on teal ── */
@@ -104,26 +119,26 @@ h1, h2, h3,
 }
 
 .seal {
-  background: linear-gradient(180deg, #FFE566 0%, #FFB800 100%) !important;
-  border-color: #E09500 !important;
+  background: #FFCC33 !important;
+  border-color: #E6B82E !important;
   color: #ffffff !important;
-  text-shadow: 0 2px 0 rgba(140, 70, 0, 0.4);
-  box-shadow:
-    inset 0 2px 0 rgba(255, 255, 255, 0.45),
-    0 4px 0 #C87A00,
-    0 6px 14px rgba(0, 0, 0, 0.2) !important;
+  text-shadow: 0 2px 0 rgba(120, 80, 0, 0.45);
+  box-shadow: 0 4px 0 #C4A82D !important;
 }
 
 .top-nav-btn {
-  background: linear-gradient(180deg, #00889E 0%, #007A8E 100%) !important;
+  background-color: #007A8E !important;
+  background-image: var(--app-btn-gloss-overlay) !important;
   border-color: rgba(123, 207, 255, 0.45) !important;
   color: #ffffff !important;
-  box-shadow: 0 4px 0 #004858, 0 6px 12px rgba(0, 0, 0, 0.2) !important;
+  box-shadow: var(--app-btn-gloss-inset), 0 5px 0 #004858, var(--app-btn-gloss-ambient) !important;
 }
 
-.top-nav-btn:active {
-  transform: translateY(2px);
-  box-shadow: 0 2px 0 #004858 !important;
+.top-nav-btn:active,
+.top-nav-btn.is-pressed {
+  transform: translateY(2px) scale(var(--app-btn-press-scale, 0.976));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 2px 0 #004858, 0 4px 8px rgba(0, 40, 50, 0.1) !important;
+  filter: brightness(0.96);
 }
 
 /* ── Menu panels (Wordle-style grouped buttons) ── */
@@ -189,7 +204,6 @@ button.ghost,
 .settings-back,
 .back-link,
 .top-nav-btn,
-.accent-mint,
 .accent-peach,
 .accent-blue,
 .accent-lavender,
@@ -201,14 +215,15 @@ button.ghost,
 .match-mode-btn[data-match-mode="medium"],
 .match-mode-btn[data-match-mode="hard"],
 .match-token-counter {
-  background: var(--app-btn-fill) !important;
+  background-color: var(--app-btn-fill) !important;
+  background-image: var(--app-btn-gloss-overlay) !important;
   border: 2px solid var(--app-btn-border-color) !important;
   border-radius: var(--app-btn-radius, 24px) !important;
   color: var(--app-btn-text) !important;
   box-shadow: var(--app-btn-shadow) !important;
 }
 
-/* Sky-blue secondary buttons */
+/* Soft gloss on interactive buttons — panels stay matte above */
 .match-mode-cancel,
 .length-cancel,
 #syl-picker-cancel,
@@ -216,16 +231,81 @@ button.ghost,
 .accent-blue.learning-mode-card,
 .accent-blue.daily-challenge-card,
 .accent-blue.word-game-card {
-  background: var(--app-btn-fill-sky) !important;
+  background-color: var(--app-btn-fill-sky) !important;
+  background-image: var(--app-btn-gloss-overlay) !important;
   border-color: var(--app-btn-border-sky) !important;
   box-shadow: var(--app-btn-shadow-sky) !important;
+}
+
+.menu-multiplayer-btn,
+#menu-screen .menu-multiplayer-btn {
+  background-color: var(--app-btn-fill-purple) !important;
+  background-image: var(--app-btn-gloss-overlay) !important;
+  border-color: var(--app-btn-border-purple) !important;
+  box-shadow: var(--app-btn-shadow-purple) !important;
+}
+
+#menu-screen .menu-btn-primary.daily-challenge-card:not(.menu-daily-puzzle-bar):not(.menu-jamo-game-btn) {
+  background-color: var(--app-btn-fill) !important;
+  background-image: var(--app-btn-gloss-overlay) !important;
+  border-color: var(--app-btn-border-color) !important;
+  box-shadow: var(--app-btn-shadow) !important;
+}
+
+#menu-screen .menu-btn-game.daily-challenge-card {
+  background-color: var(--app-btn-fill-sky) !important;
+  background-image: var(--app-btn-gloss-overlay) !important;
+  border-color: var(--app-btn-border-sky) !important;
+  box-shadow: var(--app-btn-shadow-sky) !important;
+}
+
+#menu-screen .accent-battle.menu-battle-game-btn {
+  background-color: var(--app-btn-fill-purple) !important;
+  background-image: var(--app-btn-gloss-overlay) !important;
+  border-color: var(--app-btn-border-purple) !important;
+  box-shadow: var(--app-btn-shadow-purple) !important;
+}
+
+#menu-screen .accent-mint.menu-battle-game-btn,
+#menu-screen .accent-mint.menu-single-player-game-btn {
+  background-color: #5FD68A !important;
+  background-image: var(--app-btn-gloss-overlay) !important;
+  border-color: #2A9850 !important;
+  box-shadow: var(--app-btn-gloss-inset), 0 6px 0 #2A8048, var(--app-btn-gloss-ambient) !important;
+}
+
+#menu-screen .menu-jamo-game-btn {
+  background-color: #FF8A9B !important;
+  background-image: var(--app-btn-gloss-overlay) !important;
+  border-color: #E86578 !important;
+  box-shadow: var(--app-btn-gloss-inset), 0 6px 0 #C94A5C, var(--app-btn-gloss-ambient) !important;
+}
+
+#menu-screen .accent-muted.menu-tutorial-btn {
+  background-color: var(--app-btn-fill-dark) !important;
+  background-image: var(--app-btn-gloss-overlay) !important;
+  border-color: var(--app-btn-border-dark) !important;
+  box-shadow: var(--app-btn-shadow-dark) !important;
+}
+
+#menu-screen .accent-muted .mode-name,
+#menu-screen .accent-muted .app-btn-title {
+  text-shadow: none !important;
+  color: rgba(255, 255, 255, 0.88) !important;
+}
+
+.menu-multiplayer-btn .mode-name,
+.menu-multiplayer-btn .app-btn-title,
+#menu-screen .menu-multiplayer-btn .mode-name {
+  text-shadow: var(--app-btn-text-shadow-purple) !important;
 }
 
 /* Dark teal ghost / cancel */
 .match-mode-cancel,
 .length-cancel,
 #syl-picker-cancel {
-  background: var(--app-btn-fill-dark) !important;
+  background-color: var(--app-btn-fill-dark) !important;
+  background-image: var(--app-btn-gloss-overlay) !important;
   border-color: var(--app-btn-border-dark) !important;
   box-shadow: var(--app-btn-shadow-dark) !important;
   color: rgba(255, 255, 255, 0.85) !important;
@@ -233,7 +313,8 @@ button.ghost,
 
 .language-option.selected,
 .theme-option.selected {
-  background: var(--app-btn-fill-hover) !important;
+  background-color: var(--app-btn-fill-hover) !important;
+  background-image: var(--app-btn-gloss-overlay) !important;
   border-color: #FFE566 !important;
 }
 
@@ -295,23 +376,38 @@ button.ghost,
 
 /* ── Button press feel ── */
 .app-btn:active:not(:disabled),
+.app-btn.is-pressed:not(:disabled),
 .learning-mode-card:active:not(.is-locked),
+.learning-mode-card.is-pressed:not(.is-locked),
 .daily-challenge-card:active,
+.daily-challenge-card.is-pressed,
 .featured-continue-cta:active,
+.featured-continue-cta.is-pressed,
 .match-mode-btn:active,
+.match-mode-btn.is-pressed,
 .match-actions .btn:active:not(:disabled),
+.match-actions .btn.is-pressed:not(:disabled),
 .match-hint-btn:active:not(:disabled),
+.match-hint-btn.is-pressed:not(:disabled),
 .rotation-dock:active:not(.disabled),
+.rotation-dock.is-pressed:not(.disabled),
 #submit-btn:active:not(:disabled),
+#submit-btn.is-pressed:not(:disabled),
 .length-btn:active,
-.modal button:active {
-  transform: translateY(4px) !important;
+.length-btn.is-pressed,
+.modal button:active,
+.modal button.is-pressed {
+  transform: translateY(var(--app-btn-press-shift, 4px)) scale(var(--app-btn-press-scale, 0.976)) !important;
   box-shadow: var(--app-btn-shadow-active) !important;
+  filter: brightness(0.96);
 }
 
 .accent-blue:active,
+.accent-blue.is-pressed,
 .match-mode-cancel:active,
-.length-cancel:active {
+.match-mode-cancel.is-pressed,
+.length-cancel:active,
+.length-cancel.is-pressed {
   box-shadow: var(--app-btn-shadow-active-sky) !important;
 }
 
@@ -343,7 +439,7 @@ button.ghost,
 
 .rotation-dock.drag-over {
   background: var(--app-btn-fill-hover) !important;
-  border-color: #FFE566 !important;
+  border-color: #FFD966 !important;
 }
 
 .match-hint-btn {
@@ -514,14 +610,17 @@ button.ghost,
 }
 
 .daily-leaderboard-btn {
-  background: var(--app-btn-fill) !important;
+  background-color: var(--app-btn-fill) !important;
+  background-image: var(--app-btn-gloss-overlay) !important;
   border: 2px solid var(--app-btn-border-color) !important;
   box-shadow: var(--app-btn-shadow) !important;
   text-decoration: none !important;
   color: #ffffff !important;
 }
 
-.daily-leaderboard-btn:active {
-  transform: translateY(4px) !important;
+.daily-leaderboard-btn:active,
+.daily-leaderboard-btn.is-pressed {
+  transform: translateY(var(--app-btn-press-shift, 4px)) scale(var(--app-btn-press-scale, 0.976)) !important;
   box-shadow: var(--app-btn-shadow-active) !important;
+  filter: brightness(0.96);
 }

@@ -12,6 +12,17 @@
   let viewMonth = null;
   let selectedDate = null;
   let activeTab = 'puzzles';
+  let scrollLockY = 0;
+
+  function lockBodyScroll() {
+    scrollLockY = window.scrollY || document.documentElement.scrollTop || 0;
+    document.body.style.top = `-${scrollLockY}px`;
+  }
+
+  function unlockBodyScroll() {
+    document.body.style.top = '';
+    window.scrollTo(0, scrollLockY);
+  }
 
   function t(key, vars) {
     return global.I18n?.t(key, vars) ?? '';
@@ -25,13 +36,19 @@
       .replace(/"/g, '&quot;');
   }
 
+  const CAL_STYLES_HREF = 'css/daily-calendar.css?v=7';
+
   function ensureStyles() {
-    if (document.getElementById('daily-cal-styles')) return;
-    const link = document.createElement('link');
-    link.id = 'daily-cal-styles';
-    link.rel = 'stylesheet';
-    link.href = 'css/daily-calendar.css';
-    document.head.appendChild(link);
+    let link = document.getElementById('daily-cal-styles');
+    if (!link) {
+      link = document.createElement('link');
+      link.id = 'daily-cal-styles';
+      link.rel = 'stylesheet';
+      document.head.appendChild(link);
+    }
+    if (link.getAttribute('href') !== CAL_STYLES_HREF) {
+      link.href = CAL_STYLES_HREF;
+    }
   }
 
   function monthLabel(year, month) {
@@ -73,33 +90,74 @@
     return next.year !== viewYear || next.month !== viewMonth;
   }
 
+  function milestoneClass(badge, badges) {
+    if (badge.earned) return ' is-earned';
+    const next = badges.find((b) => !b.earned);
+    if (next && next.threshold === badge.threshold) return ' is-current';
+    return ' is-locked';
+  }
+
   function buildBadgesHtml() {
     const badges = SVC().getBadgeState(viewYear, viewMonth);
     const wins = SVC().getMonthWinCount(viewYear, viewMonth);
     const next = SVC().getNextBadgeThreshold(viewYear, viewMonth);
     const maxThreshold = SVC().BADGE_THRESHOLDS[SVC().BADGE_THRESHOLDS.length - 1];
-    const progressPct = Math.min(100, Math.round((wins / maxThreshold) * 100));
+    const progressPct = Math.min(100, (wins / maxThreshold) * 100);
+    const winsUntilNext = wins >= maxThreshold ? 0 : Math.max(0, next - wins);
 
     const badgesHtml = badges.map((b) => `
-      <div class="daily-cal-badge${b.earned ? ' is-earned' : ''}" title="${escapeHtml(t('dailyCalendar.badgeAt', { count: b.threshold }))}">
+      <div class="daily-cal-badge${milestoneClass(b, badges)}" title="${escapeHtml(t('dailyCalendar.badgeAt', { count: b.threshold }))}">
         <span class="daily-cal-badge-icon" aria-hidden="true">${BADGE_ICONS[b.id] || '🏅'}</span>
-        <span class="daily-cal-badge-label">${b.threshold}</span>
+        <span class="daily-cal-badge-label">${escapeHtml(t('dailyCalendar.badgeAt', { count: b.threshold }))}</span>
       </div>
     `).join('');
 
-    const progressText = wins >= maxThreshold
+    const markerPcts = SVC().BADGE_THRESHOLDS.map((threshold) => (threshold / maxThreshold) * 100);
+    const markersHtml = markerPcts.map((pct) => `
+      <span class="daily-cal-progress-marker" style="left:${pct}%"></span>
+    `).join('');
+
+    const remainingText = wins >= maxThreshold
       ? t('dailyCalendar.allBadgesEarned', { count: wins })
-      : t('dailyCalendar.progressToNext', { count: wins, next });
+      : t('dailyCalendar.winsUntilNext', { count: winsUntilNext });
 
     return `
       <section class="daily-cal-prizes" aria-label="${escapeHtml(t('dailyCalendar.monthlyPrizes'))}">
         <h3 class="daily-cal-prizes-title">${escapeHtml(t('dailyCalendar.monthlyPrizes'))}</h3>
-        <div class="daily-cal-badges">${badgesHtml}</div>
-        <div class="daily-cal-progress-wrap" aria-hidden="true">
-          <div class="daily-cal-progress-bar" style="width:${progressPct}%"></div>
+        <div class="daily-cal-wins-summary">
+          <p class="daily-cal-wins-count">${escapeHtml(t('dailyCalendar.winsCount', { current: wins, max: maxThreshold }))}</p>
+          <p class="daily-cal-wins-remaining">${escapeHtml(remainingText)}</p>
         </div>
-        <p class="daily-cal-progress-text">${escapeHtml(progressText)}</p>
+        <div class="daily-cal-badges">${badgesHtml}</div>
+        <div class="daily-cal-progress-wrap" role="progressbar" aria-valuenow="${wins}" aria-valuemin="0" aria-valuemax="${maxThreshold}" aria-label="${escapeHtml(t('dailyCalendar.winsCount', { current: wins, max: maxThreshold }))}">
+          <div class="daily-cal-progress-bar" style="width:${progressPct}%"></div>
+          ${markersHtml}
+        </div>
       </section>
+    `;
+  }
+
+  function buildStatsHtml() {
+    const streakInfo = global.LearningStreak?.getDisplayInfo?.();
+    if (!streakInfo) return '';
+
+    const wins = SVC().getMonthWinCount(viewYear, viewMonth);
+
+    return `
+      <div class="daily-cal-stats" aria-label="${escapeHtml(t('dailyCalendar.statsLabel'))}">
+        <div class="daily-cal-stat">
+          <span class="daily-cal-stat-value">${streakInfo.streakDays}</span>
+          <span class="daily-cal-stat-label">${escapeHtml(t('dailyCalendar.statStreak'))}</span>
+        </div>
+        <div class="daily-cal-stat">
+          <span class="daily-cal-stat-value">${wins}</span>
+          <span class="daily-cal-stat-label">${escapeHtml(t('dailyCalendar.statMonthlyWins'))}</span>
+        </div>
+        <div class="daily-cal-stat">
+          <span class="daily-cal-stat-value">${streakInfo.longestStreak}</span>
+          <span class="daily-cal-stat-label">${escapeHtml(t('dailyCalendar.statBestStreak'))}</span>
+        </div>
+      </div>
     `;
   }
 
@@ -132,13 +190,17 @@
       if (!cell) return '<div class="daily-cal-day is-empty" aria-hidden="true"></div>';
       const { day, dateKey } = cell;
       const selectable = SVC().canSelectDate(dateKey);
+      const completed = SVC().isDateCompleted(dateKey);
+      const checkHtml = completed
+        ? '<span class="daily-cal-day-check" aria-hidden="true">✓</span>'
+        : '';
       return `
         <button type="button" class="${dayClasses(dateKey)}"
           data-date="${escapeHtml(dateKey)}"
           ${selectable ? '' : 'disabled'}
           aria-label="${escapeHtml(t('dailyCalendar.dayLabel', { day, date: dateKey }))}"
           aria-pressed="${dateKey === selectedDate ? 'true' : 'false'}">
-          ${day}
+          <span class="daily-cal-day-num">${day}</span>${checkHtml}
         </button>
       `;
     }).join('');
@@ -182,13 +244,16 @@
     const canPlay = svc.canPlayDate(selectedDate);
 
     if (canPlay) {
+      const playLabel = svc.isToday(selectedDate)
+        ? t('dailyCalendar.playToday')
+        : t('dailyCalendar.playDate', { date: dateLabel });
       const freeTag = svc.isToday(selectedDate)
         ? `<span class="daily-cal-free-tag">${escapeHtml(t('dailyCalendar.free'))}</span>`
         : '';
       return `
         <div class="daily-cal-play-row">
           <button type="button" class="daily-cal-play-btn" data-cal-action="play">
-            ${escapeHtml(t('dailyCalendar.playDate', { date: dateLabel }))}${freeTag}
+            <span class="daily-cal-play-label">${escapeHtml(playLabel)}</span>${freeTag}
           </button>
         </div>
       `;
@@ -218,11 +283,14 @@
 
     body.innerHTML = activeTab === 'trophies'
       ? buildTrophiesHtml()
-      : buildBadgesHtml() + buildCalendarHtml();
+      : buildBadgesHtml() + buildCalendarHtml() + buildStatsHtml();
     footer.innerHTML = activeTab === 'puzzles' ? buildFooterHtml() : '';
 
     overlayEl.querySelectorAll('.daily-cal-tab').forEach((tab) => {
-      tab.classList.toggle('is-active', tab.dataset.calTab === activeTab);
+      const isActive = tab.dataset.calTab === activeTab;
+      tab.classList.toggle('is-active', isActive);
+      tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      tab.tabIndex = isActive ? 0 : -1;
     });
 
     global.I18n?.applyToDocument?.(overlayEl);
@@ -231,7 +299,9 @@
   function close() {
     if (!overlayEl) return;
     document.body.classList.remove('daily-cal-open');
+    unlockBodyScroll();
     overlayEl.classList.remove('visible');
+    global.HomeNav?.show?.();
     const el = overlayEl;
     overlayEl = null;
     setTimeout(() => el.remove(), 280);
@@ -314,9 +384,16 @@
         const dateKey = btn.dataset.date;
         if (!dateKey || !SVC().canSelectDate(dateKey)) return;
         selectedDate = dateKey;
-        renderBody();
-        bindFooterActions();
-        bindCalendarEvents();
+        overlayEl.querySelectorAll('.daily-cal-day[data-date]').forEach((dayBtn) => {
+          const picked = dayBtn.dataset.date === selectedDate;
+          dayBtn.classList.toggle('is-selected', picked);
+          dayBtn.setAttribute('aria-pressed', picked ? 'true' : 'false');
+        });
+        const footer = overlayEl.querySelector('.daily-cal-footer');
+        if (footer && activeTab === 'puzzles') {
+          footer.innerHTML = buildFooterHtml();
+          bindFooterActions();
+        }
       });
     });
   }
@@ -343,12 +420,13 @@
     overlayEl.innerHTML = `
       <div class="daily-cal-modal">
         <header class="daily-cal-header">
-          <button type="button" class="daily-cal-close" aria-label="${escapeHtml(t('dailyCalendar.close'))}">×</button>
-          <div class="daily-cal-tabs" role="tablist">
-            <button type="button" class="daily-cal-tab is-active" role="tab" data-cal-tab="puzzles">${escapeHtml(t('dailyCalendar.tabPuzzles'))}</button>
-            <button type="button" class="daily-cal-tab" role="tab" data-cal-tab="trophies">${escapeHtml(t('dailyCalendar.tabTrophies'))}</button>
+          <button type="button" class="daily-cal-close" aria-label="${escapeHtml(t('dailyCalendar.closeLabel'))}">
+            <span class="daily-cal-close-icon" aria-hidden="true">×</span>
+          </button>
+          <div class="daily-cal-tabs" role="tablist" aria-label="${escapeHtml(t('dailyCalendar.title'))}">
+            <button type="button" class="daily-cal-tab is-active" role="tab" data-cal-tab="puzzles" aria-selected="true">${escapeHtml(t('dailyCalendar.tabPuzzles'))}</button>
+            <button type="button" class="daily-cal-tab" role="tab" data-cal-tab="trophies" aria-selected="false" tabindex="-1">${escapeHtml(t('dailyCalendar.tabTrophies'))}</button>
           </div>
-          <span style="width:36px" aria-hidden="true"></span>
         </header>
         <div class="daily-cal-body"></div>
         <footer class="daily-cal-footer"></footer>
@@ -357,6 +435,8 @@
 
     document.body.appendChild(overlayEl);
     document.body.classList.add('daily-cal-open');
+    lockBodyScroll();
+    global.HomeNav?.hide?.();
     renderBody();
     bindEvents();
     requestAnimationFrame(() => overlayEl.classList.add('visible'));

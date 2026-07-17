@@ -4,7 +4,7 @@
   background: var(--bg, #FFF8F5);
   color: var(--text, #5D6470);
   padding: calc(12px + var(--safe-top, 0px)) 16px calc(24px + var(--safe-bottom, 0px));
-  font-family: 'Noto Sans KR', system-ui, sans-serif;
+  font-family: 'Junegull', sans-serif;
 }
 
 .level-mode-header {
@@ -21,7 +21,7 @@
 }
 
 .level-mode-header h1 {
-  font-family: Jua, 'Noto Sans KR', sans-serif;
+  font-family: 'Junegull', 'Junegull', sans-serif;
   font-size: 1.6rem;
   color: var(--heading, #7B8FD4);
   margin: 0 0 6px;
@@ -119,7 +119,7 @@
 
 .level-mode-detail-title {
   margin: 0;
-  font-family: Jua, 'Noto Sans KR', sans-serif;
+  font-family: 'Junegull', 'Junegull', sans-serif;
   font-size: 1.35rem;
   color: var(--heading, #7B8FD4);
 }
@@ -150,7 +150,7 @@
   border-radius: 14px;
   background: var(--mint-btn, #98DDB8);
   color: var(--text, #5D6470);
-  font-family: Jua, 'Noto Sans KR', sans-serif;
+  font-family: 'Junegull', 'Junegull', sans-serif;
   font-size: 1.05rem;
   cursor: pointer;
 }
@@ -197,7 +197,7 @@
 }
 
 .tutorial-onboarding-title {
-  font-family: Jua, 'Noto Sans KR', sans-serif;
+  font-family: 'Junegull', 'Junegull', sans-serif;
   font-size: 1.4rem;
   color: var(--heading, #7B8FD4);
   margin: 0 0 10px;
@@ -216,7 +216,7 @@
   background: var(--mint-btn, #98DDB8);
   color: var(--text, #5D6470);
   text-decoration: none;
-  font-family: Jua, 'Noto Sans KR', sans-serif;
+  font-family: 'Junegull', 'Junegull', sans-serif;
   font-size: 1.05rem;
 }
 

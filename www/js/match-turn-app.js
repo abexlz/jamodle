@@ -7,16 +7,34 @@
   const RS = () => global.RaceService;
   const RC = () => global.RaceCountdown;
   const COUNTDOWN_SEC = 3;
-  const TURN_EXPIRE_GRACE_MS = 3000;
   const countdownTotalMs = () => RC()?.countdownTotalMs?.(COUNTDOWN_SEC) ?? (COUNTDOWN_SEC + 1) * 1000;
+  // Grace (server-anchored) after a turn expires before the *waiting* player is
+  // allowed to force-advance it. Normal turns are advanced by the active player;
+  // this only rescues a frozen/disconnected active player.
+  const TURN_EXPIRE_GRACE_MS = 4000;
+  const DEBUG_TURN = (() => {
+    try {
+      const qs = new URLSearchParams(global.location?.search || '');
+      return qs.has('debugTurn') || global.localStorage?.getItem('jamodeul-debug-turn') === '1';
+    } catch (_) {
+      return false;
+    }
+  })();
+
+  function debugTurn(event, meta) {
+    if (!DEBUG_TURN) return;
+    try {
+      console.log('[TurnDebug][MatchTurnApp]', event, meta || {});
+    } catch (_) {}
+  }
 
   function rt(key, vars) {
     const t = global.I18n?.t;
     if (!t) return '';
     const turn = t('matchTurn.' + key, vars);
     if (turn) return turn;
-    const race = t('matchRace.' + key, vars);
-    if (race) return race;
+    const matchRace = t('matchRace.' + key, vars);
+    if (matchRace) return matchRace;
     return t('race.' + key, vars) || '';
   }
 
@@ -58,12 +76,24 @@
       this.preparedTurnNumber = null;
       this.pendingTurnSubmit = false;
       this._lastTurnKey = null;
-      this.browseHistoryIdx = null;
-      this._browseFollowLatest = true;
       this._localeOff = null;
       this._prevTurnBoundaryKey = null;
       this._turnSwapTimer = null;
       this._lastUrgencySec = null;
+      this._resultsRendered = false;
+      this._activeSeenAtMs = null;
+      this._turnLocalKey = null;
+      this._turnLocalStartMs = null;
+      this._observedAnyTurn = false;
+      this._timeoutAttemptTurnKey = null;
+      this._timeoutAttemptAt = 0;
+      this._forceAttemptTurnKey = null;
+      this._forceAttemptAt = 0;
+      this._autoWritesBlocked = false;
+      this._quotaPaused = false;
+      this._leftMatch = false;
+      this._playedRevealKey = null;
+      this._emotes = null;
     }
 
     async init() {
@@ -80,6 +110,7 @@
         this.renderError(rt('loginRequired'));
         return;
       }
+      global.FirebaseSocial?.syncLocalPublicProfile?.().catch(() => {});
 
       document.title = rt('pageTitle');
       this.renderShell();
@@ -89,13 +120,46 @@
         this.matchId,
         (data) => this.onMatchUpdate(data),
         (err) => {
+          if (RS().isQuotaError?.(err)) {
+            RS().haltOnQuotaError?.(err, 'subscribeMatch');
+            this.pauseDueToQuota();
+            return;
+          }
           console.error('[MatchTurnApp]', err);
           this.renderError(err?.code === 'permission-denied' ? rt('permissionDenied') : rt('loadFailed'));
         }
       );
+
+      if (RS().isQuotaHalted?.()) this.pauseDueToQuota();
+    }
+
+    pauseDueToQuota() {
+      if (this._quotaPaused) return;
+      this._quotaPaused = true;
+      this._autoWritesBlocked = true;
+      this.stopTurnLiveWatch();
+      this.matchUnsub?.();
+      this.matchUnsub = null;
+      if (this.turnTimer) {
+        clearInterval(this.turnTimer);
+        this.turnTimer = null;
+      }
+      this.renderMain(`
+        <div class="race-panel">
+          <p class="race-panel-title">${escapeHtml(rt('loadFailed'))}</p>
+          <p class="race-panel-sub">Firestore quota reached. Close extra tabs, wait a few minutes, then reload.</p>
+          <button type="button" class="race-btn race-btn--primary" id="race-quota-reload">${escapeHtml(ct('retry') || 'Retry')}</button>
+        </div>
+      `);
+      this.root.querySelector('#race-quota-reload')?.addEventListener('click', () => {
+        global.location.reload();
+      });
     }
 
     destroy() {
+      global.RaceRematchUI?.teardown?.();
+      this.stopTurnLiveWatch();
+      this.leaveMatch();
       this._localeOff?.();
       this.matchUnsub?.();
       if (this.countdownTimer) {
@@ -109,11 +173,15 @@
       if (this.turnTimer) clearInterval(this.turnTimer);
       if (this._turnSwapTimer) clearTimeout(this._turnSwapTimer);
       global.KoreanMatchDrag?.end?.();
+      this._emotes?.destroy();
+      this._emotes = null;
+      global.MatchEmotes?.unsubscribeAllEmotes?.();
       this.game?.destroy();
     }
 
     onLocaleChange() {
       document.title = rt('pageTitle');
+      if (this.matchData?.status === 'done') this._resultsRendered = false;
       if (this.matchData) this.onMatchUpdate(this.matchData);
     }
 
@@ -124,20 +192,77 @@
           <h1>${escapeHtml(rt('title'))}</h1>
           <a class="race-settings-link" href="settings.html" aria-label="${escapeHtml(global.I18n?.t('nav.settings') || 'Settings')}">⚙️</a>
         </header>
+        <div id="race-opp-hud" class="race-opp-hud hidden" aria-live="polite">
+          <div class="race-opp-card-col">
+            <div id="race-opp-card" class="race-opp-battle-card" aria-hidden="true"></div>
+            <p id="race-opp-name" class="race-opp-name-hud"></p>
+          </div>
+          <div id="race-opp-emote" class="race-opp-emote hidden" aria-live="polite"></div>
+        </div>
         <div id="race-turn-urgency" class="race-turn-urgency hidden" aria-hidden="true"></div>
         <div id="race-turn-swap" class="race-turn-swap hidden" aria-live="assertive"></div>
-        <div id="race-turn-previous" class="race-turn-previous race-turn-previous--arrows" aria-live="polite"></div>
         <div id="race-main" class="race-main"></div>
         <div id="race-countdown" class="race-countdown hidden" aria-live="assertive"></div>
       `;
       this.els = {
+        oppHud: this.root.querySelector('#race-opp-hud'),
+        oppCard: this.root.querySelector('#race-opp-card'),
+        oppName: this.root.querySelector('#race-opp-name'),
+        oppEmote: this.root.querySelector('#race-opp-emote'),
         turnBar: null,
         turnUrgency: this.root.querySelector('#race-turn-urgency'),
         turnSwap: this.root.querySelector('#race-turn-swap'),
-        turnPrevious: this.root.querySelector('#race-turn-previous'),
         main: this.root.querySelector('#race-main'),
         countdown: this.root.querySelector('#race-countdown'),
       };
+      this.wireLeaveHandlers();
+    }
+
+    wireLeaveHandlers() {
+      this.root.querySelector('.race-back')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.leaveMatchAndGo(e.currentTarget.getAttribute('href') || 'index.html');
+      });
+    }
+
+    leaveMatch() {
+      if (this._leftMatch) return;
+      const data = this.matchData;
+      if (!this.matchId || !this.myUid || !data) return;
+      if (data.status === 'done' || data.status === 'declined' || data.status === 'abandoned') return;
+      this._leftMatch = true;
+      RS().abandonMatch(this.matchId, this.myUid).catch(() => {});
+    }
+
+    async leaveMatchAndGo(href) {
+      global.RaceRematchUI?.teardown?.();
+      if (!this._leftMatch) {
+        this._leftMatch = true;
+        if (this.matchId && this.myUid) {
+          await RS().abandonMatch(this.matchId, this.myUid).catch(() => {});
+        }
+      }
+      global.location.href = href;
+    }
+
+    mountRematchUi() {
+      global.RaceRematchUI?.mount?.({
+        root: this.els.main,
+        matchId: this.matchId,
+        myUid: this.myUid,
+        getMatchData: () => this.matchData,
+        t: rt,
+        getMatchPageUrl: (id) => RS().getMatchPageUrl(id, {
+          gameType: RS().GAME_TYPES.koreanMatch,
+          playMode: RS().PLAY_MODES.turn,
+        }),
+        createRematch: (oppUid, data) => RS().createMatch(oppUid, {
+          gameType: RS().GAME_TYPES.koreanMatch,
+          wordLength: RS().getMatchWordLength(data),
+          playMode: RS().PLAY_MODES.turn,
+          excludeTarget: data.target,
+        }),
+      });
     }
 
     renderError(msg) {
@@ -158,6 +283,7 @@
     }
 
     onMatchUpdate(data) {
+      if (this._quotaPaused) return;
       if (!data) {
         this.renderMain(`
           <div class="race-panel">
@@ -178,6 +304,10 @@
       const turnKey = `${data.currentTurnUid || ''}:${data.turnNumber || 0}`;
       if (this._lastTurnKey && this._lastTurnKey !== turnKey) {
         this.pendingTurnSubmit = false;
+        this._timeoutAttemptTurnKey = null;
+        this._timeoutAttemptAt = 0;
+        this._forceAttemptTurnKey = null;
+        this._forceAttemptAt = 0;
       }
       this._lastTurnKey = turnKey;
       if (data.player1Uid !== this.myUid && data.player2Uid !== this.myUid) {
@@ -186,14 +316,52 @@
       }
 
       if (data.status === 'pending') return this.handlePending(data, this.isP1);
+      if (data.status === 'declined') return this.handleDeclined(data);
+      if (data.status === 'abandoned') return this.handleAbandoned(data);
       if (data.status === 'ready') {
         RS().tryActivateMatch(this.matchId, data);
         return this.handleReady(data, this.isP1);
       }
       if (data.status === 'active') {
+        if (data.sharedState?.over || data.winnerUid) {
+          RS().tryFinalizeMatch?.(this.matchId, data);
+          return this.handleDone({
+            ...data,
+            status: 'done',
+            winnerUid: data.winnerUid || data.sharedState?.winnerUid || null,
+          });
+        }
         return this.handleActive(data);
       }
-      if (data.status === 'done') return this.handleDone(data, this.isP1);
+      if (data.status === 'done') {
+        if (this._resultsRendered) {
+          global.RaceRematchUI?.sync?.();
+          return;
+        }
+        return this.handleDone(data);
+      }
+    }
+
+    handleDeclined(data) {
+      const decliner = data.declinedByUid === data.player1Uid ? data.player1Name : data.player2Name;
+      this.renderMain(`
+        <div class="race-panel">
+          <p class="race-panel-msg">${escapeHtml(rt('battleDeclined', { name: decliner || rt('opponent') }))}</p>
+          <a class="race-btn" href="index.html">${escapeHtml(rt('backHome'))}</a>
+        </div>
+      `);
+    }
+
+    handleAbandoned(data) {
+      if (this.turnTimer) clearInterval(this.turnTimer);
+      this.game?.setMyTurn(false);
+      const abandoner = data.abandonedByUid === data.player1Uid ? data.player1Name : data.player2Name;
+      this.renderMain(`
+        <div class="race-panel">
+          <p class="race-panel-msg">${escapeHtml(rt('opponentAbandoned', { name: abandoner || rt('opponent') }))}</p>
+          <a class="race-btn" href="index.html">${escapeHtml(rt('backHome'))}</a>
+        </div>
+      `);
     }
 
     handlePending(data, isP1) {
@@ -229,7 +397,6 @@
 
     handleReady(data, isP1) {
       if (data.player1Ready && data.player2Ready) {
-        RS().tryActivateMatch(this.matchId, data);
         this.renderMain(`<div class="race-panel"><p class="race-panel-title">${escapeHtml(rt('startingSoon'))}</p></div>`);
         return;
       }
@@ -253,18 +420,18 @@
     }
 
     handleActive(data) {
-      const startMs = RS().startedAtMs(data);
-      if (!startMs) {
-        this.renderMain(`<div class="race-panel"><p class="race-panel-title">${escapeHtml(rt('startingSoon'))}</p></div>`);
-        return;
-      }
-      const raceStartMs = startMs + countdownTotalMs();
-      if (Date.now() < raceStartMs) {
+      const firstTurnStart = (data.turnNumber || 1) === 1
+        && (data.sharedState?.guessCount || 0) === 0
+        && (data.turnHistory?.length || 0) === 0;
+
+      if (!this._activeSeenAtMs) this._activeSeenAtMs = Date.now();
+      const raceStartMs = this._activeSeenAtMs + countdownTotalMs();
+      if (!this.gameStarted && firstTurnStart && Date.now() < raceStartMs) {
         this.renderMain(`<div class="race-panel race-countdown-panel"><p class="race-panel-title">${escapeHtml(rt('startingSoon'))}</p></div>`);
-        this.showCountdown(raceStartMs, () => this.startGame(data));
+        this.showCountdown(raceStartMs, () => this.startGame(data, true));
         return;
       }
-      if (!this.gameStarted) this.startGame(data);
+      if (!this.gameStarted) this.startGame(data, firstTurnStart);
       this.syncTurnState(data);
     }
 
@@ -278,7 +445,7 @@
       });
     }
 
-    startGame(data) {
+    startGame(data, anchorTimerNow = false) {
       if (this.gameStarted) return;
       if (!data?.target) {
         this.renderMain(`<div class="race-panel"><p class="race-panel-msg">${escapeHtml(rt('loadFailed'))}</p></div>`);
@@ -299,14 +466,118 @@
         wordLength,
         mode: wordLength,
         fixedWord: data.target,
+        sharedSeed: this.matchId,
         onTurnSubmit: async (payload) => {
-          await RS().submitTurn(this.matchId, this.myUid, payload);
+          const ok = await RS().submitTurn(this.matchId, this.myUid, payload);
+          if (!ok) throw new Error('turn-not-applied');
+        },
+        onTurnLiveChange: (state) => {
+          const live = this.matchData;
+          if (!live || live.currentTurnUid !== this.myUid || live.status !== 'active') return;
+          if (RS().isQuotaHalted?.()) return;
+          if (!RS().usesTurnLiveRtdb?.() && RS().inWriteCooldown?.()) return;
+          debugTurn('onTurnLiveChange', {
+            matchId: this.matchId,
+            turnNumber: live.turnNumber || 0,
+            placements: state?.placements?.length || 0,
+            mergeResult: state?.merge?.result || null,
+          });
+          RS().updateTurnLive(this.matchId, this.myUid, live.turnNumber, state);
         },
       });
       this.game.mount();
+      requestAnimationFrame(() => {
+        this.game?.syncDockTileSize?.();
+        requestAnimationFrame(() => this.game?.syncDockTileSize?.());
+      });
       this.ensureTurnBar();
       this.mountTurnBarToDock();
+      // First turn: both clients ran the same local countdown, so the turn
+      // clock starts at GO — not at the earlier server activation timestamp.
+      // Mid-match loads keep the server-estimated elapsed time instead.
+      if (anchorTimerNow) this.anchorTurnTimerNow(data);
       this.syncTurnState(data);
+      this.renderOpponentHud(data);
+      this.setupEmotes(data);
+    }
+
+    renderOpponentHud(data) {
+      const opp = RS().getOpponent(data, this.myUid);
+      if (!opp || !this.els.oppHud) return;
+      this.els.oppHud.classList.remove('hidden');
+      if (this.els.oppName) this.els.oppName.textContent = opp.name || rt('opponent');
+      global.MatchEmotes?.fetchOpponentSummary?.(opp.uid).then((summary) => {
+        if (!summary || !this.els.oppCard) return;
+        global.MatchEmotes.renderOpponentBattleCard(this.els.oppCard, summary);
+        if (this.els.oppName && summary.name) this.els.oppName.textContent = summary.name;
+      });
+    }
+
+    setupEmotes(data) {
+      const ME = global.MatchEmotes;
+      const opp = RS().getOpponent(data, this.myUid);
+      if (!ME || !opp?.uid || !this.game?.els?.emoteMount) return;
+      this._emotes?.destroy();
+      this._emotes = new ME.MatchEmotesController({
+        matchId: this.matchId,
+        myUid: this.myUid,
+        oppUid: opp.uid,
+        mountEl: this.game.els.emoteMount,
+        displayEl: this.els.oppEmote,
+        selfDisplayEl: this.game.els.emoteSelf,
+      });
+      this._emotes.mount();
+    }
+
+    currentTurnKey(data) {
+      return `${data?.currentTurnUid || ''}:${data?.turnNumber || 0}:${data?.turnPhase || ''}`;
+    }
+
+    /**
+     * Anchor each turn's timer to the local wall clock at the moment this
+     * client observes the turn boundary. Both clients see the boundary within
+     * network latency of each other, so their timers agree — unlike raw
+     * server-timestamp math, which drifts by whatever the device clock skew is.
+     * Only the very first snapshot after a page load falls back to the
+     * server-estimated elapsed time.
+     */
+    updateTurnLocalStart(data) {
+      const key = this.currentTurnKey(data);
+      if (this._turnLocalKey === key) return;
+      this._turnLocalKey = key;
+      const duration = RS().turnDurationMs?.(data) || 0;
+      const sawBoundary = this._observedAnyTurn === true;
+      this._observedAnyTurn = true;
+      if (!sawBoundary && duration > 0) {
+        const serverRemaining = RS().turnRemainingMs?.(data);
+        const elapsed = Number.isFinite(serverRemaining)
+          ? Math.min(Math.max(duration - serverRemaining, 0), duration)
+          : 0;
+        this._turnLocalStartMs = Date.now() - elapsed;
+        return;
+      }
+      this._turnLocalStartMs = Date.now();
+    }
+
+    /** Re-anchor the current turn to start now (used when GO fires). */
+    anchorTurnTimerNow(data) {
+      this._turnLocalKey = this.currentTurnKey(data);
+      this._turnLocalStartMs = Date.now();
+      this._observedAnyTurn = true;
+    }
+
+    getTurnElapsedMs(data) {
+      if (!data) return 0;
+      this.updateTurnLocalStart(data);
+      if (!this._turnLocalStartMs) return 0;
+      return Date.now() - this._turnLocalStartMs;
+    }
+
+    getTurnRemainingMs(data) {
+      if (!data) return 0;
+      const duration = RS().turnDurationMs?.(data) || 0;
+      if (!duration) return 0;
+      return Math.max(0, duration - this.getTurnElapsedMs(data));
     }
 
     ensureTurnBar() {
@@ -336,21 +607,24 @@
       let myTurnStyle = false;
       let timerHtml = '';
 
+      const duration = RS().turnDurationMs?.(data) || 1;
+      const localPct = Math.round((this.getTurnRemainingMs(data) / duration) * 100);
       if (mode === 'rush') {
         label = rt('rushPhase');
         pct = 100;
         myTurnStyle = true;
       } else if (mode === 'waiting') {
         label = rt('oppTurn', { name: opp?.name || rt('opponent') });
+        pct = localPct;
       } else if (mode === 'mine') {
         label = rt('yourTurn');
-        pct = Math.round((1 - RS().turnElapsedRatio(data)) * 100);
+        pct = localPct;
         myTurnStyle = true;
       }
 
       if (mode !== 'rush' && data.currentTurnUid) {
-        const sec = Math.ceil(RS().turnRemainingMs(data) / 1000);
-        timerHtml = `<span class="race-turn-timer">${escapeHtml(rt('timeLeft', { s: sec }))}</span>`;
+        const sec = Math.ceil(this.getTurnRemainingMs(data) / 1000);
+        timerHtml = `<span class="race-turn-timer" aria-label="${escapeHtml(rt('timeLeft', { s: sec }))}">${sec}</span>`;
       }
 
       bar.classList.remove('hidden');
@@ -368,6 +642,8 @@
           <div class="race-turn-progress-fill" style="width:${pct}%"></div>
         </div>
       `;
+      this.game?.syncDockTileSize?.();
+      requestAnimationFrame(() => this.game?.syncDockTileSize?.());
     }
 
     updateTurnUrgencyOverlay(data) {
@@ -385,7 +661,7 @@
         return;
       }
 
-      const remainingMs = RS().turnRemainingMs(data);
+      const remainingMs = this.getTurnRemainingMs(data);
       const sec = Math.ceil(remainingMs / 1000);
       if (remainingMs <= 0 || sec > 5) {
         this.hideTurnUrgencyOverlay();
@@ -454,88 +730,43 @@
       this.game?.hideOpponentSubmission();
     }
 
-    renderPreviousPanel(data) {
-      const el = this.els.turnPrevious;
-      if (!el || !this.gameStarted) return;
-      this.renderPreviousPanelArrows(data);
-    }
-
-    renderPreviousPanelArrows(data) {
-      const el = this.els.turnPrevious;
-      const history = data.turnHistory || [];
-
-      if (this._browseFollowLatest) {
-        this.browseHistoryIdx = history.length ? history.length - 1 : null;
-      } else if (this.browseHistoryIdx != null && history.length) {
-        this.browseHistoryIdx = Math.max(0, Math.min(this.browseHistoryIdx, history.length - 1));
+    async maybePlayOpponentReveal(data) {
+      const reveal = data?.lastTurnReveal;
+      if (!this.game || !reveal || reveal.byUid === this.myUid) return;
+      const key = `${reveal.byUid}:${reveal.turnNumber ?? ''}`;
+      if (!key || key === this._playedRevealKey) return;
+      if (key === this.game._watchRevealPlayedKey) {
+        this._playedRevealKey = key;
+        return;
       }
 
-      const idx = this.browseHistoryIdx;
-      const entry = idx != null && history[idx] ? history[idx] : null;
+      const sharedLocked = data.sharedState?.locked || [];
+      const revealCorrectKeys = new Set(
+        (reveal.placements || [])
+          .filter((p) => p.correct)
+          .map((p) => `${p.syl}:${p.zone}:${p.subIndex ?? 0}`)
+      );
+      const lockedBeforeReveal = sharedLocked.filter(
+        (lock) => !revealCorrectKeys.has(`${lock.syl}:${lock.zone}:${lock.subIndex ?? 0}`)
+      );
 
-      const sig = [
-        'arrows',
-        idx,
-        this._browseFollowLatest,
-        history.length,
-        entry?.turnNumber,
-        entry?.byUid,
-        entry?.correctCount,
-        entry?.totalPlaced,
-        (entry?.placements || []).map((p) => `${p.syl}${p.zone}${p.char}${p.correct ? 1 : 0}`).join(''),
-        data.target,
-      ].join('|');
-
-      if (sig === this._previousPanelSig && el.childElementCount) return;
-      this._previousPanelSig = sig;
-
-      el.classList.remove('hidden');
-
-      const boardHtml = this.game?.getReplayBoardHtml?.(entry)
-        || `<div class="race-turn-previous-empty">${escapeHtml(rt('noTurnsYet'))}</div>`;
-
-      let meta = rt('noTurnsYet');
-      if (entry) {
-        const who = entry.byUid === this.myUid ? rt('me') : (entry.byName || rt('opponent'));
-        const stat = rt('historyStat', {
-          correct: entry.correctCount ?? 0,
-          total: entry.totalPlaced ?? 0,
-        });
-        meta = rt('historyViewTurn', {
-          n: entry.turnNumber || idx + 1,
-          name: who,
-        }) + ` · ${stat}`;
+      const wasWatching = this.game.watchMode;
+      const hasBoardPlacements = this.game.hasWatchBoardPlacements?.();
+      if (!wasWatching || !hasBoardPlacements) {
+        this.game.resetTurnBoard();
+        this.game.restoreTurnLockedPlacements(lockedBeforeReveal, data.turnHistory, this.myUid);
+        this.game.setWatchMode(true);
+        this.game.renderTurnGuessOnZones(this.game.blocks, reveal, { neutral: true });
       }
 
-      const canPrev = idx != null && idx > 0;
-      const canNext = idx != null && idx < history.length - 1;
-
-      el.innerHTML = `
-        <div class="race-turn-previous-row">
-          <button type="button" class="race-turn-previous-nav-btn" id="race-prev-turn"
-            ${canPrev ? '' : 'disabled'} aria-label="${escapeHtml(rt('historyPrev'))}">‹</button>
-          <div class="race-turn-previous-board${entry ? '' : ' race-turn-previous-board--empty'}" role="img"
-            aria-label="${escapeHtml(entry ? meta : rt('noTurnsYet'))}">${boardHtml}</div>
-          <button type="button" class="race-turn-previous-nav-btn" id="race-next-turn"
-            ${canNext ? '' : 'disabled'} aria-label="${escapeHtml(rt('historyNext'))}">›</button>
-        </div>
-        <p class="race-turn-previous-meta">${escapeHtml(meta)}</p>
-      `;
-
-      el.querySelector('#race-prev-turn')?.addEventListener('click', () => {
-        if (this.browseHistoryIdx == null || this.browseHistoryIdx <= 0) return;
-        this._browseFollowLatest = false;
-        this.browseHistoryIdx -= 1;
-        this.renderPreviousPanel(data);
+      this._playedRevealKey = key;
+      await this.game.playWatchTurnReveal(reveal, {
+        name: reveal.byName || rt('opponent'),
       });
-      el.querySelector('#race-next-turn')?.addEventListener('click', () => {
-        if (this.browseHistoryIdx == null || this.browseHistoryIdx >= history.length - 1) return;
-        this.browseHistoryIdx += 1;
-        if (this.browseHistoryIdx >= history.length - 1) {
-          this._browseFollowLatest = true;
-        }
-        this.renderPreviousPanel(data);
-      });
+
+      if (!wasWatching) {
+        this.game.setWatchMode(false);
+      }
     }
 
     /** Reset + autofill once per upcoming turn while opponent plays. */
@@ -552,19 +783,85 @@
       this.els.main?.classList.remove('race-main--hidden');
     }
 
-    syncTurnState(data) {
+    /** Show opponent's live board while they play their turn. */
+    watchOpponentTurn(data) {
+      const watchKey = `watch-${data.turnNumber || 1}`;
+      if (this.preparedTurnNumber !== watchKey) {
+        this.game.resetTurnBoard();
+        this.game.restoreTurnLockedPlacements?.(data.sharedState?.locked || []);
+        this.preparedTurnNumber = watchKey;
+      }
+      this.game.syncSharedState(data.sharedState || RS().defaultSharedState());
+      this.game.setWatchMode(true);
+      this.game.setBoardHidden(false);
+      if (!RS().usesTurnLiveRtdb?.()) {
+        const live = data.turnLive;
+        if (
+          live?.byUid === data.currentTurnUid
+          && live?.turnNumber === data.turnNumber
+        ) {
+          this.game.applyTurnLiveState(live);
+        } else if (data.lastTurnReveal?.byUid === data.currentTurnUid) {
+          this.game.applyTurnLiveState({
+            placements: data.lastTurnReveal.placements || [],
+            merge: { slots: [null, null], result: null },
+          });
+        }
+      } else if (data.lastTurnReveal?.byUid === data.currentTurnUid) {
+        this.game.applyTurnLiveState({
+          placements: data.lastTurnReveal.placements || [],
+          merge: { slots: [null, null], result: null },
+        });
+      }
+      this.syncTurnLiveWatch(data);
+      this.els.main?.classList.remove('race-main--hidden');
+    }
+
+    stopTurnLiveWatch() {
+      global.TurnLiveRtdb?.unsubscribeAll?.();
+      this._rtdbLiveUnsub = null;
+      this._rtdbWatchKey = null;
+    }
+
+    syncTurnLiveWatch(data) {
+      const TL = global.TurnLiveRtdb;
+      if (!TL?.isEnabled?.() || !this.matchId || !this.game) return;
+
+      const rush = RS().isRushPhase(data);
+      const myTurn = !rush && data.currentTurnUid === this.myUid;
+      const oppUid = data.currentTurnUid;
+      const watchKey = `${oppUid}:${data.turnNumber || 0}`;
+
+      if (myTurn || rush || !oppUid || data.status !== 'active') {
+        this.stopTurnLiveWatch();
+        return;
+      }
+      if (this._rtdbWatchKey === watchKey) return;
+
+      this.stopTurnLiveWatch();
+      this._rtdbWatchKey = watchKey;
+      this._rtdbLiveUnsub = TL.subscribeOpponentLive(
+        this.matchId,
+        oppUid,
+        (live) => {
+          if (!live || !this.game) return;
+          if (live.turnNumber !== (this.matchData?.turnNumber || 0)) return;
+          if (live.byUid !== oppUid) return;
+          this.game.applyTurnLiveState(live);
+        }
+      );
+    }
+
+    async syncTurnState(data) {
       if (!data || !this.game) return;
 
       this.maybeShowTurnSwapOverlay(data);
 
       const rush = RS().isRushPhase(data);
       const myTurn = !rush && data.currentTurnUid === this.myUid;
-      const lastReveal = data.lastTurnReveal;
-      const iSubmittedLast = lastReveal?.byUid === this.myUid && !myTurn && !rush;
-
-      this.renderPreviousPanel(data);
 
       if (rush) {
+        this.stopTurnLiveWatch();
         this.renderTurnBar(data, 'rush');
         this.hideOppSubmission();
         if (this.preparedTurnNumber !== 'rush') {
@@ -580,21 +877,18 @@
 
       this.game.setRushMode(false);
       this.game.setInspectMode(false);
-
-      if (iSubmittedLast) {
-        this.renderTurnBar(data, 'waiting');
-        this.hideOppSubmission();
-        this.enterPrepBoard(data);
-        this.startTurnTimer(data);
-        return;
-      }
-
       if (myTurn) {
+        await this.maybePlayOpponentReveal(data);
         this.renderTurnBar(data, 'mine');
         this.hideOppSubmission();
+        this.stopTurnLiveWatch();
         if (this.preparedTurnNumber !== data.turnNumber) {
           this.game.resetTurnBoard();
-          this.game.applyAutofillFromHistory?.(data.turnHistory, this.myUid);
+          this.game.restoreTurnLockedPlacements?.(
+            data.sharedState?.locked || [],
+            data.turnHistory,
+            this.myUid
+          );
           this.preparedTurnNumber = data.turnNumber;
         }
         this.game.syncSharedState(data.sharedState || RS().defaultSharedState());
@@ -604,9 +898,10 @@
       } else {
         this.renderTurnBar(data, 'waiting');
         this.hideOppSubmission();
-        this.enterPrepBoard(data);
+        this.watchOpponentTurn(data);
       }
 
+      this.syncTurnLiveWatch(data);
       this.startTurnTimer(data);
       this.updateTurnUrgencyOverlay(data);
     }
@@ -622,7 +917,7 @@
     startTurnTimer(data) {
       if (this.turnTimer) clearInterval(this.turnTimer);
       if (data.status !== 'active') return;
-      this.turnTimer = setInterval(async () => {
+      const tick = async () => {
         if (!this.matchData || this.matchData.status !== 'active') {
           clearInterval(this.turnTimer);
           return;
@@ -630,42 +925,138 @@
         const live = this.matchData;
         const rush = RS().isRushPhase(live);
         const myTurn = !rush && live.currentTurnUid === this.myUid;
+        const turnKey = `${live.currentTurnUid || ''}:${live.turnNumber || 0}`;
+        const now = Date.now();
+        const tabHidden = global.document?.hidden === true;
+        const writeCoolingDown = RS().inWriteCooldown?.() === true;
+        const quotaHalted = RS().isQuotaHalted?.() === true;
 
+        if (quotaHalted) {
+          this.pauseDueToQuota();
+          return;
+        }
+
+        this.syncTurnBarOnly(this.matchData);
+        if (this.matchData && !this.pendingTurnSubmit) {
+          this.applyLiveTurnSync(this.matchData);
+        }
+
+        // Own-turn expiry is user-critical: run before tab/cooldown guards and
+        // call the same checkAnswer() path as the Check button.
         if (
           myTurn
-          && RS().turnRemainingMs(live) <= 0
+          && this.getTurnRemainingMs(live) <= 0
           && !this.pendingTurnSubmit
+          && this.game
+          && !this.game.checking
+          && !this.game.turnSubmitting
+          && !this.game.checkedComplete
         ) {
           this.pendingTurnSubmit = true;
+          debugTurn('timeout:expire-own-turn', {
+            matchId: this.matchId,
+            turnKey,
+            turnNumber: live.turnNumber || 0,
+            remainingLocalMs: this.getTurnRemainingMs(live),
+            hasPlacement: this.game.hasAnyPlacement?.() === true,
+          });
           try {
-            const submitted = await this.game?.submitTurnOnTimeout?.();
-            if (!submitted) {
-              await RS().completeTurnWindow(this.matchId, this.matchData);
-            }
+            await this.game.expireMyTurn?.();
           } catch (err) {
+            if (RS().isQuotaError?.(err)) this._autoWritesBlocked = true;
+            debugTurn('timeout:expire-own-turn:error', {
+              matchId: this.matchId,
+              turnKey,
+              code: err?.code || null,
+              message: err?.message || String(err),
+            });
             console.warn('[MatchTurnApp] auto turn submit', err);
-            await RS().completeTurnWindow(this.matchId, this.matchData);
           } finally {
             this.pendingTurnSubmit = false;
           }
-        } else if (
-          !myTurn
-          && live.currentTurnUid
-          && RS().turnRemainingMs(live) <= -TURN_EXPIRE_GRACE_MS
-          && !this.pendingTurnSubmit
-        ) {
-          await RS().completeTurnWindow(this.matchId, this.matchData);
         }
-        this.syncTurnBarOnly(this.matchData);
-        if (this.matchData) this.syncTurnState(this.matchData);
-      }, 200);
+
+        // Background auto-writes only (never block own-turn expiry above).
+        if (writeCoolingDown || quotaHalted || this._autoWritesBlocked || tabHidden) {
+          return;
+        }
+
+        if (
+          !rush
+          && !myTurn
+          && live.currentTurnUid
+          && this.getTurnElapsedMs(live) >= (RS().turnDurationMs?.(live) || 0) + TURN_EXPIRE_GRACE_MS
+        ) {
+          if (
+            this._forceAttemptTurnKey !== turnKey
+            || now - this._forceAttemptAt >= 2500
+          ) {
+            this._forceAttemptTurnKey = turnKey;
+            this._forceAttemptAt = now;
+            debugTurn('timeout:force-advance-opponent-turn', {
+              matchId: this.matchId,
+              turnKey,
+              turnNumber: live.turnNumber || 0,
+              currentTurnUid: live.currentTurnUid || null,
+              remainingServerMs: RS().turnRemainingMs(live),
+            });
+            try {
+              const applied = await RS().completeTurnWindow(this.matchId, live, 0, { localExpired: true });
+              if (!applied && RS().isQuotaHalted?.()) this._autoWritesBlocked = true;
+            } catch (err) {
+              if (RS().isQuotaError?.(err)) this._autoWritesBlocked = true;
+              debugTurn('timeout:force-advance-opponent-turn:error', {
+                matchId: this.matchId,
+                turnKey,
+                code: err?.code || null,
+                message: err?.message || String(err),
+              });
+              console.warn('[MatchTurnApp] force turn advance', err);
+            }
+          }
+        }
+      };
+      tick();
+      this.turnTimer = setInterval(tick, 250);
     }
 
-    handleDone(data, isP1) {
+    applyLiveTurnSync(data) {
+      if (!data || !this.game || data.status !== 'active') return;
+      if (RS().isRushPhase(data)) return;
+      const myTurn = data.currentTurnUid === this.myUid;
+      if (myTurn) {
+        this.syncTurnBarOnly(data);
+        this.updateTurnUrgencyOverlay(data);
+        return;
+      }
+      if (RS().usesTurnLiveRtdb?.()) {
+        this.syncTurnBarOnly(data);
+        this.updateTurnUrgencyOverlay(data);
+        return;
+      }
+      const live = data.turnLive;
+      if (
+        live?.byUid === data.currentTurnUid
+        && live?.turnNumber === data.turnNumber
+      ) {
+        this.game.applyTurnLiveState(live);
+      }
+      this.syncTurnBarOnly(data);
+      this.updateTurnUrgencyOverlay(data);
+    }
+
+    async handleDone(data) {
+      if (this._resultsRendered) return;
+      await this.maybePlayOpponentReveal(data);
+      if (this._resultsRendered) return;
+      this._resultsRendered = true;
+
+      this.stopTurnLiveWatch();
       this.game?.setMyTurn(false);
       if (this.turnTimer) clearInterval(this.turnTimer);
       if (this._turnSwapTimer) clearTimeout(this._turnSwapTimer);
       this.hideTurnUrgencyOverlay();
+      this.els.turnSwap?.classList.add('hidden');
       if (this.countdownTimer) {
         clearInterval(this.countdownTimer);
         this.countdownTimer = null;
@@ -676,7 +1067,6 @@
       }
       this.hideOppSubmission();
       this.els.turnBar?.classList.add('hidden');
-      this.els.turnPrevious?.classList.add('hidden');
 
       const shared = data.sharedState || {};
       const opp = RS().getOpponent(data, this.myUid);
@@ -689,6 +1079,10 @@
         resultLine,
         resultKind: data.winnerUid === this.myUid ? 'win' : data.winnerUid ? 'loss' : 'draw',
         winnerUid: data.winnerUid,
+        battleXpMode: data.winnerUid === this.myUid ? 'koreanMatch' : '',
+        battleMatchId: this.matchId,
+        battleQuestMode: 'turn',
+        battleFriend: true,
         players: [
           { uid: this.myUid, name: rt('me'), statHtml: `${shared.guessCount || 0} ${escapeHtml(rt('turns'))}` },
           { uid: opp?.uid, name: opp?.name || rt('opponent'), statHtml: `${shared.guessCount || 0} ${escapeHtml(rt('turns'))}` },
@@ -700,23 +1094,9 @@
         profileHref: 'index.html',
       }));
 
-      this.root.querySelector('#race-rematch')?.addEventListener('click', async () => {
-        const wordLength = RS().getMatchWordLength(data);
-        try {
-          const newId = await RS().createMatch(isP1 ? data.player2Uid : data.player1Uid, {
-            gameType: RS().GAME_TYPES.koreanMatch,
-            wordLength,
-            playMode: RS().PLAY_MODES.turn,
-            excludeTarget: data.target,
-          });
-          global.location.href = RS().getMatchPageUrl(newId, {
-            gameType: RS().GAME_TYPES.koreanMatch,
-            playMode: RS().PLAY_MODES.turn,
-          });
-        } catch {
-          alert(rt('rematchFailed'));
-        }
-      });
+      RUI.afterResultsMount(this.els.main);
+      void RUI.fillAnswerMeaning(this.els.main, data.target);
+      this.mountRematchUi();
     }
   }
 

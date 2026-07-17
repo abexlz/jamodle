@@ -61,11 +61,52 @@ service cloud.firestore {
             || request.auth.uid == request.resource.data.player2Uid);
       }
 
+      function progressUnchanged(key) {
+        let before = resource.data.get(key, {});
+        let after = request.resource.data.get(key, {});
+        return after.get('guessCount', 0) == before.get('guessCount', 0)
+          && after.get('finished', false) == before.get('finished', false)
+          && after.get('won', false) == before.get('won', false);
+      }
+
       function opponentProgressUnchanged() {
         return (request.auth.uid == resource.data.player1Uid
-            && request.resource.data.player2Progress == resource.data.player2Progress)
+            && progressUnchanged('player2Progress'))
           || (request.auth.uid == resource.data.player2Uid
-            && request.resource.data.player1Progress == resource.data.player1Progress);
+            && progressUnchanged('player1Progress'));
+      }
+
+      function isDeclineUpdate() {
+        return request.resource.data.status == 'declined'
+          && request.resource.data.declinedByUid == request.auth.uid
+          && request.resource.data.player1Uid == resource.data.player1Uid
+          && request.resource.data.player2Uid == resource.data.player2Uid;
+      }
+
+      function isAbandonUpdate() {
+        return (resource.data.status == 'pending'
+            || resource.data.status == 'ready'
+            || resource.data.status == 'active')
+          && request.resource.data.status == 'abandoned'
+          && request.resource.data.abandonedByUid == request.auth.uid
+          && request.resource.data.player1Uid == resource.data.player1Uid
+          && request.resource.data.player2Uid == resource.data.player2Uid
+          && request.resource.data.winnerUid == (
+            request.auth.uid == resource.data.player1Uid
+              ? resource.data.player2Uid
+              : resource.data.player1Uid
+          )
+          && progressUnchanged('player1Progress')
+          && progressUnchanged('player2Progress');
+      }
+
+      function isRelatedWordsMatchUpdate() {
+        return resource.data.gameType == 'related-words'
+          && request.resource.data.gameType == 'related-words'
+          && request.resource.data.player1Uid == resource.data.player1Uid
+          && request.resource.data.player2Uid == resource.data.player2Uid
+          && resource.data.status in ['ready', 'active']
+          && request.resource.data.status in ['active', 'done'];
       }
 
       allow get: if isMatchParty();
@@ -87,12 +128,37 @@ service cloud.firestore {
           || (request.resource.data.gameType == 'korean-match'
             && request.resource.data.wordLength is int
             && request.resource.data.wordLength in [2, 3, 4, 5, 6])
+          || (request.resource.data.gameType == 'related-words'
+            && request.resource.data.chainId is string
+            && request.resource.data.raceTarget is int
+            && request.resource.data.raceTarget >= 1
+            && request.resource.data.raceTarget <= 50
+            && request.resource.data.wordLength is int)
         );
+
+      function isRematchLobbyUpdate() {
+        return resource.data.status == 'done'
+          && request.resource.data.status == 'done'
+          && request.resource.data.player1Uid == resource.data.player1Uid
+          && request.resource.data.player2Uid == resource.data.player2Uid
+          && request.resource.data.winnerUid == resource.data.winnerUid
+          && request.resource.data.get('target', '') == resource.data.get('target', '')
+          && request.resource.data.get('gameType', 'wordle') == resource.data.get('gameType', 'wordle')
+          && request.resource.data.get('wordLength', 0) == resource.data.get('wordLength', 0)
+          && request.resource.data.get('chainId', '') == resource.data.get('chainId', '')
+          && request.resource.data.get('playMode', '') == resource.data.get('playMode', '')
+          && progressUnchanged('player1Progress')
+          && progressUnchanged('player2Progress');
+      }
 
       allow update: if request.auth != null
         && isMatchParty()
         && isMatchPartyOnWrite()
-        && opponentProgressUnchanged();
+        && (opponentProgressUnchanged()
+          || isDeclineUpdate()
+          || isAbandonUpdate()
+          || isRelatedWordsMatchUpdate()
+          || isRematchLobbyUpdate());
 
       allow delete: if request.auth != null
         && resource.data.status == 'pending'
