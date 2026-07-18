@@ -25,13 +25,6 @@
       ]
     },
     {
-      "collectionGroup": "users",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "wordChainBestStreak", "order": "DESCENDING" }
-      ]
-    },
-    {
       "collectionGroup": "matchQueue",
       "queryScope": "COLLECTION",
       "fields": [
