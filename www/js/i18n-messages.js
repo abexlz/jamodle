@@ -43,7 +43,14 @@
         "practiceSolo": "Practice solo",
         "pickFriend": "Pick a friend for your custom match.",
         "multiplayerTitle": "Random Match",
-        "multiplayerSoon": "Online matchmaking is coming soon. Use Custom to challenge friends for now!"
+        "multiplayerSoon": "Online matchmaking is coming soon. Use Custom to challenge friends for now!",
+        "matchmakingPickLength": "Pick word length",
+        "matchmakingTurnOnly": "Random match is turn-based Jamo for now.",
+        "matchmakingSearching": "Searching for an opponent…",
+        "matchmakingCancel": "Cancel search",
+        "matchmakingFailed": "Could not start matchmaking. Try again.",
+        "matchmakingLogin": "Sign in to play random matches.",
+        "matchmakingFound": "Opponent found!"
       },
       "modes": {
         "level-mode": {
@@ -427,6 +434,7 @@
       "feedbackWrong": "Some jamo are not correct yet. Try again.",
       "resultsTitle": "Match Clear!",
       "resultsDaily": "Daily complete!",
+      "answerSpeak": "Hear pronunciation",
       "keepGoing": "Keep Going →",
       "leave": "Leave",
       "menu": "← Home",
@@ -741,15 +749,6 @@
         "longestStreak": "Longest streak",
         "learningDays": "Learning days"
       },
-      "multiplayer": {
-        "title": "Multiplayer",
-        "empty": "No multiplayer battles yet — challenge a friend!",
-        "winRate": "Win rate",
-        "battles": "Battles played",
-        "wins": "Wins",
-        "losses": "Losses",
-        "draws": "Draws"
-      },
       "recent": {
         "title": "Recently learned",
         "empty": "Your recent words will appear here."
@@ -972,8 +971,6 @@
       "oppGuessAria": "Opponent guesses: {{count}}",
       "oppDone": " · done ✓",
       "oppGaveUp": " · gave up",
-      "seriesScore": "Rematch series {{opp}} to {{my}}",
-      "seriesScore": "Rematch series {{opp}} to {{my}}",
       "win": "Victory! 🎉",
       "loss": "Defeat",
       "draw": "Draw",
@@ -1470,7 +1467,14 @@
         "practiceSolo": "혼자 연습하기",
         "pickFriend": "커스텀 대결할 친구를 선택하세요.",
         "multiplayerTitle": "랜덤 매치",
-        "multiplayerSoon": "온라인 매칭은 곧 추가됩니다. 지금은 커스텀으로 친구에게 도전해 보세요!"
+        "multiplayerSoon": "온라인 매칭은 곧 추가됩니다. 지금은 커스텀으로 친구에게 도전해 보세요!",
+        "matchmakingPickLength": "글자 수 선택",
+        "matchmakingTurnOnly": "랜덤 매치는 턴제 자모게임만 지원합니다.",
+        "matchmakingSearching": "상대를 찾는 중…",
+        "matchmakingCancel": "검색 취소",
+        "matchmakingFailed": "매칭을 시작하지 못했습니다. 다시 시도해 주세요.",
+        "matchmakingLogin": "랜덤 매치를 하려면 로그인하세요.",
+        "matchmakingFound": "상대를 찾았습니다!"
       },
       "modes": {
         "level-mode": {
@@ -1853,6 +1857,7 @@
       "feedbackPartial": "맞는 자모가 있어요. 계속해 보세요!",
       "feedbackWrong": "아직 맞지 않은 자모가 있어요.",
       "resultsTitle": "맞혔어요!",
+      "answerSpeak": "발음 듣기",
       "resultsDaily": "오늘의 자모게임 완료!",
       "keepGoing": "계속하기 →",
       "leave": "나가기",
@@ -2168,15 +2173,6 @@
         "longestStreak": "최장 streak",
         "learningDays": "학습한 날"
       },
-      "multiplayer": {
-        "title": "멀티플레이",
-        "empty": "아직 멀티플레이 기록이 없어요 — 친구에게 도전해 보세요!",
-        "winRate": "승률",
-        "battles": "플레이한 대전",
-        "wins": "승리",
-        "losses": "패배",
-        "draws": "무승부"
-      },
       "recent": {
         "title": "최근 학습 단어",
         "empty": "최근 학습한 단어가 여기에 표시됩니다."
@@ -2399,7 +2395,6 @@
       "oppGuessAria": "상대 추측 {{count}}회",
       "oppDone": " · 완료 ✓",
       "oppGaveUp": " · 포기",
-      "seriesScore": "리매치 시리즈 {{opp}} : {{my}}",
       "win": "승리! 🎉",
       "loss": "패배",
       "draw": "무승부",

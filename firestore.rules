@@ -132,13 +132,19 @@ service cloud.firestore {
             && request.resource.data.player2Ready == true
             && request.resource.data.rematchFrom is string
             && request.resource.data.rematchFrom.size() > 0)
+          || (request.resource.data.status == 'ready'
+            && request.resource.data.player1Ready == true
+            && request.resource.data.player2Ready == true
+            && request.resource.data.get('matchSource', '') == 'matchmaking'
+            && request.resource.data.playMode == 'turn'
+            && request.resource.data.gameType == 'korean-match')
         )
         && (
           (request.resource.data.get('gameType', 'wordle') == 'wordle'
             && request.resource.data.wordLength in [2, 3])
           || (request.resource.data.gameType == 'korean-match'
             && request.resource.data.wordLength is int
-            && request.resource.data.wordLength in [2, 3, 4, 5, 6])
+            && request.resource.data.wordLength in [1, 2, 3, 4, 5, 6])
           || (request.resource.data.gameType == 'related-words'
             && request.resource.data.chainId is string
             && request.resource.data.raceTarget is int
@@ -182,6 +188,28 @@ service cloud.firestore {
           request.auth.uid == resource.data.player2Uid
           || request.auth.uid == resource.data.player1Uid
         );
+    }
+
+    match /matchQueue/{uid} {
+      allow get: if request.auth != null
+        && (request.auth.uid == uid || resource.data.status == 'searching');
+      allow list: if request.auth != null && resource.data.status == 'searching';
+      allow create: if request.auth != null
+        && request.auth.uid == uid
+        && request.resource.data.uid == uid
+        && request.resource.data.status == 'searching'
+        && request.resource.data.game is string
+        && request.resource.data.playMode is string
+        && request.resource.data.wordLength is int
+        && request.resource.data.displayName is string;
+      allow update: if request.auth != null && (
+        (request.auth.uid == uid && resource.data.status == 'searching')
+        || (resource.data.status == 'searching'
+          && request.resource.data.status == 'matched'
+          && request.resource.data.matchedByUid == request.auth.uid
+          && request.resource.data.matchId is string)
+      );
+      allow delete: if request.auth != null && request.auth.uid == uid;
     }
 
     match /wordChainMatches/{matchId} {

@@ -1,5 +1,5 @@
 /**
- * Home screen battle mode — game pick, multiplayer placeholder, custom friend challenges.
+ * Home screen battle mode — game pick, random matchmaking, custom friend challenges.
  */
 (function (global) {
   'use strict';
@@ -42,7 +42,7 @@
 
   function syncMultiplayerOpenClass() {
     const anyOpen = isOverlayOpen('battle-mode-overlay')
-      || isOverlayOpen('battle-multiplayer-placeholder')
+      || isOverlayOpen('battle-matchmaking-overlay')
       || isOverlayOpen('multiplayer-overlay');
     document.body.classList.toggle('multiplayer-open', anyOpen);
   }
@@ -109,7 +109,7 @@
       closeBattleModeOverlay();
 
       if (actionBtn.dataset.battleAction === 'multiplayer') {
-        openPlaceholder();
+        openMatchmakingOverlay(game);
         return;
       }
 
@@ -144,49 +144,160 @@
       .replace(/"/g, '&quot;');
   }
 
-  function ensurePlaceholderOverlay() {
-    let overlay = document.getElementById('battle-multiplayer-placeholder');
+  function koreanLengthButtonsHtml() {
+    const colors = ['mint', 'yellow', 'blue', 'pink', 'purple', 'peach'];
+    const lengths = global.MatchWords?.LETTER_LENGTHS || [1, 2, 3, 4, 5, 6];
+    return lengths.map((n, i) => {
+      const label = t('match.modes.letterCount', { n }) || `${n} letters`;
+      return `<button type="button" class="race-opt race-opt--${colors[i % colors.length]}" data-matchmaking-length="${n}" aria-label="${escapeHtml(label)}">${n}</button>`;
+    }).join('');
+  }
+
+  function ensureMatchmakingOverlay() {
+    let overlay = document.getElementById('battle-matchmaking-overlay');
     if (overlay) return overlay;
 
     overlay = document.createElement('div');
-    overlay.id = 'battle-multiplayer-placeholder';
+    overlay.id = 'battle-matchmaking-overlay';
     overlay.className = 'multiplayer-overlay hidden';
     overlay.setAttribute('role', 'dialog');
     overlay.setAttribute('aria-modal', 'true');
     overlay.innerHTML = `
-      <div class="multiplayer-modal battle-placeholder-modal">
+      <div class="multiplayer-modal battle-matchmaking-modal">
         <div class="multiplayer-modal-header">
-          <h2 class="multiplayer-modal-title" data-i18n="menu.battle.multiplayerTitle">${t('menu.battle.multiplayerTitle')}</h2>
-          <button type="button" class="multiplayer-close-btn" data-battle-placeholder-close
+          <h2 class="multiplayer-modal-title" data-i18n="menu.battle.multiplayerTitle">${escapeHtml(t('menu.battle.multiplayerTitle'))}</h2>
+          <button type="button" class="multiplayer-close-btn" data-matchmaking-close
             data-i18n-aria="common.close" aria-label="Close">✕</button>
         </div>
-        <p class="multiplayer-modal-sub battle-placeholder-sub" data-i18n="menu.battle.multiplayerSoon">${t('menu.battle.multiplayerSoon')}</p>
-        <button type="button" class="race-btn race-btn--ghost battle-placeholder-ok" data-battle-placeholder-close data-i18n="common.close">${t('common.close')}</button>
+        <div class="battle-matchmaking-step" data-matchmaking-step="pick">
+          <p class="multiplayer-modal-sub" data-i18n="menu.battle.matchmakingPickLength">${escapeHtml(t('menu.battle.matchmakingPickLength'))}</p>
+          <p class="battle-matchmaking-note" data-i18n="menu.battle.matchmakingTurnOnly">${escapeHtml(t('menu.battle.matchmakingTurnOnly'))}</p>
+          <div class="race-length-options race-length-options--grid-3 battle-matchmaking-lengths">
+            ${koreanLengthButtonsHtml()}
+          </div>
+        </div>
+        <div class="battle-matchmaking-step hidden" data-matchmaking-step="searching">
+          <div class="battle-matchmaking-search" aria-live="polite">
+            <div class="battle-matchmaking-spinner" aria-hidden="true"></div>
+            <p class="battle-matchmaking-status" data-matchmaking-status data-i18n="menu.battle.matchmakingSearching">${escapeHtml(t('menu.battle.matchmakingSearching'))}</p>
+          </div>
+          <button type="button" class="race-btn race-btn--ghost battle-matchmaking-cancel" data-matchmaking-cancel data-i18n="menu.battle.matchmakingCancel">${escapeHtml(t('menu.battle.matchmakingCancel'))}</button>
+        </div>
+        <div class="battle-matchmaking-step hidden" data-matchmaking-step="unsupported">
+          <p class="multiplayer-modal-sub" data-i18n="menu.battle.matchmakingTurnOnly">${escapeHtml(t('menu.battle.matchmakingTurnOnly'))}</p>
+          <button type="button" class="race-btn race-btn--ghost battle-matchmaking-cancel" data-matchmaking-close data-i18n="common.close">${escapeHtml(t('common.close'))}</button>
+        </div>
       </div>
     `;
     document.body.appendChild(overlay);
+
     overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) closePlaceholder();
+      if (e.target === overlay) closeMatchmakingOverlay();
     });
-    overlay.querySelectorAll('[data-battle-placeholder-close]').forEach((btn) => {
+    overlay.querySelectorAll('[data-matchmaking-close]').forEach((btn) => {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
-        closePlaceholder();
+        closeMatchmakingOverlay();
       });
     });
+    overlay.querySelector('[data-matchmaking-cancel]')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      cancelMatchmakingSearch();
+    });
+    overlay.querySelector('.battle-matchmaking-lengths')?.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-matchmaking-length]');
+      if (!btn) return;
+      e.preventDefault();
+      const wordLength = Number(btn.dataset.matchmakingLength);
+      if (!wordLength) return;
+      startMatchmakingSearch(wordLength);
+    });
+
     return overlay;
   }
 
-  function openPlaceholder() {
-    const overlay = ensurePlaceholderOverlay();
+  function showMatchmakingStep(overlay, step) {
+    overlay.querySelectorAll('[data-matchmaking-step]').forEach((el) => {
+      el.classList.toggle('hidden', el.dataset.matchmakingStep !== step);
+    });
+  }
+
+  function openMatchmakingOverlay(game) {
+    if (!global.FirebaseSocial?.getCurrentUid?.()) {
+      alert(t('menu.battle.matchmakingLogin') || 'Sign in to play random matches.');
+      global.FirebaseSocial?.whenAuthReady?.().then(() => {
+        if (global.FirebaseSocial?.getCurrentUid?.()) openMatchmakingOverlay(game);
+      });
+      return;
+    }
+
+    const overlay = ensureMatchmakingOverlay();
+    overlay.dataset.selectedGame = game === 'word-chain' ? 'word-chain' : 'jamodle';
+    if (game === 'word-chain') {
+      showMatchmakingStep(overlay, 'unsupported');
+    } else {
+      showMatchmakingStep(overlay, 'pick');
+    }
     overlay.classList.remove('hidden');
     syncMultiplayerOpenClass();
     global.I18n?.applyToDocument?.(overlay);
   }
 
-  function closePlaceholder() {
-    document.getElementById('battle-multiplayer-placeholder')?.classList.add('hidden');
+  async function closeMatchmakingOverlay() {
+    await cancelMatchmakingSearch();
+    document.getElementById('battle-matchmaking-overlay')?.classList.add('hidden');
     syncMultiplayerOpenClass();
+  }
+
+  async function cancelMatchmakingSearch() {
+    try {
+      await global.MatchQueueService?.leaveQueue?.();
+    } catch (_) { /* ignore */ }
+  }
+
+  function setMatchmakingStatus(overlay, key) {
+    const statusEl = overlay.querySelector('[data-matchmaking-status]');
+    if (!statusEl) return;
+    statusEl.textContent = t(key);
+  }
+
+  async function startMatchmakingSearch(wordLength) {
+    const overlay = ensureMatchmakingOverlay();
+    const game = overlay.dataset.selectedGame === 'word-chain' ? 'word-chain' : 'jamodle';
+    showMatchmakingStep(overlay, 'searching');
+    setMatchmakingStatus(overlay, 'menu.battle.matchmakingSearching');
+    syncMultiplayerOpenClass();
+
+    if (!global.MatchQueueService?.joinQueue) {
+      alert(t('menu.battle.matchmakingFailed'));
+      showMatchmakingStep(overlay, 'pick');
+      return;
+    }
+
+    try {
+      await global.MatchQueueService.joinQueue({
+        game,
+        wordLength,
+        onMatched: (result) => {
+          setMatchmakingStatus(overlay, 'menu.battle.matchmakingFound');
+          const url = global.RaceService?.getMatchPageUrl?.(result.matchId, {
+            gameType: 'korean-match',
+            playMode: 'turn',
+          });
+          if (url) {
+            global.location.href = url;
+          }
+        },
+        onError: () => {
+          alert(t('menu.battle.matchmakingFailed'));
+          showMatchmakingStep(overlay, 'pick');
+        },
+      });
+    } catch (err) {
+      console.error('[Multiplayer] matchmaking failed', err);
+      alert(t('menu.battle.matchmakingFailed'));
+      showMatchmakingStep(overlay, 'pick');
+    }
   }
 
   function bindBattleMode(root) {
@@ -208,6 +319,9 @@
   function bindMultiplayerAction() {
     const root = document.getElementById('menu-root');
     bindBattleMode(root);
+    global.addEventListener('pagehide', () => {
+      global.MatchQueueService?.leaveQueue?.().catch(() => {});
+    });
   }
 
   function mount() {

@@ -572,12 +572,14 @@
     const dictText = await global.DictionaryService?.resolveEnglishMeaning?.(word);
     if (dictText) {
       el.textContent = dictText;
+      global.AnswerTTS?.setupResultsAnswer?.(root, word);
       return;
     }
     const gloss = global.MatchWordMeanings?.[word]
       || global.LearningWords?.getWordMeaning?.(word);
     if (gloss) {
       el.textContent = gloss;
+      global.AnswerTTS?.setupResultsAnswer?.(root, word);
       return;
     }
     const entry = global.LearningWords?.findWordEntry?.(word);
@@ -587,6 +589,7 @@
       const curated = global.LearningWordModel?.getDisplayMeaning?.(normalized);
       if (curated) el.textContent = curated;
     }
+    global.AnswerTTS?.setupResultsAnswer?.(root, word);
   }
 
   global.RaceResultsUI = {

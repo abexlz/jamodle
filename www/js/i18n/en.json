@@ -39,7 +39,14 @@
       "practiceSolo": "Practice solo",
       "pickFriend": "Pick a friend for your custom match.",
       "multiplayerTitle": "Random Match",
-      "multiplayerSoon": "Online matchmaking is coming soon. Use Custom to challenge friends for now!"
+      "multiplayerSoon": "Online matchmaking is coming soon. Use Custom to challenge friends for now!",
+      "matchmakingPickLength": "Pick word length",
+      "matchmakingTurnOnly": "Random match is turn-based Jamo for now.",
+      "matchmakingSearching": "Searching for an opponent…",
+      "matchmakingCancel": "Cancel search",
+      "matchmakingFailed": "Could not start matchmaking. Try again.",
+      "matchmakingLogin": "Sign in to play random matches.",
+      "matchmakingFound": "Opponent found!"
     },
     "modes": {
       "level-mode": {
@@ -423,6 +430,7 @@
     "feedbackWrong": "Some jamo are not correct yet. Try again.",
     "resultsTitle": "Match Clear!",
     "resultsDaily": "Daily complete!",
+    "answerSpeak": "Hear pronunciation",
     "keepGoing": "Keep Going →",
     "leave": "Leave",
     "menu": "← Home",

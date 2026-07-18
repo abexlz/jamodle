@@ -264,6 +264,55 @@
   margin: 0 16px;
 }
 
+.battle-matchmaking-modal {
+  padding-bottom: 16px;
+}
+
+.battle-matchmaking-note {
+  margin: 0 16px 12px;
+  font-size: clamp(12px, 3.2vw, 14px);
+  line-height: 1.35;
+  text-align: center;
+  opacity: 0.85;
+}
+
+.battle-matchmaking-lengths {
+  padding: 0 16px 8px;
+}
+
+.battle-matchmaking-search {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px 8px;
+}
+
+.battle-matchmaking-spinner {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 3px solid rgba(155, 111, 255, 0.25);
+  border-top-color: #9B6FFF;
+  animation: battle-matchmaking-spin 0.9s linear infinite;
+}
+
+@keyframes battle-matchmaking-spin {
+  to { transform: rotate(360deg); }
+}
+
+.battle-matchmaking-status {
+  margin: 0;
+  text-align: center;
+  font-size: clamp(14px, 3.8vw, 16px);
+}
+
+.battle-matchmaking-cancel {
+  display: block;
+  width: calc(100% - 32px);
+  margin: 8px 16px 0;
+}
+
 .menu-multiplayer-btn {
   width: 100%;
 }

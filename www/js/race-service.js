@@ -494,6 +494,32 @@
     return `${page}?id=${encodeURIComponent(matchId)}`;
   }
 
+  function buildMatchmakingMatchData(player1Uid, player2Uid, player1Name, player2Name, wordLength) {
+    const wl = normalizeWordLength(wordLength);
+    const target = pickKoreanMatchTarget(wl);
+    return {
+      gameType: GAME_TYPES.koreanMatch,
+      playMode: PLAY_MODES.turn,
+      matchSource: 'matchmaking',
+      player1Uid,
+      player2Uid,
+      player1Name,
+      player2Name,
+      status: 'ready',
+      target,
+      wordLength: wl,
+      player1Ready: true,
+      player2Ready: true,
+      player1Progress: defaultProgress(),
+      player2Progress: defaultProgress(),
+      turnDurationMs: turnDurationForLength(wl),
+      turnPhase: TURN_PHASES.playing,
+      sharedState: defaultSharedState(),
+      turnHistory: [],
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    };
+  }
+
   async function createMatch(opponentUid, optionsOrWordLength) {
     const uid = getUid();
     const db = getDb();
@@ -1884,6 +1910,8 @@
     defaultSharedState,
     defaultRelatedWordsSharedState,
     createMatch,
+    buildMatchmakingMatchData,
+    matchesRef,
     createRematchMatch,
     acceptMatch,
     declineMatch,

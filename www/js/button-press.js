@@ -17,7 +17,7 @@
     '.match-hint-btn, .match-action-btn, .match-emote-btn, .match-emote-option, ' +
     '.rw-extra-btn, .rw-extra-guess-giveup, .rw-reveal-btn, ' +
     '.daily-cal-play-btn, .daily-cal-unlock-btn, .daily-cal-month-btn, ' +
-    '.settings-option-btn, .btn, .pronounce-btn, .done-lesson-btn, .level-mode-complete-btn, ' +
+    '.settings-option-btn, .btn, .pronounce-btn, .answer-speak-btn, .done-lesson-btn, .level-mode-complete-btn, ' +
     '.profile-challenge-btn, ' +
     'a.daily-challenge-card, a.menu-single-player-game-btn, a.menu-tutorial-btn, a.featured-continue-cta, ' +
     'a.race-btn, a.top-nav-btn, a.settings-back, a.home-tab-btn';
@@ -31,6 +31,7 @@
     '[data-slot-index]',
     '[data-tile-id]',
     '.match-emote-option',
+    '.answer-speak-btn',
   ].join(', ');
 
   const NAV_SOUND_SELECTORS = [

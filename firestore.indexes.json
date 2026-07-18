@@ -32,6 +32,17 @@
       ]
     },
     {
+      "collectionGroup": "matchQueue",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "game", "order": "ASCENDING" },
+        { "fieldPath": "playMode", "order": "ASCENDING" },
+        { "fieldPath": "wordLength", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "ASCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "wordChainMatches",
       "queryScope": "COLLECTION",
       "fields": [

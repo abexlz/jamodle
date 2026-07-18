@@ -3460,6 +3460,7 @@
     }
 
     hideTurnAnswerBanner() {
+      global.AnswerTTS?.cancel?.();
       this.els.turnAnswerBanner?.classList.add('hidden');
       if (this.els.turnAnswerWord) this.els.turnAnswerWord.textContent = '';
       if (this.els.turnAnswerMeaning) {
@@ -3479,10 +3480,16 @@
         meaningEl.classList.add('hidden');
       }
       banner.classList.remove('hidden');
+      global.AnswerTTS?.attachPopup?.({
+        word,
+        wordEl,
+        autoplayRepeats: 2,
+      });
       const meaning = await this.getMeaningForWord(word);
       if (meaningEl && meaning) {
         meaningEl.textContent = meaning;
         meaningEl.classList.remove('hidden');
+        global.AnswerTTS?.mountMeaningSpeaker?.(meaningEl, word);
       }
     }
 
@@ -4537,6 +4544,7 @@
     }
 
     async checkAnswer() {
+      global.AnswerTTS?.armSolveAutoplay?.();
       if (this.multiFindMode) {
         await this.checkMultiWordAnswer();
         return;
@@ -4871,7 +4879,10 @@
       meaningEl.textContent = syncText;
       meaningEl.hidden = !syncText;
       meaningEl.classList.toggle('hidden', !syncText);
-      if (syncText) return;
+      if (syncText) {
+        global.AnswerTTS?.mountMeaningSpeaker?.(meaningEl, meaningWords[0] || this.getResolvedWord());
+        return;
+      }
       const fallbackWord = meaningWords[0] || this.getResolvedWord();
       if (!fallbackWord) return;
       const fillAsync = async () => {
@@ -4880,6 +4891,7 @@
         meaningEl.textContent = text;
         meaningEl.hidden = false;
         meaningEl.classList.remove('hidden');
+        global.AnswerTTS?.mountMeaningSpeaker?.(meaningEl, fallbackWord);
       };
       fillAsync().catch(() => {});
     }
@@ -4916,6 +4928,12 @@
       }
 
       this.els.results.classList.remove('hidden');
+      global.AnswerTTS?.attachPopup?.({
+        word,
+        wordEl: this.els.resultsWord,
+        meaningEl: this.els.resultsWordMeaning,
+        autoplayRepeats: 2,
+      });
     }
 
     continuePlaying() {
