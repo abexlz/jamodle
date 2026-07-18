@@ -531,7 +531,7 @@
     }
 
     renderBattleHud(data) {
-      const showHud = data.status === 'active' || data.status === 'done';
+      const showHud = data.status === 'active';
       if (!showHud) {
         this.els.battleHud?.classList.add('hidden');
         document.body.classList.remove('rw-race-active');
@@ -938,6 +938,9 @@
     handleDone(data, isP1) {
       if (this._resultsRendered) return;
       this._resultsRendered = true;
+
+      this.els.battleHud?.classList.add('hidden');
+      document.body.classList.remove('rw-race-active');
 
       if (this.game) {
         this.game.setEnabled(false);

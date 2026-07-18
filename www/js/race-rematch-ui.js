@@ -11,8 +11,15 @@
     return root?.querySelector?.('#race-rematch') || null;
   }
 
-  function rematchLabel(state, t) {
-    if (state.count > 0) return t('rematchProgress', { ready: state.count });
+  function getOpponentName(ctx) {
+    const data = ctx.getMatchData?.();
+    if (!data || !ctx.myUid) return ctx.t('opponent');
+    return RS().getOpponent(data, ctx.myUid)?.name || ctx.t('opponent');
+  }
+
+  function rematchLabel(state, t, opponentName) {
+    if (state.myReady) return t('rematchWaiting');
+    if (state.oppReady) return t('rematchOpponentAsked', { name: opponentName });
     return t('rematch');
   }
 
@@ -25,13 +32,13 @@
     };
   }
 
-  function applyButton(btn, state, t) {
+  function applyButton(btn, state, t, opponentName) {
     if (!btn) return;
     const disabled = state.opponentLeft || state.redirecting || state.myReady || state.busy;
     btn.disabled = disabled;
     btn.classList.toggle('race-btn--rematch-muted', disabled);
     btn.classList.toggle('race-btn--rematch-waiting', !disabled && state.busy);
-    btn.textContent = rematchLabel(state, t);
+    btn.textContent = rematchLabel(state, t, opponentName);
   }
 
   function redirect(ctx, matchId) {
@@ -58,7 +65,7 @@
     }
 
     ctx.busy = true;
-    applyButton(getBtn(ctx.root), { ...state, busy: true, redirecting: false }, ctx.t);
+    applyButton(getBtn(ctx.root), { ...state, busy: true, redirecting: false }, ctx.t, getOpponentName(ctx));
 
     const alreadyClaimed = state.rematchClaimedByUid === ctx.myUid;
     if (!alreadyClaimed) {
@@ -106,7 +113,7 @@
       ...state,
       busy: true,
       redirecting: false,
-    }), ctx.t);
+    }), ctx.t, getOpponentName(ctx));
 
     try {
       await RS().setRematchReady(ctx.matchId, ctx.myUid);
@@ -138,7 +145,7 @@
       ...state,
       busy: ctx.busy,
       redirecting: ctx.redirecting,
-    }, ctx.t);
+    }, ctx.t, getOpponentName(ctx));
 
     if (state.bothReady && !state.opponentLeft && !ctx.busy && !ctx.redirecting) {
       tryFinalizeRematch(ctx);

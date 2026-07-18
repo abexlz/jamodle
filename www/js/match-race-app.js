@@ -299,6 +299,12 @@
     }
 
     renderOpponentBar(data) {
+      if (data.status === 'done') {
+        this.els.oppHud?.classList.add('hidden');
+        this.els.opponentBar?.classList.add('hidden');
+        return;
+      }
+
       const opp = RS().getOpponent(data, this.myUid);
       if (!opp) return;
 
@@ -544,6 +550,9 @@
         clearTimeout(this._countdownFallbackTimer);
         this._countdownFallbackTimer = null;
       }
+      this.els.oppHud?.classList.add('hidden');
+      this.els.opponentBar?.classList.add('hidden');
+      this._emotes?.destroy();
 
       const p1 = data.player1Progress || RS().defaultProgress();
       const p2 = data.player2Progress || RS().defaultProgress();

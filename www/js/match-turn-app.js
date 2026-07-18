@@ -1070,6 +1070,8 @@
       }
       this.hideOppSubmission();
       this.els.turnBar?.classList.add('hidden');
+      this.els.oppHud?.classList.add('hidden');
+      this._emotes?.destroy();
 
       const shared = data.sharedState || {};
       const opp = RS().getOpponent(data, this.myUid);
