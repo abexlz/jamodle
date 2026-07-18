@@ -168,6 +168,7 @@
         b: state?.bank || [],
         s: state?.selected || null,
         r: state?.removed || [],
+        a: state?.action || null,
       });
     } catch (_) {
       return `${turnNumber || 1}:${Date.now()}`;
@@ -843,13 +844,14 @@
     }, wait);
   }
 
-  function updateTurnLive(matchId, myUid, turnNumber, state) {
+  function updateTurnLive(matchId, myUid, turnNumber, state, opts = {}) {
     if (!matchId || !myUid) return;
     if (!canThisTabWriteTurnLive(matchId, myUid)) return;
     const normalizedTurn = turnNumber || 1;
     const track = getTurnLiveTrack(matchId, myUid);
     const fingerprint = turnLiveFingerprint(normalizedTurn, state);
-    if (fingerprint === track.lastFingerprint && !track.pending && !track.inFlight) {
+    const immediate = opts.immediate === true || state?.action?.kind === 'checking';
+    if (!immediate && fingerprint === track.lastFingerprint && !track.pending && !track.inFlight) {
       return;
     }
 
@@ -860,9 +862,14 @@
     };
 
     if (track.inFlight) return;
+    if (track.timer) clearTimeout(track.timer);
+    track.timer = null;
+    if (immediate) {
+      void flushTurnLive(matchId, myUid);
+      return;
+    }
     const elapsed = Date.now() - track.lastSentAt;
     const wait = Math.max(0, TURN_LIVE_MIN_INTERVAL_MS - elapsed);
-    if (track.timer) clearTimeout(track.timer);
     track.timer = setTimeout(() => {
       track.timer = null;
       flushTurnLive(matchId, myUid);

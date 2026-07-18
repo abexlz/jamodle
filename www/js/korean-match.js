@@ -2986,6 +2986,64 @@
       this.updateCheckButton();
     }
 
+    /**
+     * Clear active-turn placements while restoring cumulative shared greens.
+     * Used on turn boundaries so correct letters survive turn swaps.
+     */
+    prepareForNewTurn(locked, turnHistory, myUid) {
+      if (!this.turnBased) return;
+      this.mergeDock?.reset();
+      this.updateRotationDockLabel();
+      this._lastLiveFingerprint = null;
+      this._suspendLiveBroadcast = false;
+      this.clearWatchRevealVisuals();
+      this.blocks.forEach((block) => {
+        block.getAllZones().forEach((zone) => {
+          zone.el.querySelectorAll('.opp-reveal-tile').forEach((el) => el.remove());
+          if (zone.locked) return;
+          zone.clear();
+          zone.el.classList.remove(
+            'correct', 'incorrect', 'turn-neutral', 'revealing', 'revealing-wrong', 'locked',
+            'watch-correct', 'watch-wrong', 'watch-reveal-pending'
+          );
+        });
+      });
+      Object.values(this.tileMap).forEach((tile) => {
+        if (tile.locked) return;
+        tile.el?.classList.remove(
+          'revealed', 'correct-flip', 'turn-neutral-tile', 'revealing', 'revealing-wrong'
+        );
+        if (!tile.inBank) this.returnTileToBank(tile);
+      });
+      this.blocks.forEach((block) => {
+        block.getAllZones().forEach((zone) => {
+          if (!zone.locked) return;
+          const tile = zone.placedTileId ? this.tileMap[zone.placedTileId] : null;
+          zone.locked = false;
+          zone.clear();
+          zone.el.classList.remove(
+            'correct', 'incorrect', 'turn-neutral', 'revealing', 'revealing-wrong', 'locked',
+            'watch-correct', 'watch-wrong', 'watch-reveal-pending'
+          );
+          if (tile) {
+            tile.locked = false;
+            tile.el?.classList.remove('revealed', 'correct-flip', 'locked');
+            this.returnTileToBank(tile);
+          }
+        });
+      });
+      this.checkedComplete = false;
+      this.checking = false;
+      this.turnSubmitting = false;
+      this.clearSelection();
+      this.restoreTurnLockedPlacements(locked, turnHistory, myUid);
+      this.updateCheckButton();
+    }
+
+    waitForWatchReveal() {
+      return this._watchRevealInFlight || Promise.resolve();
+    }
+
     /** Merge correct slot placements from the player's past turns in this match. */
     buildAutofillPlacements(turnHistory, myUid) {
       const map = new Map();
@@ -3485,11 +3543,22 @@
         if (key === this._watchRevealPlayedKey) return;
         this._watchRevealPlayedKey = key;
       }
-      if (this._watchRevealBusy) return;
+      if (this._watchRevealInFlight) return this._watchRevealInFlight;
+      this._watchRevealInFlight = this._runWatchTurnReveal(reveal, labels).finally(() => {
+        this._watchRevealInFlight = null;
+      });
+      return this._watchRevealInFlight;
+    }
+
+    async _runWatchTurnReveal(reveal, labels = {}) {
       this._watchRevealBusy = true;
 
       try {
-        const { toReveal, toWrong } = this.collectWatchRevealTargets(reveal);
+        let { toReveal, toWrong } = this.collectWatchRevealTargets(reveal);
+        if (!toReveal.length && !toWrong.length && reveal.placements?.length) {
+          this.renderTurnGuessOnZones(this.blocks, reveal, { neutral: true });
+          ({ toReveal, toWrong } = this.collectWatchRevealTargets(reveal));
+        }
         if (!toReveal.length && !toWrong.length) return;
 
         this.root?.classList.add('match-watch-revealing');
@@ -4016,6 +4085,7 @@
 
       if (live.action?.kind === 'checking' && actionSeq > this._lastOppFlashSeq) {
         this._lastOppFlashSeq = actionSeq;
+        this.renderTurnGuessOnZones(this.blocks, { placements: live.placements || [] }, { neutral: true });
         const reveal = this.buildWatchRevealFromLive(live);
         void this.playWatchTurnReveal(reveal);
         return;

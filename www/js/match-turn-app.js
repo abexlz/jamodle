@@ -478,14 +478,16 @@
           const live = this.matchData;
           if (!live || live.currentTurnUid !== this.myUid || live.status !== 'active') return;
           if (RS().isQuotaHalted?.()) return;
-          if (!RS().usesTurnLiveRtdb?.() && RS().inWriteCooldown?.()) return;
+          const checking = state?.action?.kind === 'checking';
+          if (!checking && !RS().usesTurnLiveRtdb?.() && RS().inWriteCooldown?.()) return;
           debugTurn('onTurnLiveChange', {
             matchId: this.matchId,
             turnNumber: live.turnNumber || 0,
             placements: state?.placements?.length || 0,
             mergeResult: state?.merge?.result || null,
+            checking,
           });
-          RS().updateTurnLive(this.matchId, this.myUid, live.turnNumber, state);
+          RS().updateTurnLive(this.matchId, this.myUid, live.turnNumber, state, { immediate: checking });
         },
       });
       this.game.mount();
@@ -756,8 +758,7 @@
       const wasWatching = this.game.watchMode;
       const hasBoardPlacements = this.game.hasWatchBoardPlacements?.();
       if (!wasWatching || !hasBoardPlacements) {
-        this.game.resetTurnBoard();
-        this.game.restoreTurnLockedPlacements(lockedBeforeReveal, data.turnHistory, this.myUid);
+        this.game.prepareForNewTurn(lockedBeforeReveal, data.turnHistory, this.myUid);
         this.game.setWatchMode(true);
         this.game.renderTurnGuessOnZones(this.game.blocks, reveal, { neutral: true });
       }
@@ -790,8 +791,7 @@
     watchOpponentTurn(data) {
       const watchKey = `watch-${data.turnNumber || 1}`;
       if (this.preparedTurnNumber !== watchKey) {
-        this.game.resetTurnBoard();
-        this.game.restoreTurnLockedPlacements?.(data.sharedState?.locked || []);
+        this.game.prepareForNewTurn?.(data.sharedState?.locked || []);
         this.preparedTurnNumber = watchKey;
       }
       this.game.syncSharedState(data.sharedState || RS().defaultSharedState());
@@ -882,12 +882,12 @@
       this.game.setInspectMode(false);
       if (myTurn) {
         await this.maybePlayOpponentReveal(data);
+        await this.game.waitForWatchReveal?.();
         this.renderTurnBar(data, 'mine');
         this.hideOppSubmission();
         this.stopTurnLiveWatch();
         if (this.preparedTurnNumber !== data.turnNumber) {
-          this.game.resetTurnBoard();
-          this.game.restoreTurnLockedPlacements?.(
+          this.game.prepareForNewTurn?.(
             data.sharedState?.locked || [],
             data.turnHistory,
             this.myUid
