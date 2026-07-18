@@ -36,7 +36,7 @@
       .replace(/"/g, '&quot;');
   }
 
-  const CAL_STYLES_HREF = 'css/daily-calendar.css?v=9';
+  const CAL_STYLES_HREF = 'css/daily-calendar.css?v=10';
 
   function ensureStyles() {
     let link = document.getElementById('daily-cal-styles');
@@ -195,7 +195,7 @@
         ? '<span class="daily-cal-day-check" aria-hidden="true">✓</span>'
         : '';
       return `
-        <button type="button" class="${dayClasses(dateKey)}"
+        <button type="button" class="${dayClasses(dateKey)} no-press"
           data-date="${escapeHtml(dateKey)}"
           ${selectable ? '' : 'disabled'}
           aria-label="${escapeHtml(t('dailyCalendar.dayLabel', { day, date: dateKey }))}"
@@ -207,9 +207,9 @@
 
     return `
       <div class="daily-cal-month-nav">
-        <button type="button" class="daily-cal-month-btn" data-cal-nav="prev" aria-label="${escapeHtml(t('dailyCalendar.prevMonth'))}" ${canGoPrevMonth() ? '' : 'disabled'}>‹</button>
+        <button type="button" class="daily-cal-month-btn no-press" data-cal-nav="prev" aria-label="${escapeHtml(t('dailyCalendar.prevMonth'))}" ${canGoPrevMonth() ? '' : 'disabled'}>‹</button>
         <div class="daily-cal-month-label">${escapeHtml(monthLabel(viewYear, viewMonth))}</div>
-        <button type="button" class="daily-cal-month-btn" data-cal-nav="next" aria-label="${escapeHtml(t('dailyCalendar.nextMonth'))}" ${canGoNextMonth() ? '' : 'disabled'}>›</button>
+        <button type="button" class="daily-cal-month-btn no-press" data-cal-nav="next" aria-label="${escapeHtml(t('dailyCalendar.nextMonth'))}" ${canGoNextMonth() ? '' : 'disabled'}>›</button>
       </div>
       <div class="daily-cal-weekdays">${weekdayHtml}</div>
       <div class="daily-cal-grid" role="grid">${daysHtml}</div>
@@ -236,7 +236,7 @@
   function buildFooterHtml() {
     const svc = SVC();
     if (!selectedDate || !svc.canSelectDate(selectedDate)) {
-      return `<button type="button" class="daily-cal-play-btn" disabled>${escapeHtml(t('dailyCalendar.selectDay'))}</button>`;
+      return `<button type="button" class="daily-cal-play-btn no-press" disabled>${escapeHtml(t('dailyCalendar.selectDay'))}</button>`;
     }
 
     const dateLabel = formatPlayDate(selectedDate);
@@ -252,7 +252,7 @@
         : '';
       return `
         <div class="daily-cal-play-row">
-          <button type="button" class="daily-cal-play-btn" data-cal-action="play">
+          <button type="button" class="daily-cal-play-btn no-press" data-cal-action="play">
             <span class="daily-cal-play-label">${escapeHtml(playLabel)}</span>${freeTag}
           </button>
         </div>
@@ -264,10 +264,10 @@
       <div class="daily-cal-play-row">
         <p class="daily-cal-progress-text">${escapeHtml(t('dailyCalendar.unlockPastHint', { date: dateLabel }))}</p>
         <div class="daily-cal-unlock-row">
-          <button type="button" class="daily-cal-unlock-btn coins" data-cal-action="coins">
+          <button type="button" class="daily-cal-unlock-btn coins no-press" data-cal-action="coins">
             ${escapeHtml(t('dailyCalendar.payCoins', { count: cost }))}
           </button>
-          <button type="button" class="daily-cal-unlock-btn ad" data-cal-action="ad">
+          <button type="button" class="daily-cal-unlock-btn ad no-press" data-cal-action="ad">
             ${escapeHtml(t('dailyCalendar.watchAd'))}
           </button>
         </div>
@@ -343,9 +343,8 @@
   function bindEvents() {
     if (!overlayEl) return;
 
-    overlayEl.querySelector('.daily-cal-close')?.addEventListener('click', close);
     overlayEl.addEventListener('click', (e) => {
-      if (e.target === overlayEl) close();
+      if (e.target === overlayEl || e.target.closest('.daily-cal-close')) close();
     });
 
     overlayEl.querySelectorAll('.daily-cal-tab').forEach((tab) => {
@@ -420,13 +419,14 @@
     overlayEl.innerHTML = `
       <div class="daily-cal-modal">
         <header class="daily-cal-header">
-          <button type="button" class="daily-cal-close" aria-label="${escapeHtml(t('dailyCalendar.closeLabel'))}">
+          <button type="button" class="daily-cal-close no-press" aria-label="${escapeHtml(t('dailyCalendar.closeLabel'))}">
             <span class="daily-cal-close-icon" aria-hidden="true">×</span>
           </button>
           <div class="daily-cal-tabs" role="tablist" aria-label="${escapeHtml(t('dailyCalendar.title'))}">
-            <button type="button" class="daily-cal-tab is-active" role="tab" data-cal-tab="puzzles" aria-selected="true">${escapeHtml(t('dailyCalendar.tabPuzzles'))}</button>
-            <button type="button" class="daily-cal-tab" role="tab" data-cal-tab="trophies" aria-selected="false" tabindex="-1">${escapeHtml(t('dailyCalendar.tabTrophies'))}</button>
+            <button type="button" class="daily-cal-tab no-press is-active" role="tab" data-cal-tab="puzzles" aria-selected="true">${escapeHtml(t('dailyCalendar.tabPuzzles'))}</button>
+            <button type="button" class="daily-cal-tab no-press" role="tab" data-cal-tab="trophies" aria-selected="false" tabindex="-1">${escapeHtml(t('dailyCalendar.tabTrophies'))}</button>
           </div>
+          <div class="daily-cal-header-spacer" aria-hidden="true"></div>
         </header>
         <div class="daily-cal-body"></div>
         <footer class="daily-cal-footer"></footer>

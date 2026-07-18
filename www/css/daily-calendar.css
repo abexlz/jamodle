@@ -57,20 +57,27 @@
 }
 
 .daily-cal-header {
-  position: relative;
-  display: flex;
+  display: grid;
+  grid-template-columns: 36px 1fr 36px;
   align-items: center;
-  justify-content: center;
   padding: 14px 16px 10px;
   gap: 8px;
   grid-area: header;
 }
 
+.daily-cal-header-spacer {
+  width: 36px;
+  height: 36px;
+  justify-self: end;
+}
+
 .daily-cal-close {
-  position: absolute;
-  left: 16px;
-  top: 50%;
-  transform: translateY(-50%);
+  position: relative;
+  left: auto;
+  top: auto;
+  transform: none;
+  grid-column: 1;
+  justify-self: start;
   width: 36px;
   height: 36px;
   border: 2px solid rgba(123, 207, 255, 0.35);
@@ -108,7 +115,9 @@
 .daily-cal-tabs {
   display: flex;
   gap: 0;
-  width: min(100%, 260px);
+  width: min(100%, 220px);
+  justify-self: center;
+  grid-column: 2;
   padding: 3px;
   border-radius: 999px;
   border: 2px solid rgba(123, 207, 255, 0.35);
@@ -415,8 +424,8 @@
 }
 
 .daily-cal-day.is-selected {
-  border-color: #7BCFFF;
-  border-width: 3px;
+  outline: 2px solid #7BCFFF;
+  outline-offset: -1px;
   z-index: 1;
 }
 
@@ -620,7 +629,7 @@ body.daily-cal-open #menu-screen {
   }
 
   .daily-cal-close {
-    left: 12px;
+    justify-self: start;
   }
 
   .daily-cal-body {
@@ -703,4 +712,42 @@ body.daily-cal-open #menu-screen {
     font-size: 12px;
     padding: 7px 8px;
   }
+}
+
+/* Isolate calendar controls from global menu button press/hover physics */
+.daily-cal-overlay .daily-cal-close.no-press,
+.daily-cal-overlay .daily-cal-tab.no-press,
+.daily-cal-overlay .daily-cal-month-btn.no-press,
+.daily-cal-overlay .daily-cal-day.no-press,
+.daily-cal-overlay .daily-cal-unlock-btn.no-press {
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    opacity 0.15s ease,
+    transform 0.12s ease,
+    filter 0.12s ease !important;
+}
+
+.daily-cal-overlay .daily-cal-close.no-press:hover,
+.daily-cal-overlay .daily-cal-tab.no-press:hover,
+.daily-cal-overlay .daily-cal-month-btn.no-press:hover:not(:disabled),
+.daily-cal-overlay .daily-cal-day.no-press:hover:not(:disabled),
+.daily-cal-overlay .daily-cal-unlock-btn.no-press:hover {
+  transform: none !important;
+}
+
+.daily-cal-overlay .daily-cal-close.no-press:active,
+.daily-cal-overlay .daily-cal-close.no-press.is-pressed,
+.daily-cal-overlay .daily-cal-tab.no-press:active,
+.daily-cal-overlay .daily-cal-tab.no-press.is-pressed,
+.daily-cal-overlay .daily-cal-month-btn.no-press:active:not(:disabled),
+.daily-cal-overlay .daily-cal-month-btn.no-press.is-pressed:not(:disabled),
+.daily-cal-overlay .daily-cal-day.no-press:active:not(:disabled),
+.daily-cal-overlay .daily-cal-day.no-press.is-pressed:not(:disabled),
+.daily-cal-overlay .daily-cal-unlock-btn.no-press:active,
+.daily-cal-overlay .daily-cal-unlock-btn.no-press.is-pressed {
+  transform: scale(0.96) !important;
+  filter: brightness(0.94) !important;
+  box-shadow: none !important;
 }
