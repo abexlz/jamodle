@@ -6,6 +6,7 @@
 
   const RS = () => global.RaceService;
   const RC = () => global.RaceCountdown;
+  const HUD = () => global.RaceBattleHudUI;
   const COUNTDOWN_SEC = 3;
   const countdownTotalMs = () => RC()?.countdownTotalMs?.(COUNTDOWN_SEC) ?? (COUNTDOWN_SEC + 1) * 1000;
 
@@ -127,17 +128,18 @@
     }
 
     renderShell() {
+      const hud = HUD()?.shellMarkup?.({ showScores: false }) || '';
       this.root.innerHTML = `
         <header class="race-header">
           <a class="race-back" href="profile.html">${escapeHtml(rt('backProfile'))}</a>
           <h1>${escapeHtml(rt('title'))}</h1>
         </header>
-        <div id="race-opponent-bar" class="race-opponent-bar hidden" aria-live="polite"></div>
+        ${hud}
         <div id="race-main" class="race-main"></div>
         <div id="race-countdown" class="race-countdown hidden" aria-live="assertive"></div>
       `;
       this.els = {
-        opponentBar: this.root.querySelector('#race-opponent-bar'),
+        ...HUD()?.bindEls?.(this.root, { showScores: false }),
         main: this.root.querySelector('#race-main'),
         countdown: this.root.querySelector('#race-countdown'),
       };
@@ -266,25 +268,33 @@
     }
 
     renderOpponentBar(data) {
-      const opp = RS().getOpponent(data, this.myUid);
-      if (!opp || !this.els.opponentBar) return;
+      if (data.status === 'done') {
+        this.els.battleHud?.classList.add('hidden');
+        return;
+      }
 
-      const count = opp.progress?.guessCount || 0;
-      const finished = opp.progress?.finished;
-      const dots = Array.from({ length: RS().MAX_GUESSES }, (_, i) =>
-        `<span class="race-dot${i < count ? ' filled' : ''}"></span>`
-      ).join('');
+      const wordLen = data.wordLength === 2 ? 2 : 3;
+      const opp = HUD()?.updateBattleHud?.(data, {
+        els: this.els,
+        myUid: this.myUid,
+        matchId: this.matchId,
+        onOpp: (opponent) => {
+          const count = opponent.progress?.guessCount || 0;
+          const finished = opponent.progress?.finished;
+          let statusText = '';
+          if (finished && opponent.progress?.won === true) statusText = rt('oppDone');
+          else if (finished) statusText = rt('oppGaveUp');
 
-      let statusText = '';
-      if (finished && opp.progress?.won === true) statusText = rt('oppDone');
-      else if (finished) statusText = rt('oppGaveUp');
-
-      this.els.opponentBar.classList.remove('hidden');
-      this.els.opponentBar.innerHTML = `
-        <span class="race-opp-name">${escapeHtml(opp.name)}</span>
-        <span class="race-opp-dots" aria-label="${escapeHtml(rt('oppGuessAria', { count }))}">${dots}</span>
-        <span class="race-opp-status">${statusText}</span>
-      `;
+          if (this.els.centerTitle) {
+            this.els.centerTitle.textContent = rt('wordRace', { n: wordLen });
+          }
+          if (this.els.centerSub) {
+            const guessLine = rt('oppGuessAria', { count });
+            this.els.centerSub.textContent = statusText ? `${guessLine}${statusText}` : guessLine;
+          }
+        },
+      });
+      if (!opp) return;
     }
 
     renderMain(html) {

@@ -269,6 +269,65 @@
   width: 100%;
 }
 
+.rw-race-battle-hud--no-scores .rw-race-battle-mid {
+  gap: clamp(48px, 18vw, 88px);
+}
+
+.rw-race-battle-hud--no-scores {
+  min-height: clamp(118px, 32vw, 148px);
+  padding-bottom: clamp(18px, 5vw, 26px);
+}
+
+.race-series-score {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.race-series-score.hidden {
+  display: none;
+}
+
+.race-series-wins {
+  font-family: 'Jua', sans-serif;
+  font-size: clamp(22px, 6vw, 30px);
+  font-weight: 700;
+  line-height: 1;
+  min-width: 1.1em;
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+.race-series-wins--opp {
+  color: #E05050;
+}
+
+.race-series-wins--you {
+  color: #3A7A58;
+}
+
+[data-theme="dark"] .race-series-wins--opp {
+  color: #FF8A8A;
+}
+
+[data-theme="dark"] .race-series-wins--you {
+  color: #7FD8A0;
+}
+
+.race-series-sep {
+  font-family: 'Jua', sans-serif;
+  font-size: clamp(18px, 5vw, 24px);
+  font-weight: 700;
+  color: #8A939E;
+  line-height: 1;
+}
+
+[data-theme="dark"] .race-series-sep {
+  color: #9AA3B8;
+}
+
 .rw-race-battle-center-meta {
   display: flex;
   flex-direction: column;

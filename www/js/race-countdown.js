@@ -53,6 +53,7 @@
       clearCountdownTimers(state);
     }
     state._countdownEndMs = raceStartMs;
+    state._lastCountdownSoundSec = null;
 
     el.classList.remove('hidden');
     const cap = Number(countdownSec) > 0 ? Number(countdownSec) : DEFAULT_COUNTDOWN_SEC;
@@ -61,6 +62,7 @@
       if (state.countdownDone) return;
       state.countdownDone = true;
       clearCountdownTimers(state);
+      global.SoundEffects?.countdownGo?.();
       el.textContent = goLabel || 'Go!';
       el.classList.add('go');
       setTimeout(() => {
@@ -76,7 +78,12 @@
         finish();
         return;
       }
-      el.textContent = String(countdownDisplaySec(remaining, cap));
+      const displaySec = countdownDisplaySec(remaining, cap);
+      if (displaySec !== state._lastCountdownSoundSec) {
+        state._lastCountdownSoundSec = displaySec;
+        global.SoundEffects?.countdownTick?.(displaySec);
+      }
+      el.textContent = String(displaySec);
       el.classList.remove('go');
     };
 

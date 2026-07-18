@@ -187,6 +187,11 @@
           <div class="rw-race-battle-bottom">
             <p id="race-opp-name" class="rw-race-battle-name"></p>
             <div class="rw-race-battle-center-meta">
+              <div id="race-series-score" class="race-series-score hidden" aria-hidden="true">
+                <span id="race-series-opp-wins" class="race-series-wins race-series-wins--opp">0</span>
+                <span class="race-series-sep" aria-hidden="true">:</span>
+                <span id="race-series-my-wins" class="race-series-wins race-series-wins--you">0</span>
+              </div>
               <span id="rw-race-chain-title" class="rw-race-chain-title"></span>
               <span id="rw-race-chain-progress" class="rw-race-chain-progress"></span>
             </div>
@@ -208,6 +213,9 @@
         myWordCountNum: this.root.querySelector('#race-my-word-count-num'),
         main: this.root.querySelector('#race-main'),
         countdown: this.root.querySelector('#race-countdown'),
+        seriesScore: this.root.querySelector('#race-series-score'),
+        seriesOppWins: this.root.querySelector('#race-series-opp-wins'),
+        seriesMyWins: this.root.querySelector('#race-series-my-wins'),
       };
       this.els.myWordCountNum = global.RwScoreOdometer?.mount(this.els.myWordCountNum) || this.els.myWordCountNum;
       this.els.oppWordCountNum = global.RwScoreOdometer?.mount(this.els.oppWordCountNum) || this.els.oppWordCountNum;
@@ -627,6 +635,14 @@
 
       this.loadBattleCard(this.els.oppCard, opp.uid, 'opp');
       this.loadBattleCard(this.els.myCard, this.myUid, 'my');
+
+      void global.RaceBattleHudUI?.updateSeriesScore?.(
+        this.els,
+        this.matchId,
+        this.myUid,
+        opp.uid,
+        data,
+      );
 
       const oppLive = isP1 ? data.player2RwLive : data.player1RwLive;
       this.updateEnemyHudLives(oppLive?.wrongCount || 0, oppLive?.stunnedUntil || 0);

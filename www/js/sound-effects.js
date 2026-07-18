@@ -297,6 +297,20 @@
       ]);
     },
 
+    countdownTick(step) {
+      const freqs = { 3: 392, 2: 494, 1: 622 };
+      const freq = freqs[step] || 520;
+      playTone({ freq, duration: 0.07, peak: 0.11, type: 'sine' });
+    },
+
+    countdownGo() {
+      playSequence([
+        { freq: 523, duration: 0.07, peak: 0.12, type: 'sine' },
+        { freq: 659, duration: 0.08, peak: 0.13, gap: 0.045 },
+        { freq: 988, duration: 0.14, peak: 0.14, gap: 0.05 },
+      ]);
+    },
+
     lose() {
       playTone({ freq: 392, duration: 0.18, peak: 0.09 });
       playTone({ freq: 262, duration: 0.28, peak: 0.08, delay: 0.16 });

@@ -6,6 +6,7 @@
 
   const RS = () => global.RaceService;
   const RC = () => global.RaceCountdown;
+  const HUD = () => global.RaceBattleHudUI;
   const COUNTDOWN_SEC = 3;
   const countdownTotalMs = () => RC()?.countdownTotalMs?.(COUNTDOWN_SEC) ?? (COUNTDOWN_SEC + 1) * 1000;
 
@@ -138,29 +139,19 @@
     }
 
     renderShell() {
+      const hud = HUD()?.shellMarkup?.({ showScores: false, emoteSlot: true }) || '';
       this.root.innerHTML = `
         <header class="race-header">
           <a class="race-back" href="profile.html">${escapeHtml(rt('backProfile'))}</a>
           <h1>${escapeHtml(rt('title'))}</h1>
           <a class="race-settings-link" href="settings.html" aria-label="${escapeHtml(global.I18n?.t('nav.settings') || 'Settings')}">⚙️</a>
         </header>
-        <div id="race-opp-hud" class="race-opp-hud hidden" aria-live="polite">
-          <div class="race-opp-card-col">
-            <div id="race-opp-card" class="race-opp-battle-card" aria-hidden="true"></div>
-            <p id="race-opp-name" class="race-opp-name-hud"></p>
-          </div>
-          <div id="race-opp-emote" class="race-opp-emote hidden" aria-live="polite"></div>
-        </div>
-        <div id="race-opponent-bar" class="race-opponent-bar hidden" aria-live="polite"></div>
+        ${hud}
         <div id="race-main" class="race-main"></div>
         <div id="race-countdown" class="race-countdown hidden" aria-live="assertive"></div>
       `;
       this.els = {
-        oppHud: this.root.querySelector('#race-opp-hud'),
-        oppCard: this.root.querySelector('#race-opp-card'),
-        oppName: this.root.querySelector('#race-opp-name'),
-        oppEmote: this.root.querySelector('#race-opp-emote'),
-        opponentBar: this.root.querySelector('#race-opponent-bar'),
+        ...HUD()?.bindEls?.(this.root, { showScores: false }),
         main: this.root.querySelector('#race-main'),
         countdown: this.root.querySelector('#race-countdown'),
       };
@@ -300,42 +291,35 @@
 
     renderOpponentBar(data) {
       if (data.status === 'done') {
-        this.els.oppHud?.classList.add('hidden');
-        this.els.opponentBar?.classList.add('hidden');
+        this.els.battleHud?.classList.add('hidden');
         return;
       }
 
-      const opp = RS().getOpponent(data, this.myUid);
+      const mode = this.matchModeLabel(data);
+      const opp = HUD()?.updateBattleHud?.(data, {
+        els: this.els,
+        myUid: this.myUid,
+        matchId: this.matchId,
+        onOpp: (opponent) => {
+          const count = opponent.progress?.guessCount || 0;
+          const finished = opponent.progress?.finished;
+          let statusText = '';
+          if (finished && opponent.progress?.won === true) statusText = rt('oppDone');
+          else if (finished) statusText = rt('oppGaveUp');
+
+          if (this.els.centerTitle) this.els.centerTitle.textContent = mode;
+          if (this.els.centerSub) {
+            const attemptLine = rt('oppAttempts', { count });
+            this.els.centerSub.textContent = statusText ? `${attemptLine}${statusText}` : attemptLine;
+          }
+
+          if (this.game && opponent.progress?.won === true && !this.game.checkedComplete) {
+            this.game.setEnabled(false);
+            this.game.feedback?.show('info', rt('oppFinishedFirst'));
+          }
+        },
+      });
       if (!opp) return;
-
-      if (this.els.oppHud) {
-        this.els.oppHud.classList.remove('hidden');
-        if (this.els.oppName) this.els.oppName.textContent = opp.name || rt('opponent');
-        global.MatchEmotes?.fetchOpponentSummary?.(opp.uid).then((summary) => {
-          if (!summary || !this.els.oppCard) return;
-          global.MatchEmotes.renderOpponentBattleCard(this.els.oppCard, summary);
-          if (this.els.oppName && summary.name) this.els.oppName.textContent = summary.name;
-        });
-      }
-
-      if (!this.els.opponentBar) return;
-
-      const count = opp.progress?.guessCount || 0;
-      const finished = opp.progress?.finished;
-      let statusText = '';
-      if (finished && opp.progress?.won === true) statusText = rt('oppDone');
-      else if (finished) statusText = rt('oppGaveUp');
-
-      this.els.opponentBar.classList.remove('hidden');
-      this.els.opponentBar.innerHTML = `
-        <span class="race-opp-attempts">${escapeHtml(rt('oppAttempts', { count }))}</span>
-        <span class="race-opp-status">${statusText}</span>
-      `;
-
-      if (this.game && opp.progress?.won === true && !this.game.checkedComplete) {
-        this.game.setEnabled(false);
-        this.game.feedback?.show('info', rt('oppFinishedFirst'));
-      }
     }
 
     setupEmotes(data) {
@@ -550,8 +534,7 @@
         clearTimeout(this._countdownFallbackTimer);
         this._countdownFallbackTimer = null;
       }
-      this.els.oppHud?.classList.add('hidden');
-      this.els.opponentBar?.classList.add('hidden');
+      this.els.battleHud?.classList.add('hidden');
       this._emotes?.destroy();
 
       const p1 = data.player1Progress || RS().defaultProgress();

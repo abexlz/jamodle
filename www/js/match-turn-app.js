@@ -6,6 +6,7 @@
 
   const RS = () => global.RaceService;
   const RC = () => global.RaceCountdown;
+  const HUD = () => global.RaceBattleHudUI;
   const COUNTDOWN_SEC = 3;
   const countdownTotalMs = () => RC()?.countdownTotalMs?.(COUNTDOWN_SEC) ?? (COUNTDOWN_SEC + 1) * 1000;
   // Grace (server-anchored) after a turn expires before the *waiting* player is
@@ -186,29 +187,21 @@
     }
 
     renderShell() {
+      const hud = HUD()?.shellMarkup?.({ showScores: false, emoteSlot: true }) || '';
       this.root.innerHTML = `
         <header class="race-header">
           <a class="race-back" href="index.html">${escapeHtml(rt('backHome'))}</a>
           <h1>${escapeHtml(rt('title'))}</h1>
           <a class="race-settings-link" href="settings.html" aria-label="${escapeHtml(global.I18n?.t('nav.settings') || 'Settings')}">⚙️</a>
         </header>
-        <div id="race-opp-hud" class="race-opp-hud hidden" aria-live="polite">
-          <div class="race-opp-card-col">
-            <div id="race-opp-card" class="race-opp-battle-card" aria-hidden="true"></div>
-            <p id="race-opp-name" class="race-opp-name-hud"></p>
-          </div>
-          <div id="race-opp-emote" class="race-opp-emote hidden" aria-live="polite"></div>
-        </div>
+        ${hud}
         <div id="race-turn-urgency" class="race-turn-urgency hidden" aria-hidden="true"></div>
         <div id="race-turn-swap" class="race-turn-swap hidden" aria-live="assertive"></div>
         <div id="race-main" class="race-main"></div>
         <div id="race-countdown" class="race-countdown hidden" aria-live="assertive"></div>
       `;
       this.els = {
-        oppHud: this.root.querySelector('#race-opp-hud'),
-        oppCard: this.root.querySelector('#race-opp-card'),
-        oppName: this.root.querySelector('#race-opp-name'),
-        oppEmote: this.root.querySelector('#race-opp-emote'),
+        ...HUD()?.bindEls?.(this.root, { showScores: false }),
         turnBar: null,
         turnUrgency: this.root.querySelector('#race-turn-urgency'),
         turnSwap: this.root.querySelector('#race-turn-swap'),
@@ -313,6 +306,12 @@
       if (data.player1Uid !== this.myUid && data.player2Uid !== this.myUid) {
         this.renderError(rt('notParticipant'));
         return;
+      }
+
+      if (data.status === 'active') {
+        this.renderBattleHud(data);
+      } else {
+        this.els.battleHud?.classList.add('hidden');
       }
 
       if (data.status === 'pending') return this.handlePending(data, this.isP1);
@@ -502,19 +501,23 @@
       // Mid-match loads keep the server-estimated elapsed time instead.
       if (anchorTimerNow) this.anchorTurnTimerNow(data);
       this.syncTurnState(data);
-      this.renderOpponentHud(data);
+      this.renderBattleHud(data);
       this.setupEmotes(data);
     }
 
-    renderOpponentHud(data) {
-      const opp = RS().getOpponent(data, this.myUid);
-      if (!opp || !this.els.oppHud) return;
-      this.els.oppHud.classList.remove('hidden');
-      if (this.els.oppName) this.els.oppName.textContent = opp.name || rt('opponent');
-      global.MatchEmotes?.fetchOpponentSummary?.(opp.uid).then((summary) => {
-        if (!summary || !this.els.oppCard) return;
-        global.MatchEmotes.renderOpponentBattleCard(this.els.oppCard, summary);
-        if (this.els.oppName && summary.name) this.els.oppName.textContent = summary.name;
+    renderBattleHud(data) {
+      const mode = this.turnModeLabel(data);
+      HUD()?.updateBattleHud?.(data, {
+        els: this.els,
+        myUid: this.myUid,
+        matchId: this.matchId,
+        onOpp: () => {
+          if (this.els.centerTitle) this.els.centerTitle.textContent = mode;
+          if (this.els.centerSub) {
+            const turnNum = data.turnNumber || 1;
+            this.els.centerSub.textContent = rt('turnNumber', { n: turnNum });
+          }
+        },
       });
     }
 
@@ -1070,7 +1073,7 @@
       }
       this.hideOppSubmission();
       this.els.turnBar?.classList.add('hidden');
-      this.els.oppHud?.classList.add('hidden');
+      this.els.battleHud?.classList.add('hidden');
       this._emotes?.destroy();
 
       const shared = data.sharedState || {};

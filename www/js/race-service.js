@@ -1829,6 +1829,47 @@
     }
   }
 
+  async function getRematchSeriesScore(matchId, myUid, oppUid) {
+    const db = getDb();
+    if (!db || !matchId || !myUid || !oppUid) {
+      return { myWins: 0, oppWins: 0, isRematch: false };
+    }
+
+    try {
+      const currentSnap = await matchesRef().doc(matchId).get();
+      if (!currentSnap.exists) {
+        return { myWins: 0, oppWins: 0, isRematch: false };
+      }
+
+      const current = currentSnap.data();
+      if (!current?.rematchFrom) {
+        return { myWins: 0, oppWins: 0, isRematch: false };
+      }
+
+      let myWins = 0;
+      let oppWins = 0;
+      let prevId = current.rematchFrom;
+      const seen = new Set([matchId]);
+
+      while (prevId && !seen.has(prevId)) {
+        seen.add(prevId);
+        const prevSnap = await matchesRef().doc(prevId).get();
+        if (!prevSnap.exists) break;
+        const prev = prevSnap.data();
+        if (prev?.status === 'done' && prev.winnerUid) {
+          if (prev.winnerUid === myUid) myWins += 1;
+          else if (prev.winnerUid === oppUid) oppWins += 1;
+        }
+        prevId = prev?.rematchFrom || null;
+      }
+
+      return { myWins, oppWins, isRematch: true };
+    } catch (err) {
+      console.warn('[Race] rematch series score failed', err);
+      return { myWins: 0, oppWins: 0, isRematch: false };
+    }
+  }
+
   global.RaceService = {
     MAX_GUESSES,
     TURN_DURATION_MS,
@@ -1868,6 +1909,7 @@
     amPlayer1,
     startedAtMs,
     getRematchLobbyState,
+    getRematchSeriesScore,
     setResultsPresent,
     setRematchReady,
     claimRematchCreation,
