@@ -1458,6 +1458,7 @@
           locked: mergeSharedLocked(data.sharedState?.locked, payload),
           over: !!payload.won,
           winnerUid: payload.won ? myUid : null,
+          ...(payload.solvedWord ? { solvedWord: payload.solvedWord } : {}),
         };
         const isP1 = data.player1Uid === myUid;
         const progKey = isP1 ? 'player1Progress' : 'player2Progress';
@@ -1479,6 +1480,7 @@
               finished: true,
               won: true,
               finishedAt: firebase.firestore.FieldValue.serverTimestamp(),
+              ...(payload.solvedWord ? { solvedWord: payload.solvedWord } : {}),
             },
           };
           if (!usesTurnLiveRtdb()) {

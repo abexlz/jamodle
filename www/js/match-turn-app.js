@@ -1074,6 +1074,12 @@
       let resultLine = rt('draw');
       if (data.winnerUid === this.myUid) resultLine = rt('win');
       else if (data.winnerUid) resultLine = rt('loss');
+      const winnerProgress = data.winnerUid === data.player1Uid
+        ? (data.player1Progress || RS().defaultProgress())
+        : data.winnerUid === data.player2Uid
+          ? (data.player2Progress || RS().defaultProgress())
+          : null;
+      const displayWord = shared.solvedWord || winnerProgress?.solvedWord || data.target;
 
       this.renderMain(RUI.renderResultsPanel({
         resultLine,
@@ -1087,7 +1093,7 @@
           { uid: this.myUid, name: rt('me'), statHtml: `${shared.guessCount || 0} ${escapeHtml(rt('turns'))}` },
           { uid: opp?.uid, name: opp?.name || rt('opponent'), statHtml: `${shared.guessCount || 0} ${escapeHtml(rt('turns'))}` },
         ],
-        answerTilesHtml: RUI.buildMatchWinTiles(data.target),
+        answerTilesHtml: RUI.buildMatchWinTiles(displayWord),
         answerLabel: rt('answerLabel'),
         rematchLabel: rt('rematch'),
         profileLabel: rt('profileLink'),
@@ -1095,7 +1101,7 @@
       }));
 
       RUI.afterResultsMount(this.els.main);
-      void RUI.fillAnswerMeaning(this.els.main, data.target);
+      void RUI.fillAnswerMeaning(this.els.main, displayWord);
       this.mountRematchUi();
     }
   }

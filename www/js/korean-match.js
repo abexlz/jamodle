@@ -1413,6 +1413,7 @@
         won: !!won,
         elapsedMs: this.getElapsedMs(),
         locked,
+        winningWord: this.winningWord || this.getResolvedWord(),
       };
     }
 
@@ -1468,6 +1469,7 @@
       this.currentWord = wordData;
       this.discoveredWord = null;
       this.discoveredDictionaryEntry = null;
+      this.winningWord = '';
       this.multiDictionaryEntries = {};
       const word = typeof wordData?.word === 'string' ? wordData.word.trim() : '';
       if (!word) {
@@ -1512,13 +1514,20 @@
         this.restoreDailyLocked(saved.locked);
       }
 
+      if (saved?.winningWord) {
+        this.winningWord = saved.winningWord;
+        if (saved.winningWord !== word) {
+          this.discoveredWord = saved.winningWord;
+        }
+      }
+
       if (!this.isDaily && saved?.over && saved?.won) {
         this.checkedComplete = true;
         this.els.check.disabled = true;
         this.els.reset.disabled = true;
         this.updateHintButtons();
         this.stopTimer();
-        this.revealHintWordSync(wordData.word);
+        this.revealHintWordSync(this.winningWord || word);
         this.showResults(saved.elapsedMs || 0);
         this.feedback.show('success', t('match.feedbackDailyDone'));
         return;
@@ -1656,8 +1665,23 @@
       return parts.join('');
     }
 
+    captureWinningWord() {
+      if (this.multiFindMode) {
+        this.winningWord = this.multiFoundWords.join(' · ');
+        return this.winningWord;
+      }
+      const submitted = this.getSubmittedBoardWord();
+      this.winningWord = this.discoveredWord || submitted || this.currentWord?.word || '';
+      if (this.winningWord) this.prefetchMeaning(this.winningWord);
+      return this.winningWord;
+    }
+
     getResolvedWord() {
-      return this.discoveredWord || this.currentWord?.word || '';
+      if (this.winningWord) return this.winningWord;
+      if (this.discoveredWord) return this.discoveredWord;
+      const submitted = this.getSubmittedBoardWord();
+      if (submitted) return submitted;
+      return this.currentWord?.word || '';
     }
 
     async isMultiFindWordAccepted(word) {
@@ -1730,6 +1754,7 @@
             this.feedback.show('success', `${streakResult.newMilestone.badge} ${streakResult.newMilestone.message}`);
           }, 1200);
         }
+        this.captureWinningWord();
         this.spawnConfetti();
         this.showResults(this.getElapsedMs());
         this.els.check.disabled = true;
@@ -4535,6 +4560,7 @@
         this.checkedComplete = true;
         this.stopTimer();
         const elapsed = this.getElapsedMs();
+        const resolvedWord = this.captureWinningWord();
         if (this.tutorialMode) {
           this.checking = false;
           this.onTutorialEvent?.('wordComplete', { game: this, elapsed });
@@ -4542,7 +4568,6 @@
         }
         if (this.turnBased && this.onTurnSubmit) {
           this.turnSubmitting = true;
-          const resolvedWord = this.getResolvedWord();
           void this.showTurnAnswerBanner(resolvedWord);
           this.freezeOwnTurnResult();
           this.checking = false;
@@ -4552,6 +4577,7 @@
               ...submission,
               won: true,
               guessCount: this.guessCount,
+              solvedWord: resolvedWord,
             });
           } catch (err) {
             if (err?.message === 'turn-not-applied') {
@@ -4573,12 +4599,21 @@
         }
         if (this.versus) {
           if (this.onProgress) {
-            await this.onProgress({ guessCount: this.guessCount, won: true, elapsedMs: elapsed });
+            await this.onProgress({
+              guessCount: this.guessCount,
+              won: true,
+              elapsedMs: elapsed,
+              solvedWord: resolvedWord,
+            });
           }
           if (this.onFinished) {
-            await this.onFinished({ won: true, guessCount: this.guessCount, elapsedMs: elapsed });
+            await this.onFinished({
+              won: true,
+              guessCount: this.guessCount,
+              elapsedMs: elapsed,
+              solvedWord: resolvedWord,
+            });
           }
-          const resolvedWord = this.getResolvedWord();
           const targetWord = this.currentWord?.word || '';
           const versusKey = dictionaryWin && resolvedWord && targetWord && resolvedWord !== targetWord
             ? 'match.feedbackDictionarySuccess'
@@ -4609,14 +4644,13 @@
         if (global.XpService?.awardAndCelebrate) {
           global.XpService.awardAndCelebrate({
             mode: this.isDaily ? 'dailyMatch' : 'koreanMatch',
-            wordId: this.getResolvedWord(),
+            wordId: resolvedWord,
             usedHint: this.hintsUsedThisRound,
             isDailyChallenge: this.isDaily,
             won: true,
             guessCount: this.guessCount,
           });
         }
-        const resolvedWord = this.getResolvedWord();
         const targetWord = this.currentWord?.word || '';
         const successKey = dictionaryWin && resolvedWord && targetWord && resolvedWord !== targetWord
           ? 'match.feedbackDictionarySuccess'
@@ -4787,10 +4821,9 @@
     showResults(elapsed) {
       const word = this.multiFindMode
         ? this.multiFoundWords.join(' · ')
-        : this.getResolvedWord();
+        : (this.winningWord || this.getResolvedWord());
       this.els.resultsWord.textContent = word;
       this.updateResultsMeaning(this.multiFindMode ? this.multiFoundWords : word);
-      this.updateMeaningDisplay();
       this.els.resultsTime.textContent = formatTime(elapsed);
       this.els.resultsGuesses.textContent = String(this.guessCount);
       if (this.els.resultsStreak) {

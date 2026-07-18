@@ -501,14 +501,22 @@
         wordLength: RS().getMatchWordLength(data),
         mode: RS().getMatchWordLength(data),
         fixedWord: data.target,
-        onProgress: async ({ guessCount, won, elapsedMs }) => {
-          await RS().updateMyProgress(this.matchId, isP1, { guessCount, elapsedMs });
+        onProgress: async ({ guessCount, won, elapsedMs, solvedWord }) => {
+          await RS().updateMyProgress(this.matchId, isP1, {
+            guessCount,
+            elapsedMs,
+            ...(solvedWord ? { solvedWord } : {}),
+          });
           if (won) {
             await RS().markFinished(this.matchId, isP1, true);
           }
         },
-        onFinished: async ({ won, guessCount, elapsedMs }) => {
-          await RS().updateMyProgress(this.matchId, isP1, { guessCount, elapsedMs });
+        onFinished: async ({ won, guessCount, elapsedMs, solvedWord }) => {
+          await RS().updateMyProgress(this.matchId, isP1, {
+            guessCount,
+            elapsedMs,
+            ...(solvedWord ? { solvedWord } : {}),
+          });
           await RS().markFinished(this.matchId, isP1, won);
         },
       });
@@ -560,6 +568,12 @@
       const oppProgress = isP1 ? p2 : p1;
       const RUI = global.RaceResultsUI;
       const resultKind = data.winnerUid === this.myUid ? 'win' : data.winnerUid ? 'loss' : 'draw';
+      const winnerProgress = data.winnerUid === data.player1Uid
+        ? p1
+        : data.winnerUid === data.player2Uid
+          ? p2
+          : null;
+      const displayWord = winnerProgress?.solvedWord || data.target;
 
       this.renderMain(RUI.renderResultsPanel({
         resultLine,
@@ -581,13 +595,14 @@
             statHtml: `${oppProgress.guessCount} ${escapeHtml(rt('attempts'))} · ${escapeHtml(formatTime(elapsedFor(oppProgress)))}`,
           },
         ],
-        answerTilesHtml: RUI.buildMatchWinTiles(data.target),
+        answerTilesHtml: RUI.buildMatchWinTiles(displayWord),
         answerLabel: rt('answerLabel'),
         rematchLabel: rt('rematch'),
         profileLabel: rt('profileLink'),
       }));
 
       RUI.afterResultsMount(this.els.main);
+      void RUI.fillAnswerMeaning(this.els.main, displayWord);
       this.mountRematchUi();
     }
   }
