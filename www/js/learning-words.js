@@ -22,7 +22,7 @@
     const curated = String(rawMeaning || '').trim();
     if (curated && !isHanziGloss(curated)) return curated;
     if (glossary) return glossary;
-    return curated;
+    return '';
   }
 
   function normalizeEntry(entry) {

@@ -167,7 +167,9 @@
     }
 
     const entry = result.entry;
-    const meaning = LWM()?.getDisplayMeaning(curatedEntry) || entry.definition || entry.englishWord || '';
+    const meaning = LWM()?.getDisplayMeaning(curatedEntry)
+      || global.DictionaryService?.formatEntryMeaning?.(entry)
+      || '';
     const pos = entry.partOfSpeech
       ? `${entry.partOfSpeech}${entry.partOfSpeechEn ? ` (${entry.partOfSpeechEn})` : ''}`
       : '';

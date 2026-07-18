@@ -242,6 +242,39 @@
     lookupWord(word).catch(() => {});
   }
 
+  /**
+   * English gloss for any dictionary headword — uses cache, then live API.
+   * @param {string} word
+   * @param {object|null} [prefetchedEntry] validation/search entry already in hand
+   */
+  async function resolveEnglishMeaning(word, prefetchedEntry = null) {
+    const q = String(word || '').trim();
+    if (!q) return '';
+
+    if (prefetchedEntry) {
+      const direct = formatEntryMeaning(prefetchedEntry);
+      if (direct) return direct;
+    }
+
+    const cached = readCache(q);
+    if (cached?.entry) {
+      const fromCache = formatEntryMeaning(cached.entry);
+      if (fromCache) return fromCache;
+    }
+
+    if (!isOnline()) return '';
+
+    try {
+      const result = await lookupWord(q);
+      if (result?.entry) {
+        const live = formatEntryMeaning(result.entry);
+        if (live) return live;
+      }
+    } catch { /* offline or API error */ }
+
+    return '';
+  }
+
   global.DictionaryService = {
     SOURCE_NAME,
     lookupWord,
@@ -249,6 +282,7 @@
     isDictionaryWord,
     matchesExactEntry,
     formatEntryMeaning,
+    resolveEnglishMeaning,
     prefetchWord,
     readCache,
     getApiBase,

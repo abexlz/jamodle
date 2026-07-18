@@ -1242,9 +1242,9 @@
       const q = String(word || '').trim();
       if (!q) return '';
 
-      const dictEntry = this.multiDictionaryEntries?.[q]
+      const prefetched = this.multiDictionaryEntries?.[q]
         || (q === this.discoveredWord ? this.discoveredDictionaryEntry : null);
-      const dictMeaning = global.DictionaryService?.formatEntryMeaning?.(dictEntry);
+      const dictMeaning = await global.DictionaryService?.resolveEnglishMeaning?.(q, prefetched);
       if (dictMeaning) return dictMeaning;
 
       const glossary = global.MatchWordMeanings?.[q]
@@ -1258,15 +1258,6 @@
         const curated = global.LearningWordModel?.getDisplayMeaning?.(normalized);
         if (curated) return curated;
       }
-      try {
-        const result = await global.DictionaryService?.lookupWord?.(q);
-        if (result?.found && result.entry) {
-          return global.DictionaryService?.formatEntryMeaning?.(result.entry)
-            || result.entry.definition
-            || result.entry.englishWord
-            || '';
-        }
-      } catch { /* offline or API error */ }
       return '';
     }
 
@@ -4736,11 +4727,7 @@
         .map((w) => {
           const dictEntry = this.multiDictionaryEntries?.[w]
             || (w === this.discoveredWord ? this.discoveredDictionaryEntry : null);
-          const dictText = formatDict(dictEntry);
-          if (dictText) return dictText;
-          return global.MatchWordMeanings?.[w]
-            || global.LearningWords?.getWordMeaning?.(w)
-            || '';
+          return formatDict(dictEntry);
         })
         .filter(Boolean)
         .join(' · ');

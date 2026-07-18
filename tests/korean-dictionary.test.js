@@ -49,5 +49,25 @@ assert(hasExactDictionaryMatch(items, '물'), 'exact match 물');
 assert(!hasExactDictionaryMatch(items, '물고'), 'no partial match');
 assert(pickExactEntry(items, '물고기').word === '물고기', 'pick exact entry');
 
+const chineseOnlyItem = {
+  target_code: '99999',
+  word: '교복',
+  pos: '명사',
+  sense: [{
+    sense_order: 1,
+    definition: '학교에서 입는 옷.',
+    translation: {
+      trans_lang: '중국어',
+      trans_word: '校服',
+      trans_dfn: '校服',
+    },
+  }],
+};
+
+const chineseOnly = normalizeSearchItem(chineseOnlyItem);
+assert(chineseOnly.definition === '', 'no Chinese fallback in definition');
+assert(chineseOnly.englishWord === '', 'no Chinese fallback in englishWord');
+assert(chineseOnly.rawDefinitionKo.includes('학교'), 'Korean definition kept separately');
+
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed > 0 ? 1 : 0);

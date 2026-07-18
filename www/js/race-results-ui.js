@@ -547,7 +547,13 @@
   async function fillAnswerMeaning(root, word) {
     const el = root?.querySelector?.('.race-results-answer-meaning');
     if (!el || !word) return;
-    const gloss = global.LearningWords?.getWordMeaning?.(word);
+    const dictText = await global.DictionaryService?.resolveEnglishMeaning?.(word);
+    if (dictText) {
+      el.textContent = dictText;
+      return;
+    }
+    const gloss = global.MatchWordMeanings?.[word]
+      || global.LearningWords?.getWordMeaning?.(word);
     if (gloss) {
       el.textContent = gloss;
       return;
@@ -557,19 +563,8 @@
       const normalized = global.LearningWords?.getNormalizedWord?.(word)
         || global.LearningWordModel?.normalizeLearningWord?.(entry);
       const curated = global.LearningWordModel?.getDisplayMeaning?.(normalized);
-      if (curated) {
-        el.textContent = curated;
-        return;
-      }
+      if (curated) el.textContent = curated;
     }
-    try {
-      const result = await global.DictionaryService?.lookupWord?.(word);
-      const text = global.DictionaryService?.formatEntryMeaning?.(result?.entry)
-        || result?.entry?.definition
-        || result?.entry?.englishWord
-        || '';
-      if (text) el.textContent = text;
-    } catch { /* offline or API error */ }
   }
 
   global.RaceResultsUI = {
