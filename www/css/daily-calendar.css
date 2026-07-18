@@ -22,8 +22,8 @@
 .daily-cal-modal {
   width: 100%;
   max-width: 420px;
-  height: min(92dvh, 680px);
-  max-height: min(92dvh, 680px);
+  height: min(96dvh, 780px);
+  max-height: min(96dvh, 780px);
   overflow: hidden;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
@@ -51,8 +51,8 @@
   }
   .daily-cal-modal {
     border-radius: 24px;
-    height: min(88dvh, 680px);
-    max-height: min(88dvh, 680px);
+    height: min(92dvh, 780px);
+    max-height: min(92dvh, 780px);
   }
 }
 
@@ -385,8 +385,7 @@
   pointer-events: none;
 }
 
-.daily-cal-day.is-future,
-.daily-cal-day.is-locked-past:not(.is-completed) {
+.daily-cal-day.is-future {
   opacity: 0.38;
   background: rgba(0, 35, 45, 0.45);
   border-color: rgba(0, 80, 95, 0.3);
@@ -394,25 +393,26 @@
   cursor: not-allowed;
 }
 
-.daily-cal-day.is-past:not(.is-completed):not(.is-locked-past) {
-  background: rgba(0, 120, 140, 0.42);
-  border-color: rgba(0, 151, 178, 0.4);
-  color: rgba(255, 255, 255, 0.9);
+.daily-cal-day.is-past:not(.is-completed):not(.is-today) {
+  background: rgba(230, 168, 35, 0.78);
+  border-color: rgba(255, 210, 90, 0.7);
+  color: rgba(45, 32, 5, 0.95);
+  font-weight: 700;
+}
+
+.daily-cal-day.is-completed:not(.is-today) {
+  background: rgba(42, 168, 88, 0.78);
+  border-color: rgba(95, 220, 140, 0.6);
+  color: #ffffff;
+  font-weight: 700;
 }
 
 .daily-cal-day.is-today {
-  border-color: rgba(123, 207, 255, 0.85);
-  background: rgba(0, 151, 178, 0.48);
+  border-color: rgba(100, 180, 255, 0.9);
+  background: rgba(35, 125, 220, 0.78);
   color: #ffffff;
   font-weight: 700;
-  box-shadow: 0 0 10px rgba(123, 207, 255, 0.35);
-}
-
-.daily-cal-day.is-completed {
-  background: rgba(0, 175, 195, 0.62);
-  border-color: rgba(95, 214, 200, 0.55);
-  color: #ffffff;
-  font-weight: 700;
+  box-shadow: 0 0 10px rgba(100, 180, 255, 0.45);
 }
 
 .daily-cal-day.is-selected {
@@ -617,8 +617,8 @@ body.daily-cal-open #menu-screen {
 
 @media (max-width: 480px), (max-height: 740px) {
   .daily-cal-modal {
-    height: min(94dvh, 680px);
-    max-height: min(94dvh, 680px);
+    height: min(96dvh, 780px);
+    max-height: min(96dvh, 780px);
   }
 
   .daily-cal-header {
