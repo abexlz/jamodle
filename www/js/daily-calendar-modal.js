@@ -36,7 +36,7 @@
       .replace(/"/g, '&quot;');
   }
 
-  const CAL_STYLES_HREF = 'css/daily-calendar.css?v=8';
+  const CAL_STYLES_HREF = 'css/daily-calendar.css?v=9';
 
   function ensureStyles() {
     let link = document.getElementById('daily-cal-styles');
