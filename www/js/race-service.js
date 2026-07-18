@@ -5,8 +5,8 @@
   'use strict';
 
   const MAX_GUESSES = 6;
-  const TURN_DURATION_MS = 30000;
-  const TURN_DURATION_NORMAL_MS = 60000;
+  const TURN_DURATION_MS = 60000;
+  const TURN_DURATION_NORMAL_MS = 90000;
   const INSPECT_DURATION_MS = 15000;
   const GAME_TYPES = { wordle: 'wordle', koreanMatch: 'korean-match', relatedWords: 'related-words' };
   const RELATED_WORDS_RACE_TARGET = 25;
@@ -562,6 +562,82 @@
       await ref.set(data);
     } catch (err) {
       registerWriteError(err, 'createMatch');
+      throw err;
+    }
+    return ref.id;
+  }
+
+  async function createRematchMatch(opponentUid, optionsOrWordLength, rematchFromMatchId) {
+    const uid = getUid();
+    const db = getDb();
+    if (!uid || !db) throw new Error('auth');
+    if (inWriteCooldown()) throw new Error('write-cooldown');
+    if (!rematchFromMatchId) throw new Error('rematch-from');
+
+    const opts = normalizeOptions(optionsOrWordLength);
+    const isMatch = opts.gameType === GAME_TYPES.koreanMatch;
+    const isRelatedWordsGame = opts.gameType === GAME_TYPES.relatedWords;
+
+    const myName = getPublicName();
+    let opponentName = '플레이어';
+    try {
+      const snap = await db.collection('users').doc(opponentUid).get();
+      if (snap.exists) opponentName = global.FirebaseSocial.getPublicName(snap.data());
+    } catch { /* fallback name */ }
+
+    const ref = matchesRef().doc();
+    const relatedChainId = isRelatedWordsGame
+      ? (opts.chainId && global.RelatedWordsChains?.getChain?.(opts.chainId)
+        ? opts.chainId
+        : pickRelatedWordsChain(ref.id))
+      : null;
+    const target = isRelatedWordsGame
+      ? relatedChainId
+      : pickTarget(opts);
+    const wordLength = isRelatedWordsGame
+      ? RELATED_WORDS_RACE_TARGET
+      : (isMatch ? syllableCount(target) : Number(opts.wordLength));
+
+    const data = {
+      gameType: isRelatedWordsGame
+        ? GAME_TYPES.relatedWords
+        : (isMatch ? GAME_TYPES.koreanMatch : GAME_TYPES.wordle),
+      player1Uid: uid,
+      player2Uid: opponentUid,
+      player1Name: myName,
+      player2Name: opponentName,
+      status: 'ready',
+      target,
+      wordLength,
+      player1Ready: true,
+      player2Ready: true,
+      player1Progress: defaultProgress(),
+      player2Progress: defaultProgress(),
+      rematchFrom: rematchFromMatchId,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    };
+
+    if (isRelatedWordsGame) {
+      data.chainId = relatedChainId;
+      data.raceTarget = getRelatedWordsLinkCount({ chainId: relatedChainId });
+      data.sharedState = defaultRelatedWordsSharedState();
+    }
+
+    if (isMatch) {
+      data.wordLength = normalizeWordLength(opts.wordLength);
+      if (opts.playMode === PLAY_MODES.turn) {
+        data.playMode = PLAY_MODES.turn;
+        data.turnDurationMs = turnDurationForLength(data.wordLength);
+        data.turnPhase = TURN_PHASES.playing;
+        data.sharedState = defaultSharedState();
+        data.turnHistory = [];
+      }
+    }
+
+    try {
+      await ref.set(data);
+    } catch (err) {
+      registerWriteError(err, 'createRematchMatch');
       throw err;
     }
     return ref.id;
@@ -1684,7 +1760,8 @@
         const p2Ready = data.player2RematchReady === true;
         const p1Present = data.player1ResultsPresent === true;
         const p2Present = data.player2ResultsPresent === true;
-        if (!p1Ready || !p2Ready || !p1Present || !p2Present) return;
+        const initiatorReady = p1Ready || p2Ready;
+        if (!initiatorReady || !p1Present || !p2Present) return;
 
         tx.update(ref, { rematchClaimedByUid: myUid });
         claimed = true;
@@ -1723,6 +1800,7 @@
     defaultSharedState,
     defaultRelatedWordsSharedState,
     createMatch,
+    createRematchMatch,
     acceptMatch,
     declineMatch,
     abandonMatch,

@@ -1098,13 +1098,15 @@
     /* app-buttons.css */
   }
 </style>
-<link rel="stylesheet" href="css/korean-match.css?v=20260713f">
+<link rel="stylesheet" href="css/korean-match.css?v=20260717a">
 <link rel="stylesheet" href="css/pause-quit.css?v=2">
 <link rel="stylesheet" href="css/app-theme.css?v=10">
 <link rel="stylesheet" href="css/app-wordle-ui.css?v=11">
 <style>
   /* Fit Korean Match on one screen — no page scroll */
   body.match-page {
+    display: flex;
+    flex-direction: column;
     min-height: 100dvh;
     height: auto;
     overflow-x: hidden;
@@ -1113,11 +1115,14 @@
   }
 
   body.match-page #match-app {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
     height: auto;
     min-height: min(100dvh - 60px, 100%);
     max-height: none;
-    gap: 6px;
-    overflow: visible;
+    gap: 4px;
+    overflow: hidden;
   }
 
   body.match-page #match-app {
@@ -1243,11 +1248,12 @@
 
   body.match-page .bank-section {
     flex-shrink: 0;
+    margin-top: auto;
   }
 
   body.match-page .bank-row {
     gap: 6px;
-    align-items: flex-start;
+    align-items: flex-end;
   }
 
   body.match-page .bank-tools {
@@ -1298,7 +1304,7 @@
     min-height: calc(var(--dock-tile-size, var(--tile-size)) + 20px);
     max-height: none;
     overflow-y: visible;
-    align-self: flex-start;
+    align-self: auto;
     align-content: flex-start;
     align-items: flex-start;
   }
@@ -1478,8 +1484,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-<script src="js/firebase-social.js?v=15"></script>
 <script src="js/storage.js"></script>
+<script src="js/cloud-sync-service.js?v=1"></script>
+<script src="js/firebase-social.js?v=23"></script>
 <script src="js/user-preferences.js"></script>
 <script src="js/button-press.js?v=20260706n"></script>
 <script src="js/sound-effects.js"></script>
@@ -1492,6 +1499,7 @@
 <script src="js/vowel-merge-dock.js?v=20260706b"></script>
 <script src="js/learning-word-model.js"></script>
 <script src="js/match-word-meanings.js"></script>
+<script src="js/learning-words-data.js"></script>
 <script src="js/learning-words.js"></script>
 <script src="js/match-words.js"></script>
 <script src="js/match-multi-puzzle.js"></script>

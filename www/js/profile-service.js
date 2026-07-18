@@ -1,5 +1,5 @@
 /**
- * User profile persistence — local-only, versioned, safe fallbacks.
+ * User profile persistence — local storage with optional Firestore cloud sync on login.
  */
 (function (global) {
   'use strict';
@@ -168,6 +168,7 @@
         localStorage.setItem(PROFILE_KEY, JSON.stringify(copy));
       }
       schedulePublicProfileSync(copy);
+      global.CloudSyncService?.schedulePush?.();
       return true;
     } catch (err) {
       console.warn('[Jamodeul] Profile save failed.', err);

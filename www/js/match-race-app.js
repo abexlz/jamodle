@@ -202,11 +202,11 @@
         getMatchData: () => this.matchData,
         t: rt,
         getMatchPageUrl: (id) => RS().getMatchPageUrl(id, { gameType: RS().GAME_TYPES.koreanMatch }),
-        createRematch: (oppUid, data) => RS().createMatch(oppUid, {
+        createRematch: (oppUid, data, rematchFrom) => RS().createRematchMatch(oppUid, {
           gameType: RS().GAME_TYPES.koreanMatch,
           wordLength: RS().getMatchWordLength(data),
           excludeTarget: data.target,
-        }),
+        }, rematchFrom),
       });
     }
 

@@ -1,5 +1,5 @@
 /**
- * Mutual rematch on 1v1 battle results — both players must agree (1/2, 2/2).
+ * Instant rematch on 1v1 battle results — one tap starts the next match for both players.
  */
 (function (global) {
   'use strict';
@@ -16,10 +16,8 @@
     const disabled = state.opponentLeft || state.busy || state.redirecting;
     btn.disabled = disabled;
     btn.classList.toggle('race-btn--rematch-muted', disabled);
-    btn.classList.toggle('race-btn--rematch-waiting', !disabled && state.myReady && state.count < 2);
-    btn.textContent = state.count > 0
-      ? t('rematchProgress', { ready: state.count })
-      : t('rematch');
+    btn.classList.toggle('race-btn--rematch-waiting', !disabled && state.busy);
+    btn.textContent = t('rematch');
   }
 
   function redirect(ctx, matchId) {
@@ -39,7 +37,7 @@
       redirect(ctx, state.rematchMatchId);
       return;
     }
-    if (!state.bothReady || !state.bothPresent) return;
+    if (state.opponentLeft || !state.bothPresent || !state.myReady) return;
 
     const claimed = await RS().claimRematchCreation(ctx.matchId, ctx.myUid);
     if (!claimed) return;
@@ -50,7 +48,7 @@
     try {
       const oppUid = RS().getOpponent(data, ctx.myUid)?.uid;
       if (!oppUid) return;
-      const newId = await ctx.createRematch(oppUid, data);
+      const newId = await ctx.createRematch(oppUid, data, ctx.matchId);
       await RS().publishRematchMatchId(ctx.matchId, newId);
       redirect(ctx, newId);
     } catch {
@@ -72,6 +70,7 @@
 
     try {
       await RS().setRematchReady(ctx.matchId, ctx.myUid);
+      await tryFinalizeRematch(ctx);
     } catch {
       alert(ctx.t('rematchFailed'));
     } finally {
@@ -97,7 +96,7 @@
       redirecting: ctx.redirecting,
     }, ctx.t);
 
-    if (state.bothReady && state.bothPresent && !ctx.busy && !ctx.redirecting) {
+    if (state.myReady && state.bothPresent && !state.opponentLeft && !ctx.busy && !ctx.redirecting) {
       tryFinalizeRematch(ctx);
     }
   }

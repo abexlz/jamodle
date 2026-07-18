@@ -349,9 +349,9 @@
         getMatchData: () => this.matchData,
         t: rt,
         getMatchPageUrl: (id) => RS().getMatchPageUrl(id, { gameType: RS().GAME_TYPES.relatedWords }),
-        createRematch: (oppUid) => RS().createMatch(oppUid, {
+        createRematch: (oppUid, _data, rematchFrom) => RS().createRematchMatch(oppUid, {
           gameType: RS().GAME_TYPES.relatedWords,
-        }),
+        }, rematchFrom),
       });
     }
 

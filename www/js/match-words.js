@@ -1,5 +1,5 @@
 /**
- * Korean Match word pool — reads from the unified list in learning-words.js.
+ * Korean Match word pool — reads from the unified list in learning-words-data.js.
  */
 (function (global) {
   'use strict';

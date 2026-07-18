@@ -12,6 +12,7 @@
     "open:android": "npx cap open android",
     "build:android": "cd android && ./gradlew bundleRelease",
     "test": "node tests/hangul-compose.test.js && node tests/korean-dictionary.test.js && node tests/daily-calendar.test.js && node tests/tutorial-progress.test.js && node tests/related-words-dock.test.js && node tests/related-words-race-finalize.test.js && node tests/related-words-round-points.test.js",
+    "import-words": "python3 scripts/import-learning-words-from-xlsx.py",
     "validate-words": "node scripts/validate-words.js",
     "sync-i18n": "node scripts/sync-i18n-messages.js"
   },

@@ -179,10 +179,10 @@
         getMatchData: () => this.matchData,
         t: rt,
         getMatchPageUrl: (id) => RS().getMatchPageUrl(id, { gameType: 'wordle' }),
-        createRematch: (oppUid, data) => RS().createMatch(oppUid, {
+        createRematch: (oppUid, data, rematchFrom) => RS().createRematchMatch(oppUid, {
           gameType: RS().GAME_TYPES.wordle,
           wordLength: data.wordLength,
-        }),
+        }, rematchFrom),
       });
     }
 

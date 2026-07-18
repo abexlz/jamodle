@@ -256,12 +256,12 @@
           gameType: RS().GAME_TYPES.koreanMatch,
           playMode: RS().PLAY_MODES.turn,
         }),
-        createRematch: (oppUid, data) => RS().createMatch(oppUid, {
+        createRematch: (oppUid, data, rematchFrom) => RS().createRematchMatch(oppUid, {
           gameType: RS().GAME_TYPES.koreanMatch,
           wordLength: RS().getMatchWordLength(data),
           playMode: RS().PLAY_MODES.turn,
           excludeTarget: data.target,
-        }),
+        }, rematchFrom),
       });
     }
 

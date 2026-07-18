@@ -188,12 +188,25 @@
     }
     coreReady = true;
 
+    auth.getRedirectResult().catch((err) => {
+      if (err?.code === 'auth/unauthorized-domain') {
+        alert(loginErrorMessage(err));
+        return;
+      }
+      if (err && err.code !== 'auth/popup-closed-by-user') {
+        console.error('[Firebase] redirect sign-in failed', err);
+      }
+    });
+
     auth.onAuthStateChanged(async (user) => {
       currentUser = user;
       authReady = true;
       if (user) {
         try {
           userProfile = await ensureUserDoc(user);
+          if (global.CloudSyncService?.syncOnLogin) {
+            await global.CloudSyncService.syncOnLogin(user.uid, db);
+          }
           pushLocalPublicProfile().catch(() => {});
           pushLocalWordChainBestStreak().catch(() => {});
         } catch (err) {
@@ -361,18 +374,62 @@
     alert(socialT('social.loginRequired'));
   }
 
+  function preferRedirectSignIn() {
+    const ua = navigator.userAgent || '';
+    if (/iPhone|iPad|iPod|Android/i.test(ua)) return true;
+    try {
+      return global.matchMedia?.('(display-mode: standalone)')?.matches === true;
+    } catch {
+      return false;
+    }
+  }
+
+  function loginErrorMessage(err) {
+    if (err?.code === 'auth/unauthorized-domain') {
+      const host = global.location?.hostname || 'this site';
+      return socialT('social.unauthorizedDomain', { host })
+        || `Add "${host}" to Firebase Authentication → Authorized domains, then try again.`;
+    }
+    return socialT('social.loginFailed') || 'Sign-in failed. Please try again.';
+  }
+
   async function signInWithGoogle() {
     if (!ensureCore()) {
       alert(socialT('social.loginLoadFailed'));
       return;
     }
     const provider = new firebase.auth.GoogleAuthProvider();
+    if (preferRedirectSignIn()) {
+      try {
+        await auth.signInWithRedirect(provider);
+      } catch (err) {
+        console.error('[Firebase] redirect sign-in failed', err);
+        alert(loginErrorMessage(err));
+      }
+      return;
+    }
     try {
       await auth.signInWithPopup(provider);
     } catch (err) {
-      if (err.code !== 'auth/popup-closed-by-user') {
-        alert(socialT('social.loginFailed'));
+      if (err.code === 'auth/popup-closed-by-user') return;
+      const redirectCodes = new Set([
+        'auth/popup-blocked',
+        'auth/unauthorized-domain',
+        'auth/operation-not-supported-in-this-environment',
+        'auth/web-storage-unsupported',
+      ]);
+      if (redirectCodes.has(err.code)) {
+        try {
+          await auth.signInWithRedirect(provider);
+          return;
+        } catch (redirectErr) {
+          console.error('[Firebase] redirect fallback failed', redirectErr);
+          alert(loginErrorMessage(redirectErr));
+          return;
+        }
       }
+      console.error('[Firebase] popup sign-in failed', err);
+      alert(loginErrorMessage(err));
     }
   }
 

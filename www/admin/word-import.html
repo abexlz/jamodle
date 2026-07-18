@@ -42,7 +42,7 @@
 <body>
 <div class="wrap">
   <h1>📚 Word Import Tool</h1>
-  <p class="hint">Developer-only tool. Search the Korean Basic Dictionary, pick an entry, and export a curated <code>LearningWord</code> snippet for <code>learning-words.js</code>.</p>
+  <p class="hint">Developer-only tool. Search the Korean Basic Dictionary, pick an entry, and export a curated <code>LearningWord</code> snippet. Add rows to <code>data/korean-learning-nouns.xlsx</code>, then run <code>npm run import-words</code>.</p>
 
   <div id="gate" class="card gate">
     <label for="admin-token">Admin token</label>
@@ -214,7 +214,7 @@ function exportJson() {
 async function copyJson() {
   exportJson();
   await navigator.clipboard.writeText(els.exportOutput.textContent);
-  setStatus('Copied to clipboard. Paste into <code>learning-words.js</code>.', 'ok');
+  setStatus('Copied to clipboard. Add to the xlsx source and run npm run import-words.', 'ok');
 }
 
 els.unlock.addEventListener('click', unlock);

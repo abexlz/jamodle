@@ -919,16 +919,24 @@
           </div>`
         : '';
 
-      const bankSectionHtml = this.turnBased
-        ? `<section class="bank-section bank-section--turn" aria-label="Jamo tiles">
-          <div class="race-turn-bottom">
-            <div class="bank-tools">
-              ${bankToolsEmote}
+      const bankToolsCore = `
               <button type="button" class="rotation-dock" id="rotation-dock" aria-label="${t('match.rotationLabel')}" title="${t('match.rotationHint')}">
                 <span class="rotation-dock-icon" aria-hidden="true">↻</span>
                 <span class="rotation-dock-label" data-i18n="match.rotationLabel">${t('match.rotationLabel')}</span>
               </button>
-              <div class="vowel-merge-dock" id="vowel-merge-dock" aria-label="Vowel merge"></div>
+              <div class="vowel-merge-dock" id="vowel-merge-dock" aria-label="Vowel merge"></div>`;
+
+      const bankToolsHtml = `
+            ${this.versus ? `<div class="bank-tools-emote">${bankToolsEmote}</div>` : ''}
+            <div class="bank-tools-core">
+              ${bankToolsCore}
+            </div>`;
+
+      const bankSectionHtml = this.turnBased
+        ? `<section class="bank-section bank-section--turn" aria-label="Jamo tiles">
+          <div class="race-turn-bottom${this.versus ? ' race-turn-bottom--versus' : ''}">
+            <div class="bank-tools">
+              ${bankToolsHtml}
             </div>
             <div class="race-turn-dock-stack">
               <div id="race-turn-bar-mount" class="race-turn-bar-mount" aria-live="polite"></div>
@@ -938,14 +946,9 @@
         </section>`
         : `<section class="bank-section" aria-label="Jamo tiles">
           <p class="section-label" data-i18n="match.jamoLabel">${t('match.jamoLabel')}</p>
-          <div class="bank-row">
+          <div class="bank-row${this.versus ? ' bank-row--versus' : ''}">
             <div class="bank-tools">
-              ${bankToolsEmote}
-              <button type="button" class="rotation-dock" id="rotation-dock" aria-label="${t('match.rotationLabel')}" title="${t('match.rotationHint')}">
-                <span class="rotation-dock-icon" aria-hidden="true">↻</span>
-                <span class="rotation-dock-label" data-i18n="match.rotationLabel">${t('match.rotationLabel')}</span>
-              </button>
-              <div class="vowel-merge-dock" id="vowel-merge-dock" aria-label="Vowel merge"></div>
+              ${bankToolsHtml}
             </div>
             <div class="jamo-bank" id="match-bank"></div>
           </div>
@@ -1272,7 +1275,8 @@
     updateMeaningDisplay() {
       const el = this.els.meaning;
       if (!el) return;
-      const show = prefs()?.shouldShowEnglish?.() !== false && this.meaningRevealed;
+      const gameFinished = this.checkedComplete || this.inspectMode;
+      const show = prefs()?.shouldShowEnglish?.() !== false && this.meaningRevealed && gameFinished;
       el.classList.toggle('hidden', !show);
       el.textContent = show ? (this.meaningText || t('match.hints.noMeaning')) : '';
     }
@@ -1616,10 +1620,9 @@
       return word;
     }
 
-    /** Dictionary alternate answers: regular match only, every dock tile placed. */
+    /** Dictionary alternate answers when every dock tile is on the board (solo + 1v1). */
     shouldUseDictionaryCheck() {
       if (this.tutorialMode || this.isDaily || this.multiFindMode) return false;
-      if (this.turnBased && this.fixedWord) return false;
       return this.hasAllDockTilesOnBoard();
     }
 
@@ -2895,6 +2898,7 @@
           this.els.check.disabled = true;
           this.els.reset.disabled = true;
           this.updateHintButtons();
+          this.updateMeaningDisplay();
         }
         this.applySharedLocked(shared.locked || []);
         this.updateCheckButton();
@@ -2907,6 +2911,7 @@
         this.els.check.disabled = true;
         this.els.reset.disabled = true;
         this.updateHintButtons();
+        this.updateMeaningDisplay();
       }
       this.updateCheckButton();
     }
@@ -4463,9 +4468,7 @@
       let dictionaryOffline = false;
 
       if (composedWord) {
-        if (!this.turnBased) {
-          this.feedback.show('info', t('match.feedbackChecking'));
-        }
+        this.feedback.show('info', t('match.feedbackChecking'));
         const dictResult = await this.isDictionaryAcceptedWord(composedWord);
         dictionaryWin = dictResult.valid;
         dictionaryOffline = dictResult.offline;
@@ -4794,6 +4797,7 @@
         : this.getResolvedWord();
       this.els.resultsWord.textContent = word;
       this.updateResultsMeaning(this.multiFindMode ? this.multiFoundWords : word);
+      this.updateMeaningDisplay();
       this.els.resultsTime.textContent = formatTime(elapsed);
       this.els.resultsGuesses.textContent = String(this.guessCount);
       if (this.els.resultsStreak) {

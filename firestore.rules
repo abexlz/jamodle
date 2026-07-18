@@ -5,6 +5,10 @@ service cloud.firestore {
       allow read: if request.auth != null;
       allow create: if request.auth != null && request.auth.uid == uid;
       allow update: if request.auth != null && request.auth.uid == uid;
+
+      match /private/{docId} {
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+      }
     }
 
     match /friendRequests/{requestId} {
@@ -116,12 +120,19 @@ service cloud.firestore {
         && request.auth.uid == request.resource.data.player1Uid
         && request.resource.data.player2Uid is string
         && request.resource.data.player1Uid != request.resource.data.player2Uid
-        && request.resource.data.status == 'pending'
-        && request.resource.data.player1Ready == true
-        && request.resource.data.player2Ready == false
         && request.resource.data.target is string
         && request.resource.data.player1Name is string
         && request.resource.data.player2Name is string
+        && (
+          (request.resource.data.status == 'pending'
+            && request.resource.data.player1Ready == true
+            && request.resource.data.player2Ready == false)
+          || (request.resource.data.status == 'ready'
+            && request.resource.data.player1Ready == true
+            && request.resource.data.player2Ready == true
+            && request.resource.data.rematchFrom is string
+            && request.resource.data.rematchFrom.size() > 0)
+        )
         && (
           (request.resource.data.get('gameType', 'wordle') == 'wordle'
             && request.resource.data.wordLength in [2, 3])
