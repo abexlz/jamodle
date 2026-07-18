@@ -490,8 +490,6 @@
         resultLine,
         resultKind,
         winnerUid: data.winnerUid,
-        battleQuestMode: 'race',
-        battleFriend: true,
         players: [
           {
             uid: this.myUid,

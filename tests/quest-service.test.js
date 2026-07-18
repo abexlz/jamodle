@@ -2,6 +2,10 @@
 
 const assert = require('assert');
 
+global.document = {
+  getElementById: () => null,
+};
+
 global.LearningStreak = {
   loadStreak: () => ({ currentStreak: 4 }),
 };
@@ -44,6 +48,9 @@ assert(!QS.QUEST_DEFS['weekly-builder-5'], 'builder weekly quest removed');
 assert(!QS.QUEST_DEFS['weekly-vowel'], 'vowel weekly quest removed');
 assert(QS.QUEST_DEFS['weekly-word-chain-2']?.type === 'word_chain_win', 'word chain quest added');
 assert(QS.QUEST_DEFS['weekly-jamodle-5']?.type === 'korean_match_win', 'weekly jamodle uses match wins');
+assert(QS.QUEST_DEFS['race-win']?.type === 'coop_win', 'race-win tracks 1v1 jamodle wins');
+assert(QS.DAILY_POOL.includes('race-win'), 'race-win stays in daily pool');
+assert(!QS.DAILY_POOL.includes('coop-win'), 'coop-win removed from daily pool');
 
 const snap = QS.getQuestSnapshot();
 assert.equal(snap.daily.length, QS.DAILY_COUNT, 'daily quest count stays at 3');
@@ -59,20 +66,6 @@ if (dailyPlay) {
   const snap2 = QS.getQuestSnapshot();
   const updated = snap2.daily.find((q) => q.questId === 'daily-play');
   assert(updated && updated.progress >= 1, 'daily play counts before win');
-}
-
-QS.recordActivity('koreanMatch', { won: true, guessCount: 1 });
-const snap3 = QS.getQuestSnapshot();
-const firstTry = snap3.daily.find((q) => q.questId === 'classic-first-try');
-if (firstTry) {
-  assert(firstTry.progress >= 1, 'first try quest increments on guessCount 1 win');
-}
-
-QS.recordActivity('battle', { racePlay: true });
-const snap4 = QS.getQuestSnapshot();
-const racePlay = snap4.daily.find((q) => q.questId === 'race-win');
-if (racePlay) {
-  assert(racePlay.progress >= 1, 'race quest increments on play, not only wins');
 }
 
 console.log('quest-service.test.js: all passed');

@@ -1169,8 +1169,8 @@
         "desc": "Solve a Classic Jamo Game word on your first try"
       },
       "race-win": {
-        "title": "Race match",
-        "desc": "Play a 1v1 race with a friend"
+        "title": "Jamo duel",
+        "desc": "Win a 1v1 Jamo Game match"
       },
       "coop-win": {
         "title": "Turn win",

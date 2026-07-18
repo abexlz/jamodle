@@ -413,7 +413,6 @@
       global.QuestService?.recordActivity?.('battle', {
         won: iWon,
         friendBattle: isFriend,
-        racePlay: battleMode === 'race',
         coopWin: iWon && battleMode === 'turn',
       });
     } catch (err) {

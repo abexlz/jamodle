@@ -81,11 +81,11 @@
     'race-win': {
       id: 'race-win',
       scope: 'daily',
-      type: 'race_play',
+      type: 'coop_win',
       target: 1,
       xp: 50,
       coins: 25,
-      icon: '🏁',
+      icon: '⚔️',
       tier: 'daily-medium',
     },
     'coop-win': {
@@ -239,7 +239,6 @@
     'daily-under-3',
     'classic-first-try',
     'race-win',
-    'coop-win',
     'total-5-wins',
     'daily-related-chain',
     'match-1',
@@ -327,7 +326,6 @@
     }
 
     if (meta?.friendBattle) add('friend_battle_play');
-    if (meta?.racePlay) add('race_play');
     if (meta?.coopWin) add('coop_win');
 
     return events;
@@ -544,7 +542,7 @@
   /**
    * Record game activity for quest progress.
    * @param {string} mode
-   * @param {{ won?: boolean, guessCount?: number, friendBattle?: boolean, racePlay?: boolean, coopWin?: boolean }} [meta]
+   * @param {{ won?: boolean, guessCount?: number, friendBattle?: boolean, coopWin?: boolean }} [meta]
    */
   function recordActivity(mode, meta) {
     const profile = global.ProfileService?.loadProfile?.();
