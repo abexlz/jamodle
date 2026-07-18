@@ -1113,6 +1113,7 @@
       this.meaningRevealed = false;
       this.meaningText = '';
       this._meaningPromise = null;
+      this._meaningWord = '';
       this.hintsUsedThisRound = false;
 
       this.feedback = new GameFeedback(this.root.querySelector('#match-feedback'));
@@ -1246,8 +1247,10 @@
       const dictMeaning = global.DictionaryService?.formatEntryMeaning?.(dictEntry);
       if (dictMeaning) return dictMeaning;
 
-      const glossary = global.LearningWords?.getWordMeaning?.(q);
+      const glossary = global.MatchWordMeanings?.[q]
+        || global.LearningWords?.getWordMeaning?.(q);
       if (glossary) return glossary;
+
       const entry = global.LearningWords?.findWordEntry?.(q);
       if (entry) {
         const normalized = global.LearningWords?.getNormalizedWord?.(q)
@@ -1268,8 +1271,19 @@
     }
 
     prefetchMeaning(word) {
-      this._meaningPromise = this.resolveWordMeaning(word);
-      global.DictionaryService?.prefetchWord?.(word);
+      const q = String(word || '').trim();
+      this._meaningWord = q;
+      this._meaningPromise = this.resolveWordMeaning(q);
+      global.DictionaryService?.prefetchWord?.(q);
+    }
+
+    async getMeaningForWord(word) {
+      const q = String(word || '').trim();
+      if (!q) return '';
+      if (this._meaningWord === q && this._meaningPromise) {
+        return this._meaningPromise;
+      }
+      return this.resolveWordMeaning(q);
     }
 
     updateMeaningDisplay() {
@@ -1292,7 +1306,7 @@
         }
       }
       const word = this.currentWord?.word;
-      const text = await (this._meaningPromise || this.resolveWordMeaning(word));
+      const text = await this.getMeaningForWord(word);
       this.meaningText = text || t('match.hints.noMeaning');
       this.meaningRevealed = true;
       this.hintsUsedThisRound = true;
@@ -1455,6 +1469,7 @@
       this.meaningRevealed = false;
       this.meaningText = '';
       this._meaningPromise = null;
+      this._meaningWord = '';
       this.hintsUsedThisRound = false;
       this.blocks = [];
       this.tileMap = {};
@@ -3382,9 +3397,7 @@
         meaningEl.classList.add('hidden');
       }
       banner.classList.remove('hidden');
-      const meaning = this._meaningPromise
-        ? await this._meaningPromise
-        : await this.resolveWordMeaning(word);
+      const meaning = await this.getMeaningForWord(word);
       if (meaningEl && meaning) {
         meaningEl.textContent = meaning;
         meaningEl.classList.remove('hidden');
@@ -4475,10 +4488,7 @@
         if (dictionaryWin) {
           this.discoveredWord = composedWord;
           this.discoveredDictionaryEntry = dictResult.entry || null;
-          const dictMeaning = global.DictionaryService?.formatEntryMeaning?.(this.discoveredDictionaryEntry);
-          if (dictMeaning) {
-            this._meaningPromise = Promise.resolve(dictMeaning);
-          }
+          this.prefetchMeaning(composedWord);
         }
       }
 
@@ -4728,8 +4738,8 @@
             || (w === this.discoveredWord ? this.discoveredDictionaryEntry : null);
           const dictText = formatDict(dictEntry);
           if (dictText) return dictText;
-          return global.LearningWords?.getWordMeaning?.(w)
-            || global.MatchWordMeanings?.[w]
+          return global.MatchWordMeanings?.[w]
+            || global.LearningWords?.getWordMeaning?.(w)
             || '';
         })
         .filter(Boolean)
@@ -4766,11 +4776,7 @@
       const fallbackWord = meaningWords[0] || this.getResolvedWord();
       if (!fallbackWord) return;
       const fillAsync = async () => {
-        const useCached = fallbackWord === this.discoveredWord
-          || fallbackWord === this.currentWord?.word;
-        const text = await (useCached && this._meaningPromise
-          ? this._meaningPromise
-          : this.resolveWordMeaning(fallbackWord));
+        const text = await this.getMeaningForWord(fallbackWord);
         if (!text || !meaningEl.isConnected) return;
         meaningEl.textContent = text;
         meaningEl.hidden = false;

@@ -68,10 +68,18 @@
   }
 
   /** Short English gloss from a dictionary entry (no local word list needed). */
+  function isHanziGloss(text) {
+    const s = String(text || '').trim();
+    if (!s) return false;
+    return /^[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]+$/.test(s);
+  }
+
   function formatEntryMeaning(entry) {
     if (!entry) return '';
     const gloss = String(entry.englishWord || '').trim();
     const definition = String(entry.definition || '').trim();
+    if (gloss && !isHanziGloss(gloss)) return gloss;
+    if (definition && !isHanziGloss(definition)) return definition;
     return gloss || definition;
   }
 

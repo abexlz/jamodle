@@ -82,11 +82,17 @@
     };
   }
 
-  /** Display meaning: prefer curated, fall back to dictionary */
+  /** Display meaning: prefer curated English, fall back to dictionary */
   function getDisplayMeaning(entry) {
     if (!entry) return '';
-    if (entry.meaning) return entry.meaning;
-    return entry.dictionary?.definition || '';
+    const glossary = global.MatchWordMeanings?.[String(entry.word || '').trim()] || '';
+    const curated = String(entry.meaning || '').trim();
+    const isHanzi = curated && /^[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]+$/.test(curated);
+    if (curated && !isHanzi) return curated;
+    if (glossary) return glossary;
+    const dictDef = String(entry.dictionary?.definition || entry.dictionary?.englishWord || '').trim();
+    if (dictDef && !/^[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]+$/.test(dictDef)) return dictDef;
+    return curated || dictDef;
   }
 
   global.LearningWordModel = {

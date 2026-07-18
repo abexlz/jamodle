@@ -10,6 +10,21 @@
     return global.MatchWordMeanings?.[String(word || '').trim()] || '';
   }
 
+  /** Hanzi-only glosses from the imported spreadsheet — prefer English glossary instead. */
+  function isHanziGloss(text) {
+    const s = String(text || '').trim();
+    if (!s) return false;
+    return /^[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]+$/.test(s);
+  }
+
+  function pickEnglishMeaning(word, rawMeaning) {
+    const glossary = glossaryMeaning(word);
+    const curated = String(rawMeaning || '').trim();
+    if (curated && !isHanziGloss(curated)) return curated;
+    if (glossary) return glossary;
+    return curated;
+  }
+
   function normalizeEntry(entry) {
     if (typeof entry === 'string') {
       return { word: entry, meaning: glossaryMeaning(entry) };
@@ -17,7 +32,7 @@
     if (entry && typeof entry.word === 'string') {
       return {
         ...entry,
-        meaning: entry.meaning || glossaryMeaning(entry.word),
+        meaning: pickEnglishMeaning(entry.word, entry.meaning),
       };
     }
     return null;
@@ -39,8 +54,7 @@
     const key = String(word || '').trim();
     if (!key) return '';
     const entry = LEARNING_WORDS.find((e) => e.word === key);
-    if (entry?.meaning) return entry.meaning;
-    return glossaryMeaning(key);
+    return pickEnglishMeaning(key, entry?.meaning);
   }
 
   const RAW_WORDS = Array.isArray(global.LEARNING_WORDS_RAW)
