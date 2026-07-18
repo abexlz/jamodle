@@ -123,6 +123,27 @@
 /* Profile page */
 .profile-app { max-width: 420px; margin: 0 auto; }
 
+.profile-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  padding-top: 4px;
+}
+
+.profile-page-header h1 {
+  font-family: 'Jua', sans-serif;
+  font-size: 28px;
+  color: var(--heading, #7B8FD4);
+  margin: 0;
+  text-align: center;
+}
+
+.profile-page .top-nav-actions--left {
+  left: 12px;
+  right: auto;
+}
+
 .profile-hero {
   text-align: center;
   padding: 8px 12px 20px;
@@ -176,9 +197,17 @@
   color: var(--text-soft, #9AA3AD);
   cursor: pointer;
   touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   position: relative;
   z-index: 0;
-  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, padding 0.2s ease;
+  transition:
+    transform var(--app-btn-press-duration, 0.12s) var(--app-btn-press-ease, ease),
+    box-shadow var(--app-btn-press-duration, 0.12s) var(--app-btn-press-ease, ease),
+    filter var(--app-btn-press-duration, 0.12s) var(--app-btn-press-ease, ease),
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    padding 0.2s ease;
 }
 
 .profile-nav-btn.is-active {
@@ -196,6 +225,7 @@
 .profile-nav-btn.is-pressed {
   transform: translateY(var(--app-btn-press-shift, 2px)) scale(var(--app-btn-press-scale, 0.976));
   filter: brightness(0.96);
+  box-shadow: var(--app-btn-shadow-active, none);
 }
 
 .profile-tabs-shell {
@@ -221,6 +251,24 @@
 
 .reduce-motion .profile-panel {
   animation: none;
+}
+
+.reduce-motion .profile-nav-btn:active,
+.reduce-motion .profile-nav-btn.is-pressed,
+.reduce-motion .avatar-option:active,
+.reduce-motion .avatar-option.is-pressed,
+.reduce-motion .title-option:active,
+.reduce-motion .title-option.is-pressed,
+.reduce-motion .frame-option:active,
+.reduce-motion .frame-option.is-pressed,
+.reduce-motion .profile-login-btn:active,
+.reduce-motion .profile-login-btn.is-pressed,
+.reduce-motion .profile-nickname-save:active,
+.reduce-motion .profile-nickname-save.is-pressed,
+.reduce-motion .profile-social-btn:active,
+.reduce-motion .profile-social-btn.is-pressed {
+  transform: none;
+  filter: none;
 }
 
 .profile-tabs-shell--friends .profile-nav-btn:first-child.is-active {
@@ -444,6 +492,18 @@
   color: var(--heading, #7B8FD4);
   cursor: pointer;
   flex-shrink: 0;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform var(--app-btn-press-duration, 0.12s) var(--app-btn-press-ease, ease),
+    box-shadow var(--app-btn-press-duration, 0.12s) var(--app-btn-press-ease, ease),
+    filter var(--app-btn-press-duration, 0.12s) var(--app-btn-press-ease, ease);
+}
+
+.profile-nickname-save:not(:disabled):active,
+.profile-nickname-save:not(:disabled).is-pressed {
+  transform: translateY(var(--app-btn-press-shift, 2px)) scale(var(--app-btn-press-scale, 0.976));
+  filter: brightness(0.96);
 }
 
 .profile-nickname-save:disabled { opacity: 0.45; cursor: default; }
@@ -745,8 +805,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.12s;
   justify-self: center;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform var(--app-btn-press-duration, 0.12s) var(--app-btn-press-ease, ease),
+    box-shadow var(--app-btn-press-duration, 0.12s) var(--app-btn-press-ease, ease),
+    filter var(--app-btn-press-duration, 0.12s) var(--app-btn-press-ease, ease),
+    background-color 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .avatar-option.selected {
@@ -760,7 +827,11 @@
   cursor: not-allowed;
 }
 
-.avatar-option:not(:disabled):active { transform: scale(0.94); }
+.avatar-option:not(:disabled):active,
+.avatar-option:not(:disabled).is-pressed {
+  transform: translateY(var(--app-btn-press-shift, 2px)) scale(var(--app-btn-press-scale, 0.976));
+  filter: brightness(0.96);
+}
 
 .profile-cosmetics-hint {
   font-size: 12px;
@@ -789,8 +860,14 @@
   align-items: center;
   justify-content: center;
   padding: 6px 4px;
-  transition: transform 0.12s, border-color 0.12s;
   overflow: visible;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform var(--app-btn-press-duration, 0.12s) var(--app-btn-press-ease, ease),
+    box-shadow var(--app-btn-press-duration, 0.12s) var(--app-btn-press-ease, ease),
+    filter var(--app-btn-press-duration, 0.12s) var(--app-btn-press-ease, ease),
+    border-color 0.12s ease;
 }
 
 .frame-option .profile-badge-card {
@@ -809,7 +886,11 @@
   cursor: not-allowed;
 }
 
-.frame-option:not(:disabled):active { transform: scale(0.94); }
+.frame-option:not(:disabled):active,
+.frame-option:not(:disabled).is-pressed {
+  transform: translateY(var(--app-btn-press-shift, 2px)) scale(var(--app-btn-press-scale, 0.976));
+  filter: brightness(0.96);
+}
 
 .high-contrast .badge-card.locked { opacity: 0.75; border-style: dashed; }
 .high-contrast .badge-card.earned { border-width: 3px; }
@@ -841,6 +922,18 @@
   background: var(--lavender, #E8DEFF);
   color: var(--heading, #7B8FD4);
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform var(--app-btn-press-duration, 0.12s) var(--app-btn-press-ease, ease),
+    box-shadow var(--app-btn-press-duration, 0.12s) var(--app-btn-press-ease, ease),
+    filter var(--app-btn-press-duration, 0.12s) var(--app-btn-press-ease, ease);
+}
+
+.profile-login-btn:active,
+.profile-login-btn.is-pressed {
+  transform: translateY(var(--app-btn-press-shift, 2px)) scale(var(--app-btn-press-scale, 0.976));
+  filter: brightness(0.96);
 }
 
 .profile-login-btn--out {
@@ -927,6 +1020,18 @@
   color: var(--heading, #7B8FD4);
   cursor: pointer;
   white-space: nowrap;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform var(--app-btn-press-duration, 0.12s) var(--app-btn-press-ease, ease),
+    box-shadow var(--app-btn-press-duration, 0.12s) var(--app-btn-press-ease, ease),
+    filter var(--app-btn-press-duration, 0.12s) var(--app-btn-press-ease, ease);
+}
+
+.profile-social-btn:not(:disabled):active,
+.profile-social-btn:not(:disabled).is-pressed {
+  transform: translateY(var(--app-btn-press-shift, 2px)) scale(var(--app-btn-press-scale, 0.976));
+  filter: brightness(0.96);
 }
 
 .profile-social-btn:disabled { opacity: 0.45; cursor: default; }
@@ -1429,8 +1534,10 @@
   opacity: 1;
 }
 
-.title-option:not(:disabled):active {
-  transform: scale(0.97);
+.title-option:not(:disabled):active,
+.title-option:not(:disabled).is-pressed {
+  transform: translateY(var(--app-btn-press-shift, 2px)) scale(var(--app-btn-press-scale, 0.976));
+  filter: brightness(0.96);
 }
 
 .title-option:disabled {

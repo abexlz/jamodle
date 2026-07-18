@@ -176,17 +176,6 @@
     `;
   }
 
-  function renderRecentWords(summary) {
-    if (!summary.recentWords?.length) {
-      return `<p class="profile-empty-note">${t('profile.recent.empty')}</p>`;
-    }
-    return `
-      <ul class="profile-recent-list" aria-label="${escapeHtml(t('profile.recent.title'))}">
-        ${summary.recentWords.map((w) => `<li>${escapeHtml(w.word)}</li>`).join('')}
-      </ul>
-    `;
-  }
-
   function renderFriendsPanel(summary) {
     return `
       <div class="profile-panel-block">
@@ -246,10 +235,6 @@
         <div id="profile-stats-wrap">${renderStats(summary)}</div>
       </div>
       <div class="profile-panel-block">
-        <h3 class="profile-panel-subhead" data-i18n="profile.recent.title">${t('profile.recent.title')}</h3>
-        ${renderRecentWords(summary)}
-      </div>
-      <div class="profile-panel-block">
         <h3 class="profile-panel-subhead" data-i18n="profile.badges.title">${t('profile.badges.title')}</h3>
         <div class="badge-grid">${renderBadges(summary)}</div>
       </div>
@@ -274,8 +259,7 @@
     const shellClass = activePanel ? ` profile-tabs-shell--${activePanel}` : '';
 
     root.innerHTML = `
-      <header class="settings-header profile-header-nav">
-        <a class="settings-back" href="index.html" data-i18n="nav.back">${t('nav.back')}</a>
+      <header class="profile-page-header">
         <h1 data-i18n="profile.title">${t('profile.title')}</h1>
       </header>
 
