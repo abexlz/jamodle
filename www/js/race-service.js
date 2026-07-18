@@ -1762,8 +1762,7 @@
         const p2Ready = data.player2RematchReady === true;
         const p1Present = data.player1ResultsPresent === true;
         const p2Present = data.player2ResultsPresent === true;
-        const initiatorReady = p1Ready || p2Ready;
-        if (!initiatorReady || !p1Present || !p2Present) return;
+        if (!p1Ready || !p2Ready || !p1Present || !p2Present) return;
 
         tx.update(ref, { rematchClaimedByUid: myUid });
         claimed = true;
@@ -1784,6 +1783,23 @@
       return true;
     } catch (err) {
       console.warn('[Race] publish rematch match id', err);
+      return false;
+    }
+  }
+
+  async function releaseRematchClaim(matchId) {
+    const ref = matchesRef()?.doc(matchId);
+    if (!ref) return false;
+    if (inWriteCooldown()) return false;
+    try {
+      const snap = await ref.get();
+      if (!snap.exists) return false;
+      const data = snap.data();
+      if (!data || data.status !== 'done' || data.rematchMatchId) return false;
+      await ref.update({ rematchClaimedByUid: firebase.firestore.FieldValue.delete() });
+      return true;
+    } catch (err) {
+      console.warn('[Race] release rematch claim', err);
       return false;
     }
   }
@@ -1831,6 +1847,7 @@
     setRematchReady,
     claimRematchCreation,
     publishRematchMatchId,
+    releaseRematchClaim,
     turnStartedAtMs,
     turnRemainingMs,
     turnElapsedRatio,

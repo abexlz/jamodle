@@ -450,7 +450,10 @@
         || data.player1Progress?.finished
         || data.player2Progress?.finished;
       if (!this._activeSeenAtMs) this._activeSeenAtMs = Date.now();
-      const raceStartMs = this._activeSeenAtMs + countdownTotalMs();
+      const raceStartMs = RC().resolveRaceStartMs(this, data, {
+        countdownSec: COUNTDOWN_SEC,
+        getStartedAtMs: (d) => RS().startedAtMs(d),
+      });
 
       if (!this.gameStarted && !hasStartedPlaying && Date.now() < raceStartMs) {
         this.renderMain(`

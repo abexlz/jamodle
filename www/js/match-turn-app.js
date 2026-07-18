@@ -425,7 +425,10 @@
         && (data.turnHistory?.length || 0) === 0;
 
       if (!this._activeSeenAtMs) this._activeSeenAtMs = Date.now();
-      const raceStartMs = this._activeSeenAtMs + countdownTotalMs();
+      const raceStartMs = RC().resolveRaceStartMs(this, data, {
+        countdownSec: COUNTDOWN_SEC,
+        getStartedAtMs: (d) => RS().startedAtMs(d),
+      });
       if (!this.gameStarted && firstTurnStart && Date.now() < raceStartMs) {
         this.renderMain(`<div class="race-panel race-countdown-panel"><p class="race-panel-title">${escapeHtml(rt('startingSoon'))}</p></div>`);
         this.showCountdown(raceStartMs, () => this.startGame(data, true));

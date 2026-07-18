@@ -1,5 +1,5 @@
 /**
- * Instant rematch on 1v1 battle results — one tap starts the next match for both players.
+ * Rematch on 1v1 battle results — both players tap Rematch (1/2 → 2/2) to start the next match.
  */
 (function (global) {
   'use strict';
@@ -11,13 +11,27 @@
     return root?.querySelector?.('#race-rematch') || null;
   }
 
+  function rematchLabel(state, t) {
+    if (state.count > 0) return t('rematchProgress', { ready: state.count });
+    return t('rematch');
+  }
+
+  function effectiveLobbyState(ctx, state) {
+    if (!ctx.pendingReady) return state;
+    return {
+      ...state,
+      myReady: state.myReady || true,
+      count: Math.max(state.count, 1),
+    };
+  }
+
   function applyButton(btn, state, t) {
     if (!btn) return;
-    const disabled = state.opponentLeft || state.busy || state.redirecting;
+    const disabled = state.opponentLeft || state.redirecting || state.myReady || state.busy;
     btn.disabled = disabled;
     btn.classList.toggle('race-btn--rematch-muted', disabled);
     btn.classList.toggle('race-btn--rematch-waiting', !disabled && state.busy);
-    btn.textContent = t('rematch');
+    btn.textContent = rematchLabel(state, t);
   }
 
   function redirect(ctx, matchId) {
@@ -37,21 +51,27 @@
       redirect(ctx, state.rematchMatchId);
       return;
     }
-    if (state.opponentLeft || !state.bothPresent || !state.myReady) return;
-
-    const claimed = await RS().claimRematchCreation(ctx.matchId, ctx.myUid);
-    if (!claimed) return;
+    if (state.opponentLeft || !state.bothPresent || !state.bothReady) return;
 
     ctx.busy = true;
     applyButton(getBtn(ctx.root), { ...state, busy: true, redirecting: false }, ctx.t);
 
+    const claimed = await RS().claimRematchCreation(ctx.matchId, ctx.myUid);
+    if (!claimed) {
+      ctx.busy = false;
+      sync(ctx);
+      return;
+    }
+
     try {
       const oppUid = RS().getOpponent(data, ctx.myUid)?.uid;
-      if (!oppUid) return;
+      if (!oppUid) throw new Error('no-opponent');
       const newId = await ctx.createRematch(oppUid, data, ctx.matchId);
-      await RS().publishRematchMatchId(ctx.matchId, newId);
+      const published = await RS().publishRematchMatchId(ctx.matchId, newId);
+      if (!published) throw new Error('publish-failed');
       redirect(ctx, newId);
     } catch {
+      await RS().releaseRematchClaim(ctx.matchId);
       alert(ctx.t('rematchFailed'));
       ctx.busy = false;
       sync(ctx);
@@ -65,17 +85,24 @@
     const state = RS().getRematchLobbyState(data, ctx.myUid);
     if (state.opponentLeft || state.myReady) return;
 
+    ctx.pendingReady = true;
     ctx.busy = true;
-    applyButton(getBtn(ctx.root), { ...state, busy: true, redirecting: false }, ctx.t);
+    applyButton(getBtn(ctx.root), effectiveLobbyState(ctx, {
+      ...state,
+      busy: true,
+      redirecting: false,
+    }), ctx.t);
 
     try {
       await RS().setRematchReady(ctx.matchId, ctx.myUid);
-      await tryFinalizeRematch(ctx);
     } catch {
+      ctx.pendingReady = false;
       alert(ctx.t('rematchFailed'));
     } finally {
-      ctx.busy = false;
-      sync(ctx);
+      if (!ctx.redirecting) {
+        ctx.busy = false;
+        sync(ctx);
+      }
     }
   }
 
@@ -84,7 +111,8 @@
     const data = ctx.getMatchData?.();
     if (!data || data.status !== 'done') return;
 
-    const state = RS().getRematchLobbyState(data, ctx.myUid);
+    const state = effectiveLobbyState(ctx, RS().getRematchLobbyState(data, ctx.myUid));
+    if (state.myReady) ctx.pendingReady = false;
     if (state.rematchMatchId) {
       redirect(ctx, state.rematchMatchId);
       return;
@@ -96,7 +124,7 @@
       redirecting: ctx.redirecting,
     }, ctx.t);
 
-    if (state.myReady && state.bothPresent && !state.opponentLeft && !ctx.busy && !ctx.redirecting) {
+    if (state.bothReady && state.bothPresent && !state.opponentLeft && !ctx.busy && !ctx.redirecting) {
       tryFinalizeRematch(ctx);
     }
   }
@@ -130,6 +158,7 @@
       ...ctx,
       busy: false,
       redirecting: false,
+      pendingReady: false,
       _leftResults: false,
     };
 

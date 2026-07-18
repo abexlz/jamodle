@@ -90,10 +90,18 @@
     state._countdownFallbackTimer = setTimeout(finish, msUntilEnd + 100);
   }
 
+  function resolveRaceStartMs(state, data, { countdownSec, getStartedAtMs } = {}) {
+    const started = getStartedAtMs?.(data);
+    if (started) return started + countdownTotalMs(countdownSec);
+    if (!state._activeSeenAtMs) state._activeSeenAtMs = Date.now();
+    return state._activeSeenAtMs + countdownTotalMs(countdownSec);
+  }
+
   global.RaceCountdown = {
     DEFAULT_COUNTDOWN_SEC,
     countdownTotalMs,
     countdownDisplaySec,
+    resolveRaceStartMs,
     runCountdown,
   };
 })(typeof window !== 'undefined' ? window : globalThis);
