@@ -147,19 +147,24 @@ service cloud.firestore {
             && request.resource.data.wordLength is int)
         );
 
+      function rematchLobbyFieldKeys() {
+        return [
+          'player1RematchReady',
+          'player2RematchReady',
+          'player1ResultsPresent',
+          'player2ResultsPresent',
+          'rematchClaimedByUid',
+          'rematchMatchId',
+        ];
+      }
+
       function isRematchLobbyUpdate() {
         return resource.data.status == 'done'
           && request.resource.data.status == 'done'
           && request.resource.data.player1Uid == resource.data.player1Uid
           && request.resource.data.player2Uid == resource.data.player2Uid
-          && request.resource.data.winnerUid == resource.data.winnerUid
-          && request.resource.data.get('target', '') == resource.data.get('target', '')
-          && request.resource.data.get('gameType', 'wordle') == resource.data.get('gameType', 'wordle')
-          && request.resource.data.get('wordLength', 0) == resource.data.get('wordLength', 0)
-          && request.resource.data.get('chainId', '') == resource.data.get('chainId', '')
-          && request.resource.data.get('playMode', '') == resource.data.get('playMode', '')
-          && progressUnchanged('player1Progress')
-          && progressUnchanged('player2Progress');
+          && request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(rematchLobbyFieldKeys());
       }
 
       allow update: if request.auth != null

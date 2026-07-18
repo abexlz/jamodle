@@ -51,26 +51,41 @@
       redirect(ctx, state.rematchMatchId);
       return;
     }
-    if (state.opponentLeft || !state.bothPresent || !state.bothReady) return;
+    if (state.opponentLeft || !state.bothReady) return;
+
+    if (state.rematchClaimedByUid && state.rematchClaimedByUid !== ctx.myUid) {
+      return;
+    }
 
     ctx.busy = true;
     applyButton(getBtn(ctx.root), { ...state, busy: true, redirecting: false }, ctx.t);
 
-    const claimed = await RS().claimRematchCreation(ctx.matchId, ctx.myUid);
-    if (!claimed) {
-      ctx.busy = false;
-      sync(ctx);
-      return;
+    const alreadyClaimed = state.rematchClaimedByUid === ctx.myUid;
+    if (!alreadyClaimed) {
+      const claimed = await RS().claimRematchCreation(ctx.matchId, ctx.myUid);
+      if (!claimed) {
+        ctx.busy = false;
+        sync(ctx);
+        return;
+      }
     }
 
+    let newId = null;
     try {
       const oppUid = RS().getOpponent(data, ctx.myUid)?.uid;
       if (!oppUid) throw new Error('no-opponent');
-      const newId = await ctx.createRematch(oppUid, data, ctx.matchId);
-      const published = await RS().publishRematchMatchId(ctx.matchId, newId);
-      if (!published) throw new Error('publish-failed');
+      newId = await ctx.createRematch(oppUid, data, ctx.matchId);
+      const published = await RS().publishRematchMatchIdWithRetry(ctx.matchId, newId);
+      if (!published) {
+        console.warn('[Rematch] publish failed after create', newId);
+      }
       redirect(ctx, newId);
-    } catch {
+    } catch (err) {
+      console.warn('[Rematch] finalize failed', err);
+      if (newId) {
+        redirect(ctx, newId);
+        return;
+      }
       await RS().releaseRematchClaim(ctx.matchId);
       alert(ctx.t('rematchFailed'));
       ctx.busy = false;
@@ -95,7 +110,8 @@
 
     try {
       await RS().setRematchReady(ctx.matchId, ctx.myUid);
-    } catch {
+    } catch (err) {
+      console.warn('[Rematch] set ready failed', err);
       ctx.pendingReady = false;
       alert(ctx.t('rematchFailed'));
     } finally {
@@ -124,7 +140,7 @@
       redirecting: ctx.redirecting,
     }, ctx.t);
 
-    if (state.bothReady && state.bothPresent && !state.opponentLeft && !ctx.busy && !ctx.redirecting) {
+    if (state.bothReady && !state.opponentLeft && !ctx.busy && !ctx.redirecting) {
       tryFinalizeRematch(ctx);
     }
   }

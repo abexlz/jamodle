@@ -568,7 +568,12 @@
     return ref.id;
   }
 
-  async function createRematchMatch(opponentUid, optionsOrWordLength, rematchFromMatchId) {
+  function normalizeWordleLength(value) {
+    const n = Number(value);
+    return n === 3 ? 3 : 2;
+  }
+
+  async function createRematchMatch(opponentUid, optionsOrWordLength, rematchFromMatchId, forcedMatchId) {
     const uid = getUid();
     const db = getDb();
     if (!uid || !db) throw new Error('auth');
@@ -586,7 +591,7 @@
       if (snap.exists) opponentName = global.FirebaseSocial.getPublicName(snap.data());
     } catch { /* fallback name */ }
 
-    const ref = matchesRef().doc();
+    const ref = forcedMatchId ? matchesRef().doc(forcedMatchId) : matchesRef().doc();
     const relatedChainId = isRelatedWordsGame
       ? (opts.chainId && global.RelatedWordsChains?.getChain?.(opts.chainId)
         ? opts.chainId
@@ -597,7 +602,7 @@
       : pickTarget(opts);
     const wordLength = isRelatedWordsGame
       ? RELATED_WORDS_RACE_TARGET
-      : (isMatch ? syllableCount(target) : Number(opts.wordLength));
+      : (isMatch ? normalizeWordLength(opts.wordLength) : normalizeWordleLength(opts.wordLength));
 
     const data = {
       gameType: isRelatedWordsGame
@@ -636,6 +641,10 @@
     }
 
     try {
+      if (forcedMatchId) {
+        const existing = await ref.get();
+        if (existing.exists) return ref.id;
+      }
       await ref.set(data);
     } catch (err) {
       registerWriteError(err, 'createRematchMatch');
@@ -1767,9 +1776,7 @@
 
         const p1Ready = data.player1RematchReady === true;
         const p2Ready = data.player2RematchReady === true;
-        const p1Present = data.player1ResultsPresent === true;
-        const p2Present = data.player2ResultsPresent === true;
-        if (!p1Ready || !p2Ready || !p1Present || !p2Present) return;
+        if (!p1Ready || !p2Ready) return;
 
         tx.update(ref, { rematchClaimedByUid: myUid });
         claimed = true;
@@ -1792,6 +1799,17 @@
       console.warn('[Race] publish rematch match id', err);
       return false;
     }
+  }
+
+  async function publishRematchMatchIdWithRetry(matchId, newMatchId, attempts = 4) {
+    for (let i = 0; i < attempts; i++) {
+      const ok = await publishRematchMatchId(matchId, newMatchId);
+      if (ok) return true;
+      if (i < attempts - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 350 * (i + 1)));
+      }
+    }
+    return false;
   }
 
   async function releaseRematchClaim(matchId) {
@@ -1854,6 +1872,7 @@
     setRematchReady,
     claimRematchCreation,
     publishRematchMatchId,
+    publishRematchMatchIdWithRetry,
     releaseRematchClaim,
     turnStartedAtMs,
     turnRemainingMs,
