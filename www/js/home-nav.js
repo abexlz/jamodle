@@ -90,7 +90,6 @@
 
       e.preventDefault();
       storeHomeTab(tab);
-      if (!isIndexPage()) global.SoundEffects?.nav?.();
 
       if (isIndexPage()) {
         global.MenuApp?.setHomeTab?.(tab);

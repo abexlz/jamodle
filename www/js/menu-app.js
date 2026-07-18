@@ -49,23 +49,6 @@
     });
   }
 
-  function bindMenuSounds() {
-    const root = document.getElementById('menu-root');
-    if (!root || root.dataset.soundsBound === '1') return;
-    root.dataset.soundsBound = '1';
-    root.addEventListener('click', (e) => {
-      const card = e.target.closest(
-        'a.learning-mode-card, a.daily-challenge-card, a.featured-continue-cta, '
-        + 'a.menu-tutorial-btn, a.menu-top-classic, button.learning-mode-card, '
-        + 'button.word-game-card, button.menu-battle-game-btn, a.menu-single-player-game-btn, button.battle-mode-action-btn'
-      );
-      if (!card || card.disabled || card.classList.contains('is-locked')) return;
-      global.SoundEffects?.nav?.();
-    });
-    const profileNav = document.querySelector('.menu-profile-nav');
-    profileNav?.addEventListener('click', () => global.SoundEffects?.nav?.());
-  }
-
   function normalizeHomeTab(tab) {
     if (tab === 'learn' || tab === 'shop' || tab === 'quests') return tab;
     return 'menu';
@@ -86,7 +69,6 @@
   function setHomeTab(tab) {
     const next = normalizeHomeTab(tab);
     if (next === activeHomeTab) return;
-    global.SoundEffects?.nav?.();
     activeHomeTab = next;
     try {
       sessionStorage.setItem(HOME_TAB_KEY, next);
@@ -120,7 +102,6 @@
     global.ShopUI?.bindSection?.(root);
     global.QuestUI?.bindSection?.(root);
     bindHomeTabBar();
-    bindMenuSounds();
     updateMenuScreenTabClass(activeHomeTab);
     updateHomeTabBodyClass(activeHomeTab);
     updateTabBarUI();

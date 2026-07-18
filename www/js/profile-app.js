@@ -114,6 +114,33 @@
     }).join('');
   }
 
+  function renderMultiplayerStats(summary) {
+    const played = summary.battleGamesPlayed || 0;
+    if (!played) {
+      return `<p class="profile-empty-note" data-i18n="profile.multiplayer.empty">${t('profile.multiplayer.empty')}</p>`;
+    }
+
+    const winRate = summary.battleWinRate != null ? `${summary.battleWinRate}%` : '—';
+    const items = [
+      { label: t('profile.multiplayer.winRate'), value: winRate },
+      { label: t('profile.multiplayer.battles'), value: played },
+      { label: t('profile.multiplayer.wins'), value: summary.battleWins || 0 },
+      { label: t('profile.multiplayer.losses'), value: summary.battleLosses || 0 },
+      { label: t('profile.multiplayer.draws'), value: summary.battleDraws || 0 },
+    ];
+
+    return `
+      <div class="profile-stats-grid profile-stats-grid--multiplayer">
+        ${items.map((item) => `
+          <div class="profile-stat">
+            <span class="profile-stat-label">${escapeHtml(item.label)}</span>
+            <strong>${escapeHtml(String(item.value))}</strong>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
   function renderStats(summary) {
     const hasActivity = summary.totalXp > 0
       || summary.wordsLearned > 0
@@ -209,6 +236,10 @@
           ? t('profile.streakLine', { days: summary.currentStreak })
           : t('profile.streakStart')}</p>
         <p class="profile-streak-line profile-streak-sub">${t('profile.longestStreak', { days: summary.longestStreak })}</p>
+      </div>
+      <div class="profile-panel-block">
+        <h3 class="profile-panel-subhead" data-i18n="profile.multiplayer.title">${t('profile.multiplayer.title')}</h3>
+        <div id="profile-multiplayer-stats-wrap">${renderMultiplayerStats(summary)}</div>
       </div>
       <div class="profile-panel-block">
         <h3 class="profile-panel-subhead" data-i18n="profile.stats.title">${t('profile.stats.title')}</h3>

@@ -102,7 +102,6 @@
       const actionBtn = e.target.closest('[data-battle-action]');
       if (!actionBtn) return;
       e.preventDefault();
-      global.SoundEffects?.nav?.();
 
       const game = overlay.dataset.selectedGame === 'word-chain' ? 'word-chain' : 'jamodle';
       const root = document.getElementById('menu-root');

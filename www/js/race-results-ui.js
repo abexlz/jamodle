@@ -401,6 +401,28 @@
     }));
   }
 
+  function tryRecordBattleStats(root) {
+    const panel = root.querySelector('.race-results--win, .race-results--loss, .race-results--draw');
+    if (!panel || panel.dataset.battleStatsRecorded === '1') return;
+
+    const matchId = panel.dataset.battleMatchId || '';
+    if (matchId.startsWith('bot-')) {
+      panel.dataset.battleStatsRecorded = '1';
+      return;
+    }
+
+    let result = 'draw';
+    if (panel.classList.contains('race-results--win')) result = 'win';
+    else if (panel.classList.contains('race-results--loss')) result = 'loss';
+
+    try {
+      global.ProfileService?.recordBattleResult?.(result);
+    } catch (err) {
+      console.warn('[RaceResults] battle stats failed', err);
+    }
+    panel.dataset.battleStatsRecorded = '1';
+  }
+
   function tryRecordBattleQuests(root) {
     const panel = root.querySelector('.race-results--win, .race-results--loss, .race-results--draw');
     if (!panel || panel.dataset.questRecorded === '1') return;
@@ -451,6 +473,7 @@
   function afterResultsMount(root) {
     if (!root) return;
     tryRecordBattleQuests(root);
+    tryRecordBattleStats(root);
     const winPanel = root.querySelector('.race-results--win');
     const lossPanel = root.querySelector('.race-results--loss');
 

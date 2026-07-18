@@ -741,6 +741,15 @@
         "longestStreak": "Longest streak",
         "learningDays": "Learning days"
       },
+      "multiplayer": {
+        "title": "Multiplayer",
+        "empty": "No multiplayer battles yet — challenge a friend!",
+        "winRate": "Win rate",
+        "battles": "Battles played",
+        "wins": "Wins",
+        "losses": "Losses",
+        "draws": "Draws"
+      },
       "recent": {
         "title": "Recently learned",
         "empty": "Your recent words will appear here."
@@ -2156,6 +2165,15 @@
         "currentStreak": "현재 streak",
         "longestStreak": "최장 streak",
         "learningDays": "학습한 날"
+      },
+      "multiplayer": {
+        "title": "멀티플레이",
+        "empty": "아직 멀티플레이 기록이 없어요 — 친구에게 도전해 보세요!",
+        "winRate": "승률",
+        "battles": "플레이한 대전",
+        "wins": "승리",
+        "losses": "패배",
+        "draws": "무승부"
       },
       "recent": {
         "title": "최근 학습 단어",

@@ -5,7 +5,7 @@
   'use strict';
 
   const PROFILE_KEY = 'jamodeul-user-profile';
-  const PROFILE_VERSION = 4;
+  const PROFILE_VERSION = 5;
   const DAILY_TZ = 'Asia/Seoul';
   const MAX_RECENT_WORDS = 8;
 
@@ -67,6 +67,9 @@
       stats: {
         totalActivities: 0,
         dailyChallengesCompleted: 0,
+        battleWins: 0,
+        battleLosses: 0,
+        battleDraws: 0,
       },
     };
   }
@@ -136,6 +139,9 @@
       stats: {
         totalActivities: Math.max(0, parseInt(raw.stats?.totalActivities, 10) || 0),
         dailyChallengesCompleted: Math.max(0, parseInt(raw.stats?.dailyChallengesCompleted, 10) || 0),
+        battleWins: Math.max(0, parseInt(raw.stats?.battleWins, 10) || 0),
+        battleLosses: Math.max(0, parseInt(raw.stats?.battleLosses, 10) || 0),
+        battleDraws: Math.max(0, parseInt(raw.stats?.battleDraws, 10) || 0),
       },
       _level: levelInfo.level,
     };
@@ -284,6 +290,25 @@
     }
   }
 
+  function recordBattleResult(result) {
+    const profile = loadProfile();
+    if (!profile.stats) profile.stats = emptyProfile().stats;
+    if (result === 'win') profile.stats.battleWins += 1;
+    else if (result === 'loss') profile.stats.battleLosses += 1;
+    else profile.stats.battleDraws += 1;
+    saveProfile(profile);
+    return profile;
+  }
+
+  function getBattleWinRate(stats) {
+    const wins = Math.max(0, parseInt(stats?.battleWins, 10) || 0);
+    const losses = Math.max(0, parseInt(stats?.battleLosses, 10) || 0);
+    const draws = Math.max(0, parseInt(stats?.battleDraws, 10) || 0);
+    const total = wins + losses + draws;
+    if (!total) return null;
+    return Math.round((wins / total) * 100);
+  }
+
   function getProfileSummary() {
     const profile = loadProfile();
     const levelInfo = global.LevelUtils?.getLevelFromTotalXp(profile.totalXp) || {
@@ -334,6 +359,13 @@
       recentWords: profile.recentWords,
       earnedBadges: profile.earnedBadges,
       unlockedAvatarIds: profile.unlockedAvatarIds,
+      battleWins: profile.stats.battleWins || 0,
+      battleLosses: profile.stats.battleLosses || 0,
+      battleDraws: profile.stats.battleDraws || 0,
+      battleGamesPlayed: (profile.stats.battleWins || 0)
+        + (profile.stats.battleLosses || 0)
+        + (profile.stats.battleDraws || 0),
+      battleWinRate: getBattleWinRate(profile.stats),
     };
   }
 
@@ -364,6 +396,8 @@
     addRecentWord,
     markLearningDay,
     getProfileSummary,
+    recordBattleResult,
+    getBattleWinRate,
     getPublicProfilePayload,
     resetProfile,
     emptyProfile,

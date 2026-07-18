@@ -125,6 +125,9 @@
           left.stats?.dailyChallengesCompleted,
           right.stats?.dailyChallengesCompleted
         ),
+        battleWins: maxInt(left.stats?.battleWins, right.stats?.battleWins),
+        battleLosses: maxInt(left.stats?.battleLosses, right.stats?.battleLosses),
+        battleDraws: maxInt(left.stats?.battleDraws, right.stats?.battleDraws),
       },
     };
     delete merged._level;
