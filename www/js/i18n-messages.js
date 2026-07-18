@@ -1197,8 +1197,8 @@
           "desc": "Solve a Classic Jamo Game word on your first try"
         },
         "race-win": {
-          "title": "Race winner",
-          "desc": "Win a 1v1 race match"
+          "title": "Race match",
+          "desc": "Play a 1v1 race with a friend"
         },
         "coop-win": {
           "title": "Turn win",
@@ -2608,8 +2608,8 @@
           "desc": "자모들 놀이에서 첫 시도 정답"
         },
         "race-win": {
-          "title": "레이스 승리",
-          "desc": "1v1 레이스에서 승리"
+          "title": "레이스 매치",
+          "desc": "친구와 1v1 레이스 한 판 플레이"
         },
         "coop-win": {
           "title": "턴제 승리",

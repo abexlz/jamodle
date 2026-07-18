@@ -68,4 +68,11 @@ if (firstTry) {
   assert(firstTry.progress >= 1, 'first try quest increments on guessCount 1 win');
 }
 
+QS.recordActivity('battle', { racePlay: true });
+const snap4 = QS.getQuestSnapshot();
+const racePlay = snap4.daily.find((q) => q.questId === 'race-win');
+if (racePlay) {
+  assert(racePlay.progress >= 1, 'race quest increments on play, not only wins');
+}
+
 console.log('quest-service.test.js: all passed');
