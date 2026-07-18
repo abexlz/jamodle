@@ -2596,10 +2596,11 @@
       }
     }
 
-    findDevTileForZone(zone) {
+    findDevTileForZone(zone, { inBankOnly = false } = {}) {
       const expected = zone.expected;
       if (!expected) return null;
-      const candidates = Object.values(this.tileMap).filter((tile) => !tile.locked);
+      let candidates = Object.values(this.tileMap).filter((tile) => !tile.locked);
+      if (inBankOnly) candidates = candidates.filter((tile) => tile.inBank);
       const canUse = (tile) => {
         const probe = {
           char: expected,
@@ -2634,9 +2635,14 @@
       return tile;
     }
 
-    placeDevAnswerTile(zone) {
+    placeDevAnswerTile(zone, { inBankOnly = false } = {}) {
       if (zone.locked || zone.expected === null || this.isZoneCorrect(zone)) return false;
-      const tile = this.findDevTileForZone(zone);
+      if (zone.placedTileId) {
+        const existing = this.tileMap[zone.placedTileId];
+        if (existing && !existing.locked) this.returnTileToBank(existing);
+        else zone.clear();
+      }
+      const tile = this.findDevTileForZone(zone, { inBankOnly });
       if (!tile) return false;
       this.prepareDevTileForZone(tile, zone);
       if (tile.mergeDockRef) {
@@ -2661,9 +2667,11 @@
         `;
       }
 
+      this.clearUnlockedPlacements();
+
       this.blocks.forEach((block) => {
         block.getAllZones().forEach((zone) => {
-          if (this.placeDevAnswerTile(zone)) {
+          if (this.placeDevAnswerTile(zone, { inBankOnly: true })) {
             this.syncSyllableVowelLayout(this.blocks[zone.syllableIndex]);
           }
         });
