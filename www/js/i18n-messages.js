@@ -1856,7 +1856,7 @@
       "back": "← 홈"
     },
     "match": {
-      "title": "자모게임 놀이",
+      "title": "자모게임",
       "titleDaily": "오늘의 자모게임",
       "subtitle": "자모를 끌어 한글 단어를 맞춰 보세요",
       "subtitleDaily": "오늘의 단어 · 자정(KST)에 갱신",

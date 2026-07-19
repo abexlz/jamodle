@@ -1,12 +1,5 @@
 /* Home mode panels — glass box, decorative heading, side-by-side game buttons */
 
-:root {
-  --menu-mode-rail-w: clamp(60px, 16.1vw, 69px);
-  --menu-mode-rail-gap: 8px;
-  --menu-mode-btn-pad-x: 10px;
-  --menu-mode-btn-pad-y: 4px;
-}
-
 .menu-mode-panel {
   position: relative;
   padding: 8px 10px 10px;
@@ -100,17 +93,20 @@
   z-index: 1;
   aspect-ratio: auto;
   min-height: clamp(55px, 15vw, 65px);
-  padding: var(--menu-mode-btn-pad-y) var(--menu-mode-btn-pad-x);
+  padding: 10px 12px;
   overflow: hidden;
-  display: grid !important;
-  grid-template-columns: var(--menu-mode-rail-w) minmax(0, 1fr);
-  column-gap: var(--menu-mode-rail-gap);
+  flex-direction: row !important;
   align-items: center !important;
-  justify-content: stretch !important;
+  justify-content: flex-start !important;
+  gap: 8px !important;
 }
 
-#menu-screen .menu-mode-panel .menu-battle-game-btn {
-  min-height: clamp(64px, 17vw, 74px);
+#menu-screen .menu-mode-panel .menu-battle-game-bar.menu-battle-game-btn,
+#menu-screen .menu-mode-panel .menu-jamo-game-bar.menu-single-player-game-btn,
+#menu-screen .menu-mode-panel .menu-word-chain-bar.menu-single-player-game-btn {
+  padding: 0 !important;
+  gap: 0 !important;
+  min-height: clamp(52px, 14vw, 60px) !important;
 }
 
 #menu-screen .menu-mode-panel .menu-battle-game-btn .mode-icon,
@@ -118,17 +114,6 @@
   flex-shrink: 0;
   font-size: clamp(28px, 7.5vw, 35px);
   line-height: 1;
-}
-
-#menu-screen .menu-mode-panel .menu-battle-game-btn .menu-mode-icon-img {
-  width: var(--menu-mode-rail-w);
-  height: var(--menu-mode-rail-w);
-  aspect-ratio: 1;
-  object-fit: contain;
-  display: block;
-  flex-shrink: 0;
-  margin: 0;
-  justify-self: center;
 }
 
 #menu-screen .menu-mode-panel .menu-battle-game-btn .daily-challenge-content,
@@ -139,20 +124,23 @@
   align-items: center;
   justify-content: flex-start;
   gap: 0;
-  padding: 0;
-  margin: 0;
 }
 
 #menu-screen .menu-mode-panel .menu-battle-game-btn .mode-name,
 #menu-screen .menu-mode-panel .menu-single-player-game-btn .mode-name {
-  text-align: left;
-  white-space: nowrap;
+  text-align: center;
+  white-space: nowrap !important;
   font-size: clamp(25px, 6.5vw, 29px) !important;
   line-height: 1.08;
   text-transform: none;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin: 0;
+}
+
+#menu-screen .menu-mode-panel .menu-battle-game-btn .mode-name {
+  line-height: 1.05;
+  text-align: center !important;
+  margin-left: 0;
 }
 
 #menu-screen .menu-battle-game-btn,

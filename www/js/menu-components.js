@@ -332,6 +332,10 @@
     `;
   }
 
+  function renderWordChainTitle(text) {
+    return escapeHtml(String(text || '').trim());
+  }
+
   function renderMenuComboBadge(bestCombo, labelKey = 'match.bestCombo') {
     const count = Math.max(0, Number(bestCombo) || 0);
     const comboLabel = escapeHtml(t('relatedWords.comboLabel') || 'combo');
@@ -362,7 +366,7 @@
         <${tag} class="daily-challenge-card daily-challenge-bar word-game-bar accent-mint menu-single-player-game-btn menu-word-chain-bar menu-game-combo-bar" id="menu-${escapeHtml(mode.id)}"${hrefAttr}${typeAttr}${actionAttr} aria-label="${label}">
           ${renderWordChainComboBadge(bestCombo)}
           <span class="daily-challenge-content menu-word-chain-main">
-            <span class="mode-name app-btn-title">${label}</span>
+            <span class="mode-name app-btn-title">${renderWordChainTitle(modeText(mode, 'title'))}</span>
           </span>
         </${tag}>
       `;
@@ -374,7 +378,7 @@
         <${tag} class="daily-challenge-card daily-challenge-bar word-game-bar accent-${mode.accent} menu-btn-primary menu-jamo-game-btn menu-jamo-game-bar menu-game-combo-bar menu-single-player-game-btn" id="menu-${escapeHtml(mode.id)}"${hrefAttr}${typeAttr}${actionAttr} aria-label="${label}">
           ${renderMenuComboBadge(bestCombo)}
           <span class="daily-challenge-content menu-jamo-game-main">
-            <span class="mode-name app-btn-title">${label}</span>
+            <span class="mode-name app-btn-title">${renderWordChainTitle(modeText(mode, 'title'))}</span>
           </span>
         </${tag}>
       `;
@@ -411,15 +415,19 @@
     const wordChainLabel = escapeHtml(t('menu.battle.wordChain') || t('menu.modes.related-words.title') || 'Word Chain');
     const title = escapeHtml(t('menu.battle.title') || t('nav.multiplayer') || 'Battle Mode');
     const buttons = `
-      <button type="button" class="daily-challenge-card daily-challenge-bar word-game-bar menu-jamo-game-btn menu-battle-game-btn" data-battle-game="jamodle" aria-label="${jamodleLabel}">
-        ${renderMenuModeIcon('jamoGame')}
-        <span class="daily-challenge-content">
+      <button type="button" class="daily-challenge-card daily-challenge-bar word-game-bar menu-jamo-game-btn menu-jamo-game-bar menu-battle-game-btn menu-battle-game-bar menu-game-combo-bar" data-battle-game="jamodle" aria-label="${jamodleLabel}">
+        <span class="menu-battle-icon-slot" aria-hidden="true">
+          ${renderMenuModeIcon('jamoGame')}
+        </span>
+        <span class="daily-challenge-content menu-jamo-game-main">
           <span class="mode-name app-btn-title">${jamodleLabel}</span>
         </span>
       </button>
-      <button type="button" class="daily-challenge-card daily-challenge-bar word-game-bar accent-mint menu-battle-game-btn" data-battle-game="word-chain" aria-label="${wordChainLabel}">
-        ${renderMenuModeIcon('wordChain')}
-        <span class="daily-challenge-content">
+      <button type="button" class="daily-challenge-card daily-challenge-bar word-game-bar accent-mint menu-word-chain-bar menu-battle-game-btn menu-battle-game-bar menu-game-combo-bar" data-battle-game="word-chain" aria-label="${wordChainLabel}">
+        <span class="menu-battle-icon-slot" aria-hidden="true">
+          ${renderMenuModeIcon('wordChain')}
+        </span>
+        <span class="daily-challenge-content menu-word-chain-main">
           <span class="mode-name app-btn-title">${wordChainLabel}</span>
         </span>
       </button>
