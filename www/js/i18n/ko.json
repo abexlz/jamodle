@@ -79,6 +79,11 @@
         "subtitle": "가로·세로·겹모음을 배워요.",
         "subtitleKo": "ㅏ · ㅓ · ㅗ · ㅜ · ㅘ"
       },
+      "tutorial": {
+        "title": "튜토리얼",
+        "subtitle": "배치, 돌리기, 합치기, 단어 만들기를 배워요.",
+        "subtitleKo": "배치 · 돌리기 · 합치기 · 단어 만들기"
+      },
       "related-words": {
         "title": "단어 체인",
         "subtitle": "여러 테마의 연관 단어를 이어 만들어요.",

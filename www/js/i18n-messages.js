@@ -83,6 +83,11 @@
           "subtitle": "Learn horizontal, vertical, and compound vowels.",
           "subtitleKo": "ㅏ · ㅓ · ㅗ · ㅜ · ㅘ"
         },
+        "tutorial": {
+          "title": "Tutorial",
+          "subtitle": "Learn placement, rotation, merge, and word building.",
+          "subtitleKo": "배치 · 돌리기 · 합치기 · 단어 만들기"
+        },
         "related-words": {
           "title": "Word Chain",
           "subtitle": "Link related words across every theme.",
@@ -1510,6 +1515,11 @@
           "title": "모음 연습",
           "subtitle": "가로·세로·겹모음을 배워요.",
           "subtitleKo": "ㅏ · ㅓ · ㅗ · ㅜ · ㅘ"
+        },
+        "tutorial": {
+          "title": "튜토리얼",
+          "subtitle": "배치, 돌리기, 합치기, 단어 만들기를 배워요.",
+          "subtitleKo": "배치 · 돌리기 · 합치기 · 단어 만들기"
         },
         "related-words": {
           "title": "단어 체인",

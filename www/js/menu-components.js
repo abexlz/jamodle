@@ -305,7 +305,6 @@
         ${renderMenuTop()}
         ${renderSinglePlayerSection()}
         ${renderMenuBottom()}
-        ${renderTutorialBar()}
       </div>
     `;
   }
@@ -447,22 +446,6 @@
       bodyHtml: buttons,
       showHeadingClouds: false,
     });
-  }
-
-  function shouldShowTutorialMenuEntry() {
-    return true;
-  }
-
-  function renderTutorialBar() {
-    if (!shouldShowTutorialMenuEntry()) return '';
-    return `
-      <a class="daily-challenge-card daily-challenge-bar word-game-bar accent-muted menu-tutorial-btn menu-tutorial-bottom" id="menu-tutorial-btn" href="match-tutorial.html?start=1">
-        <span class="mode-icon app-btn-icon" aria-hidden="true">📘</span>
-        <span class="daily-challenge-content">
-          <span class="mode-name app-btn-title" data-i18n="menu.tutorialMode">${escapeHtml(t('menu.tutorialMode'))}</span>
-        </span>
-      </a>
-    `;
   }
 
   function renderMenuBottom() {

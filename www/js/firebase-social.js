@@ -598,6 +598,9 @@
     } else if (action === 'bot-fight-related-words') {
       e.preventDefault();
       startRelatedWordsBotFight();
+    } else if (action === 'bot-fight-jamo') {
+      e.preventDefault();
+      startMatchTurnBotFight();
     }
   }
 
@@ -614,6 +617,21 @@
     closeMultiplayerPicker();
     const chainParam = chainId ? `&chain=${encodeURIComponent(chainId)}` : '';
     global.location.href = `related-words-race.html?bot=1&winrate=${wr}&speed=${safeSpeed}${chainParam}`;
+  }
+
+  /** Temporary dev-only shortcut: local Jamo turn-based match vs a simulated bot. */
+  function startMatchTurnBotFight() {
+    if (global.DevBuild?.isDevModeActive?.() !== true) return;
+    const overlay = document.getElementById('multiplayer-overlay');
+    const slider = overlay?.querySelector('[data-bot-winrate]');
+    const winrate = Number(slider?.value);
+    const wr = Number.isFinite(winrate) ? Math.min(100, Math.max(0, winrate)) : 50;
+    const speed = overlay?.querySelector('[data-multiplayer-bot-section]')?.dataset.selectedSpeed || 'medium';
+    const wordLength = Number(overlay?.querySelector('[data-bot-jamo-length]')?.value);
+    const wl = global.MatchWords?.normalizeWordLength?.(wordLength) ?? 4;
+    const safeSpeed = ['slow', 'medium', 'fast'].includes(speed) ? speed : 'medium';
+    closeMultiplayerPicker();
+    global.location.href = `match-turn.html?bot=1&winrate=${wr}&speed=${safeSpeed}&wordLength=${wl}`;
   }
 
   function onDocumentKeydown(e) {
@@ -1742,6 +1760,8 @@
           </div>
           ${botChainSelectHtml()}
           <button type="button" class="race-opt race-opt--purple" data-social-action="bot-fight-related-words">Word Chain vs Bot</button>
+          ${botJamoLengthSelectHtml()}
+          <button type="button" class="race-opt race-opt--mint" data-social-action="bot-fight-jamo">Jamo Game vs Bot</button>
         </section>
       </div>
     `;
@@ -1842,6 +1862,20 @@
       <div class="multiplayer-bot-row">
         <label class="multiplayer-bot-label" for="bot-chain-select">Word chain</label>
         <select id="bot-chain-select" class="multiplayer-bot-chain" data-bot-chain>${options}</select>
+      </div>`;
+  }
+
+  function botJamoLengthSelectHtml() {
+    const lengths = global.MatchWords?.LETTER_LENGTHS || [1, 2, 3, 4, 5, 6];
+    const options = lengths.map((n) => {
+      const label = global.I18n?.t('match.modes.letterCount', { n }) || `${n} letters`;
+      const selected = n === 4 ? ' selected' : '';
+      return `<option value="${n}"${selected}>${escapeHtml(label)}</option>`;
+    }).join('');
+    return `
+      <div class="multiplayer-bot-row">
+        <label class="multiplayer-bot-label" for="bot-jamo-length-select">Jamo word length</label>
+        <select id="bot-jamo-length-select" class="multiplayer-bot-chain" data-bot-jamo-length>${options}</select>
       </div>`;
   }
 
