@@ -7,6 +7,7 @@
 
   const RS = () => global.RaceService;
   const RC = () => global.RaceCountdown;
+  const CF = () => global.RaceCoinFlip;
   const HUD = () => global.RaceBattleHudUI;
   const HC = () => global.HangulCompose;
   const MY_UID = 'player';
@@ -176,11 +177,15 @@
     };
   }
 
-  function pickTarget(wordLength) {
+  function pickTarget(wordLength, excludeWord) {
     const len = global.MatchWords?.normalizeWordLength?.(wordLength) ?? 4;
-    const pool = global.MatchWords?.getWordsForLength?.(len) || [];
+    const pool = (global.MatchWords?.getWordsForLength?.(len) || [])
+      .filter((w) => !excludeWord || w !== excludeWord);
     if (pool.length) return pool[Math.floor(Math.random() * pool.length)];
-    return len === 1 ? '책' : len === 2 ? '사과' : len === 6 ? '대한민국' : '고양이';
+    const fallback = {
+      1: '책', 2: '사과', 3: '고양이', 4: '대학교', 5: '김치찌개', 6: '대한민국',
+    };
+    return fallback[len] || fallback[4];
   }
 
   function iterTargetZones(target) {
@@ -666,6 +671,8 @@
       this._botTurnRunning = false;
       this._botScheduledTurnKey = null;
       this._localeOff = null;
+      this._lastRoundKey = null;
+      this._roundBreakTimer = null;
     }
 
     myUid() {
@@ -697,6 +704,7 @@
       }
 
       const target = pickTarget(this.wordLength);
+      const roundStarter = RS().flipCoinStarter(MY_UID, BOT_UID, this.matchId, 1);
       this.matchData = {
         gameType: RS().GAME_TYPES.koreanMatch,
         playMode: RS().PLAY_MODES.turn,
@@ -707,7 +715,8 @@
         player2Uid: BOT_UID,
         player1Name: rt('me'),
         player2Name: this.botName(),
-        currentTurnUid: MY_UID,
+        currentTurnUid: roundStarter,
+        coinFlipStarterUid: roundStarter,
         turnNumber: 1,
         turnDurationMs: RS().turnDurationForLength(this.wordLength),
         turnPhase: RS().TURN_PHASES.playing,
@@ -715,16 +724,21 @@
         turnHistory: [],
         lastTurnReveal: null,
         turnLive: null,
+        seriesTarget: RS().KOREAN_TURN_SERIES_TARGET,
+        seriesScore: RS().defaultSeriesScore(),
+        roundNumber: 1,
       };
 
       this.renderMain(`<div class="race-panel race-countdown-panel"><p class="race-panel-title">${escapeHtml(rt('startingSoon'))}</p></div>`);
-      const raceStartMs = Date.now() + (RC()?.countdownTotalMs?.(COUNTDOWN_SEC) ?? 4000);
-      RC()?.runCountdown?.(this, {
-        el: this.els.countdown,
-        raceStartMs,
-        countdownSec: COUNTDOWN_SEC,
-        onDone: () => this.startGame(true),
-        goLabel: rt('go'),
+      this.beginRoundSequence(this.matchData, () => {
+        const raceStartMs = Date.now() + (RC()?.countdownTotalMs?.(COUNTDOWN_SEC) ?? 4000);
+        RC()?.runCountdown?.(this, {
+          el: this.els.countdown,
+          raceStartMs,
+          countdownSec: COUNTDOWN_SEC,
+          onDone: () => this.startGame(true),
+          goLabel: rt('go'),
+        });
       });
     }
 
@@ -736,6 +750,8 @@
       if (this.turnTimer) clearInterval(this.turnTimer);
       if (this._turnSwapTimer) clearTimeout(this._turnSwapTimer);
       if (this.countdownTimer) clearInterval(this.countdownTimer);
+      if (this._roundBreakTimer) clearTimeout(this._roundBreakTimer);
+      CF()?.clearCoinFlipTimers?.(this);
       global.KoreanMatchDrag?.end?.();
       this.game?.destroy();
     }
@@ -758,14 +774,14 @@
         <div id="race-turn-urgency" class="race-turn-urgency hidden" aria-hidden="true"></div>
         <div id="race-turn-swap" class="race-turn-swap hidden" aria-live="assertive"></div>
         <div id="race-main" class="race-main"></div>
+        <div id="race-coin-flip" class="race-coin-flip hidden" aria-live="polite"></div>
         <div id="race-countdown" class="race-countdown hidden" aria-live="assertive"></div>
       `;
       this.els = {
+        ...HUD()?.bindEls?.(this.root, { showScores: false }) || {},
         main: this.root.querySelector('#race-main'),
+        coinFlip: this.root.querySelector('#race-coin-flip'),
         countdown: this.root.querySelector('#race-countdown'),
-        battleHud: this.root.querySelector('#race-battle-hud'),
-        centerTitle: this.root.querySelector('#race-center-title'),
-        centerSub: this.root.querySelector('#race-center-sub'),
         turnUrgency: this.root.querySelector('#race-turn-urgency'),
         turnSwap: this.root.querySelector('#race-turn-swap'),
         turnBar: null,
@@ -825,7 +841,10 @@
         onOpp: () => {
           if (this.els.centerTitle) this.els.centerTitle.textContent = this.turnModeLabel(data);
           if (this.els.centerSub) {
-            this.els.centerSub.textContent = rt('turnNumber', { n: data.turnNumber || 1 });
+            const roundNum = data.roundNumber || 1;
+            const turnNum = data.turnNumber || 1;
+            this.els.centerSub.textContent = rt('roundTurn', { round: roundNum, turn: turnNum })
+              || `Round ${roundNum} · Turn ${turnNum}`;
           }
         },
       });
@@ -847,14 +866,13 @@
       };
 
       if (payload.won) {
+        const patch = RS().buildKoreanTurnWinState(
+          data, MY_UID, shared, historyEntry, this.matchId, { useServerTime: false }
+        );
         this.matchData = {
           ...data,
-          status: 'done',
-          winnerUid: MY_UID,
-          sharedState: shared,
-          lastTurnReveal: historyEntry,
+          ...patch,
           turnHistory: [...(data.turnHistory || []), historyEntry],
-          currentTurnUid: MY_UID,
           turnLive: null,
         };
       } else {
@@ -889,14 +907,13 @@
       };
 
       if (payload.won) {
+        const patch = RS().buildKoreanTurnWinState(
+          data, BOT_UID, shared, historyEntry, this.matchId, { useServerTime: false }
+        );
         this.matchData = {
           ...data,
-          status: 'done',
-          winnerUid: BOT_UID,
-          sharedState: shared,
-          lastTurnReveal: historyEntry,
+          ...patch,
           turnHistory: [...(data.turnHistory || []), historyEntry],
-          currentTurnUid: BOT_UID,
           turnLive: null,
         };
       } else {
@@ -922,10 +939,138 @@
         this.handleDone(data);
         return;
       }
-      if (data.status === 'active' && this.gameStarted) {
-        this.syncTurnState(data);
+      if (data.status === 'round_break') {
         this.renderBattleHud(data);
+        return this.handleRoundBreak(data);
       }
+      if (data.status === 'active') {
+        const roundKey = `${data.roundNumber || 1}:${data.target}`;
+        if (this._lastRoundKey && this._lastRoundKey !== roundKey && this.gameStarted) {
+          this.resetForNewRound(data);
+          return;
+        }
+        this._lastRoundKey = roundKey;
+        if (this.gameStarted) {
+          this.syncTurnState(data);
+          this.renderBattleHud(data);
+        }
+      }
+    }
+
+    beginRoundSequence(data, onDone) {
+      const roundKey = `${data.roundNumber || 1}:${data.target}`;
+      const starterUid = data.coinFlipStarterUid || data.currentTurnUid;
+      CF()?.runCoinFlip?.(this, {
+        el: this.els.coinFlip,
+        roundKey,
+        starterUid,
+        matchData: data,
+        myUid: MY_UID,
+        onDone: () => onDone?.(),
+      }) || onDone?.();
+    }
+
+    resetForNewRound(data) {
+      this.clearBotTimers();
+      if (this.turnTimer) clearInterval(this.turnTimer);
+      if (this._turnSwapTimer) clearTimeout(this._turnSwapTimer);
+      this.hideTurnUrgencyOverlay();
+      this.game?.destroy();
+      this.game = null;
+      this.gameStarted = false;
+      this.countdownDone = false;
+      this._turnLocalKey = null;
+      this._turnLocalStartMs = null;
+      this._observedAnyTurn = false;
+      this._playedRevealKey = null;
+      this.preparedTurnNumber = null;
+      this._botTurnRunning = false;
+      this._botScheduledTurnKey = null;
+      this._lastRoundKey = null;
+      CF()?.clearCoinFlipTimers?.(this);
+
+      this.beginRoundSequence(data, () => {
+        const raceStartMs = Date.now() + (RC()?.countdownTotalMs?.(COUNTDOWN_SEC) ?? 4000);
+        RC()?.runCountdown?.(this, {
+          el: this.els.countdown,
+          raceStartMs,
+          countdownSec: COUNTDOWN_SEC,
+          onDone: () => this.startGame(true),
+          goLabel: rt('go'),
+        });
+      });
+    }
+
+    handleRoundBreak(data) {
+      this.clearBotTimers();
+      if (this.turnTimer) clearInterval(this.turnTimer);
+      this.game?.setMyTurn(false);
+      this.hideTurnUrgencyOverlay();
+      this.els.turnBar?.classList.add('hidden');
+      this.game?.destroy();
+      this.game = null;
+      this.gameStarted = false;
+
+      const iWon = data.roundWinnerUid === MY_UID;
+      const score = RS().getSeriesScoreForPlayer(data, MY_UID, BOT_UID);
+      const word = data.sharedState?.solvedWord || data.lastRoundTarget || data.target;
+      const line = iWon ? rt('roundWin') : rt('roundLoss');
+      const scoreLine = rt('seriesScore', { my: score.myWins, opp: score.oppWins });
+      const firstTo = rt('firstTo', { n: data.seriesTarget || RS().KOREAN_TURN_SERIES_TARGET || 2 });
+
+      this.renderMain(`
+        <div class="race-panel race-round-break">
+          <p class="race-panel-title">${escapeHtml(line)}</p>
+          <p class="race-panel-sub">${escapeHtml(scoreLine)} · ${escapeHtml(firstTo)}</p>
+          <p class="race-panel-sub">${escapeHtml(rt('answerLabel'))}: <strong>${escapeHtml(word)}</strong></p>
+          <p class="race-panel-sub">${escapeHtml(rt('nextRoundSoon'))}</p>
+        </div>
+      `);
+
+      this.scheduleRoundBreakAdvance(data);
+    }
+
+    scheduleRoundBreakAdvance(data) {
+      if (this._roundBreakTimer) clearTimeout(this._roundBreakTimer);
+      const remaining = RS().roundBreakRemainingMs(data);
+      const delay = remaining > 0 ? remaining + 80 : 80;
+      this._roundBreakTimer = setTimeout(() => {
+        this._roundBreakTimer = null;
+        const live = this.matchData;
+        if (!live || live.status !== 'round_break') return;
+        this.advanceBotRound(live);
+      }, delay);
+    }
+
+    advanceBotRound(data) {
+      const nextRoundNum = data.nextRoundNumber || ((data.roundNumber || 1) + 1);
+      const starter = data.nextRoundStarterUid
+        || RS().flipCoinStarter(MY_UID, BOT_UID, this.matchId, nextRoundNum);
+      const exclude = data.lastRoundTarget || data.target;
+      const newTarget = pickTarget(this.wordLength, exclude);
+
+      this.matchData = {
+        ...data,
+        status: 'active',
+        target: newTarget,
+        roundNumber: nextRoundNum,
+        currentTurnUid: starter,
+        coinFlipStarterUid: starter,
+        turnNumber: 1,
+        turnPhase: RS().TURN_PHASES.playing,
+        sharedState: RS().defaultSharedState(),
+        turnHistory: [],
+        lastTurnReveal: null,
+        turnLive: null,
+        winnerUid: null,
+        roundWinnerUid: null,
+        lastRoundTarget: null,
+        nextRoundNumber: null,
+        nextRoundStarterUid: null,
+        roundBreakStartedAt: null,
+        roundBreakMs: null,
+      };
+      this.resetForNewRound(this.matchData);
     }
 
     currentTurnKey(data) {

@@ -6,6 +6,7 @@
 
   const RS = () => global.RaceService;
   const RC = () => global.RaceCountdown;
+  const CF = () => global.RaceCoinFlip;
   const HUD = () => global.RaceBattleHudUI;
   const COUNTDOWN_SEC = 3;
   const countdownTotalMs = () => RC()?.countdownTotalMs?.(COUNTDOWN_SEC) ?? (COUNTDOWN_SEC + 1) * 1000;
@@ -95,6 +96,8 @@
       this._leftMatch = false;
       this._playedRevealKey = null;
       this._emotes = null;
+      this._lastRoundKey = null;
+      this._roundBreakTimer = null;
     }
 
     async init() {
@@ -173,6 +176,8 @@
       }
       if (this.turnTimer) clearInterval(this.turnTimer);
       if (this._turnSwapTimer) clearTimeout(this._turnSwapTimer);
+      if (this._roundBreakTimer) clearTimeout(this._roundBreakTimer);
+      CF()?.clearCoinFlipTimers?.(this);
       global.KoreanMatchDrag?.end?.();
       this._emotes?.destroy();
       this._emotes = null;
@@ -198,6 +203,7 @@
         <div id="race-turn-urgency" class="race-turn-urgency hidden" aria-hidden="true"></div>
         <div id="race-turn-swap" class="race-turn-swap hidden" aria-live="assertive"></div>
         <div id="race-main" class="race-main"></div>
+        <div id="race-coin-flip" class="race-coin-flip hidden" aria-live="polite"></div>
         <div id="race-countdown" class="race-countdown hidden" aria-live="assertive"></div>
       `;
       this.els = {
@@ -206,6 +212,7 @@
         turnUrgency: this.root.querySelector('#race-turn-urgency'),
         turnSwap: this.root.querySelector('#race-turn-swap'),
         main: this.root.querySelector('#race-main'),
+        coinFlip: this.root.querySelector('#race-coin-flip'),
         countdown: this.root.querySelector('#race-countdown'),
       };
       this.wireLeaveHandlers();
@@ -321,6 +328,10 @@
         RS().tryActivateMatch(this.matchId, data);
         return this.handleReady(data, this.isP1);
       }
+      if (data.status === 'round_break') {
+        this.renderBattleHud(data);
+        return this.handleRoundBreak(data);
+      }
       if (data.status === 'active') {
         if (data.sharedState?.over || data.winnerUid) {
           RS().tryFinalizeMatch?.(this.matchId, data);
@@ -419,6 +430,13 @@
     }
 
     handleActive(data) {
+      const roundKey = `${data.roundNumber || 1}:${data.target}`;
+      if (this._lastRoundKey && this._lastRoundKey !== roundKey && this.gameStarted) {
+        this.resetForNewRound(data);
+        return;
+      }
+      this._lastRoundKey = roundKey;
+
       const firstTurnStart = (data.turnNumber || 1) === 1
         && (data.sharedState?.guessCount || 0) === 0
         && (data.turnHistory?.length || 0) === 0;
@@ -428,13 +446,101 @@
         countdownSec: COUNTDOWN_SEC,
         getStartedAtMs: (d) => RS().startedAtMs(d),
       });
-      if (!this.gameStarted && firstTurnStart && Date.now() < raceStartMs) {
-        this.renderMain(`<div class="race-panel race-countdown-panel"><p class="race-panel-title">${escapeHtml(rt('startingSoon'))}</p></div>`);
-        this.showCountdown(raceStartMs, () => this.startGame(data, true));
+
+      const startAfterCoinFlip = () => {
+        if (!this.gameStarted && firstTurnStart && Date.now() < raceStartMs) {
+          this.renderMain(`<div class="race-panel race-countdown-panel"><p class="race-panel-title">${escapeHtml(rt('startingSoon'))}</p></div>`);
+          this.showCountdown(raceStartMs, () => this.startGame(data, true));
+          return;
+        }
+        if (!this.gameStarted) this.startGame(data, firstTurnStart);
+        else this.syncTurnState(data);
+      };
+
+      if (!this.gameStarted) {
+        this.beginRoundSequence(data, startAfterCoinFlip);
         return;
       }
-      if (!this.gameStarted) this.startGame(data, firstTurnStart);
       this.syncTurnState(data);
+    }
+
+    beginRoundSequence(data, onDone) {
+      const roundKey = `${data.roundNumber || 1}:${data.target}`;
+      const starterUid = data.coinFlipStarterUid || data.currentTurnUid;
+      CF()?.runCoinFlip?.(this, {
+        el: this.els.coinFlip,
+        roundKey,
+        starterUid,
+        matchData: data,
+        myUid: this.myUid,
+        onDone: () => onDone?.(),
+      }) || onDone?.();
+    }
+
+    resetForNewRound(data) {
+      this.stopTurnLiveWatch();
+      if (this.turnTimer) clearInterval(this.turnTimer);
+      if (this._turnSwapTimer) clearTimeout(this._turnSwapTimer);
+      this.hideTurnUrgencyOverlay();
+      this._emotes?.destroy();
+      this._emotes = null;
+      this.game?.destroy();
+      this.game = null;
+      this.gameStarted = false;
+      this.countdownDone = false;
+      this._activeSeenAtMs = null;
+      this._turnLocalKey = null;
+      this._turnLocalStartMs = null;
+      this._observedAnyTurn = false;
+      this._playedRevealKey = null;
+      this.preparedTurnNumber = null;
+      this.pendingTurnSubmit = false;
+      this._lastRoundKey = null;
+      CF()?.clearCoinFlipTimers?.(this);
+      this.handleActive(data);
+    }
+
+    handleRoundBreak(data) {
+      if (this.turnTimer) clearInterval(this.turnTimer);
+      this.game?.setMyTurn(false);
+      this.hideTurnUrgencyOverlay();
+      this.els.turnBar?.classList.add('hidden');
+      this.game?.destroy();
+      this.game = null;
+      this.gameStarted = false;
+
+      const opp = RS().getOpponent(data, this.myUid);
+      const iWon = data.roundWinnerUid === this.myUid;
+      const score = RS().getSeriesScoreForPlayer(data, this.myUid, opp?.uid);
+      const word = data.sharedState?.solvedWord || data.lastRoundTarget || data.target;
+      const line = iWon ? rt('roundWin') : rt('roundLoss');
+      const scoreLine = rt('seriesScore', { my: score.myWins, opp: score.oppWins });
+      const firstTo = rt('firstTo', { n: data.seriesTarget || RS().KOREAN_TURN_SERIES_TARGET || 2 });
+
+      this.renderMain(`
+        <div class="race-panel race-round-break">
+          <p class="race-panel-title">${escapeHtml(line)}</p>
+          <p class="race-panel-sub">${escapeHtml(scoreLine)} · ${escapeHtml(firstTo)}</p>
+          <p class="race-panel-sub">${escapeHtml(rt('answerLabel'))}: <strong>${escapeHtml(word)}</strong></p>
+          <p class="race-panel-sub">${escapeHtml(rt('nextRoundSoon'))}</p>
+        </div>
+      `);
+
+      RS().tryAdvanceRound(this.matchId, data);
+      this.scheduleRoundBreakAdvance(data);
+    }
+
+    scheduleRoundBreakAdvance(data) {
+      if (this._roundBreakTimer) clearTimeout(this._roundBreakTimer);
+      const remaining = RS().roundBreakRemainingMs(data);
+      const delay = remaining > 0 ? remaining + 80 : 80;
+      this._roundBreakTimer = setTimeout(() => {
+        this._roundBreakTimer = null;
+        const live = this.matchData;
+        if (!live || live.status !== 'round_break') return;
+        RS().tryAdvanceRound(this.matchId, live);
+        this.scheduleRoundBreakAdvance(live);
+      }, delay);
     }
 
     showCountdown(raceStartMs, onDone) {
@@ -514,8 +620,10 @@
         onOpp: () => {
           if (this.els.centerTitle) this.els.centerTitle.textContent = mode;
           if (this.els.centerSub) {
+            const roundNum = data.roundNumber || 1;
             const turnNum = data.turnNumber || 1;
-            this.els.centerSub.textContent = rt('turnNumber', { n: turnNum });
+            this.els.centerSub.textContent = rt('roundTurn', { round: roundNum, turn: turnNum })
+              || `Round ${roundNum} · Turn ${turnNum}`;
           }
         },
       });

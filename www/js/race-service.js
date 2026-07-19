@@ -19,11 +19,15 @@
   const WRITE_COOLDOWN_MS = 30000;
   const QUOTA_HALT_MS = 10 * 60 * 1000;
   const ACTIVATE_MIN_INTERVAL_MS = 10000;
+  const ADVANCE_ROUND_MIN_INTERVAL_MS = 2000;
+  const KOREAN_TURN_SERIES_TARGET = 2;
+  const ROUND_BREAK_MS = 3500;
   const TURN_LIVE_LOCK_TTL_MS = 5000;
   const TAB_ID = `tab-${Math.random().toString(36).slice(2, 10)}`;
   const turnLiveTracks = new Map();
   const rwLiveTracks = new Map();
   const activateLastAttemptAt = new Map();
+  const advanceRoundLastAttemptAt = new Map();
   let writeCooldownUntil = 0;
   let quotaHaltedUntil = 0;
   /** @deprecated legacy mode strings */
@@ -483,6 +487,130 @@
     return data?.playMode === PLAY_MODES.turn;
   }
 
+  function isKoreanTurnSeries(data) {
+    return isTurnBased(data) && isKoreanMatch(data);
+  }
+
+  function defaultSeriesScore() {
+    return { player1Wins: 0, player2Wins: 0 };
+  }
+
+  function attachKoreanTurnSeriesFields(data) {
+    if (!data || !isKoreanTurnSeries(data)) return data;
+    data.seriesTarget = data.seriesTarget || KOREAN_TURN_SERIES_TARGET;
+    data.seriesScore = data.seriesScore || defaultSeriesScore();
+    data.roundNumber = data.roundNumber || 1;
+    return data;
+  }
+
+  function hashFlipSeed(seed) {
+    let h = 0;
+    const s = String(seed || '');
+    for (let i = 0; i < s.length; i++) {
+      h = ((h << 5) - h + s.charCodeAt(i)) | 0;
+    }
+    return Math.abs(h);
+  }
+
+  function flipCoinStarter(player1Uid, player2Uid, matchId, roundNumber) {
+    const seed = `${matchId}:round:${roundNumber || 1}`;
+    return hashFlipSeed(seed) % 2 === 0 ? player1Uid : player2Uid;
+  }
+
+  function getSeriesScore(data) {
+    return data?.seriesScore || defaultSeriesScore();
+  }
+
+  function getSeriesScoreForPlayer(data, myUid, oppUid) {
+    if (!isKoreanTurnSeries(data)) {
+      return { myWins: 0, oppWins: 0, isSeries: false };
+    }
+    const score = getSeriesScore(data);
+    const myWins = myUid === data.player1Uid ? (score.player1Wins || 0) : (score.player2Wins || 0);
+    const oppWins = myUid === data.player1Uid ? (score.player2Wins || 0) : (score.player1Wins || 0);
+    return { myWins, oppWins, isSeries: true };
+  }
+
+  function fieldTimestampMs(ts) {
+    if (!ts) return null;
+    if (typeof ts.toMillis === 'function') return ts.toMillis();
+    if (typeof ts === 'number' && Number.isFinite(ts)) return ts;
+    if (typeof ts.seconds === 'number') return ts.seconds * 1000;
+    return null;
+  }
+
+  function roundBreakRemainingMs(data) {
+    const started = fieldTimestampMs(data?.roundBreakStartedAt);
+    if (!started) return ROUND_BREAK_MS;
+    const duration = Number(data?.roundBreakMs) > 0 ? Number(data.roundBreakMs) : ROUND_BREAK_MS;
+    return Math.max(0, started + duration - Date.now());
+  }
+
+  function buildKoreanTurnWinState(data, winnerUid, shared, historyEntry, matchId, opts = {}) {
+    const useServerTime = opts.useServerTime !== false;
+    const seriesScore = { ...getSeriesScore(data) };
+    if (winnerUid === data.player1Uid) {
+      seriesScore.player1Wins = (seriesScore.player1Wins || 0) + 1;
+    } else {
+      seriesScore.player2Wins = (seriesScore.player2Wins || 0) + 1;
+    }
+
+    const target = data.seriesTarget || KOREAN_TURN_SERIES_TARGET;
+    const p1Wins = seriesScore.player1Wins || 0;
+    const p2Wins = seriesScore.player2Wins || 0;
+    const base = {
+      sharedState: shared,
+      lastTurnReveal: historyEntry,
+      seriesScore,
+      currentTurnUid: winnerUid,
+      turnPhase: TURN_PHASES.playing,
+    };
+
+    if (p1Wins >= target || p2Wins >= target) {
+      const isP1 = winnerUid === data.player1Uid;
+      const progKey = isP1 ? 'player1Progress' : 'player2Progress';
+      const finishedAt = useServerTime
+        ? firebase.firestore.FieldValue.serverTimestamp()
+        : Date.now();
+      return {
+        ...base,
+        status: 'done',
+        winnerUid,
+        [progKey]: {
+          guessCount: shared.guessCount,
+          finished: true,
+          won: true,
+          finishedAt,
+          ...(shared.solvedWord ? { solvedWord: shared.solvedWord } : {}),
+        },
+      };
+    }
+
+    const nextRoundNum = (data.roundNumber || 1) + 1;
+    const nextStarter = flipCoinStarter(data.player1Uid, data.player2Uid, matchId, nextRoundNum);
+    const breakStartedAt = useServerTime
+      ? firebase.firestore.FieldValue.serverTimestamp()
+      : Date.now();
+    return {
+      ...base,
+      status: 'round_break',
+      roundWinnerUid: winnerUid,
+      lastRoundTarget: data.target,
+      nextRoundNumber: nextRoundNum,
+      nextRoundStarterUid: nextStarter,
+      coinFlipStarterUid: nextStarter,
+      roundBreakStartedAt: breakStartedAt,
+      roundBreakMs: ROUND_BREAK_MS,
+    };
+  }
+
+  function buildKoreanTurnWinUpdates(data, winnerUid, shared, historyEntry, history, matchId) {
+    return {
+      ...buildKoreanTurnWinState(data, winnerUid, shared, historyEntry, matchId, { useServerTime: true }),
+      turnHistory: history,
+    };
+  }
+
   function getMatchPageUrl(matchId, data) {
     if (isRelatedWords(data)) {
       return `related-words-race.html?id=${encodeURIComponent(matchId)}`;
@@ -516,6 +644,9 @@
       turnPhase: TURN_PHASES.playing,
       sharedState: defaultSharedState(),
       turnHistory: [],
+      seriesTarget: KOREAN_TURN_SERIES_TARGET,
+      seriesScore: defaultSeriesScore(),
+      roundNumber: 1,
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
     };
   }
@@ -582,6 +713,7 @@
         data.turnPhase = TURN_PHASES.playing;
         data.sharedState = defaultSharedState();
         data.turnHistory = [];
+        attachKoreanTurnSeriesFields(data);
       }
     }
 
@@ -663,6 +795,7 @@
         data.turnPhase = TURN_PHASES.playing;
         data.sharedState = defaultSharedState();
         data.turnHistory = [];
+        attachKoreanTurnSeriesFields(data);
       }
     }
 
@@ -936,9 +1069,12 @@
         startedAt: firebase.firestore.FieldValue.serverTimestamp(),
       };
       if (isTurnBased(data)) {
+        const roundNumber = data.roundNumber || 1;
+        const starter = flipCoinStarter(data.player1Uid, data.player2Uid, matchId, roundNumber);
         updates.turnNumber = 1;
         updates.turnPhase = TURN_PHASES.playing;
-        updates.currentTurnUid = data.player1Uid;
+        updates.currentTurnUid = starter;
+        updates.coinFlipStarterUid = starter;
         updates.turnStartedAt = firebase.firestore.FieldValue.serverTimestamp();
         updates.turnDurationMs = data.turnDurationMs || TURN_DURATION_MS;
         updates.sharedState = data.sharedState || defaultSharedState();
@@ -1509,22 +1645,25 @@
         const history = [...(data.turnHistory || []), historyEntry];
 
         if (payload.won) {
-          const wonUpdates = {
-            sharedState: shared,
-            status: 'done',
-            winnerUid: myUid,
-            turnPhase: TURN_PHASES.playing,
-            currentTurnUid: myUid,
-            lastTurnReveal: historyEntry,
-            turnHistory: history,
-            [progKey]: {
-              guessCount: shared.guessCount,
-              finished: true,
-              won: true,
-              finishedAt: firebase.firestore.FieldValue.serverTimestamp(),
-              ...(payload.solvedWord ? { solvedWord: payload.solvedWord } : {}),
-            },
-          };
+          const wonUpdates = isKoreanTurnSeries(data)
+            ? buildKoreanTurnWinUpdates(data, myUid, shared, historyEntry, history, matchId)
+            : {
+              sharedState: shared,
+              status: 'done',
+              winnerUid: myUid,
+              turnPhase: TURN_PHASES.playing,
+              currentTurnUid: myUid,
+              lastTurnReveal: historyEntry,
+              turnHistory: history,
+              [progKey]: {
+                guessCount: shared.guessCount,
+                finished: true,
+                won: true,
+                finishedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                ...(payload.solvedWord ? { solvedWord: payload.solvedWord } : {}),
+              },
+            };
+          wonUpdates.turnPhase = TURN_PHASES.playing;
           if (!usesTurnLiveRtdb()) {
             wonUpdates.turnLive = firebase.firestore.FieldValue.delete();
           }
@@ -1855,6 +1994,56 @@
     }
   }
 
+  async function tryAdvanceRound(matchId, data) {
+    if (!data || data.status !== 'round_break') return;
+    if (!isKoreanTurnSeries(data)) return;
+    if (roundBreakRemainingMs(data) > 0) return;
+    if (inWriteCooldown()) return;
+
+    const now = Date.now();
+    const lastAttempt = advanceRoundLastAttemptAt.get(matchId) || 0;
+    if (now - lastAttempt < ADVANCE_ROUND_MIN_INTERVAL_MS) return;
+    advanceRoundLastAttemptAt.set(matchId, now);
+
+    const ref = matchesRef()?.doc(matchId);
+    if (!ref) return;
+
+    const nextRoundNum = data.nextRoundNumber || ((data.roundNumber || 1) + 1);
+    const starter = data.nextRoundStarterUid
+      || flipCoinStarter(data.player1Uid, data.player2Uid, matchId, nextRoundNum);
+    const exclude = data.lastRoundTarget || data.target;
+    const newTarget = pickKoreanMatchTarget(getMatchWordLength(data), exclude);
+
+    try {
+      await ref.update({
+        status: 'active',
+        target: newTarget,
+        roundNumber: nextRoundNum,
+        currentTurnUid: starter,
+        coinFlipStarterUid: starter,
+        turnNumber: 1,
+        turnPhase: TURN_PHASES.playing,
+        turnStartedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        sharedState: defaultSharedState(),
+        turnHistory: [],
+        lastTurnReveal: firebase.firestore.FieldValue.delete(),
+        turnLive: firebase.firestore.FieldValue.delete(),
+        winnerUid: firebase.firestore.FieldValue.delete(),
+        roundWinnerUid: firebase.firestore.FieldValue.delete(),
+        lastRoundTarget: firebase.firestore.FieldValue.delete(),
+        nextRoundNumber: firebase.firestore.FieldValue.delete(),
+        nextRoundStarterUid: firebase.firestore.FieldValue.delete(),
+        roundBreakStartedAt: firebase.firestore.FieldValue.delete(),
+        roundBreakMs: firebase.firestore.FieldValue.delete(),
+        player1Progress: defaultProgress(),
+        player2Progress: defaultProgress(),
+      });
+    } catch (err) {
+      registerWriteError(err, 'tryAdvanceRound');
+      console.warn('[Race] advance round (may be duplicate)', err);
+    }
+  }
+
   async function getRematchSeriesScore(matchId, myUid, oppUid) {
     const db = getDb();
     if (!db || !matchId || !myUid || !oppUid) {
@@ -1922,6 +2111,7 @@
     updateRelatedWordsLive,
     setPlayerReady,
     tryActivateMatch,
+    tryAdvanceRound,
     updateMyProgress,
     markFinished,
     submitRelatedWordsRound,
@@ -1977,6 +2167,15 @@
     pickRelatedWordsChain,
     pickRandomRelatedWordsChain,
     isTurnBased,
+    isKoreanTurnSeries,
+    KOREAN_TURN_SERIES_TARGET,
+    ROUND_BREAK_MS,
+    defaultSeriesScore,
+    flipCoinStarter,
+    getSeriesScoreForPlayer,
+    roundBreakRemainingMs,
+    buildKoreanTurnWinUpdates,
+    buildKoreanTurnWinState,
     getMatchPageUrl,
     syllableCount,
   };

@@ -116,18 +116,29 @@
   }
 
   async function updateSeriesScore(els, matchId, myUid, oppUid, matchData) {
-    if (!els?.seriesScore || !matchData?.rematchFrom || !matchId || !myUid || !oppUid) {
+    if (!els?.seriesScore || !matchId || !myUid || !oppUid) {
       hideSeriesScore(els);
       return;
     }
 
-    const cacheKey = `${matchId}:${myUid}`;
-    if (!seriesCache.has(cacheKey)) {
-      seriesCache.set(cacheKey, RS().getRematchSeriesScore(matchId, myUid, oppUid));
-    }
-
-    const score = await seriesCache.get(cacheKey);
-    if (!score?.isRematch) {
+    let score;
+    if (RS().isKoreanTurnSeries?.(matchData)) {
+      score = RS().getSeriesScoreForPlayer(matchData, myUid, oppUid);
+      if (!score?.isSeries) {
+        hideSeriesScore(els);
+        return;
+      }
+    } else if (matchData?.rematchFrom) {
+      const cacheKey = `${matchId}:${myUid}`;
+      if (!seriesCache.has(cacheKey)) {
+        seriesCache.set(cacheKey, RS().getRematchSeriesScore(matchId, myUid, oppUid));
+      }
+      score = await seriesCache.get(cacheKey);
+      if (!score?.isRematch) {
+        hideSeriesScore(els);
+        return;
+      }
+    } else {
       hideSeriesScore(els);
       return;
     }
@@ -136,13 +147,14 @@
     if (els.seriesMyWins) els.seriesMyWins.textContent = String(score.myWins);
     els.seriesScore.classList.remove('hidden');
     els.seriesScore.setAttribute('aria-hidden', 'false');
-    const label = global.I18n?.t?.('race.seriesScore', { my: score.myWins, opp: score.oppWins })
+    const label = global.I18n?.t?.('matchTurn.seriesScore', { my: score.myWins, opp: score.oppWins })
+      || global.I18n?.t?.('race.seriesScore', { my: score.myWins, opp: score.oppWins })
       || `Series ${score.oppWins} to ${score.myWins}`;
     els.seriesScore.setAttribute('aria-label', label);
   }
 
   function updateBattleHud(data, { els, myUid, matchId, onOpp } = {}) {
-    if (!els?.battleHud || data?.status !== 'active') {
+    if (!els?.battleHud || (data?.status !== 'active' && data?.status !== 'round_break')) {
       els?.battleHud?.classList.add('hidden');
       document.body.classList.remove('rw-race-active');
       return null;
