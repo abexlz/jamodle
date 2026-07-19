@@ -3485,12 +3485,12 @@
         wordEl,
         autoplay: !this.versus,
         autoplayRepeats: 2,
+        root: banner,
       });
       const meaning = await this.getMeaningForWord(word);
       if (meaningEl && meaning) {
         meaningEl.textContent = meaning;
         meaningEl.classList.remove('hidden');
-        global.AnswerTTS?.mountMeaningSpeaker?.(meaningEl, word);
       }
     }
 
@@ -4880,10 +4880,7 @@
       meaningEl.textContent = syncText;
       meaningEl.hidden = !syncText;
       meaningEl.classList.toggle('hidden', !syncText);
-      if (syncText) {
-        global.AnswerTTS?.mountMeaningSpeaker?.(meaningEl, meaningWords[0] || this.getResolvedWord());
-        return;
-      }
+      if (syncText) return;
       const fallbackWord = meaningWords[0] || this.getResolvedWord();
       if (!fallbackWord) return;
       const fillAsync = async () => {
@@ -4892,7 +4889,6 @@
         meaningEl.textContent = text;
         meaningEl.hidden = false;
         meaningEl.classList.remove('hidden');
-        global.AnswerTTS?.mountMeaningSpeaker?.(meaningEl, fallbackWord);
       };
       fillAsync().catch(() => {});
     }
@@ -4932,9 +4928,9 @@
       global.AnswerTTS?.attachPopup?.({
         word,
         wordEl: this.els.resultsWord,
-        meaningEl: this.els.resultsWordMeaning,
         autoplay: !this.versus,
         autoplayRepeats: 2,
+        root: this.els.results,
       });
     }
 

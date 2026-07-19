@@ -44,10 +44,26 @@
       || el.classList.contains('race-results-answer-meaning');
   }
 
-  function isVisibleMeaning(el) {
-    if (!el || !el.isConnected) return false;
-    if (el.classList.contains('hidden') || el.hidden) return false;
-    return !!String(el.textContent || '').trim();
+  function unwrapMeaningSpeakerRows(root) {
+    const scope = root && root.querySelectorAll ? root : document;
+    scope.querySelectorAll('.answer-tts-row--meaning').forEach((row) => {
+      const meaning = row.querySelector(
+        '.turn-answer-meaning, .results-word-meaning, .race-results-answer-meaning',
+      );
+      const parent = row.parentNode;
+      if (!parent) {
+        row.remove();
+        return;
+      }
+      if (meaning) parent.insertBefore(meaning, row);
+      row.remove();
+    });
+  }
+
+  function pickSpeakerAnchor({ wordEl = null, tilesEl = null } = {}) {
+    if (tilesEl?.isConnected) return tilesEl;
+    if (wordEl?.isConnected) return wordEl;
+    return null;
   }
 
   function primeSpeech() {
@@ -146,7 +162,7 @@
     return { row, btn, anchorEl };
   }
 
-  function bindSpeakerButton(btn, getWord) {
+  function bindSpeakerButton(btn) {
     if (!btn || btn.dataset.answerTtsBound === '1') return;
     btn.dataset.answerTtsBound = '1';
     btn.addEventListener('click', (e) => {
@@ -157,8 +173,7 @@
       if (isPlaying) return;
       lastClickAt = now;
       noteUserGesture();
-      const word = typeof getWord === 'function' ? getWord() : getWord;
-      playWord(word, { repeats: 1 });
+      playWord(btn.dataset.speakWord, { repeats: 1 });
     });
   }
 
@@ -166,33 +181,31 @@
     if (!anchorEl || !speakWord) return null;
     const parts = ensureSpeakerRow(anchorEl);
     if (parts?.btn) {
-      bindSpeakerButton(parts.btn, () => speakWord);
+      parts.btn.dataset.speakWord = speakWord;
+      bindSpeakerButton(parts.btn);
     }
     return parts;
   }
 
-  function mountMeaningSpeaker(meaningEl, word) {
-    const speakWord = normalizeWord(word);
-    if (!speakWord || !isVisibleMeaning(meaningEl)) return;
-    mountSpeakerAnchor(meaningEl, speakWord);
+  function mountMeaningSpeaker() {
+    /* Meaning rows no longer get a speaker button — word/tiles anchor only. */
   }
 
   function attachPopup({
     word,
     wordEl = null,
-    meaningEl = null,
     tilesEl = null,
     autoplayRepeats = 2,
     autoplay = true,
+    root = null,
   } = {}) {
     const speakWord = normalizeWord(word);
     if (!speakWord) return;
 
-    if (wordEl) mountSpeakerAnchor(wordEl, speakWord);
-    if (tilesEl) mountSpeakerAnchor(tilesEl, speakWord);
-    if (meaningEl && isVisibleMeaning(meaningEl)) {
-      mountSpeakerAnchor(meaningEl, speakWord);
-    }
+    unwrapMeaningSpeakerRows(root || wordEl?.parentElement || tilesEl?.parentElement || document);
+
+    const anchorEl = pickSpeakerAnchor({ wordEl, tilesEl });
+    if (anchorEl) mountSpeakerAnchor(anchorEl, speakWord);
 
     const repeats = Number(autoplayRepeats);
     if (autoplay && repeats > 0 && shouldAutoplayOnReveal()) {
@@ -206,9 +219,9 @@
     attachPopup({
       word,
       tilesEl: answerBlock.querySelector('.race-results-answer-tiles'),
-      meaningEl: answerBlock.querySelector('.race-results-answer-meaning'),
       autoplay: options.autoplay !== false,
       autoplayRepeats: options.autoplayRepeats ?? 2,
+      root: answerBlock,
     });
   }
 
