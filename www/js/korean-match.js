@@ -171,12 +171,8 @@
   }
 
   /* ── JamoTile ── */
-  function isVowelZone(zoneType) {
-    return zoneType === 'jungH' || zoneType === 'jungV';
-  }
-
   function jamoGlyphInner(char, zoneType) {
-    if (isVowelZone(zoneType)) {
+    if (zoneType === 'jungV') {
       return `<span class="jamo-glyph-stretch">${char}</span>`;
     }
     return char;
