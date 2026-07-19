@@ -44,7 +44,7 @@
     --jungH-glyph-offset-y: -8cqh;
     --jamo-vowel-in-zone-scale: calc(var(--jamo-cho-in-zone-scale) * 1.2);
     --jungH-match-jungV-scale: 1.19;
-    --jungV-stretch-y: 1.15;
+    --jungV-stretch-y: 1.5;
     --jamo-jungH-in-zone-scale: calc(var(--jamo-vowel-in-zone-scale) * var(--jungH-match-jungV-scale));
     --syl-grid-col-vowel: 0.461fr;
     --syl-grid-row-cho: 0.92fr;
