@@ -15,37 +15,88 @@
 
   const SPEED_PROFILES = {
     slow: {
-      readMin: 1800,
-      readMax: 4200,
-      placeMin: 700,
-      placeMax: 2200,
-      longPauseMin: 2200,
-      longPauseMax: 4000,
-      rethinkMin: 900,
-      rethinkMax: 2000,
-      wrongHold: 900,
+      readMin: 2800,
+      readMax: 5200,
+      sylPauseMin: 900,
+      sylPauseMax: 2000,
+      selectMin: 550,
+      selectMax: 1200,
+      placeMin: 1100,
+      placeMax: 2600,
+      rotateMin: 750,
+      rotateMax: 1500,
+      rotatePauseMin: 500,
+      rotatePauseMax: 1100,
+      mergeStepMin: 900,
+      mergeStepMax: 2000,
+      longPauseMin: 2800,
+      longPauseMax: 5000,
+      rethinkMin: 1200,
+      rethinkMax: 2800,
+      mistakeHoldMin: 1800,
+      mistakeHoldMax: 3500,
+      betweenMin: 600,
+      betweenMax: 1400,
+      preCheckMin: 2800,
+      preCheckMax: 5500,
+      postCheckMin: 3200,
+      postCheckMax: 5200,
     },
     medium: {
-      readMin: 900,
-      readMax: 2200,
-      placeMin: 350,
-      placeMax: 1100,
-      longPauseMin: 1400,
-      longPauseMax: 2800,
-      rethinkMin: 500,
-      rethinkMax: 1200,
-      wrongHold: 650,
+      readMin: 1600,
+      readMax: 3400,
+      sylPauseMin: 500,
+      sylPauseMax: 1200,
+      selectMin: 350,
+      selectMax: 800,
+      placeMin: 700,
+      placeMax: 1600,
+      rotateMin: 500,
+      rotateMax: 1000,
+      rotatePauseMin: 350,
+      rotatePauseMax: 750,
+      mergeStepMin: 600,
+      mergeStepMax: 1300,
+      longPauseMin: 1600,
+      longPauseMax: 3000,
+      rethinkMin: 700,
+      rethinkMax: 1600,
+      mistakeHoldMin: 1100,
+      mistakeHoldMax: 2200,
+      betweenMin: 350,
+      betweenMax: 850,
+      preCheckMin: 1800,
+      preCheckMax: 3800,
+      postCheckMin: 2400,
+      postCheckMax: 4000,
     },
     fast: {
-      readMin: 400,
-      readMax: 1000,
-      placeMin: 180,
-      placeMax: 550,
-      longPauseMin: 700,
-      longPauseMax: 1400,
-      rethinkMin: 280,
-      rethinkMax: 650,
-      wrongHold: 420,
+      readMin: 900,
+      readMax: 2000,
+      sylPauseMin: 300,
+      sylPauseMax: 700,
+      selectMin: 220,
+      selectMax: 500,
+      placeMin: 450,
+      placeMax: 950,
+      rotateMin: 320,
+      rotateMax: 650,
+      rotatePauseMin: 200,
+      rotatePauseMax: 450,
+      mergeStepMin: 380,
+      mergeStepMax: 800,
+      longPauseMin: 900,
+      longPauseMax: 1700,
+      rethinkMin: 400,
+      rethinkMax: 900,
+      mistakeHoldMin: 650,
+      mistakeHoldMax: 1200,
+      betweenMin: 200,
+      betweenMax: 500,
+      preCheckMin: 1100,
+      preCheckMax: 2200,
+      postCheckMin: 1600,
+      postCheckMax: 2800,
     },
   };
 
@@ -232,6 +283,325 @@
     (locked || []).forEach((p) => map.set(placementKey(p), p.char));
     placements.forEach((p) => map.set(placementKey(p), p.char));
     return iterTargetZones(target).every((z) => map.get(placementKey(z)) === z.expected);
+  }
+
+  /** Tracks bot dock/board state for realistic live-turn broadcasts. */
+  class BotTurnSimulator {
+    constructor(game) {
+      this.placements = [];
+      this.merge = { slots: [null, null], slotIds: [null, null], result: null, resultId: null };
+      this.bank = (game?.serializeBankLiveState?.() || []).map((b) => ({ ...b }));
+      this.onBoard = new Set();
+      this.removed = [];
+      this.selected = null;
+    }
+
+    visibleBank() {
+      const inMerge = new Set(this.merge.slotIds.filter(Boolean));
+      if (this.merge.resultId) inMerge.add(this.merge.resultId);
+      return this.bank.filter((b) => (
+        !this.onBoard.has(b.id)
+        && !inMerge.has(b.id)
+        && !this.removed.includes(b.id)
+      ));
+    }
+
+    liveState(action = null) {
+      return {
+        placements: this.placements.map((p) => ({ ...p })),
+        merge: {
+          slots: [...this.merge.slots],
+          slotIds: [...this.merge.slotIds],
+          result: this.merge.result,
+          resultId: this.merge.resultId,
+        },
+        bank: this.visibleBank().map((b) => ({ ...b })),
+        selected: this.selected ? { ...this.selected } : null,
+        removed: [...this.removed],
+        action: action ? { ...action } : null,
+      };
+    }
+
+    findBankTile(char) {
+      return this.visibleBank().find((b) => b.char === char)
+        || this.bank.find((b) => (
+          b.char === char
+          && !this.onBoard.has(b.id)
+          && !this.removed.includes(b.id)
+        ));
+    }
+
+    updateBankChar(tileId, char) {
+      const entry = this.bank.find((b) => b.id === tileId);
+      if (entry) entry.char = char;
+    }
+
+    selectBank(tileId) {
+      this.selected = { type: 'bank', tileId };
+    }
+
+    selectMergeSlot(index) {
+      this.selected = { type: 'merge-slot', index };
+    }
+
+    selectMergeResult() {
+      this.selected = { type: 'merge-result' };
+    }
+
+    useTile(tileId) {
+      this.onBoard.add(tileId);
+    }
+
+    placeZone(syl, zone, subIndex, char) {
+      const key = placementKey({ syl, zone, subIndex });
+      this.placements = this.placements.filter((p) => placementKey(p) !== key);
+      this.placements.push({ syl, zone, subIndex: subIndex ?? 0, char });
+      this.selected = null;
+    }
+
+    clearZone(syl, zone, subIndex) {
+      const key = placementKey({ syl, zone, subIndex });
+      this.placements = this.placements.filter((p) => placementKey(p) !== key);
+      this.selected = null;
+    }
+
+    setMergeSlot(index, tileId, char) {
+      this.merge.slots[index] = char;
+      this.merge.slotIds[index] = tileId;
+      this.onBoard.add(tileId);
+      this.selected = null;
+    }
+
+    commitMerge(resultChar, resultId, ingredientIds) {
+      ingredientIds.forEach((id) => {
+        if (!id) return;
+        this.removed.push(id);
+        this.onBoard.delete(id);
+      });
+      this.merge.slots = [null, null];
+      this.merge.slotIds = [null, null];
+      this.merge.result = resultChar;
+      this.merge.resultId = resultId;
+      if (!this.bank.find((b) => b.id === resultId)) {
+        this.bank.push({ id: resultId, char: resultChar });
+      } else {
+        this.updateBankChar(resultId, resultChar);
+      }
+      this.selected = null;
+    }
+
+    pickWrongZone(zones, correctZone) {
+      const sameSyl = zones.filter((z) => (
+        z.syl === correctZone.syl
+        && placementKey(z) !== placementKey(correctZone)
+      ));
+      if (sameSyl.length) {
+        return sameSyl[Math.floor(Math.random() * sameSyl.length)];
+      }
+      const others = zones.filter((z) => placementKey(z) !== placementKey(correctZone));
+      return others[Math.floor(Math.random() * others.length)] || correctZone;
+    }
+  }
+
+  function buildHumanBotTurnScript(game, target, locked, winRate, speed) {
+    const profile = SPEED_PROFILES[speed] || SPEED_PROFILES.medium;
+    const sim = new BotTurnSimulator(game);
+    const script = [];
+    let t = 0;
+    let actionSeq = 0;
+
+    const push = (delay, mutate, actionKind, actionDetail = {}) => {
+      t += delay;
+      if (mutate) mutate();
+      const action = actionKind
+        ? { seq: ++actionSeq, kind: actionKind, ...actionDetail }
+        : null;
+      script.push({ at: t, live: sim.liveState(action) });
+    };
+
+    t += randRange(profile.readMin, profile.readMax);
+
+    const lockedKeys = new Set((locked || []).map((p) => placementKey(p)));
+    const allZones = iterTargetZones(target);
+    const zones = allZones.filter((z) => !lockedKeys.has(placementKey(z)));
+    if (!zones.length) {
+      return { script, payload: finalizePayload([], target, false), totalMs: t };
+    }
+
+    const wrongChance = lerp(0.5, 0.1, winRate);
+    const solveChance = lerp(0.15, 0.7, winRate);
+    const stumbleChance = lerp(0.3, 0.06, winRate);
+    const makesWrongFinal = Math.random() < wrongChance;
+    const triesSolve = !makesWrongFinal && Math.random() < solveChance;
+
+    let finalPlacements;
+    let won = false;
+    if (triesSolve) {
+      finalPlacements = buildPlacements(target, locked, { wrong: false, partial: false });
+      won = isWinningSubmission(finalPlacements, locked, target);
+      if (!won) finalPlacements = buildPlacements(target, locked, { wrong: false, partial: true });
+    } else if (makesWrongFinal) {
+      finalPlacements = buildPlacements(target, locked, { wrong: true, partial: false });
+    } else {
+      finalPlacements = buildPlacements(target, locked, { wrong: false, partial: true });
+    }
+
+    const finalMap = new Map(finalPlacements.map((p) => [placementKey(p), p]));
+    const bySyl = new Map();
+    zones.forEach((z) => {
+      if (!bySyl.has(z.syl)) bySyl.set(z.syl, []);
+      bySyl.get(z.syl).push(z);
+    });
+
+    const syllables = HC().decomposeWordForMatch(target);
+
+    const scheduleRotateToChar = (tile, goalChar) => {
+      if (!tile || !HC().canRotateJamo?.(tile.char)) return;
+      const wrongRot = tile.char !== goalChar && Math.random() < lerp(0.4, 0.1, winRate);
+      if (!wrongRot) {
+        push(randRange(profile.selectMin, profile.selectMax), () => {
+          sim.selectBank(tile.id);
+        }, 'select', { selected: { type: 'bank', tileId: tile.id } });
+        return;
+      }
+      const wrongChar = HC().rotateJamo(tile.char) || pickWrongChar(goalChar);
+      push(randRange(profile.selectMin, profile.selectMax), () => {
+        sim.selectBank(tile.id);
+      }, 'select', { selected: { type: 'bank', tileId: tile.id } });
+      push(randRange(profile.rotateMin, profile.rotateMax), () => {
+        sim.updateBankChar(tile.id, wrongChar);
+      }, 'rotate', { tileId: tile.id, at: { type: 'bank', tileId: tile.id } });
+      t += randRange(profile.rotatePauseMin, profile.rotatePauseMax);
+      if (wrongChar !== goalChar) {
+        push(randRange(profile.rotateMin, profile.rotateMax), () => {
+          sim.updateBankChar(tile.id, goalChar);
+        }, 'rotate', { tileId: tile.id, at: { type: 'bank', tileId: tile.id } });
+      }
+      push(randRange(profile.selectMin, profile.selectMax), () => {
+        sim.selectBank(tile.id);
+      }, 'select', { selected: { type: 'bank', tileId: tile.id } });
+    };
+
+    const schedulePlaceChar = (zone, char, tileId) => {
+      push(randRange(profile.placeMin, profile.placeMax), () => {
+        if (tileId) sim.useTile(tileId);
+        sim.placeZone(zone.syl, zone.zone, zone.subIndex, char);
+      }, 'move');
+    };
+
+    const scheduleMergeAndPlace = (zone, goalChar, sylData) => {
+      const components = (HC().getMedialComponents?.(sylData.jung) || [])
+        .filter((c) => HC().PLACEABLE_VERTICAL_VOWELS?.has(c));
+      if (components.length < 2) {
+        const tile = sim.findBankTile(goalChar);
+        if (tile) scheduleRotateToChar(tile, goalChar);
+        schedulePlaceChar(zone, goalChar, tile?.id);
+        return;
+      }
+
+      const [left, right] = components;
+      const leftTile = sim.findBankTile(left);
+      const rightTile = sim.findBankTile(right);
+      if (!leftTile || !rightTile) {
+        schedulePlaceChar(zone, goalChar, null);
+        return;
+      }
+
+      push(randRange(profile.selectMin, profile.selectMax), () => {
+        sim.selectBank(leftTile.id);
+      }, 'select', { selected: { type: 'bank', tileId: leftTile.id } });
+      push(randRange(profile.mergeStepMin, profile.mergeStepMax), () => {
+        sim.setMergeSlot(0, leftTile.id, left);
+      }, 'move');
+
+      push(randRange(profile.selectMin, profile.selectMax), () => {
+        sim.selectBank(rightTile.id);
+      }, 'select', { selected: { type: 'bank', tileId: rightTile.id } });
+      push(randRange(profile.mergeStepMin, profile.mergeStepMax), () => {
+        sim.setMergeSlot(1, rightTile.id, right);
+      }, 'move');
+
+      t += randRange(profile.rotatePauseMin, profile.rotatePauseMax);
+      const resultId = `bot-merge-${leftTile.id}-${rightTile.id}`;
+      push(randRange(profile.mergeStepMin, profile.mergeStepMax), () => {
+        sim.commitMerge(goalChar, resultId, [leftTile.id, rightTile.id]);
+      }, 'merge', { ingredientIds: [leftTile.id, rightTile.id] });
+
+      push(randRange(profile.selectMin, profile.selectMax), () => {
+        sim.selectMergeResult();
+      }, 'select', { selected: { type: 'merge-result' } });
+      schedulePlaceChar(zone, goalChar, resultId);
+    };
+
+    [...bySyl.entries()].forEach(([, sylZones]) => {
+      const planned = sylZones.filter((z) => finalMap.has(placementKey(z)));
+      if (!planned.length) return;
+
+      t += randRange(profile.sylPauseMin, profile.sylPauseMax);
+      if (Math.random() < stumbleChance) {
+        t += randRange(profile.longPauseMin, profile.longPauseMax);
+      }
+
+      const mistakeRate = lerp(0.42, 0.1, winRate);
+      if (Math.random() < mistakeRate) {
+        const correctZone = planned[0];
+        const wrongZone = sim.pickWrongZone(allZones, correctZone);
+        const wrongChar = pickWrongChar(correctZone.expected);
+        const wrongTile = sim.findBankTile(wrongChar) || sim.findBankTile(pickWrongChar(wrongChar));
+        if (wrongTile) {
+          push(randRange(profile.selectMin, profile.selectMax), () => {
+            sim.selectBank(wrongTile.id);
+          }, 'select', { selected: { type: 'bank', tileId: wrongTile.id } });
+        }
+        push(randRange(profile.placeMin, profile.placeMax), () => {
+          if (wrongTile) sim.useTile(wrongTile.id);
+          sim.placeZone(wrongZone.syl, wrongZone.zone, wrongZone.subIndex, wrongChar);
+        }, 'move');
+        t += randRange(profile.mistakeHoldMin, profile.mistakeHoldMax);
+        push(randRange(profile.placeMin, profile.placeMax), () => {
+          sim.clearZone(wrongZone.syl, wrongZone.zone, wrongZone.subIndex);
+          if (wrongTile) sim.onBoard.delete(wrongTile.id);
+        }, 'move');
+        t += randRange(profile.rethinkMin, profile.rethinkMax);
+      }
+
+      planned.forEach((zone) => {
+        const fin = finalMap.get(placementKey(zone));
+        if (!fin) return;
+        const sylData = syllables[zone.syl];
+        const needsMerge = zone.zone === 'jungV'
+          && sylData
+          && HC().isVerticalMergeMedial?.(sylData.jung);
+
+        if (needsMerge) {
+          scheduleMergeAndPlace(zone, fin.char, sylData);
+        } else {
+          const tile = sim.findBankTile(fin.char);
+          if (tile) scheduleRotateToChar(tile, fin.char);
+          schedulePlaceChar(zone, fin.char, tile?.id);
+        }
+
+        t += randRange(profile.betweenMin, profile.betweenMax);
+      });
+    });
+
+    t += randRange(profile.preCheckMin, profile.preCheckMax);
+    push(0, () => {
+      sim.placements = finalPlacements.map((p) => ({
+        syl: p.syl,
+        zone: p.zone,
+        subIndex: p.subIndex ?? 0,
+        char: p.char,
+      }));
+      sim.selected = null;
+      sim.merge = { slots: [null, null], slotIds: [null, null], result: null, resultId: null };
+    }, 'checking');
+
+    return {
+      script,
+      payload: finalizePayload(finalPlacements, target, won),
+      totalMs: t + randRange(profile.postCheckMin, profile.postCheckMax),
+    };
   }
 
   class MatchTurnBotApp {
@@ -796,80 +1166,37 @@
 
     scheduleBotTurn(data) {
       if (this._botTurnRunning || data.currentTurnUid !== BOT_UID || data.status !== 'active') return;
+      if (!this.game) return;
       this._botTurnRunning = true;
       this.clearBotTimers();
       this._botTurnRunning = true;
 
-      const profile = this.speedProfile();
-      const wr = this.winRate;
-      const wrongChance = lerp(0.55, 0.08, wr);
-      const solveChance = lerp(0.12, 0.72, wr);
-      const stumbleChance = lerp(0.28, 0.05, wr);
       const locked = data.sharedState?.locked || [];
       const target = data.target;
+      const { script, payload, totalMs } = buildHumanBotTurnScript(
+        this.game,
+        target,
+        locked,
+        this.winRate,
+        this.speed
+      );
 
-      const makesWrong = Math.random() < wrongChance;
-      const triesSolve = !makesWrong && Math.random() < solveChance;
-      let placements;
-      let won = false;
-
-      if (triesSolve) {
-        placements = buildPlacements(target, locked, { wrong: false, partial: false });
-        won = isWinningSubmission(placements, locked, target);
-        if (!won) placements = buildPlacements(target, locked, { wrong: false, partial: true });
-      } else if (makesWrong) {
-        placements = buildPlacements(target, locked, { wrong: true, partial: false });
-      } else {
-        placements = buildPlacements(target, locked, { wrong: false, partial: true });
-      }
-
-      const payload = finalizePayload(placements, target, won);
-      let t = randRange(profile.readMin, profile.readMax);
-
-      if (Math.random() < stumbleChance) {
-        t += randRange(profile.longPauseMin, profile.longPauseMax);
-      }
-
-      const steps = [];
-      let built = [];
-      placements.forEach((p, i) => {
-        t += randRange(profile.placeMin, profile.placeMax);
-        built = built.concat([p]);
-        const stepPlacements = [...built];
-        steps.push({ at: t, live: { placements: stepPlacements, merge: { slots: [null, null], result: null } } });
-      });
-
-      steps.forEach((step) => {
+      script.forEach((step) => {
         this.botDelay(() => {
           if (!this.game || this.matchData?.currentTurnUid !== BOT_UID) return;
           this.matchData.turnLive = {
             byUid: BOT_UID,
             turnNumber: this.matchData.turnNumber,
-            placements: step.live.placements,
-            merge: step.live.merge,
+            ...step.live,
           };
           this.game.applyTurnLiveState(this.matchData.turnLive);
         }, step.at);
       });
 
-      t += randRange(profile.rethinkMin, profile.rethinkMax);
-      this.botDelay(() => {
-        if (!this.game || this.matchData?.currentTurnUid !== BOT_UID) return;
-        const checkingLive = {
-          byUid: BOT_UID,
-          turnNumber: this.matchData.turnNumber,
-          placements: payload.placements,
-          merge: { slots: [null, null], result: null },
-          action: { kind: 'checking', seq: Date.now() },
-        };
-        this.matchData.turnLive = checkingLive;
-        this.game.applyTurnLiveState(checkingLive);
-      }, t);
-
       this.botDelay(() => {
         if (!this.matchData || this.matchData.currentTurnUid !== BOT_UID) return;
         this.applyBotTurn(payload);
-      }, t + (makesWrong ? profile.wrongHold : randRange(400, 900)));
+      }, totalMs);
     }
 
     handleDone(data) {
