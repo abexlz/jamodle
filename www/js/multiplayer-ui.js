@@ -170,13 +170,14 @@
             data-i18n-aria="common.close" aria-label="Close">✕</button>
         </div>
         <div class="battle-matchmaking-step" data-matchmaking-step="pick">
-          <p class="multiplayer-modal-sub" data-i18n="menu.battle.matchmakingPickLength">${escapeHtml(t('menu.battle.matchmakingPickLength'))}</p>
+          <p class="battle-matchmaking-lead" data-i18n="menu.battle.matchmakingPickLength">${escapeHtml(t('menu.battle.matchmakingPickLength'))}</p>
           <p class="battle-matchmaking-note" data-i18n="menu.battle.matchmakingTurnOnly">${escapeHtml(t('menu.battle.matchmakingTurnOnly'))}</p>
           <div class="race-length-options race-length-options--grid-3 battle-matchmaking-lengths">
             ${koreanLengthButtonsHtml()}
           </div>
         </div>
         <div class="battle-matchmaking-step hidden" data-matchmaking-step="searching">
+          <p class="battle-matchmaking-picked" data-matchmaking-picked></p>
           <div class="battle-matchmaking-search" aria-live="polite">
             <div class="battle-matchmaking-spinner" aria-hidden="true"></div>
             <p class="battle-matchmaking-status" data-matchmaking-status data-i18n="menu.battle.matchmakingSearching">${escapeHtml(t('menu.battle.matchmakingSearching'))}</p>
@@ -202,7 +203,7 @@
     });
     overlay.querySelector('[data-matchmaking-cancel]')?.addEventListener('click', (e) => {
       e.preventDefault();
-      cancelMatchmakingSearch();
+      cancelMatchmakingSearch({ returnToPick: true });
     });
     overlay.querySelector('.battle-matchmaking-lengths')?.addEventListener('click', (e) => {
       const btn = e.target.closest('[data-matchmaking-length]');
@@ -217,9 +218,27 @@
   }
 
   function showMatchmakingStep(overlay, step) {
+    overlay.dataset.matchmakingStep = step;
+    const modal = overlay.querySelector('.battle-matchmaking-modal');
+    modal?.classList.toggle('battle-matchmaking-modal--searching', step === 'searching');
+    modal?.classList.toggle('battle-matchmaking-modal--pick', step === 'pick');
     overlay.querySelectorAll('[data-matchmaking-step]').forEach((el) => {
       el.classList.toggle('hidden', el.dataset.matchmakingStep !== step);
     });
+    const titleEl = overlay.querySelector('.multiplayer-modal-title');
+    if (titleEl) {
+      titleEl.textContent = step === 'searching'
+        ? (t('menu.battle.matchmakingSearching') || t('menu.battle.multiplayerTitle'))
+        : (t('menu.battle.multiplayerTitle') || 'Random Match');
+    }
+  }
+
+  function resetMatchmakingOverlay(overlay) {
+    if (!overlay) return;
+    overlay.dataset.selectedLength = '';
+    const pickedEl = overlay.querySelector('[data-matchmaking-picked]');
+    if (pickedEl) pickedEl.textContent = '';
+    showMatchmakingStep(overlay, overlay.dataset.selectedGame === 'word-chain' ? 'unsupported' : 'pick');
   }
 
   function openMatchmakingOverlay(game) {
@@ -233,11 +252,7 @@
 
     const overlay = ensureMatchmakingOverlay();
     overlay.dataset.selectedGame = game === 'word-chain' ? 'word-chain' : 'jamodle';
-    if (game === 'word-chain') {
-      showMatchmakingStep(overlay, 'unsupported');
-    } else {
-      showMatchmakingStep(overlay, 'pick');
-    }
+    resetMatchmakingOverlay(overlay);
     overlay.classList.remove('hidden');
     syncMultiplayerOpenClass();
     global.I18n?.applyToDocument?.(overlay);
@@ -245,14 +260,20 @@
 
   async function closeMatchmakingOverlay() {
     await cancelMatchmakingSearch();
-    document.getElementById('battle-matchmaking-overlay')?.classList.add('hidden');
+    const overlay = document.getElementById('battle-matchmaking-overlay');
+    overlay?.classList.add('hidden');
+    if (overlay) resetMatchmakingOverlay(overlay);
     syncMultiplayerOpenClass();
   }
 
-  async function cancelMatchmakingSearch() {
+  async function cancelMatchmakingSearch(options = {}) {
     try {
       await global.MatchQueueService?.leaveQueue?.();
     } catch (_) { /* ignore */ }
+    if (options.returnToPick) {
+      const overlay = document.getElementById('battle-matchmaking-overlay');
+      if (overlay) resetMatchmakingOverlay(overlay);
+    }
   }
 
   function setMatchmakingStatus(overlay, key) {
@@ -264,13 +285,19 @@
   async function startMatchmakingSearch(wordLength) {
     const overlay = ensureMatchmakingOverlay();
     const game = overlay.dataset.selectedGame === 'word-chain' ? 'word-chain' : 'jamodle';
+    overlay.dataset.selectedLength = String(wordLength);
+    const pickedEl = overlay.querySelector('[data-matchmaking-picked]');
+    if (pickedEl) {
+      pickedEl.textContent = t('match.modes.letterCount', { n: wordLength })
+        || `${wordLength} letters`;
+    }
     showMatchmakingStep(overlay, 'searching');
     setMatchmakingStatus(overlay, 'menu.battle.matchmakingSearching');
     syncMultiplayerOpenClass();
 
     if (!global.MatchQueueService?.joinQueue) {
       alert(t('menu.battle.matchmakingFailed'));
-      showMatchmakingStep(overlay, 'pick');
+      resetMatchmakingOverlay(overlay);
       return;
     }
 
@@ -278,7 +305,7 @@
       await global.FirebaseSocial?.whenAuthReady?.();
       if (!global.FirebaseSocial?.getCurrentUid?.()) {
         alert(t('menu.battle.matchmakingLogin'));
-        showMatchmakingStep(overlay, 'pick');
+        resetMatchmakingOverlay(overlay);
         return;
       }
 
@@ -297,13 +324,13 @@
         },
         onError: () => {
           alert(t('menu.battle.matchmakingFailed'));
-          showMatchmakingStep(overlay, 'pick');
+          resetMatchmakingOverlay(overlay);
         },
       });
     } catch (err) {
       console.error('[Multiplayer] matchmaking failed', err);
       alert(t('menu.battle.matchmakingFailed'));
-      showMatchmakingStep(overlay, 'pick');
+      resetMatchmakingOverlay(overlay);
     }
   }
 
