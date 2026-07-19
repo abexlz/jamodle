@@ -29,7 +29,7 @@
 
   function speakVolume() {
     const vol = Number(global.UserPreferences?.get?.().volume);
-    if (!Number.isFinite(vol)) return 0.9;
+    if (!Number.isFinite(vol)) return 0.95;
     return Math.max(0, Math.min(1, vol));
   }
 
@@ -157,7 +157,7 @@
 
   async function fetchServerAudio(text) {
     const gender = preferredVoiceGender();
-    const key = `${gender}:${text.trim()}`;
+    const key = `v2:${gender}:${text.trim()}`;
     if (audioCache.has(key)) return audioCache.get(key);
 
     const url = `${getApiBase()}/api/tts/speak?text=${encodeURIComponent(text.trim())}`
@@ -224,7 +224,7 @@
   function speakWithWebSpeech(text, options = {}) {
     if (!global.speechSynthesis) return Promise.resolve(false);
 
-    const rate = Number.isFinite(options.rate) ? options.rate : 0.78;
+    const rate = Number.isFinite(options.rate) ? options.rate : 0.82;
     const volume = Number.isFinite(options.volume) ? options.volume : speakVolume();
 
     return waitForVoices().then((voice) => new Promise((resolve) => {
