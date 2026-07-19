@@ -695,6 +695,55 @@ body.match-turn-page .rotation-dock-label {
   color: #ffffff !important;
 }
 
+.settings-section-title {
+  font-size: 1.2rem !important;
+  padding-bottom: 10px !important;
+  margin-bottom: 4px !important;
+  border-bottom: 1px solid rgba(123, 207, 255, 0.28) !important;
+}
+
+.settings-field-label {
+  color: rgba(123, 207, 255, 0.9) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.07em !important;
+  text-transform: uppercase !important;
+}
+
+.settings-row-label > span:first-child {
+  color: rgba(255, 255, 255, 0.95) !important;
+  font-weight: 600 !important;
+}
+
+.settings-app .language-option:not(.selected),
+.settings-app .theme-option:not(.selected) {
+  background-color: rgba(0, 45, 55, 0.65) !important;
+  background-image: none !important;
+  border-color: rgba(123, 207, 255, 0.28) !important;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.18) !important;
+  color: rgba(255, 255, 255, 0.82) !important;
+  text-shadow: none !important;
+}
+
+.settings-app .language-option.selected,
+.settings-app .theme-option.selected {
+  background-color: var(--app-btn-fill) !important;
+  background-image: var(--app-btn-gloss-overlay) !important;
+  border-color: #FFE566 !important;
+  box-shadow: var(--app-btn-gloss-inset), 0 5px 0 #C4A82D, var(--app-btn-gloss-ambient) !important;
+  color: #ffffff !important;
+  text-shadow: var(--app-btn-text-shadow) !important;
+}
+
+.settings-app .toggle-switch input:checked + .toggle-track {
+  background: rgba(123, 207, 255, 0.85) !important;
+}
+
+.settings-app .toggle-track {
+  background: rgba(0, 45, 55, 0.7) !important;
+  border: 1px solid rgba(123, 207, 255, 0.25) !important;
+}
+
 .settings-hint,
 .settings-note,
 .confirm-card p {

@@ -67,17 +67,33 @@
     padding: 18px 16px; margin-bottom: 16px; box-shadow: var(--shadow);
   }
   .settings-section-title {
-    font-family: 'Jua', sans-serif; font-size: 18px; color: var(--heading);
-    margin: 0 0 14px; display: flex; align-items: center; gap: 8px;
+    font-family: 'Jua', sans-serif; font-size: 20px; color: var(--heading);
+    margin: 0 0 12px; padding-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+    border-bottom: 1px solid var(--border);
   }
   .settings-icon { font-size: 20px; }
+  .settings-section-body { display: flex; flex-direction: column; }
+  .settings-field { padding: 10px 0 4px; }
+  .settings-field + .settings-row,
+  .settings-row + .settings-field,
+  .settings-field + .settings-field { margin-top: 2px; }
+  .settings-field-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text-soft);
+    margin-bottom: 8px;
+  }
   .settings-row {
     display: flex; align-items: center; justify-content: space-between;
     gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border);
   }
   .settings-row:last-child { border-bottom: none; }
   .settings-row-stack { flex-direction: column; align-items: stretch; }
-  .settings-row-label { font-size: 15px; font-weight: 500; }
+  .settings-row-label { font-size: 15px; font-weight: 600; color: var(--text); }
   .settings-hint { display: block; font-size: 12px; color: var(--text-soft); margin-top: 2px; }
   .settings-note, .about-desc, .about-credit {
     font-size: 14px; color: var(--text-soft); line-height: 1.5; margin: 0 0 12px;
@@ -93,9 +109,9 @@
     background: var(--card); border-radius: 50%; transition: transform 0.2s;
     box-shadow: var(--shadow);
   }
-  .toggle-switch input:checked + .toggle-track { background: var(--lavender-btn); }
-  .toggle-switch input:checked + .toggle-track::after { transform: translateX(20px); }
-  .language-selector, .theme-selector { display: flex; flex-direction: column; gap: 8px; }
+  .toggle-switch input:checked + .toggle-track { background: #7BCFFF; }
+  .toggle-switch input:checked + .toggle-track::after { transform: translateX(20px); background: #ffffff; }
+  .language-selector, .theme-selector { display: flex; flex-direction: column; gap: 6px; }
   .settings-app .language-option,
   .settings-app .theme-option {
     flex-direction: row !important;
@@ -103,12 +119,18 @@
     justify-content: space-between !important;
     aspect-ratio: auto !important;
     max-height: none !important;
-    min-height: 46px !important;
-    padding: 10px 16px !important;
-    font-size: clamp(18px, 4.8vw, 22px) !important;
+    min-height: 44px !important;
+    padding: 10px 14px !important;
+    font-size: clamp(16px, 4.2vw, 20px) !important;
+    background: var(--bg) !important;
+    border-color: var(--border) !important;
+    box-shadow: inset 0 2px 6px rgba(93, 100, 112, 0.12) !important;
+    text-shadow: none !important;
+    color: var(--text) !important;
   }
   .language-option.selected, .theme-option.selected {
     border-color: var(--lavender-btn); background: var(--lavender);
+    box-shadow: var(--shadow) !important;
   }
   .language-check { color: var(--heading); }
   .settings-select {
@@ -165,8 +187,8 @@
   .confirm-actions { /* app-buttons.css */ }
   .btn-warn { /* app-buttons.css */ }
 </style>
-<link rel="stylesheet" href="css/app-theme.css?v=10">
-<link rel="stylesheet" href="css/app-wordle-ui.css?v=9">
+<link rel="stylesheet" href="css/app-theme.css?v=11">
+<link rel="stylesheet" href="css/app-wordle-ui.css?v=10">
 <link rel="stylesheet" href="css/app-fonts.css?v=3">
 </head>
 <body>

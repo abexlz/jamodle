@@ -14,6 +14,16 @@
       .replace(/"/g, '&quot;');
   }
 
+  function SettingsField({ labelKey, children, id }) {
+    const labelId = id ? `${id}-label` : '';
+    return `
+      <div class="settings-field">
+        <span class="settings-field-label" ${labelId ? `id="${escapeHtml(labelId)}"` : ''} data-i18n="${labelKey}">${escapeHtml(t(labelKey))}</span>
+        ${children}
+      </div>
+    `;
+  }
+
   function SettingsSection({ icon, titleKey, children }) {
     return `
       <section class="settings-section">
@@ -44,7 +54,7 @@
     ).join('');
     return `
       <div class="settings-row settings-row-stack">
-        <label class="settings-row-label" for="${escapeHtml(id)}" data-i18n="${labelKey}">${escapeHtml(t(labelKey))}</label>
+        <label class="settings-field-label" for="${escapeHtml(id)}" data-i18n="${labelKey}">${escapeHtml(t(labelKey))}</label>
         <select class="settings-select" id="${escapeHtml(id)}">${opts}</select>
       </div>
     `;
@@ -114,6 +124,7 @@
 
   global.SettingsComponents = {
     SettingsSection,
+    SettingsField,
     ToggleSetting,
     SelectSetting,
     LanguageSelector,

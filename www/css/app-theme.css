@@ -318,6 +318,26 @@ button.ghost,
   border-color: #FFE566 !important;
 }
 
+.settings-app .language-option:not(.selected),
+.settings-app .theme-option:not(.selected) {
+  background-color: rgba(0, 45, 55, 0.65) !important;
+  background-image: none !important;
+  border-color: rgba(123, 207, 255, 0.28) !important;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.18) !important;
+  color: rgba(255, 255, 255, 0.82) !important;
+  text-shadow: none !important;
+}
+
+.settings-app .language-option.selected,
+.settings-app .theme-option.selected {
+  background-color: var(--app-btn-fill) !important;
+  background-image: var(--app-btn-gloss-overlay) !important;
+  border-color: #FFE566 !important;
+  box-shadow: var(--app-btn-gloss-inset), 0 5px 0 #C4A82D, var(--app-btn-gloss-ambient) !important;
+  color: #ffffff !important;
+  text-shadow: var(--app-btn-text-shadow) !important;
+}
+
 .app-btn-title,
 .mode-name,
 .match-mode-btn-title,

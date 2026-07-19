@@ -37,10 +37,10 @@
         icon: '🎨',
         titleKey: 'settings.appearance.title',
         children: `
-          <div class="settings-row settings-row-stack">
-            <span class="settings-row-label" data-i18n="settings.appearance.theme">${I18n().t('settings.appearance.theme')}</span>
-            ${SCmp.ThemeSelector({ current: p.theme })}
-          </div>
+          ${SCmp.SettingsField({
+            labelKey: 'settings.appearance.theme',
+            children: SCmp.ThemeSelector({ current: p.theme }),
+          })}
           ${SCmp.ToggleSetting({ id: 'pref-reduce-motion', labelKey: 'settings.appearance.reduceMotion', checked: p.reduceMotion })}
         `,
       })}
@@ -51,10 +51,11 @@
         children: `
           ${SCmp.ToggleSetting({ id: 'pref-sound-effects', labelKey: 'settings.sound.effects', checked: p.soundEffects })}
           ${SCmp.ToggleSetting({ id: 'pref-pronunciation', labelKey: 'settings.sound.pronunciation', checked: p.pronunciation })}
-          <div class="settings-row settings-row-stack">
-            <label class="settings-row-label" for="pref-volume" data-i18n="settings.sound.volume">${I18n().t('settings.sound.volume')}</label>
-            <input type="range" id="pref-volume" class="settings-range" min="0" max="100" value="${Math.round(p.volume * 100)}">
-          </div>
+          ${SCmp.SettingsField({
+            labelKey: 'settings.sound.volume',
+            id: 'pref-volume',
+            children: `<input type="range" id="pref-volume" class="settings-range" min="0" max="100" value="${Math.round(p.volume * 100)}" aria-labelledby="pref-volume-label">`,
+          })}
         `,
       })}
 
@@ -65,17 +66,6 @@
           ${SCmp.ToggleSetting({ id: 'pref-english', labelKey: 'settings.learning.englishMeanings', checked: p.showEnglishMeanings })}
           ${SCmp.ToggleSetting({ id: 'pref-korean-support', labelKey: 'settings.learning.koreanSupport', checked: p.showKoreanSupport })}
           ${SCmp.ToggleSetting({ id: 'pref-pronunciation-btn', labelKey: 'settings.learning.pronunciationBtn', checked: p.pronunciationButton })}
-          ${SCmp.ToggleSetting({ id: 'pref-beginner-hints', labelKey: 'settings.learning.beginnerHints', checked: p.beginnerHints })}
-          ${SCmp.SelectSetting({
-            id: 'pref-learning-level',
-            labelKey: 'settings.learning.level',
-            value: p.learningLevel,
-            options: [
-              { value: 'beginner', labelKey: 'settings.learning.levelBeginner' },
-              { value: 'intermediate', labelKey: 'settings.learning.levelIntermediate' },
-              { value: 'advanced', labelKey: 'settings.learning.levelAdvanced' },
-            ],
-          })}
         `,
       })}
 
@@ -196,7 +186,6 @@
     bindToggle(root, 'pref-english', 'showEnglishMeanings');
     bindToggle(root, 'pref-korean-support', 'showKoreanSupport');
     bindToggle(root, 'pref-pronunciation-btn', 'pronunciationButton');
-    bindToggle(root, 'pref-beginner-hints', 'beginnerHints');
     bindToggle(root, 'pref-high-contrast', 'highContrast');
     bindToggle(root, 'pref-large-text', 'largeText');
     bindToggle(root, 'pref-tap-to-place', 'tapToPlace');
@@ -229,11 +218,6 @@
     const volume = root.querySelector('#pref-volume');
     volume?.addEventListener('input', () => {
       UP()?.save({ volume: parseInt(volume.value, 10) / 100 });
-    });
-
-    const level = root.querySelector('#pref-learning-level');
-    level?.addEventListener('change', () => {
-      UP()?.save({ learningLevel: level.value });
     });
 
     root.querySelector('#btn-clear-dict')?.addEventListener('click', () => {
