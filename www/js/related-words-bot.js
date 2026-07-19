@@ -194,6 +194,7 @@
             <div class="rw-race-battle-cluster">
               <div class="rw-race-profile-stack">
                 <div id="race-opp-card" class="rw-race-battle-card"></div>
+                <p id="race-opp-name" class="rw-race-battle-name"></p>
               </div>
               <div id="race-opp-score-stack" class="rw-race-score-stack">
                 <div class="rw-race-score-flame" aria-hidden="true"></div>
@@ -209,16 +210,17 @@
                   <span id="race-my-word-count-num" class="rw-race-score-num">0</span>
                 </div>
               </div>
-              <div id="race-my-card" class="rw-race-battle-card"></div>
+              <div class="rw-race-profile-stack">
+                <div id="race-my-card" class="rw-race-battle-card"></div>
+                <p id="race-my-name" class="rw-race-battle-name rw-race-battle-name--you"></p>
+              </div>
             </div>
           </div>
           <div class="rw-race-battle-bottom">
-            <p id="race-opp-name" class="rw-race-battle-name"></p>
             <div class="rw-race-battle-center-meta">
               <span id="rw-race-chain-title" class="rw-race-chain-title"></span>
               <span id="rw-race-chain-progress" class="rw-race-chain-progress"></span>
             </div>
-            <p id="race-my-name" class="rw-race-battle-name rw-race-battle-name--you"></p>
           </div>
         </div>
         <div id="race-main" class="race-main"></div>

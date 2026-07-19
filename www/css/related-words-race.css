@@ -260,12 +260,10 @@
 }
 
 .rw-race-battle-bottom {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  align-items: end;
-  column-gap: 10px;
-  row-gap: 2px;
-  margin-top: 6px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 4px;
   width: 100%;
 }
 
@@ -333,10 +331,6 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  justify-self: center;
-  align-self: center;
-  grid-column: 2;
-  grid-row: 1;
   min-width: 0;
   gap: 1px;
   text-align: center;
@@ -377,33 +371,25 @@
 
 .rw-race-battle-name {
   margin: 0;
-  max-width: 100%;
+  max-width: 76px;
   font-family: 'Jua', sans-serif;
   font-size: clamp(11px, 3.1vw, 13px);
   line-height: 1.2;
-  color: #5D6470;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.65);
+  color: #000;
+  text-align: center;
+  text-shadow: none;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  justify-self: start;
-  align-self: end;
-  grid-column: 1;
-  grid-row: 1;
 }
 
 [data-theme="dark"] .rw-race-battle-name {
-  color: #D8E4F8;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+  color: #000;
+  text-shadow: none;
 }
 
 .rw-race-battle-name--you {
-  justify-self: end;
-  align-self: end;
-  grid-column: 3;
-  grid-row: 1;
-  text-align: right;
-  margin-left: 0;
+  text-align: center;
 }
 
 body.rw-race-page.rw-race-active .race-header h1 {

@@ -37,16 +37,19 @@
           <div class="rw-race-battle-cluster">
             <div class="rw-race-profile-stack">
               <div id="race-opp-card" class="rw-race-battle-card"></div>
+              <p id="race-opp-name" class="rw-race-battle-name"></p>
             </div>
             ${oppScore}
           </div>
           <div class="rw-race-battle-cluster">
             ${myScore}
-            <div id="race-my-card" class="rw-race-battle-card"></div>
+            <div class="rw-race-profile-stack">
+              <div id="race-my-card" class="rw-race-battle-card"></div>
+              <p id="race-my-name" class="rw-race-battle-name rw-race-battle-name--you"></p>
+            </div>
           </div>
         </div>
         <div class="rw-race-battle-bottom">
-          <p id="race-opp-name" class="rw-race-battle-name"></p>
           <div class="rw-race-battle-center-meta">
             <div id="race-series-score" class="race-series-score hidden" aria-hidden="true">
               <span id="race-series-opp-wins" class="race-series-wins race-series-wins--opp">0</span>
@@ -56,7 +59,6 @@
             <span id="race-hud-center-title" class="rw-race-chain-title"></span>
             <span id="race-hud-center-sub" class="rw-race-chain-progress"></span>
           </div>
-          <p id="race-my-name" class="rw-race-battle-name rw-race-battle-name--you"></p>
         </div>
       </div>
       ${emote}

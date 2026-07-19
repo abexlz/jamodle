@@ -17,8 +17,8 @@
 }
 
 :root {
-  --font-latin: 'Junegull', sans-serif;
-  --font-korean: 'Jua', sans-serif;
+  --font-latin: 'Junegull';
+  --font-korean: 'Jua';
 }
 
 html,
@@ -56,6 +56,9 @@ html *::after {
 .vowel-tile,
 .builder-tile,
 .level-tile,
-.hangul-tile {
+.hangul-tile,
+.rw-race-battle-name,
+.rw-race-chain-title,
+.rw-race-chain-progress {
   font-family: 'Jua', sans-serif !important;
 }
