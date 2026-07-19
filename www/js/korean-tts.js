@@ -13,6 +13,7 @@
   let primed = false;
   let voiceReadyPromise = null;
   let selectedVoice = null;
+  let selectedVoiceGender = null;
 
   const audioCache = new Map();
   const cacheOrder = [];
@@ -57,8 +58,8 @@
     if (isKoreanVoice(voice)) score += 40;
     if (voice?.localService) score += 8;
     if (/premium|enhanced|neural|natural|wavenet|google/.test(name)) score += 24;
-    const isMale = /injoon|jinho|donghyun|daeseong|kihyo|hyunsu|hyunwoo|male/.test(name);
-    const isFemale = /yuna|narae|heena|sora|sunhi|mijin|nara|hyeri|yumi|soonbok|female/.test(name);
+    const isMale = /injoon|jinho|donghyun|daeseong|kihyo|hyunsu|hyunwoo|\bmale\b/.test(name);
+    const isFemale = /yuna|narae|heena|sora|sunhi|mijin|hyeri|yumi|soonbok|heami|jimin|\bfemale\b/.test(name);
     if (gender === 'male') {
       if (isMale) score += 30;
       if (isFemale) score -= 25;
@@ -73,7 +74,16 @@
 
   function resetVoiceSelection() {
     selectedVoice = null;
+    selectedVoiceGender = null;
     voiceReadyPromise = null;
+  }
+
+  function clearAudioCache() {
+    for (const url of audioCache.values()) {
+      if (url) URL.revokeObjectURL(url);
+    }
+    audioCache.clear();
+    cacheOrder.length = 0;
   }
 
   function pickKoreanVoice(voices) {
@@ -85,12 +95,16 @@
 
   function waitForVoices() {
     if (!global.speechSynthesis) return Promise.resolve(null);
-    if (selectedVoice) return Promise.resolve(selectedVoice);
+    const gender = preferredVoiceGender();
+    if (selectedVoice && selectedVoiceGender === gender) {
+      return Promise.resolve(selectedVoice);
+    }
 
-    if (!voiceReadyPromise) {
+    if (!voiceReadyPromise || selectedVoiceGender !== gender) {
       voiceReadyPromise = new Promise((resolve) => {
         const finish = () => {
           selectedVoice = pickKoreanVoice(global.speechSynthesis.getVoices());
+          selectedVoiceGender = gender;
           resolve(selectedVoice);
         };
 
@@ -275,9 +289,22 @@
     return true;
   }
 
-  global.UserPreferences?.onChange?.(() => {
+  let lastVoiceGender = null;
+
+  function syncVoicePreferenceState() {
+    const gender = preferredVoiceGender();
+    if (lastVoiceGender && gender !== lastVoiceGender) {
+      clearAudioCache();
+    }
+    lastVoiceGender = gender;
     resetVoiceSelection();
+  }
+
+  global.UserPreferences?.onChange?.(() => {
+    syncVoicePreferenceState();
   });
+
+  syncVoicePreferenceState();
 
   global.KoreanTTS = {
     prime,

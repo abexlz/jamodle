@@ -57,6 +57,9 @@
         prefs.theme = legacyTheme;
       }
     }
+    if (prefs.pronunciationVoice !== 'male') {
+      prefs.pronunciationVoice = 'female';
+    }
     return { ...prefs };
   }
 
