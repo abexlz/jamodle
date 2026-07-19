@@ -89,13 +89,6 @@
     return `<img class="mode-icon app-btn-icon menu-mode-icon-img" src="${escapeHtml(src)}" alt="" width="69" height="69" decoding="async" draggable="false">`;
   }
 
-  function renderBattleModeLabel(text) {
-    const trimmed = String(text || '').trim();
-    const spaceIdx = trimmed.indexOf(' ');
-    if (spaceIdx === -1) return escapeHtml(trimmed);
-    return `${escapeHtml(trimmed.slice(0, spaceIdx))}<br>${escapeHtml(trimmed.slice(spaceIdx + 1).trim())}`;
-  }
-
   const MENU_HEADING_BLOSSOM_SVG = `<svg class="menu-mode-heading-blossom-svg" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><circle cx="12" cy="12" r="2.2" fill="currentColor"/><ellipse cx="12" cy="6.5" rx="3.2" ry="4.2" fill="currentColor"/><ellipse cx="12" cy="17.5" rx="3.2" ry="4.2" fill="currentColor"/><ellipse cx="6.5" cy="12" rx="4.2" ry="3.2" fill="currentColor"/><ellipse cx="17.5" cy="12" rx="4.2" ry="3.2" fill="currentColor"/></svg>`;
 
   const MENU_HEADING_CLOUD_SVG = `<svg class="menu-mode-heading-cloud-svg" viewBox="0 0 40 16" width="34" height="14" aria-hidden="true"><path d="M2 10c2-4 6-6 10-5 2-3 7-4 11-1 3 2 4 5 3 8H2z" fill="currentColor" opacity="0.9"/><path d="M6 12c1.5-2.5 4.5-3.5 7-2.5" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity="0.55"/></svg>`;
@@ -339,13 +332,6 @@
     `;
   }
 
-  function renderWordChainTitle(text) {
-    const trimmed = String(text || '').trim();
-    const spaceIdx = trimmed.indexOf(' ');
-    if (spaceIdx === -1) return escapeHtml(trimmed);
-    return `${escapeHtml(trimmed.slice(0, spaceIdx))}<br>${escapeHtml(trimmed.slice(spaceIdx + 1).trim())}`;
-  }
-
   function renderMenuComboBadge(bestCombo, labelKey = 'match.bestCombo') {
     const count = Math.max(0, Number(bestCombo) || 0);
     const comboLabel = escapeHtml(t('relatedWords.comboLabel') || 'combo');
@@ -376,7 +362,7 @@
         <${tag} class="daily-challenge-card daily-challenge-bar word-game-bar accent-mint menu-single-player-game-btn menu-word-chain-bar menu-game-combo-bar" id="menu-${escapeHtml(mode.id)}"${hrefAttr}${typeAttr}${actionAttr} aria-label="${label}">
           ${renderWordChainComboBadge(bestCombo)}
           <span class="daily-challenge-content menu-word-chain-main">
-            <span class="mode-name app-btn-title">${renderWordChainTitle(modeText(mode, 'title'))}</span>
+            <span class="mode-name app-btn-title">${label}</span>
           </span>
         </${tag}>
       `;
@@ -388,7 +374,7 @@
         <${tag} class="daily-challenge-card daily-challenge-bar word-game-bar accent-${mode.accent} menu-btn-primary menu-jamo-game-btn menu-jamo-game-bar menu-game-combo-bar menu-single-player-game-btn" id="menu-${escapeHtml(mode.id)}"${hrefAttr}${typeAttr}${actionAttr} aria-label="${label}">
           ${renderMenuComboBadge(bestCombo)}
           <span class="daily-challenge-content menu-jamo-game-main">
-            <span class="mode-name app-btn-title">${renderWordChainTitle(modeText(mode, 'title'))}</span>
+            <span class="mode-name app-btn-title">${label}</span>
           </span>
         </${tag}>
       `;
@@ -428,13 +414,13 @@
       <button type="button" class="daily-challenge-card daily-challenge-bar word-game-bar menu-jamo-game-btn menu-battle-game-btn" data-battle-game="jamodle" aria-label="${jamodleLabel}">
         ${renderMenuModeIcon('jamoGame')}
         <span class="daily-challenge-content">
-          <span class="mode-name app-btn-title">${renderBattleModeLabel(jamodleLabel)}</span>
+          <span class="mode-name app-btn-title">${jamodleLabel}</span>
         </span>
       </button>
       <button type="button" class="daily-challenge-card daily-challenge-bar word-game-bar accent-mint menu-battle-game-btn" data-battle-game="word-chain" aria-label="${wordChainLabel}">
         ${renderMenuModeIcon('wordChain')}
         <span class="daily-challenge-content">
-          <span class="mode-name app-btn-title">${renderBattleModeLabel(wordChainLabel)}</span>
+          <span class="mode-name app-btn-title">${wordChainLabel}</span>
         </span>
       </button>
     `;

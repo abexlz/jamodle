@@ -66,7 +66,7 @@
         "subtitleKo": "자모를 끌어 단어를 완성해요"
       },
       "classic": {
-        "title": "자모게임 놀이",
+        "title": "자모게임",
         "subtitleKo": "자모를 끌어 단어를 완성해요"
       },
       "match-multi-find": {
@@ -101,7 +101,7 @@
         "subtitleKo": "오늘의 단어"
       },
       "daily-match": {
-        "title": "데일리 퍼즐",
+        "title": "일일퍼즐",
         "subtitle": "오늘의 단어를 자모로 만들어요",
         "subtitleKo": "오늘의 자모 조합"
       }

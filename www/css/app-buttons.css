@@ -1078,11 +1078,12 @@ button.ghost:disabled,
 #menu-screen .menu-word-chain-bar.accent-mint.menu-single-player-game-btn,
 #menu-screen .menu-jamo-game-bar.menu-jamo-game-btn {
   display: grid !important;
-  grid-template-columns: auto 1fr;
-  align-items: stretch !important;
+  grid-template-columns: var(--menu-mode-rail-w, clamp(60px, 16.1vw, 69px)) minmax(0, 1fr);
+  column-gap: var(--menu-mode-rail-gap, 8px);
+  align-items: center !important;
   justify-content: stretch !important;
-  gap: 0 !important;
-  padding: 0 !important;
+  gap: 0;
+  padding: var(--menu-mode-btn-pad-y, 4px) var(--menu-mode-btn-pad-x, 10px) !important;
   overflow: hidden;
   min-height: clamp(52px, 14vw, 60px) !important;
 }
@@ -1106,7 +1107,10 @@ button.ghost:disabled,
   display: flex;
   align-items: center;
   justify-content: center;
-  width: clamp(48px, 12.5vw, 56px);
+  width: var(--menu-mode-rail-w, clamp(60px, 16.1vw, 69px));
+  min-height: 0;
+  height: auto;
+  align-self: center;
   padding: 6px 5px;
   box-sizing: border-box;
   overflow: visible;
@@ -1173,23 +1177,23 @@ button.ghost:disabled,
 #menu-screen .menu-jamo-game-bar .menu-jamo-game-main {
   display: flex !important;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   min-width: 0;
-  padding: 8px 6px;
+  padding: 0;
 }
 
 #menu-screen .menu-jamo-game-bar .mode-name,
 #menu-screen .menu-jamo-game-bar .app-btn-title {
-  width: 100%;
-  text-align: center;
+  width: auto;
+  text-align: left;
   text-transform: uppercase;
   font-size: clamp(13px, 3.4vw, 16px) !important;
   line-height: 1.05;
   color: #ffffff !important;
   text-shadow: 0 2px 0 rgba(140, 40, 55, 0.45) !important;
-  white-space: normal;
-  overflow: visible;
-  word-break: keep-all;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 #menu-screen .menu-jamo-game-bar:active,
@@ -1200,23 +1204,23 @@ button.ghost:disabled,
 #menu-screen .menu-word-chain-bar .menu-word-chain-main {
   display: flex !important;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   min-width: 0;
-  padding: 8px 6px;
+  padding: 0;
 }
 
 #menu-screen .menu-word-chain-bar .mode-name,
 #menu-screen .menu-word-chain-bar .app-btn-title {
-  width: 100%;
-  text-align: center;
+  width: auto;
+  text-align: left;
   text-transform: uppercase;
   font-size: clamp(13px, 3.4vw, 16px) !important;
   line-height: 1.05;
   color: #ffffff !important;
   text-shadow: 0 2px 0 rgba(120, 80, 0, 0.45) !important;
-  white-space: normal;
-  overflow: visible;
-  word-break: keep-all;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 #menu-screen .menu-word-chain-bar:active,

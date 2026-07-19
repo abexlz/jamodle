@@ -1,5 +1,12 @@
 /* Home mode panels — glass box, decorative heading, side-by-side game buttons */
 
+:root {
+  --menu-mode-rail-w: clamp(60px, 16.1vw, 69px);
+  --menu-mode-rail-gap: 8px;
+  --menu-mode-btn-pad-x: 10px;
+  --menu-mode-btn-pad-y: 4px;
+}
+
 .menu-mode-panel {
   position: relative;
   padding: 8px 10px 10px;
@@ -93,17 +100,17 @@
   z-index: 1;
   aspect-ratio: auto;
   min-height: clamp(55px, 15vw, 65px);
-  padding: 10px 12px;
+  padding: var(--menu-mode-btn-pad-y) var(--menu-mode-btn-pad-x);
   overflow: hidden;
-  flex-direction: row !important;
+  display: grid !important;
+  grid-template-columns: var(--menu-mode-rail-w) minmax(0, 1fr);
+  column-gap: var(--menu-mode-rail-gap);
   align-items: center !important;
-  justify-content: flex-start !important;
-  gap: 8px !important;
+  justify-content: stretch !important;
 }
 
 #menu-screen .menu-mode-panel .menu-battle-game-btn {
   min-height: clamp(64px, 17vw, 74px);
-  padding: 4px 10px;
 }
 
 #menu-screen .menu-mode-panel .menu-battle-game-btn .mode-icon,
@@ -114,13 +121,14 @@
 }
 
 #menu-screen .menu-mode-panel .menu-battle-game-btn .menu-mode-icon-img {
-  width: clamp(60px, 16.1vw, 69px);
-  height: clamp(60px, 16.1vw, 69px);
+  width: var(--menu-mode-rail-w);
+  height: var(--menu-mode-rail-w);
   aspect-ratio: 1;
   object-fit: contain;
   display: block;
   flex-shrink: 0;
-  margin: -6px;
+  margin: 0;
+  justify-self: center;
 }
 
 #menu-screen .menu-mode-panel .menu-battle-game-btn .daily-challenge-content,
@@ -131,30 +139,20 @@
   align-items: center;
   justify-content: flex-start;
   gap: 0;
-}
-
-#menu-screen .menu-mode-panel .menu-battle-game-btn .daily-challenge-content {
-  padding-left: 0;
-  margin-left: 0;
-  justify-content: flex-start !important;
+  padding: 0;
+  margin: 0;
 }
 
 #menu-screen .menu-mode-panel .menu-battle-game-btn .mode-name,
 #menu-screen .menu-mode-panel .menu-single-player-game-btn .mode-name {
   text-align: left;
-  white-space: normal;
+  white-space: nowrap;
   font-size: clamp(25px, 6.5vw, 29px) !important;
   line-height: 1.08;
   text-transform: none;
-}
-
-#menu-screen .menu-mode-panel .menu-battle-game-btn .mode-name {
-  line-height: 1.05;
-  text-align: left !important;
-  white-space: normal !important;
-  overflow: visible;
-  text-overflow: unset;
-  margin-left: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
 }
 
 #menu-screen .menu-battle-game-btn,
