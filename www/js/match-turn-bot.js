@@ -15,88 +15,91 @@
 
   const SPEED_PROFILES = {
     slow: {
-      readMin: 2800,
-      readMax: 5200,
-      sylPauseMin: 900,
-      sylPauseMax: 2000,
-      selectMin: 550,
-      selectMax: 1200,
-      placeMin: 1100,
-      placeMax: 2600,
-      rotateMin: 750,
-      rotateMax: 1500,
-      rotatePauseMin: 500,
-      rotatePauseMax: 1100,
-      mergeStepMin: 900,
-      mergeStepMax: 2000,
-      longPauseMin: 2800,
-      longPauseMax: 5000,
-      rethinkMin: 1200,
-      rethinkMax: 2800,
-      mistakeHoldMin: 1800,
-      mistakeHoldMax: 3500,
-      betweenMin: 600,
-      betweenMax: 1400,
-      preCheckMin: 2800,
-      preCheckMax: 5500,
-      postCheckMin: 3200,
-      postCheckMax: 5200,
+      stepMin: 1400,
+      readMin: 3500,
+      readMax: 6500,
+      sylPauseMin: 1200,
+      sylPauseMax: 2800,
+      selectMin: 800,
+      selectMax: 1800,
+      placeMin: 1600,
+      placeMax: 3400,
+      rotateMin: 1000,
+      rotateMax: 2000,
+      rotatePauseMin: 800,
+      rotatePauseMax: 1600,
+      mergeStepMin: 1400,
+      mergeStepMax: 2800,
+      longPauseMin: 3200,
+      longPauseMax: 6000,
+      rethinkMin: 1600,
+      rethinkMax: 3200,
+      mistakeHoldMin: 2200,
+      mistakeHoldMax: 4200,
+      betweenMin: 900,
+      betweenMax: 2000,
+      preCheckMin: 3500,
+      preCheckMax: 7000,
+      postCheckMin: 4000,
+      postCheckMax: 6500,
     },
     medium: {
-      readMin: 1600,
-      readMax: 3400,
+      stepMin: 1000,
+      readMin: 2200,
+      readMax: 4500,
+      sylPauseMin: 800,
+      sylPauseMax: 1800,
+      selectMin: 550,
+      selectMax: 1300,
+      placeMin: 1100,
+      placeMax: 2400,
+      rotateMin: 700,
+      rotateMax: 1400,
+      rotatePauseMin: 550,
+      rotatePauseMax: 1100,
+      mergeStepMin: 900,
+      mergeStepMax: 1900,
+      longPauseMin: 2000,
+      longPauseMax: 3800,
+      rethinkMin: 1000,
+      rethinkMax: 2200,
+      mistakeHoldMin: 1500,
+      mistakeHoldMax: 3000,
+      betweenMin: 600,
+      betweenMax: 1400,
+      preCheckMin: 2500,
+      preCheckMax: 5000,
+      postCheckMin: 3000,
+      postCheckMax: 5000,
+    },
+    fast: {
+      stepMin: 650,
+      readMin: 1400,
+      readMax: 2800,
       sylPauseMin: 500,
-      sylPauseMax: 1200,
-      selectMin: 350,
-      selectMax: 800,
-      placeMin: 700,
+      sylPauseMax: 1100,
+      selectMin: 380,
+      selectMax: 850,
+      placeMin: 750,
       placeMax: 1600,
       rotateMin: 500,
       rotateMax: 1000,
-      rotatePauseMin: 350,
+      rotatePauseMin: 380,
       rotatePauseMax: 750,
       mergeStepMin: 600,
-      mergeStepMax: 1300,
-      longPauseMin: 1600,
-      longPauseMax: 3000,
-      rethinkMin: 700,
-      rethinkMax: 1600,
-      mistakeHoldMin: 1100,
-      mistakeHoldMax: 2200,
-      betweenMin: 350,
-      betweenMax: 850,
-      preCheckMin: 1800,
-      preCheckMax: 3800,
-      postCheckMin: 2400,
-      postCheckMax: 4000,
-    },
-    fast: {
-      readMin: 900,
-      readMax: 2000,
-      sylPauseMin: 300,
-      sylPauseMax: 700,
-      selectMin: 220,
-      selectMax: 500,
-      placeMin: 450,
-      placeMax: 950,
-      rotateMin: 320,
-      rotateMax: 650,
-      rotatePauseMin: 200,
-      rotatePauseMax: 450,
-      mergeStepMin: 380,
-      mergeStepMax: 800,
-      longPauseMin: 900,
-      longPauseMax: 1700,
-      rethinkMin: 400,
-      rethinkMax: 900,
-      mistakeHoldMin: 650,
-      mistakeHoldMax: 1200,
-      betweenMin: 200,
-      betweenMax: 500,
-      preCheckMin: 1100,
-      preCheckMax: 2200,
-      postCheckMin: 1600,
-      postCheckMax: 2800,
+      mergeStepMax: 1200,
+      longPauseMin: 1200,
+      longPauseMax: 2400,
+      rethinkMin: 650,
+      rethinkMax: 1400,
+      mistakeHoldMin: 900,
+      mistakeHoldMax: 1700,
+      betweenMin: 400,
+      betweenMax: 900,
+      preCheckMin: 1600,
+      preCheckMax: 3200,
+      postCheckMin: 2200,
+      postCheckMax: 3800,
     },
   };
 
@@ -285,12 +288,29 @@
     return iterTargetZones(target).every((z) => map.get(placementKey(z)) === z.expected);
   }
 
+  /** Full opponent dock at turn start — not serializeBankLiveState (empty in watch mode). */
+  function snapshotOpponentBank(game) {
+    const inUse = new Set();
+    game?.blocks?.forEach((block) => {
+      block.getAllZones().forEach((zone) => {
+        if (zone.placedTileId) inUse.add(zone.placedTileId);
+      });
+    });
+    const merge = game?.mergeDock?.serializeLiveChars?.();
+    (merge?.slotIds || []).forEach((id) => { if (id) inUse.add(id); });
+    if (merge?.resultId) inUse.add(merge.resultId);
+
+    return Object.values(game?.tileMap || {})
+      .filter((t) => t && !t.locked && !inUse.has(t.id))
+      .map((t) => ({ id: t.id, char: t.char }));
+  }
+
   /** Tracks bot dock/board state for realistic live-turn broadcasts. */
   class BotTurnSimulator {
     constructor(game) {
       this.placements = [];
       this.merge = { slots: [null, null], slotIds: [null, null], result: null, resultId: null };
-      this.bank = (game?.serializeBankLiveState?.() || []).map((b) => ({ ...b }));
+      this.bank = snapshotOpponentBank(game);
       this.onBoard = new Set();
       this.removed = [];
       this.selected = null;
@@ -411,13 +431,16 @@
     let actionSeq = 0;
 
     const push = (delay, mutate, actionKind, actionDetail = {}) => {
-      t += delay;
+      t += Math.max(delay, profile.stepMin || 800);
       if (mutate) mutate();
       const action = actionKind
         ? { seq: ++actionSeq, kind: actionKind, ...actionDetail }
         : null;
       script.push({ at: t, live: sim.liveState(action) });
     };
+
+    // Show the opponent's full dock before they start moving.
+    script.push({ at: 0, live: sim.liveState() });
 
     t += randRange(profile.readMin, profile.readMax);
 
@@ -456,7 +479,13 @@
     const syllables = HC().decomposeWordForMatch(target);
 
     const scheduleRotateToChar = (tile, goalChar) => {
-      if (!tile || !HC().canRotateJamo?.(tile.char)) return;
+      if (!tile) return;
+      if (!HC().canRotateJamo?.(tile.char)) {
+        push(randRange(profile.selectMin, profile.selectMax), () => {
+          sim.selectBank(tile.id);
+        }, 'select', { selected: { type: 'bank', tileId: tile.id } });
+        return;
+      }
       const wrongRot = tile.char !== goalChar && Math.random() < lerp(0.4, 0.1, winRate);
       if (!wrongRot) {
         push(randRange(profile.selectMin, profile.selectMax), () => {
@@ -635,6 +664,7 @@
       this.countdownTimer = null;
       this._botTimers = [];
       this._botTurnRunning = false;
+      this._botScheduledTurnKey = null;
       this._localeOff = null;
     }
 
@@ -700,6 +730,8 @@
 
     destroy() {
       this.clearBotTimers();
+      this._botTurnRunning = false;
+      this._botScheduledTurnKey = null;
       this._localeOff?.();
       if (this.turnTimer) clearInterval(this.turnTimer);
       if (this._turnSwapTimer) clearTimeout(this._turnSwapTimer);
@@ -1074,6 +1106,7 @@
       if (this.preparedTurnNumber !== watchKey) {
         this.game.prepareForNewTurn?.(data.sharedState?.locked || []);
         this.preparedTurnNumber = watchKey;
+        this._botScheduledTurnKey = null;
       }
       this.game.syncSharedState(data.sharedState || RS().defaultSharedState());
       this.game.setWatchMode(true);
@@ -1082,7 +1115,12 @@
       if (live?.byUid === BOT_UID && live?.turnNumber === data.turnNumber) {
         this.game.applyTurnLiveState(live);
       }
-      this.scheduleBotTurn(data);
+
+      const scheduleKey = `bot-${data.turnNumber || 1}`;
+      if (this._botScheduledTurnKey !== scheduleKey) {
+        this._botScheduledTurnKey = scheduleKey;
+        this.scheduleBotTurn(data);
+      }
     }
 
     async syncTurnState(data) {
@@ -1161,13 +1199,11 @@
     clearBotTimers() {
       this._botTimers.forEach((id) => clearTimeout(id));
       this._botTimers = [];
-      this._botTurnRunning = false;
     }
 
     scheduleBotTurn(data) {
       if (this._botTurnRunning || data.currentTurnUid !== BOT_UID || data.status !== 'active') return;
       if (!this.game) return;
-      this._botTurnRunning = true;
       this.clearBotTimers();
       this._botTurnRunning = true;
 
