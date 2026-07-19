@@ -200,14 +200,15 @@
     }
   }
 
-  function setupResultsAnswer(root, word) {
+  function setupResultsAnswer(root, word, options = {}) {
     const answerBlock = root?.querySelector?.('.race-results-answer');
     if (!answerBlock || !word) return;
     attachPopup({
       word,
       tilesEl: answerBlock.querySelector('.race-results-answer-tiles'),
       meaningEl: answerBlock.querySelector('.race-results-answer-meaning'),
-      autoplayRepeats: 2,
+      autoplay: options.autoplay !== false,
+      autoplayRepeats: options.autoplayRepeats ?? 2,
     });
   }
 

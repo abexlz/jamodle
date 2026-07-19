@@ -1109,7 +1109,7 @@
       }));
 
       RUI.afterResultsMount(this.els.main);
-      void RUI.fillAnswerMeaning(this.els.main, displayWord);
+      void RUI.fillAnswerMeaning(this.els.main, displayWord, { autoplay: false });
       this.mountRematchUi();
     }
   }

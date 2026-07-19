@@ -3483,6 +3483,7 @@
       global.AnswerTTS?.attachPopup?.({
         word,
         wordEl,
+        autoplay: !this.versus,
         autoplayRepeats: 2,
       });
       const meaning = await this.getMeaningForWord(word);
@@ -4544,7 +4545,7 @@
     }
 
     async checkAnswer() {
-      global.AnswerTTS?.armSolveAutoplay?.();
+      if (!this.versus) global.AnswerTTS?.armSolveAutoplay?.();
       if (this.multiFindMode) {
         await this.checkMultiWordAnswer();
         return;
@@ -4932,6 +4933,7 @@
         word,
         wordEl: this.els.resultsWord,
         meaningEl: this.els.resultsWordMeaning,
+        autoplay: !this.versus,
         autoplayRepeats: 2,
       });
     }

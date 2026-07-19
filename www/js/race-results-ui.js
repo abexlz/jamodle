@@ -566,20 +566,21 @@
     `;
   }
 
-  async function fillAnswerMeaning(root, word) {
+  async function fillAnswerMeaning(root, word, options = {}) {
     const el = root?.querySelector?.('.race-results-answer-meaning');
     if (!el || !word) return;
+    const ttsOptions = { autoplay: options.autoplay !== false, autoplayRepeats: options.autoplayRepeats };
     const dictText = await global.DictionaryService?.resolveEnglishMeaning?.(word);
     if (dictText) {
       el.textContent = dictText;
-      global.AnswerTTS?.setupResultsAnswer?.(root, word);
+      global.AnswerTTS?.setupResultsAnswer?.(root, word, ttsOptions);
       return;
     }
     const gloss = global.MatchWordMeanings?.[word]
       || global.LearningWords?.getWordMeaning?.(word);
     if (gloss) {
       el.textContent = gloss;
-      global.AnswerTTS?.setupResultsAnswer?.(root, word);
+      global.AnswerTTS?.setupResultsAnswer?.(root, word, ttsOptions);
       return;
     }
     const entry = global.LearningWords?.findWordEntry?.(word);
@@ -589,7 +590,7 @@
       const curated = global.LearningWordModel?.getDisplayMeaning?.(normalized);
       if (curated) el.textContent = curated;
     }
-    global.AnswerTTS?.setupResultsAnswer?.(root, word);
+    global.AnswerTTS?.setupResultsAnswer?.(root, word, ttsOptions);
   }
 
   global.RaceResultsUI = {
