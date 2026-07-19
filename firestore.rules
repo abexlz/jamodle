@@ -191,25 +191,41 @@ service cloud.firestore {
     }
 
     match /matchQueue/{uid} {
-      allow get: if request.auth != null
-        && (request.auth.uid == uid || resource.data.status == 'searching');
-      allow list: if request.auth != null && resource.data.status == 'searching';
-      allow create: if request.auth != null
-        && request.auth.uid == uid
-        && request.resource.data.uid == uid
-        && request.resource.data.status == 'searching'
-        && request.resource.data.game is string
-        && request.resource.data.playMode is string
-        && request.resource.data.wordLength is int
-        && request.resource.data.displayName is string;
-      allow update: if request.auth != null && (
-        (request.auth.uid == uid && resource.data.status == 'searching')
-        || (resource.data.status == 'searching'
+      function isQueueOwner() {
+        return request.auth != null && request.auth.uid == uid;
+      }
+
+      function validSearchingEntry(data) {
+        return data.uid == uid
+          && data.status == 'searching'
+          && data.game is string
+          && data.playMode is string
+          && data.wordLength is number
+          && data.wordLength >= 1
+          && data.wordLength <= 6
+          && data.displayName is string
+          && data.displayName.size() > 0;
+      }
+
+      function isMatcherQueueUpdate() {
+        return request.auth != null
+          && resource.data.status == 'searching'
           && request.resource.data.status == 'matched'
           && request.resource.data.matchedByUid == request.auth.uid
-          && request.resource.data.matchId is string)
-      );
-      allow delete: if request.auth != null && request.auth.uid == uid;
+          && request.resource.data.matchId is string
+          && request.resource.data.uid == resource.data.uid;
+      }
+
+      allow get: if isQueueOwner()
+        || (request.auth != null && resource.data.status == 'searching');
+      allow list: if request.auth != null && resource.data.status == 'searching';
+
+      allow create: if isQueueOwner() && validSearchingEntry(request.resource.data);
+
+      allow update: if (isQueueOwner() && validSearchingEntry(request.resource.data))
+        || isMatcherQueueUpdate();
+
+      allow delete: if isQueueOwner();
     }
 
     match /wordChainMatches/{matchId} {

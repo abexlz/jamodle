@@ -275,6 +275,13 @@
     }
 
     try {
+      await global.FirebaseSocial?.whenAuthReady?.();
+      if (!global.FirebaseSocial?.getCurrentUid?.()) {
+        alert(t('menu.battle.matchmakingLogin'));
+        showMatchmakingStep(overlay, 'pick');
+        return;
+      }
+
       await global.MatchQueueService.joinQueue({
         game,
         wordLength,

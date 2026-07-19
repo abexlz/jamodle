@@ -208,15 +208,19 @@
 
     const entry = {
       uid,
-      displayName,
+      displayName: String(displayName || '플레이어'),
       game,
       playMode,
-      wordLength,
+      wordLength: Number(wordLength),
       status: QUEUE_STATUS.searching,
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
     };
 
-    await ref.doc(uid).set(entry);
+    const docRef = ref.doc(uid);
+    try {
+      await docRef.delete();
+    } catch (_) { /* ok if missing */ }
+    await docRef.set(entry);
 
     const session = {
       uid,
