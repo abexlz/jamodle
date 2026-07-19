@@ -32,18 +32,9 @@
     return global.UserPreferences?.shouldShowPronunciationButton?.() !== false;
   }
 
-  function speakVolume() {
-    const vol = Number(global.UserPreferences?.get?.().volume);
-    if (!Number.isFinite(vol)) return 0.85;
-    return Math.max(0, Math.min(1, vol));
-  }
-
   function normalizeWord(text) {
-    if (!text) return '';
-    const raw = String(text).trim();
-    if (!raw) return '';
-    const parts = raw.split('·').map((w) => w.trim()).filter(Boolean);
-    return parts[0] || raw;
+    return global.KoreanTTS?.normalizeWord?.(text)
+      || (text ? String(text).trim().split('·')[0].trim() : '');
   }
 
   function isMeaningAnchor(el) {
@@ -60,12 +51,9 @@
   }
 
   function primeSpeech() {
-    if (!global.speechSynthesis || primed) return;
+    if (primed) return;
     primed = true;
-    try {
-      global.speechSynthesis.resume?.();
-      global.speechSynthesis.getVoices();
-    } catch (_) { /* ignore */ }
+    global.KoreanTTS?.prime?.();
   }
 
   function noteUserGesture() {
@@ -97,15 +85,13 @@
   function cancelPlayback() {
     activeSession += 1;
     isPlaying = false;
-    try {
-      global.speechSynthesis?.cancel?.();
-    } catch (_) { /* ignore */ }
+    global.KoreanTTS?.cancel?.();
   }
 
   function playWord(text, options = {}) {
     const word = normalizeWord(text);
     const repeats = Math.max(1, Number(options.repeats) || 1);
-    if (!word || !global.speechSynthesis || !pronunciationEnabled()) {
+    if (!word || !pronunciationEnabled() || !global.KoreanTTS?.speak) {
       return Promise.resolve(false);
     }
 
@@ -113,48 +99,12 @@
     const session = activeSession;
     isPlaying = true;
 
-    return new Promise((resolve) => {
-      let remaining = repeats;
-
-      const speakNext = () => {
-        if (session !== activeSession) {
-          isPlaying = false;
-          resolve(false);
-          return;
-        }
-        if (remaining <= 0) {
-          isPlaying = false;
-          resolve(true);
-          return;
-        }
-        remaining -= 1;
-
-        const utterance = new SpeechSynthesisUtterance(word);
-        utterance.lang = 'ko-KR';
-        utterance.rate = 0.85;
-        utterance.volume = speakVolume();
-
-        const finish = (ok) => {
-          if (session !== activeSession) return;
-          if (remaining > 0) {
-            setTimeout(speakNext, REPEAT_GAP_MS);
-            return;
-          }
-          isPlaying = false;
-          resolve(ok);
-        };
-
-        utterance.onend = () => finish(true);
-        utterance.onerror = () => finish(false);
-
-        try {
-          global.speechSynthesis.speak(utterance);
-        } catch (_) {
-          finish(false);
-        }
-      };
-
-      speakNext();
+    return global.KoreanTTS.speak(word, {
+      repeats,
+      gapMs: REPEAT_GAP_MS,
+    }).then((ok) => {
+      if (session === activeSession) isPlaying = false;
+      return session === activeSession ? ok : false;
     });
   }
 

@@ -201,11 +201,16 @@
   function bindActions(card, word) {
     card.querySelector('[data-action="close"]')?.addEventListener('click', close);
     card.querySelector('[data-action="speak"]')?.addEventListener('click', () => {
-      if (!word || !global.speechSynthesis) return;
+      if (!word) return;
+      if (global.KoreanTTS?.speak) {
+        global.KoreanTTS.speak(word, { repeats: 1 });
+        return;
+      }
+      if (!global.speechSynthesis) return;
       global.speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(word);
       u.lang = 'ko-KR';
-      u.rate = 0.85;
+      u.rate = 0.78;
       global.speechSynthesis.speak(u);
     });
   }

@@ -136,11 +136,16 @@
 
   /** Play pronunciation if enabled — never autoplay without user action */
   function speakKorean(text) {
-    if (!prefs.pronunciation || !text || !global.speechSynthesis) return;
+    if (!prefs.pronunciation || !text) return;
+    if (global.KoreanTTS?.speak) {
+      global.KoreanTTS.speak(text, { repeats: 1 });
+      return;
+    }
+    if (!global.speechSynthesis) return;
     global.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'ko-KR';
-    u.rate = 0.85;
+    u.rate = 0.78;
     u.volume = Math.max(0, Math.min(1, prefs.volume));
     global.speechSynthesis.speak(u);
   }

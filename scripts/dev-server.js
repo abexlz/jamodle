@@ -32,6 +32,7 @@ const MIME = {
 
 const searchHandler = require('../api/dictionary/search');
 const validateHandler = require('../api/dictionary/validate');
+const ttsHandler = require('../api/tts/speak');
 
 function withQuery(req, res, handler) {
   const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
@@ -78,6 +79,11 @@ const server = http.createServer((req, res) => {
     const word = url.searchParams.get('word') || '';
     console.log(`[dictionary] validate → ${word}`);
     return withQuery(req, res, validateHandler);
+  }
+  if (url.pathname === '/api/tts/speak') {
+    const text = url.searchParams.get('text') || url.searchParams.get('q') || '';
+    console.log(`[tts] speak → ${text}`);
+    return withQuery(req, res, ttsHandler);
   }
 
   // Common mistake: ngrok/open-from-disk URLs include /www/ but dev-server root is already www/
