@@ -935,6 +935,40 @@
     }
   }
 
+  function isCustomBattleDevBotFlow() {
+    return pendingChallengeFlow === 'menu-battle-custom'
+      && global.DevBuild?.isDevModeActive?.() === true;
+  }
+
+  function botCustomListItemHtml() {
+    const isJamo = pendingMenuBattleGame === 'jamodle';
+    const action = isJamo ? 'bot-fight-jamo' : 'bot-fight-related-words';
+    const label = isJamo
+      ? (global.I18n?.t('menu.battle.jamodle') || 'Jamo Game')
+      : (global.I18n?.t('menu.battle.wordChain') || 'Word Chain');
+    return `
+      <li class="profile-friend-row profile-friend-row--bot">
+        <span class="friend-name">🤖 Bot · ${escapeHtml(label)}</span>
+        <button type="button" class="profile-challenge-btn profile-challenge-btn--bot" data-social-action="${action}">Play</button>
+      </li>`;
+  }
+
+  function updateBotSectionForFlow(botSection) {
+    if (!botSection) return;
+    const isDev = global.DevBuild?.isDevModeActive?.() === true;
+    const isCustom = pendingChallengeFlow === 'menu-battle-custom';
+    botSection.classList.toggle('hidden', !isDev);
+
+    const showJamo = !isCustom || pendingMenuBattleGame === 'jamodle';
+    const showWordChain = !isCustom || pendingMenuBattleGame === 'word-chain';
+    botSection.querySelectorAll('[data-bot-game-block="jamodle"]').forEach((el) => {
+      el.classList.toggle('hidden', !showJamo);
+    });
+    botSection.querySelectorAll('[data-bot-game-block="word-chain"]').forEach((el) => {
+      el.classList.toggle('hidden', !showWordChain);
+    });
+  }
+
   async function populateFriendsList(listEl, mode) {
     if (!listEl) return;
     const listMode = mode === 'turn' ? 'turn' : mode === 'wordchain' ? 'wordchain' : mode === 'menu-user' ? 'menu-user' : 'race';
@@ -959,6 +993,10 @@
         : 'profile-challenge-btn';
 
     if (!currentUser) {
+      if (isCustomBattleDevBotFlow()) {
+        listEl.innerHTML = botCustomListItemHtml();
+        return;
+      }
       listEl.innerHTML = `<li class="profile-friends-empty">${escapeHtml(socialT('social.loginRequiredList'))}</li>`;
       return;
     }
@@ -975,13 +1013,19 @@
 
     const friendUids = userProfile?.friends || [];
     if (!friendUids.length) {
-      listEl.innerHTML = `<li class="profile-friends-empty">${escapeHtml(socialT('social.noFriendsYet'))}</li>`;
+      listEl.innerHTML = isCustomBattleDevBotFlow() ? botCustomListItemHtml() : '';
+      if (!listEl.innerHTML) {
+        listEl.innerHTML = `<li class="profile-friends-empty">${escapeHtml(socialT('social.noFriendsYet'))}</li>`;
+      }
       return;
     }
 
     try {
       const snaps = await Promise.all(friendUids.map((uid) => db.collection('users').doc(uid).get()));
       listEl.innerHTML = '';
+      if (isCustomBattleDevBotFlow()) {
+        listEl.insertAdjacentHTML('afterbegin', botCustomListItemHtml());
+      }
       snaps.forEach((snap, i) => {
         const uid = friendUids[i];
         const name = snap.exists ? getPublicName(snap.data()) : (socialT('social.unknown') || '알 수 없음');
@@ -1715,6 +1759,10 @@
 
   function ensureMultiplayerOverlay() {
     let overlay = document.getElementById('multiplayer-overlay');
+    if (overlay && !overlay.querySelector('[data-bot-game-block="jamodle"]')) {
+      overlay.remove();
+      overlay = null;
+    }
     if (overlay) return overlay;
 
     overlay = document.createElement('div');
@@ -1750,7 +1798,7 @@
             </label>
             <input type="range" id="bot-winrate-slider" min="0" max="100" step="5" value="50" data-bot-winrate>
           </div>
-          <div class="multiplayer-bot-row">
+          <div class="multiplayer-bot-row" data-bot-game-block="shared">
             <span class="multiplayer-bot-label">Bot speed</span>
             <div class="multiplayer-bot-speed" data-bot-speed-group role="group" aria-label="Bot speed">
               <button type="button" class="multiplayer-bot-speed-btn" data-bot-speed="slow">Slow</button>
@@ -1758,10 +1806,14 @@
               <button type="button" class="multiplayer-bot-speed-btn" data-bot-speed="fast">Fast</button>
             </div>
           </div>
-          ${botChainSelectHtml()}
-          <button type="button" class="race-opt race-opt--purple" data-social-action="bot-fight-related-words">Word Chain vs Bot</button>
-          ${botJamoLengthSelectHtml()}
-          <button type="button" class="race-opt race-opt--mint" data-social-action="bot-fight-jamo">Jamo Game vs Bot</button>
+          <div data-bot-game-block="word-chain">
+            ${botChainSelectHtml()}
+            <button type="button" class="race-opt race-opt--purple" data-social-action="bot-fight-related-words">Word Chain vs Bot</button>
+          </div>
+          <div data-bot-game-block="jamodle">
+            ${botJamoLengthSelectHtml()}
+            <button type="button" class="race-opt race-opt--mint" data-social-action="bot-fight-jamo">Jamo Game vs Bot</button>
+          </div>
         </section>
       </div>
     `;
@@ -1795,18 +1847,17 @@
     const addHint = overlay.querySelector('[data-multiplayer-add-hint]');
     const botSection = overlay.querySelector('[data-multiplayer-bot-section]');
     const loggedIn = !!currentUser;
+    const customDevBot = isCustomBattleDevBotFlow();
 
-    loginPanel?.classList.toggle('hidden', loggedIn);
-    sections?.classList.toggle('hidden', !loggedIn);
-    addHint?.classList.toggle('hidden', !loggedIn);
-    const hideBotForJamoCustom = pendingChallengeFlow === 'menu-battle-custom'
-      && pendingMenuBattleGame === 'jamodle';
-    // Temporary dev-only bot matchmaking entry (works even when logged out).
-    botSection?.classList.toggle('hidden',
-      global.DevBuild?.isDevModeActive?.() !== true || hideBotForJamoCustom);
+    loginPanel?.classList.toggle('hidden', loggedIn || customDevBot);
+    sections?.classList.toggle('hidden', !loggedIn && !customDevBot);
+    addHint?.classList.toggle('hidden', !loggedIn || customDevBot);
+    updateBotSectionForFlow(botSection);
 
-    if (!loggedIn) return;
-    await populateFriendsList(friendsList, 'menu-user');
+    if (!loggedIn && !customDevBot) return;
+    if (customDevBot || loggedIn) {
+      await populateFriendsList(friendsList, 'menu-user');
+    }
   }
 
   async function openMultiplayerPicker() {
