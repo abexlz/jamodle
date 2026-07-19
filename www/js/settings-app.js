@@ -34,18 +34,6 @@
       })}
 
       ${SCmp.SettingsSection({
-        icon: '🎨',
-        titleKey: 'settings.appearance.title',
-        children: `
-          ${SCmp.SettingsField({
-            labelKey: 'settings.appearance.theme',
-            children: SCmp.ThemeSelector({ current: p.theme }),
-          })}
-          ${SCmp.ToggleSetting({ id: 'pref-reduce-motion', labelKey: 'settings.appearance.reduceMotion', checked: p.reduceMotion })}
-        `,
-      })}
-
-      ${SCmp.SettingsSection({
         icon: '🔊',
         titleKey: 'settings.sound.title',
         children: `
@@ -172,17 +160,13 @@
       });
     });
 
-    root.querySelectorAll('.theme-option').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        UP()?.save({ theme: btn.dataset.theme });
-        renderPage(root);
-      });
+    bindToggle(root, 'pref-reduce-motion-a11y', 'reduceMotion');
+    bindToggle(root, 'pref-sound-effects', 'soundEffects', (_, checked) => {
+      if (checked) global.SoundEffects?.tap?.();
     });
-
-    bindToggle(root, 'pref-reduce-motion', 'reduceMotion', syncReduceMotion);
-    bindToggle(root, 'pref-reduce-motion-a11y', 'reduceMotion', syncReduceMotion);
-    bindToggle(root, 'pref-sound-effects', 'soundEffects');
-    bindToggle(root, 'pref-pronunciation', 'pronunciation');
+    bindToggle(root, 'pref-pronunciation', 'pronunciation', (_, checked) => {
+      if (checked) previewPronunciation();
+    });
     bindToggle(root, 'pref-english', 'showEnglishMeanings');
     bindToggle(root, 'pref-korean-support', 'showKoreanSupport');
     bindToggle(root, 'pref-pronunciation-btn', 'pronunciationButton');
@@ -219,6 +203,11 @@
     volume?.addEventListener('input', () => {
       UP()?.save({ volume: parseInt(volume.value, 10) / 100 });
     });
+    volume?.addEventListener('change', () => {
+      if (UP()?.get?.()?.soundEffects !== false) {
+        global.SoundEffects?.select?.();
+      }
+    });
 
     root.querySelector('#btn-clear-dict')?.addEventListener('click', () => {
       clearDictionaryCache();
@@ -231,11 +220,13 @@
     });
   }
 
-  function syncReduceMotion(root, checked) {
-    const a = root.querySelector('#pref-reduce-motion-a11y');
-    const b = root.querySelector('#pref-reduce-motion');
-    if (a) a.checked = checked;
-    if (b) b.checked = checked;
+  function previewPronunciation() {
+    const sample = I18n()?.getLocale?.() === 'ko' ? '안녕하세요' : '안녕';
+    if (global.KoreanTTS?.speak) {
+      global.KoreanTTS.speak(sample, { repeats: 1 });
+      return;
+    }
+    UP()?.speakKorean?.(sample);
   }
 
   function bindToggle(root, id, prefKey, onSync) {
