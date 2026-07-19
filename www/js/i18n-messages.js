@@ -523,6 +523,9 @@
         "title": "Sound",
         "effects": "Sound effects",
         "pronunciation": "Pronunciation audio",
+        "pronunciationVoice": "Pronunciation voice",
+        "pronunciationVoiceFemale": "Female voice",
+        "pronunciationVoiceMale": "Male voice",
         "volume": "Volume"
       },
       "learning": {
@@ -1948,6 +1951,9 @@
         "title": "소리",
         "effects": "효과음",
         "pronunciation": "발음 듣기",
+        "pronunciationVoice": "발음 목소리",
+        "pronunciationVoiceFemale": "여성 목소리",
+        "pronunciationVoiceMale": "남성 목소리",
         "volume": "음량"
       },
       "learning": {

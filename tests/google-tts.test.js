@@ -9,4 +9,9 @@ assert.strictEqual(tts.isSpeakableKorean('hello'), false);
 assert.strictEqual(tts.isSpeakableKorean(''), false);
 assert.strictEqual(tts.isSpeakableKorean('a'.repeat(61)), false);
 
+assert.strictEqual(tts.normalizeGender('female'), 'female');
+assert.strictEqual(tts.normalizeGender('male'), 'male');
+assert.strictEqual(tts.normalizeGender('other'), 'female');
+assert.strictEqual(tts.normalizeGender(), 'female');
+
 console.log('google-tts tests passed');

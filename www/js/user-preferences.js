@@ -15,6 +15,7 @@
     reduceMotion: false,
     soundEffects: true,
     pronunciation: true,
+    pronunciationVoice: 'female',
     volume: 0.85,
     showEnglishMeanings: true,
     showKoreanSupport: true,

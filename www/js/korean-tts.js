@@ -32,6 +32,11 @@
     return Math.max(0, Math.min(1, vol));
   }
 
+  function preferredVoiceGender() {
+    const gender = global.UserPreferences?.get?.().pronunciationVoice;
+    return gender === 'male' ? 'male' : 'female';
+  }
+
   function normalizeWord(text) {
     if (!text) return '';
     const raw = String(text).trim();
@@ -47,14 +52,28 @@
 
   function scoreKoreanVoice(voice) {
     const name = String(voice?.name || '').toLowerCase();
+    const gender = preferredVoiceGender();
     let score = 0;
     if (isKoreanVoice(voice)) score += 40;
     if (voice?.localService) score += 8;
     if (/premium|enhanced|neural|natural|wavenet|google/.test(name)) score += 24;
-    if (/yuna|narae|heena|sora|heami|sunhi|injoon|hyeri|mijin|nara|yumi/.test(name)) score += 20;
+    const isMale = /injoon|jinho|donghyun|daeseong|kihyo|hyunsu|hyunwoo|male/.test(name);
+    const isFemale = /yuna|narae|heena|sora|sunhi|mijin|nara|hyeri|yumi|soonbok|female/.test(name);
+    if (gender === 'male') {
+      if (isMale) score += 30;
+      if (isFemale) score -= 25;
+    } else {
+      if (isFemale) score += 30;
+      if (isMale) score -= 25;
+    }
     if (/compact|low|basic/.test(name)) score -= 12;
     if (/english|en-us|en_gb|uk english/.test(name)) score -= 50;
     return score;
+  }
+
+  function resetVoiceSelection() {
+    selectedVoice = null;
+    voiceReadyPromise = null;
   }
 
   function pickKoreanVoice(voices) {
@@ -123,10 +142,12 @@
   }
 
   async function fetchServerAudio(text) {
-    const key = text.trim();
+    const gender = preferredVoiceGender();
+    const key = `${gender}:${text.trim()}`;
     if (audioCache.has(key)) return audioCache.get(key);
 
-    const url = `${getApiBase()}/api/tts/speak?text=${encodeURIComponent(key)}`;
+    const url = `${getApiBase()}/api/tts/speak?text=${encodeURIComponent(text.trim())}`
+      + `&voice=${encodeURIComponent(gender)}`;
     const res = await fetch(url, {
       headers: {
         Accept: 'audio/mpeg',
@@ -253,6 +274,10 @@
 
     return true;
   }
+
+  global.UserPreferences?.onChange?.(() => {
+    resetVoiceSelection();
+  });
 
   global.KoreanTTS = {
     prime,

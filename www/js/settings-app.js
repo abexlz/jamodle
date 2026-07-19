@@ -39,6 +39,15 @@
         children: `
           ${SCmp.ToggleSetting({ id: 'pref-sound-effects', labelKey: 'settings.sound.effects', checked: p.soundEffects })}
           ${SCmp.ToggleSetting({ id: 'pref-pronunciation', labelKey: 'settings.sound.pronunciation', checked: p.pronunciation })}
+          ${SCmp.SelectSetting({
+            id: 'pref-pronunciation-voice',
+            labelKey: 'settings.sound.pronunciationVoice',
+            value: p.pronunciationVoice === 'male' ? 'male' : 'female',
+            options: [
+              { value: 'female', labelKey: 'settings.sound.pronunciationVoiceFemale' },
+              { value: 'male', labelKey: 'settings.sound.pronunciationVoiceMale' },
+            ],
+          })}
           ${SCmp.SettingsField({
             labelKey: 'settings.sound.volume',
             id: 'pref-volume',
@@ -167,6 +176,13 @@
     bindToggle(root, 'pref-pronunciation', 'pronunciation', (_, checked) => {
       if (checked) previewPronunciation();
     });
+
+    root.querySelector('#pref-pronunciation-voice')?.addEventListener('change', (e) => {
+      const value = e.target.value === 'male' ? 'male' : 'female';
+      UP()?.save({ pronunciationVoice: value });
+      if (UP()?.get?.()?.pronunciation !== false) previewPronunciation();
+    });
+
     bindToggle(root, 'pref-english', 'showEnglishMeanings');
     bindToggle(root, 'pref-korean-support', 'showKoreanSupport');
     bindToggle(root, 'pref-pronunciation-btn', 'pronunciationButton');
