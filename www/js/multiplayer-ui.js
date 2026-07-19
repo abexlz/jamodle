@@ -159,7 +159,7 @@
 
     overlay = document.createElement('div');
     overlay.id = 'battle-matchmaking-overlay';
-    overlay.className = 'multiplayer-overlay hidden';
+    overlay.className = 'multiplayer-overlay battle-matchmaking-overlay hidden';
     overlay.setAttribute('role', 'dialog');
     overlay.setAttribute('aria-modal', 'true');
     overlay.innerHTML = `
