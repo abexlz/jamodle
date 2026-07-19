@@ -171,8 +171,12 @@
   }
 
   /* ── JamoTile ── */
+  function isVowelZone(zoneType) {
+    return zoneType === 'jungH' || zoneType === 'jungV';
+  }
+
   function jamoGlyphInner(char, zoneType) {
-    if (zoneType === 'jungV') {
+    if (isVowelZone(zoneType)) {
       return `<span class="jamo-glyph-stretch">${char}</span>`;
     }
     return char;
@@ -227,6 +231,7 @@
       this.el.style.removeProperty('visibility');
       this.el.style.removeProperty('pointer-events');
       this.el.style.removeProperty('transform');
+      this.setChar(this.char);
     }
 
     setInZone(zone) {
@@ -234,6 +239,7 @@
       this.zoneRef = zone;
       this.el.classList.add('in-zone', 'snap-in');
       this.el.classList.remove('hidden-in-bank', 'selected');
+      this.setChar(this.char);
     }
 
     setLocked() {
@@ -251,7 +257,8 @@
 
     setChar(char) {
       this.char = char;
-      const inner = jamoGlyphInner(char, this.zoneType);
+      const zoneType = this.zoneRef?.zoneType ?? null;
+      const inner = jamoGlyphInner(char, zoneType);
       this.el.querySelector('.jamo-tile-front').innerHTML = inner;
       this.el.querySelector('.jamo-tile-back').innerHTML = inner;
       this.el.setAttribute('aria-label', `자모 ${char}`);
@@ -582,9 +589,12 @@
         game?.updateRotationDockLabel?.();
         game?.onTutorialEvent?.('mergeSlot', { game });
         game?.notifyTurnLiveChange?.();
-      } else if (zone && game?.tryPlaceTile(tile, zone)) {
-        placed = true;
-        game?.mergeDock?.clearMergeSlotRef?.(tile);
+      } else if (zone) {
+        const fromZone = d.dragSource?.type === 'zone' ? d.dragSource.zone : null;
+        if (game?.tryPlaceTile(tile, zone, fromZone)) {
+          placed = true;
+          game?.mergeDock?.clearMergeSlotRef?.(tile);
+        }
       } else if (d.findBankEl(dropX, dropY, game) && tile && !tile.locked) {
         game.returnTileToBank(tile);
         placed = true;
@@ -2349,11 +2359,11 @@
       }
     }
 
-    swapTiles(tileA, tileB) {
+    swapTiles(tileA, tileB, locOverrides = {}) {
       if (!tileA || !tileB || tileA.id === tileB.id) return false;
       if (tileA.locked || tileB.locked) return false;
-      const locA = this.captureTileLocation(tileA);
-      const locB = this.captureTileLocation(tileB);
+      const locA = locOverrides.locA || this.captureTileLocation(tileA);
+      const locB = locOverrides.locB || this.captureTileLocation(tileB);
       this.releaseTile(tileA);
       this.releaseTile(tileB);
       const okA = this.applyTileLocation(tileA, locB);
@@ -2495,8 +2505,8 @@
         if (this.tutorialValidator && !this.tutorialValidator('rotate', { tile, prev, next, game: this })) {
           return false;
         }
-        tile.setChar(next);
         tile.zoneType = 'jungV';
+        tile.setChar(next);
         this.bounceTile(tile.el);
         if (!this.tutorialMode) {
           this.feedback.show('info', t('match.rotateSuccess', { from: prev, to: next }));
@@ -2529,8 +2539,8 @@
         return false;
       }
 
-      tile.setChar(next);
       tile.zoneType = rotation.zoneType;
+      tile.setChar(next);
       if (rotation.zoneType === 'jungH') {
         tile.subIndex = 0;
       }
@@ -2544,8 +2554,8 @@
         if (!targetZone
           || targetZone.syllableIndex !== sourceSyllableIndex
           || (targetZone.placedTileId && targetZone.placedTileId !== tile.id)) {
-          tile.setChar(prev);
           tile.zoneType = prevZone.zoneType;
+          tile.setChar(prev);
           return false;
         }
         prevZone.clear();
@@ -2622,7 +2632,6 @@
     prepareDevTileForZone(tile, zone) {
       const expected = zone.expected;
       if (!expected || !tile) return tile;
-      tile.setChar(expected);
       tile.zoneType = zone.zoneType;
       tile.subIndex = zone.subIndex ?? 0;
       tile.syllableIndex = zone.syllableIndex;
@@ -2632,6 +2641,7 @@
       } else {
         tile.isMerged = false;
       }
+      tile.setChar(expected);
       return tile;
     }
 
@@ -2755,7 +2765,7 @@
       );
     }
 
-    tryPlaceTile(tile, zone) {
+    tryPlaceTile(tile, zone, fromZone = null) {
       if (!this.canArrangeTiles()) return false;
       if (tile.locked || zone.locked || zone.hintDisabled || this.checking) return false;
       if (!HC.isValidMatchPlacement(tile, zone)) return false;
@@ -2763,9 +2773,18 @@
         return false;
       }
       if (tile.zoneRef === zone) return true;
+      const sourceZone = fromZone || tile.zoneRef || null;
       if (zone.placedTileId && zone.placedTileId !== tile.id) {
         const existing = this.tileMap[zone.placedTileId];
-        if (existing && !existing.locked) return this.swapTiles(tile, existing);
+        if (existing && !existing.locked) {
+          if (sourceZone && sourceZone !== zone && HC.isValidMatchPlacement(existing, sourceZone)) {
+            return this.swapTiles(tile, existing, {
+              locA: { type: 'zone', zone },
+              locB: { type: 'zone', zone: sourceZone },
+            });
+          }
+          return this.swapTiles(tile, existing);
+        }
       }
       if (tile.zoneRef && tile.zoneRef !== zone) {
         tile.zoneRef.clear();
@@ -3894,8 +3913,8 @@
           }
           if (tile.locked) return;
           if (tile.char !== entry.char) {
-            tile.setChar(entry.char);
             tile.zoneType = HC.zoneTypeForRotatedJamo(entry.char, tile.zoneType);
+            tile.setChar(entry.char);
           }
         });
       } catch (err) {
@@ -4067,8 +4086,8 @@
       if (tile) {
         if (tile.locked) return tile;
         if (tile.char !== char) {
-          tile.setChar(char);
           tile.zoneType = HC.zoneTypeForRotatedJamo(char, tile.zoneType);
+          tile.setChar(char);
         }
         tile.isMerged = HC.isVerticalMergeMedial?.(char) === true;
         return tile;

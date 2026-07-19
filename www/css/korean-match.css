@@ -576,7 +576,7 @@
     line-height: 1.1;
     word-break: keep-all;
     hyphens: none;
-    transform: scaleY(var(--jungV-stretch-y, 1.15));
+    transform: scaleY(var(--jungV-stretch-y, 1.5));
     transform-origin: center center;
   }
 
@@ -845,10 +845,12 @@
     font-size: calc(var(--jamo-in-zone-glyph-ratio) * var(--jamo-vowel-in-zone-scale) * 100cqmin);
   }
 
+  .drop-zone[data-zone="jungH"] .jamo-tile.in-zone .jamo-tile-face .jamo-glyph-stretch,
+  .drop-zone[data-zone="jungH"] .jamo-tile.in-zone .jamo-tile-back .jamo-glyph-stretch,
   .drop-zone[data-zone="jungV"] .jamo-tile.in-zone .jamo-tile-face .jamo-glyph-stretch,
   .drop-zone[data-zone="jungV"] .jamo-tile.in-zone .jamo-tile-back .jamo-glyph-stretch {
     display: inline-block;
-    transform: scaleY(var(--jungV-stretch-y, 1.15));
+    transform: scaleY(var(--jungV-stretch-y, 1.5));
     transform-origin: center center;
   }
 
@@ -2209,9 +2211,10 @@
     font-size: calc(var(--jamo-in-zone-glyph-ratio, 0.936) * var(--jamo-vowel-in-zone-scale, 1.44) * 100cqmin);
   }
 
+  .drop-zone[data-zone="jungH"] > .jamo-tile.opp-reveal-tile .jamo-tile-front .jamo-glyph-stretch,
   .drop-zone[data-zone="jungV"] > .jamo-tile.opp-reveal-tile .jamo-tile-front .jamo-glyph-stretch {
     display: inline-block;
-    transform: scaleY(var(--jungV-stretch-y, 1.15));
+    transform: scaleY(var(--jungV-stretch-y, 1.5));
     transform-origin: center center;
   }
 

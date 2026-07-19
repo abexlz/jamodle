@@ -1208,9 +1208,10 @@ html.reduce-motion .race-turn-swap {
   font-size: calc(var(--jamo-in-zone-glyph-ratio, 0.936) * var(--jamo-cho-in-zone-scale, 1.2) * 100cqmin);
 }
 
+.race-turn-previous .drop-zone[data-zone="jungH"] .jamo-glyph-stretch,
 .race-turn-previous .drop-zone[data-zone="jungV"] .jamo-glyph-stretch {
   display: inline-block;
-  transform: scaleY(var(--jungV-stretch-y, 1.15));
+  transform: scaleY(var(--jungV-stretch-y, 1.5));
   transform-origin: center center;
 }
 
