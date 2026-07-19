@@ -46,7 +46,8 @@
       "matchmakingCancel": "Cancel search",
       "matchmakingFailed": "Could not start matchmaking. Try again.",
       "matchmakingLogin": "Sign in to play random matches.",
-      "matchmakingFound": "Opponent found!"
+      "matchmakingFound": "Opponent found!",
+      "matchmakingExpectedWait": "Expected wait: ~{{seconds}} sec"
     },
     "modes": {
       "level-mode": {

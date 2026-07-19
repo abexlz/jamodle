@@ -31,8 +31,8 @@
     global.FirebaseSocial?.setMenuBattleGame?.(next);
   }
 
-  function t(key) {
-    return global.I18n?.t(key) ?? '';
+  function t(key, vars) {
+    return global.I18n?.t(key, vars) ?? '';
   }
 
   function isOverlayOpen(id) {
@@ -181,6 +181,7 @@
           <div class="battle-matchmaking-search" aria-live="polite">
             <div class="battle-matchmaking-spinner" aria-hidden="true"></div>
             <p class="battle-matchmaking-status" data-matchmaking-status data-i18n="menu.battle.matchmakingSearching">${escapeHtml(t('menu.battle.matchmakingSearching'))}</p>
+            <p class="battle-matchmaking-eta" data-matchmaking-eta></p>
           </div>
           <button type="button" class="race-btn race-btn--ghost battle-matchmaking-cancel" data-matchmaking-cancel data-i18n="menu.battle.matchmakingCancel">${escapeHtml(t('menu.battle.matchmakingCancel'))}</button>
         </div>
@@ -238,6 +239,8 @@
     overlay.dataset.selectedLength = '';
     const pickedEl = overlay.querySelector('[data-matchmaking-picked]');
     if (pickedEl) pickedEl.textContent = '';
+    const etaEl = overlay.querySelector('[data-matchmaking-eta]');
+    if (etaEl) etaEl.textContent = '';
     showMatchmakingStep(overlay, overlay.dataset.selectedGame === 'word-chain' ? 'unsupported' : 'pick');
   }
 
@@ -290,6 +293,12 @@
     if (pickedEl) {
       pickedEl.textContent = t('match.modes.letterCount', { n: wordLength })
         || `${wordLength} letters`;
+    }
+    const etaEl = overlay.querySelector('[data-matchmaking-eta]');
+    if (etaEl) {
+      const seconds = 5 + Math.floor(Math.random() * 16);
+      etaEl.textContent = t('menu.battle.matchmakingExpectedWait', { seconds })
+        || `Expected wait: ~${seconds} sec`;
     }
     showMatchmakingStep(overlay, 'searching');
     setMatchmakingStatus(overlay, 'menu.battle.matchmakingSearching');
