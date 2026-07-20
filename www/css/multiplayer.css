@@ -126,20 +126,24 @@
   gap: 0;
 }
 
-#menu-screen .menu-mode-panel .menu-battle-game-btn .mode-name,
 #menu-screen .menu-mode-panel .menu-single-player-game-btn .mode-name {
   text-align: center;
   white-space: nowrap !important;
-  font-size: clamp(25px, 6.5vw, 29px) !important;
+  font-size: clamp(13px, 3.4vw, 16px) !important;
   line-height: 1.08;
   text-transform: none;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-#menu-screen .menu-mode-panel .menu-battle-game-btn .mode-name {
-  line-height: 1.05;
+#menu-screen .menu-mode-panel .menu-battle-game-bar .mode-name {
   text-align: center !important;
+  white-space: nowrap !important;
+  font-size: clamp(13px, 3.4vw, 16px) !important;
+  line-height: 1.05;
+  text-transform: uppercase;
+  overflow: hidden;
+  text-overflow: ellipsis;
   margin-left: 0;
 }
 

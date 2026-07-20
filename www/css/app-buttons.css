@@ -1076,8 +1076,7 @@ button.ghost:disabled,
 
 /* Game mode bars — combo pocket left, title right */
 #menu-screen .menu-word-chain-bar.accent-mint.menu-single-player-game-btn,
-#menu-screen .menu-jamo-game-bar.menu-jamo-game-btn,
-#menu-screen .menu-battle-game-bar.menu-battle-game-btn {
+#menu-screen .menu-jamo-game-bar.menu-jamo-game-btn {
   display: grid !important;
   grid-template-columns: auto 1fr;
   align-items: stretch !important;
@@ -1087,38 +1086,60 @@ button.ghost:disabled,
   overflow: hidden;
   min-height: clamp(52px, 14vw, 60px) !important;
   flex-direction: unset !important;
+  aspect-ratio: auto !important;
+}
+
+#menu-screen .menu-battle-game-bar.menu-battle-game-btn {
+  display: grid !important;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: 1fr;
+  align-items: stretch !important;
+  justify-content: stretch !important;
+  gap: 0 !important;
+  padding: 0 !important;
+  overflow: hidden;
+  min-height: clamp(52px, 14vw, 60px) !important;
+  flex-direction: unset !important;
+  aspect-ratio: auto !important;
 }
 
 #menu-screen .menu-battle-icon-slot {
+  grid-column: 1;
+  grid-row: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   width: clamp(48px, 12.5vw, 56px);
-  padding: 6px 5px;
+  padding: 4px;
   box-sizing: border-box;
   flex-shrink: 0;
+  overflow: hidden;
+  align-self: stretch;
 }
 
-#menu-screen .menu-jamo-game-bar.menu-battle-game-btn .menu-battle-icon-slot {
-  background: transparent;
+#menu-screen .menu-battle-game-bar.menu-jamo-game-btn .menu-battle-icon-slot {
+  background: rgba(0, 0, 0, 0.16);
   border-right: 2px solid rgba(255, 255, 255, 0.24);
 }
 
-#menu-screen .menu-word-chain-bar.menu-battle-game-btn .menu-battle-icon-slot {
+#menu-screen .menu-battle-word-chain-bar .menu-battle-icon-slot {
   background: #f0b020;
   border-right: 2px solid rgba(160, 100, 0, 0.22);
 }
 
 #menu-screen .menu-battle-icon-slot .menu-mode-icon-img {
-  width: clamp(40px, 10.5vw, 46px);
-  height: clamp(40px, 10.5vw, 46px);
+  width: clamp(34px, 9vw, 40px) !important;
+  height: clamp(34px, 9vw, 40px) !important;
+  max-width: 100%;
+  max-height: 100%;
   margin: 0;
-  display: block;
+  display: block !important;
   object-fit: contain;
 }
 
-#menu-screen .menu-battle-game-bar .menu-jamo-game-main,
-#menu-screen .menu-battle-game-bar .menu-word-chain-main {
+#menu-screen .menu-battle-label {
+  grid-column: 2;
+  grid-row: 1;
   display: flex !important;
   align-items: center;
   justify-content: center;
@@ -1126,15 +1147,32 @@ button.ghost:disabled,
   padding: 8px 6px;
 }
 
+#menu-screen .menu-battle-game-bar .mode-name,
+#menu-screen .menu-battle-game-bar .app-btn-title {
+  width: 100%;
+  text-align: center;
+  text-transform: uppercase;
+  font-size: clamp(13px, 3.4vw, 16px) !important;
+  line-height: 1.05;
+  color: #ffffff !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#menu-screen .menu-battle-word-chain-bar .mode-name,
+#menu-screen .menu-battle-word-chain-bar .app-btn-title {
+  text-shadow: 0 2px 0 rgba(120, 80, 0, 0.45) !important;
+}
+
+#menu-screen .menu-battle-game-bar.menu-jamo-game-btn .mode-name,
+#menu-screen .menu-battle-game-bar.menu-jamo-game-btn .app-btn-title {
+  text-shadow: 0 2px 0 rgba(140, 40, 55, 0.45) !important;
+}
+
 #menu-screen .menu-word-chain-bar.accent-mint.menu-single-player-game-btn {
   background-color: #ffd739 !important;
-  background-image: var(--app-btn-gloss-overlay), repeating-linear-gradient(
-    135deg,
-    #ffd739 0,
-    #ffd739 10px,
-    #ffe566 10px,
-    #ffe566 20px
-  ) !important;
+  background-image: var(--app-btn-gloss-overlay) !important;
   border: 2px solid #e6b82e !important;
   box-shadow: var(--app-btn-gloss-inset), 0 6px 0 #c4a82d, var(--app-btn-gloss-ambient) !important;
 }
@@ -1157,7 +1195,7 @@ button.ghost:disabled,
 }
 
 #menu-screen .menu-jamo-game-bar .menu-game-combo {
-  background: transparent;
+  background: rgba(0, 0, 0, 0.16);
   border-right: 2px solid rgba(255, 255, 255, 0.24);
   border-radius: 0;
   align-self: stretch;
@@ -1387,6 +1425,16 @@ button.ghost:disabled,
   align-items: center !important;
   justify-content: flex-start !important;
   gap: 10px !important;
+}
+
+#menu-screen .menu-jamo-game-bar.menu-single-player-game-btn,
+#menu-screen .menu-word-chain-bar.menu-single-player-game-btn,
+#menu-screen .menu-battle-game-bar.menu-battle-game-btn {
+  display: grid !important;
+  flex-direction: unset !important;
+  align-items: stretch !important;
+  justify-content: stretch !important;
+  gap: 0 !important;
 }
 
 #menu-screen .daily-challenge-bar .mode-icon {

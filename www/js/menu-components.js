@@ -86,7 +86,7 @@
   function renderMenuModeIcon(iconKey) {
     const src = MENU_MODE_ICONS[iconKey];
     if (!src) return '';
-    return `<img class="mode-icon app-btn-icon menu-mode-icon-img" src="${escapeHtml(src)}" alt="" width="69" height="69" decoding="async" draggable="false">`;
+    return `<img class="menu-mode-icon-img" src="${escapeHtml(src)}" alt="" width="42" height="42" decoding="async" draggable="false">`;
   }
 
   const MENU_HEADING_BLOSSOM_SVG = `<svg class="menu-mode-heading-blossom-svg" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><circle cx="12" cy="12" r="2.2" fill="currentColor"/><ellipse cx="12" cy="6.5" rx="3.2" ry="4.2" fill="currentColor"/><ellipse cx="12" cy="17.5" rx="3.2" ry="4.2" fill="currentColor"/><ellipse cx="6.5" cy="12" rx="4.2" ry="3.2" fill="currentColor"/><ellipse cx="17.5" cy="12" rx="4.2" ry="3.2" fill="currentColor"/></svg>`;
@@ -415,19 +415,19 @@
     const wordChainLabel = escapeHtml(t('menu.battle.wordChain') || t('menu.modes.related-words.title') || 'Word Chain');
     const title = escapeHtml(t('menu.battle.title') || t('nav.multiplayer') || 'Battle Mode');
     const buttons = `
-      <button type="button" class="daily-challenge-card daily-challenge-bar word-game-bar menu-jamo-game-btn menu-jamo-game-bar menu-battle-game-btn menu-battle-game-bar menu-game-combo-bar" data-battle-game="jamodle" aria-label="${jamodleLabel}">
+      <button type="button" class="daily-challenge-card daily-challenge-bar word-game-bar menu-jamo-game-btn menu-battle-game-btn menu-battle-game-bar" data-battle-game="jamodle" aria-label="${jamodleLabel}">
         <span class="menu-battle-icon-slot" aria-hidden="true">
           ${renderMenuModeIcon('jamoGame')}
         </span>
-        <span class="daily-challenge-content menu-jamo-game-main">
+        <span class="menu-battle-label daily-challenge-content">
           <span class="mode-name app-btn-title">${jamodleLabel}</span>
         </span>
       </button>
-      <button type="button" class="daily-challenge-card daily-challenge-bar word-game-bar accent-mint menu-word-chain-bar menu-battle-game-btn menu-battle-game-bar menu-game-combo-bar" data-battle-game="word-chain" aria-label="${wordChainLabel}">
+      <button type="button" class="daily-challenge-card daily-challenge-bar word-game-bar accent-mint menu-battle-game-btn menu-battle-game-bar menu-battle-word-chain-bar" data-battle-game="word-chain" aria-label="${wordChainLabel}">
         <span class="menu-battle-icon-slot" aria-hidden="true">
           ${renderMenuModeIcon('wordChain')}
         </span>
-        <span class="daily-challenge-content menu-word-chain-main">
+        <span class="menu-battle-label daily-challenge-content">
           <span class="mode-name app-btn-title">${wordChainLabel}</span>
         </span>
       </button>
