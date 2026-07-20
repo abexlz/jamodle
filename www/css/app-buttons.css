@@ -1152,7 +1152,7 @@ button.ghost:disabled,
   width: 100%;
   text-align: center;
   text-transform: uppercase;
-  font-size: clamp(13px, 3.4vw, 16px) !important;
+  font-size: clamp(15px, 4vw, 18px) !important;
   line-height: 1.05;
   color: #ffffff !important;
   white-space: nowrap;
@@ -1171,10 +1171,10 @@ button.ghost:disabled,
 }
 
 #menu-screen .menu-word-chain-bar.accent-mint.menu-single-player-game-btn {
-  background-color: #ffd739 !important;
+  background-color: var(--w-btn-green, #5FD68A) !important;
   background-image: var(--app-btn-gloss-overlay) !important;
-  border: 2px solid #e6b82e !important;
-  box-shadow: var(--app-btn-gloss-inset), 0 6px 0 #c4a82d, var(--app-btn-gloss-ambient) !important;
+  border: 2px solid #2A9850 !important;
+  box-shadow: var(--w-btn-shadow-green, 0 6px 0 #2A8048, var(--w-btn-gloss-ambient)) !important;
 }
 
 #menu-screen .menu-game-combo {
@@ -1190,8 +1190,8 @@ button.ghost:disabled,
 }
 
 #menu-screen .menu-word-chain-bar .menu-game-combo {
-  background: #f0b020;
-  border-right: 2px solid rgba(160, 100, 0, 0.22);
+  background: #2A9850;
+  border-right: 2px solid rgba(0, 80, 40, 0.35);
 }
 
 #menu-screen .menu-jamo-game-bar .menu-game-combo {
@@ -1260,7 +1260,7 @@ button.ghost:disabled,
   width: 100%;
   text-align: center;
   text-transform: uppercase;
-  font-size: clamp(13px, 3.4vw, 16px) !important;
+  font-size: clamp(15px, 4vw, 18px) !important;
   line-height: 1.05;
   color: #ffffff !important;
   text-shadow: 0 2px 0 rgba(140, 40, 55, 0.45) !important;
@@ -1288,7 +1288,7 @@ button.ghost:disabled,
   width: 100%;
   text-align: center;
   text-transform: uppercase;
-  font-size: clamp(13px, 3.4vw, 16px) !important;
+  font-size: clamp(15px, 4vw, 18px) !important;
   line-height: 1.05;
   color: #ffffff !important;
   text-shadow: 0 2px 0 rgba(120, 80, 0, 0.45) !important;
@@ -1343,13 +1343,25 @@ button.ghost:disabled,
 }
 
 #menu-screen .menu-top-daily-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   gap: 10px;
+  align-items: stretch;
 }
 
 #menu-screen .menu-top-daily-row .daily-leaderboard-btn {
+  grid-column: 1;
   width: clamp(52px, 14vw, 60px);
   min-width: clamp(52px, 14vw, 60px);
   min-height: 64px;
+}
+
+#menu-screen .menu-top-daily-row .menu-top-daily {
+  grid-column: 2;
+  justify-self: center;
+  width: auto !important;
+  min-width: 0;
+  max-width: 100%;
 }
 
 #menu-screen .featured-continue-cta,
