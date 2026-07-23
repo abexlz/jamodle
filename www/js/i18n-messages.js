@@ -1288,6 +1288,8 @@
     },
     "wheel": {
       "title": "Bonus wheel!",
+      "pageTitle": "Daily Bonus Wheel",
+      "pageNav": "Daily bonus wheel",
       "subtitle": "All daily quests done — spin for a prize!",
       "bonusTitle": "Daily bonus wheel",
       "lockedDesc": "Complete all {{total}} daily quests to unlock ({{done}}/{{total}} done)",
@@ -1298,6 +1300,8 @@
       "claimed": "Spun!",
       "wonTitle": "You won!",
       "continue": "Awesome!",
+      "backHome": "← Home",
+      "goQuests": "View daily quests →",
       "prizes": {
         "coins-5": "+5 coins",
         "coins-10": "+10 coins",
@@ -2733,6 +2737,8 @@
     },
     "wheel": {
       "title": "보너스 룰렛!",
+      "pageTitle": "일일 보너스 룰렛",
+      "pageNav": "일일 보너스 룰렛",
       "subtitle": "일일 퀘스트 완료 — 돌려서 보상 받기!",
       "bonusTitle": "일일 보너스 룰렛",
       "lockedDesc": "일일 퀘스트 {{total}}개를 모두 완료하면 잠금 해제 ({{done}}/{{total}})",
@@ -2743,6 +2749,8 @@
       "claimed": "완료!",
       "wonTitle": "당첨!",
       "continue": "좋아요!",
+      "backHome": "← 홈",
+      "goQuests": "일일 퀘스트 보기 →",
       "prizes": {
         "coins-5": "+5 코인",
         "coins-10": "+10 코인",

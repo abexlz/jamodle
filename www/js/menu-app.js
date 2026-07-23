@@ -18,6 +18,16 @@
     }
   }
 
+  function readInitialHomeTab() {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const q = params.get('tab');
+      if (q === 'learn' || q === 'shop' || q === 'quests') return q;
+      if (window.location.hash === '#quests') return 'quests';
+    } catch { /* ignore */ }
+    return readStoredHomeTab();
+  }
+
   function getHomeTab() {
     return activeHomeTab;
   }
@@ -96,7 +106,7 @@
       console.error(`${DEV} MenuComponents unavailable — menu not rendered`);
       return;
     }
-    activeHomeTab = tab || readStoredHomeTab();
+    activeHomeTab = tab || readInitialHomeTab();
     root.innerHTML = global.MenuComponents.renderMenu(activeHomeTab);
     global.I18n?.applyToDocument?.(root);
     global.ShopUI?.bindSection?.(root);
@@ -107,6 +117,7 @@
     updateTabBarUI();
     global.MultiplayerUI?.mount?.();
     global.QuestUI?.updateTabBadge?.();
+    global.WheelUI?.updateMenuWheelNav?.();
   }
 
   function refreshMenu() {

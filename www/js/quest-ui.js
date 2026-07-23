@@ -96,12 +96,12 @@
     let btnHtml = '';
     if (wheelClaimed) {
       stateClass = ' is-claimed';
-      btnHtml = `<button type="button" class="quest-daily-bonus-btn" disabled>${escapeHtml(t('wheel.claimed'))}</button>`;
+      btnHtml = `<a href="wheel.html" class="quest-daily-bonus-btn quest-daily-bonus-btn--link">${escapeHtml(t('wheel.claimed'))}</a>`;
     } else if (wheelReady) {
       stateClass = ' is-ready';
-      btnHtml = `<button type="button" class="quest-daily-bonus-btn" id="quest-wheel-btn">${escapeHtml(t('wheel.spin'))}</button>`;
+      btnHtml = `<a href="wheel.html?spin=1" class="quest-daily-bonus-btn quest-daily-bonus-btn--link" id="quest-wheel-btn">${escapeHtml(t('wheel.spin'))}</a>`;
     } else {
-      btnHtml = `<button type="button" class="quest-daily-bonus-btn" disabled>${escapeHtml(t('wheel.locked'))}</button>`;
+      btnHtml = `<a href="wheel.html" class="quest-daily-bonus-btn quest-daily-bonus-btn--link">${escapeHtml(t('wheel.locked'))}</a>`;
     }
 
     const doneCount = snap.daily.filter((q) => q.progress >= q.target).length;
@@ -207,6 +207,7 @@
     } else if (badge) {
       badge.remove();
     }
+    global.WheelUI?.updateMenuWheelNav?.();
   }
 
   function showQuestCompleteToast(rewards) {
@@ -316,9 +317,6 @@
 
     updateTabBadge();
     startQuestTimer(root);
-    const wheelBtn = root?.querySelector('#quest-wheel-btn')
-      || document.getElementById('quest-wheel-btn');
-    wheelBtn?.addEventListener('click', () => global.WheelUI?.show?.({ autoSpin: true }));
 
     const scope = root || document;
     scope.querySelectorAll('[data-quest-scope]').forEach((btn) => {

@@ -1260,6 +1260,8 @@
   },
   "wheel": {
     "title": "Bonus wheel!",
+    "pageTitle": "Daily Bonus Wheel",
+    "pageNav": "Daily bonus wheel",
     "subtitle": "All daily quests done — spin for a prize!",
     "bonusTitle": "Daily bonus wheel",
     "lockedDesc": "Complete all {{total}} daily quests to unlock ({{done}}/{{total}} done)",
@@ -1270,6 +1272,8 @@
     "claimed": "Spun!",
     "wonTitle": "You won!",
     "continue": "Awesome!",
+    "backHome": "← Home",
+    "goQuests": "View daily quests →",
     "prizes": {
       "coins-5": "+5 coins",
       "coins-10": "+10 coins",

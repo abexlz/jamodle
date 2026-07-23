@@ -88,7 +88,8 @@ body {
   }
 
   body.home-tab-quests,
-  body.home-tab-shop {
+  body.home-tab-shop,
+  body.wheel-page-body {
     background-image:
       linear-gradient(rgba(0, 90, 105, 0.2), rgba(0, 90, 105, 0.2)),
       url('../assets/bg-phone-quests.jpg') !important;

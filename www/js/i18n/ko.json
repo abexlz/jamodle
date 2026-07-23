@@ -1260,6 +1260,8 @@
   },
   "wheel": {
     "title": "보너스 룰렛!",
+    "pageTitle": "일일 보너스 룰렛",
+    "pageNav": "일일 보너스 룰렛",
     "subtitle": "일일 퀘스트 완료 — 돌려서 보상 받기!",
     "bonusTitle": "일일 보너스 룰렛",
     "lockedDesc": "일일 퀘스트 {{total}}개를 모두 완료하면 잠금 해제 ({{done}}/{{total}})",
@@ -1270,6 +1272,8 @@
     "claimed": "완료!",
     "wonTitle": "당첨!",
     "continue": "좋아요!",
+    "backHome": "← 홈",
+    "goQuests": "일일 퀘스트 보기 →",
     "prizes": {
       "coins-5": "+5 코인",
       "coins-10": "+10 코인",

@@ -65,31 +65,66 @@
     setTimeout(() => overlay.remove(), 320);
   }
 
-  function showResult(overlay, result) {
-    const modal = overlay.querySelector('.wheel-modal');
+  function getWheelStatus() {
+    const snap = global.QuestService?.getQuestSnapshot?.() || { daily: [], dailyWheelClaimed: false };
+    const profile = global.ProfileService?.loadProfile?.();
+    if (snap.dailyWheelClaimed) {
+      return { status: 'claimed', snap, profile };
+    }
+    if (WS()?.isDailyWheelAvailable?.(profile)) {
+      return { status: 'ready', snap, profile };
+    }
+    const doneCount = (snap.daily || []).filter((q) => q.progress >= q.target).length;
+    return {
+      status: 'locked',
+      snap,
+      profile,
+      doneCount,
+      total: (snap.daily || []).length,
+    };
+  }
+
+  function statusMessage(statusInfo) {
+    if (statusInfo.status === 'claimed') return t('wheel.claimedDesc');
+    if (statusInfo.status === 'ready') return t('wheel.readyDesc');
+    return t('wheel.lockedDesc', {
+      done: statusInfo.doneCount || 0,
+      total: statusInfo.total || 0,
+    });
+  }
+
+  function showResultInRoot(root, result, options) {
+    const panel = root.classList?.contains('wheel-panel') ? root : (root.querySelector?.('.wheel-panel') || root);
     const prize = result.prize;
-    modal.innerHTML = `
+    panel.innerHTML = `
       <div class="wheel-reveal">
         <span class="wheel-reveal-icon" aria-hidden="true">${prize.icon}</span>
         <h2 class="wheel-reveal-title">${escapeHtml(t('wheel.wonTitle'))}</h2>
         <p class="wheel-reveal-prize">${escapeHtml(prizeLabel(prize))}</p>
-        <button type="button" class="wheel-done-btn">${escapeHtml(t('wheel.continue'))}</button>
+        <button type="button" class="wheel-done-btn" id="wheel-done-btn">${escapeHtml(t('wheel.continue'))}</button>
       </div>
     `;
-    global.I18n?.applyToDocument?.(modal);
-    modal.querySelector('.wheel-done-btn')?.addEventListener('click', () => closeOverlay(overlay));
+    global.I18n?.applyToDocument?.(panel);
+    panel.querySelector('#wheel-done-btn')?.addEventListener('click', () => {
+      const pageRoot = options?.pageRoot || document.getElementById('wheel-page-root');
+      if (pageRoot) mountPage(pageRoot);
+      else if (options?.overlay) closeOverlay(options.overlay);
+    });
   }
 
-  function runSpin(overlay, wheelEl, btn) {
-    if (overlay.dataset.spinning === '1') return;
-    overlay.dataset.spinning = '1';
+  function runSpin(root, wheelEl, btn, options) {
+    if (options?.overlay?.dataset.spinning === '1' || root.dataset.spinning === '1') return;
+    if (options?.overlay) options.overlay.dataset.spinning = '1';
+    root.dataset.spinning = '1';
     btn.disabled = true;
 
     const result = WS()?.claimSpin?.();
     if (!result?.ok) {
-      overlay.dataset.spinning = '0';
+      if (options?.overlay) options.overlay.dataset.spinning = '0';
+      root.dataset.spinning = '0';
       btn.disabled = false;
-      closeOverlay(overlay);
+      if (options?.overlay) closeOverlay(options.overlay);
+      else if (options?.pageRoot) mountPage(options.pageRoot);
       return;
     }
 
@@ -98,57 +133,104 @@
     wheelEl.style.transform = `rotate(${rotation}deg)`;
 
     setTimeout(() => {
-      showResult(overlay, result);
+      root.dataset.spinning = '0';
+      showResultInRoot(root, result, options);
       global.PlayerHud?.refresh?.();
+      updateMenuWheelNav();
       const menuRoot = document.getElementById('menu-root');
       if (menuRoot) global.QuestUI?.refreshSection?.(menuRoot);
     }, 4400);
   }
 
-  function show(options) {
-    global.QuestService?.getQuestSnapshot?.();
-    const profile = global.ProfileService?.loadProfile?.();
-    if (!WS()?.isDailyWheelAvailable?.(profile)) return false;
+  function renderWheelPanel(statusInfo, { compact } = {}) {
+    const claimed = statusInfo.status === 'claimed';
+    const ready = statusInfo.status === 'ready';
+    const spinLabel = claimed ? t('wheel.claimed') : ready ? t('wheel.spin') : t('wheel.locked');
+    const spinDisabled = !ready;
+    const stateClass = claimed ? ' is-claimed' : ready ? ' is-ready' : ' is-locked';
 
-    const existing = document.getElementById('wheel-overlay');
-    if (existing) existing.remove();
-
-    const overlay = document.createElement('div');
-    overlay.id = 'wheel-overlay';
-    overlay.className = 'wheel-overlay';
-    overlay.setAttribute('role', 'dialog');
-    overlay.setAttribute('aria-modal', 'true');
-    overlay.innerHTML = `
-      <div class="wheel-modal">
-        <h2 class="wheel-title">${escapeHtml(t('wheel.title'))}</h2>
-        <p class="wheel-sub">${escapeHtml(t('wheel.subtitle'))}</p>
-        <div class="wheel-stage">
+    return `
+      <div class="wheel-panel${stateClass}${compact ? ' wheel-panel--compact' : ''}">
+        <h2 class="wheel-title">${escapeHtml(compact ? t('wheel.title') : t('wheel.pageTitle'))}</h2>
+        <p class="wheel-sub" id="wheel-status-msg">${escapeHtml(statusMessage(statusInfo))}</p>
+        <div class="wheel-stage${claimed ? ' wheel-stage--claimed' : ''}">
           <div class="wheel-pointer" aria-hidden="true">▼</div>
           <div class="wheel-disc" id="wheel-disc">${buildWheelSvg()}</div>
         </div>
-        <button type="button" class="wheel-spin-btn" id="wheel-spin-btn">${escapeHtml(t('wheel.spin'))}</button>
+        <button type="button" class="wheel-spin-btn" id="wheel-spin-btn"${spinDisabled ? ' disabled' : ''}>${escapeHtml(spinLabel)}</button>
+        ${!compact ? `<a class="wheel-quests-link" href="index.html?tab=quests">${escapeHtml(t('wheel.goQuests'))}</a>` : ''}
       </div>
     `;
+  }
 
-    document.body.appendChild(overlay);
-    document.body.classList.add('wheel-open');
-    global.I18n?.applyToDocument?.(overlay);
-    requestAnimationFrame(() => overlay.classList.add('visible'));
+  function bindWheelPanel(root, options) {
+    const wheelEl = root.querySelector('#wheel-disc');
+    const spinBtn = root.querySelector('#wheel-spin-btn');
+    spinBtn?.addEventListener('click', () => {
+      if (spinBtn.disabled) return;
+      runSpin(root, wheelEl, spinBtn, options);
+    });
+  }
 
-    const wheelEl = overlay.querySelector('#wheel-disc');
-    const spinBtn = overlay.querySelector('#wheel-spin-btn');
-    spinBtn?.addEventListener('click', () => runSpin(overlay, wheelEl, spinBtn));
-
+  function mountPage(rootEl, options) {
+    if (!rootEl) return false;
+    global.QuestService?.getQuestSnapshot?.();
+    const statusInfo = getWheelStatus();
+    rootEl.innerHTML = renderWheelPanel(statusInfo);
+    global.I18n?.applyToDocument?.(rootEl);
+    const panel = rootEl.querySelector('.wheel-panel');
+    const spinOptions = { pageRoot: rootEl };
+    bindWheelPanel(panel || rootEl, spinOptions);
     if (options?.autoSpin) {
-      setTimeout(() => runSpin(overlay, wheelEl, spinBtn), 380);
+      const spinBtn = panel?.querySelector('#wheel-spin-btn');
+      const wheelEl = panel?.querySelector('#wheel-disc');
+      setTimeout(() => {
+        if (spinBtn && !spinBtn.disabled) runSpin(panel, wheelEl, spinBtn, spinOptions);
+      }, 420);
     }
+    return true;
+  }
 
+  function updateMenuWheelNav() {
+    const btn = document.getElementById('menu-wheel-nav');
+    if (!btn) return;
+    global.QuestService?.getQuestSnapshot?.();
+    const profile = global.ProfileService?.loadProfile?.();
+    const ready = WS()?.isDailyWheelAvailable?.(profile);
+    const snap = global.QuestService?.getQuestSnapshot?.();
+    const claimed = snap?.dailyWheelClaimed;
+    btn.classList.toggle('is-ready', !!ready);
+    btn.classList.toggle('is-claimed', !!claimed && !ready);
+    let badge = btn.querySelector('.menu-wheel-nav-badge');
+    if (ready) {
+      if (!badge) {
+        badge = document.createElement('span');
+        badge.className = 'menu-wheel-nav-badge';
+        badge.setAttribute('aria-hidden', 'true');
+        btn.appendChild(badge);
+      }
+      badge.textContent = '!';
+    } else if (badge) {
+      badge.remove();
+    }
+  }
+
+  function show(options) {
+    global.QuestService?.getQuestSnapshot?.();
+    const profile = global.ProfileService?.loadProfile?.();
+    const ready = WS()?.isDailyWheelAvailable?.(profile);
+    const suffix = options?.autoSpin && ready ? '?spin=1' : '';
+    window.location.href = `wheel.html${suffix}`;
     return true;
   }
 
   function tryShow() {
-    return show({ autoSpin: false });
+    global.QuestService?.getQuestSnapshot?.();
+    const profile = global.ProfileService?.loadProfile?.();
+    if (!WS()?.isDailyWheelAvailable?.(profile)) return false;
+    window.location.href = 'wheel.html?spin=1';
+    return true;
   }
 
-  global.WheelUI = { show, tryShow };
+  global.WheelUI = { show, tryShow, mountPage, updateMenuWheelNav };
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -267,6 +267,15 @@
     pointer-events: none;
   }
 
+  .menu-top-bar .menu-wheel-nav {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: start;
+    align-self: center;
+    pointer-events: auto;
+    z-index: 30;
+  }
+
   .menu-top-bar .menu-profile-nav {
     grid-column: 2;
     grid-row: 1;
@@ -1572,6 +1581,9 @@
   <div class="menu-inner">
     <header class="menu-header">
       <div class="menu-top-bar">
+        <a class="menu-wheel-nav" href="wheel.html" id="menu-wheel-nav" data-i18n-aria="wheel.pageNav">
+          <span class="menu-wheel-nav-icon" aria-hidden="true">🎡</span>
+        </a>
         <a class="menu-profile-nav" href="profile.html" id="nav-profile" data-i18n-aria="nav.profile">
           <span class="menu-profile-card" id="menu-profile-card"></span>
         </a>
@@ -1584,7 +1596,7 @@
           <span class="brand-tile brand-tile-mo" aria-hidden="true">글</span>
           <span class="brand-tile brand-tile-deul" aria-hidden="true">들</span>
         </div>
-        <div class="menu-brand-line2">hangjul-dle</div>
+        <div class="menu-brand-line2">hangul-dle</div>
       </h1>
     </header>
 

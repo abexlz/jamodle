@@ -261,3 +261,188 @@
 body.wheel-open {
   overflow: hidden;
 }
+
+/* Menu top-left wheel shortcut */
+.menu-wheel-nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 2px solid #73b5f2;
+  background: linear-gradient(180deg, rgba(170, 215, 255, 0.95) 0%, rgba(130, 195, 250, 0.9) 100%);
+  box-shadow: 0 3px 0 #3d8fd4, inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  text-decoration: none;
+  position: relative;
+  transition: transform 0.12s ease, box-shadow 0.2s ease;
+}
+
+.menu-wheel-nav:active {
+  transform: translateY(2px) scale(0.96);
+  box-shadow: 0 1px 0 #3d8fd4, inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.menu-wheel-nav-icon {
+  font-size: clamp(20px, 5.2vw, 24px);
+  line-height: 1;
+}
+
+.menu-wheel-nav.is-ready {
+  border-color: #1a9d62;
+  background: linear-gradient(180deg, #45e8a8 0%, #22c57e 100%);
+  box-shadow: 0 3px 0 #1a9d62, 0 0 12px rgba(34, 197, 126, 0.45);
+  animation: menu-wheel-ready-pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes menu-wheel-ready-pulse {
+  0%, 100% { box-shadow: 0 3px 0 #1a9d62, 0 0 8px rgba(34, 197, 126, 0.35); }
+  50% { box-shadow: 0 3px 0 #1a9d62, 0 0 16px rgba(34, 197, 126, 0.6); }
+}
+
+.menu-wheel-nav.is-claimed {
+  opacity: 0.82;
+  animation: none;
+}
+
+.menu-wheel-nav-badge {
+  position: absolute;
+  top: -5px;
+  right: -4px;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
+  border-radius: 999px;
+  background: #ff5a7a;
+  border: 1.5px solid #fff;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 11px;
+  text-align: center;
+}
+
+.quest-daily-bonus-btn--link {
+  display: inline-block;
+  text-decoration: none;
+  text-align: center;
+}
+
+/* Dedicated wheel page */
+body.wheel-page-body {
+  margin: 0;
+  min-height: 100dvh;
+  padding:
+    calc(12px + env(safe-area-inset-top, 0px))
+    16px
+    calc(24px + env(safe-area-inset-bottom, 0px));
+  font-family: 'Noto Sans KR', sans-serif;
+  color: #111;
+}
+
+.wheel-page {
+  max-width: 420px;
+  margin: 0 auto;
+  min-height: calc(100dvh - 48px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.wheel-page-shell {
+  width: 100%;
+}
+
+.wheel-panel {
+  width: 100%;
+  padding: 24px 20px 28px;
+  border-radius: 24px;
+  border: 2px solid #73b5f2;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(220, 240, 255, 0.94) 100%);
+  box-shadow: 0 8px 28px rgba(0, 60, 72, 0.18);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.wheel-panel::before {
+  content: '🎡';
+  position: absolute;
+  right: -12px;
+  bottom: -24px;
+  font-size: clamp(100px, 28vw, 140px);
+  opacity: 0.06;
+  pointer-events: none;
+  transform: rotate(-10deg);
+}
+
+.wheel-panel > * {
+  position: relative;
+  z-index: 1;
+}
+
+.wheel-panel.is-ready {
+  border-color: #1a9d62;
+  box-shadow: 0 8px 28px rgba(0, 60, 72, 0.18), 0 0 20px rgba(34, 197, 126, 0.22);
+}
+
+.wheel-panel.is-locked .wheel-stage {
+  opacity: 0.72;
+  filter: grayscale(0.15);
+}
+
+.wheel-panel.is-claimed .wheel-stage {
+  opacity: 0.55;
+}
+
+.wheel-panel .wheel-title {
+  font-family: 'Jua', sans-serif;
+  font-size: clamp(24px, 6.5vw, 30px);
+  color: #0a3d52;
+}
+
+.wheel-panel .wheel-sub {
+  font-size: 14px;
+  color: #335566;
+  line-height: 1.45;
+  margin-bottom: 20px;
+}
+
+.wheel-panel .wheel-stage {
+  width: min(280px, 78vw);
+  height: min(280px, 78vw);
+  margin: 0 auto 22px;
+}
+
+.wheel-panel.is-ready .wheel-spin-btn {
+  border-color: #1a9d62;
+  background: linear-gradient(180deg, #45e8a8 0%, #22c57e 100%);
+  color: #fff;
+  text-shadow: 0 1px 0 rgba(0, 60, 40, 0.25);
+  animation: quest-wheel-btn-pulse-ready 1.8s ease-in-out infinite;
+}
+
+.wheel-quests-link {
+  display: inline-block;
+  margin-top: 14px;
+  font-family: 'Jua', sans-serif;
+  font-size: 13px;
+  color: #0a3d52;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.wheel-back-home {
+  font-family: 'Jua', sans-serif;
+  font-size: 14px;
+  color: #fff;
+  text-decoration: none;
+  text-shadow: 0 1px 0 rgba(0, 40, 50, 0.35);
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  background: rgba(0, 90, 105, 0.35);
+}
