@@ -68,6 +68,7 @@
     const screen = document.getElementById('menu-screen');
     if (!screen) return;
     screen.classList.toggle('is-quests-tab', tab === 'quests');
+    screen.classList.toggle('is-shop-tab', tab === 'shop');
   }
 
   function updateHomeTabBodyClass(tab) {

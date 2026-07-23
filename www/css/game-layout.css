@@ -299,7 +299,8 @@ body.home-menu-active.home-tab-learn #menu-root > .menu-sections {
 }
 
 body.home-menu-active #menu-screen.is-quests-tab .quest-section,
-body.home-menu-active #menu-screen.is-quests-tab .shop-section {
+body.home-menu-active #menu-screen.is-quests-tab .shop-section,
+body.home-menu-active #menu-screen.is-shop-tab .shop-section {
   flex: 1 1 0;
   min-height: 0;
   overflow: hidden;
@@ -350,31 +351,43 @@ body.home-menu-active #menu-screen.is-quests-tab .quest-daily-bonus {
   padding: clamp(8px, 1.2dvh, 12px);
 }
 
+body.home-menu-active.home-tab-shop .shop-section-header,
+body.home-menu-active.home-tab-shop .shop-scope-bar {
+  flex-shrink: 0;
+}
+
 body.home-menu-active.home-tab-shop .shop-scope-panel {
   flex: 1 1 0;
   min-height: 0;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   display: flex;
   flex-direction: column;
+  gap: clamp(4px, 0.7dvh, 8px);
+}
+
+body.home-menu-active.home-tab-shop .shop-scope-panel.hidden {
+  display: none !important;
 }
 
 body.home-menu-active.home-tab-shop .shop-item-grid {
-  flex: 1 1 0;
-  min-height: 0;
-  overflow: hidden;
+  flex: 0 0 auto;
+  min-height: auto;
+  overflow: visible;
   gap: clamp(4px, 0.7dvh, 6px);
 }
 
 body.home-menu-active.home-tab-shop .shop-theme-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-template-rows: repeat(2, minmax(0, 1fr));
-  align-content: stretch;
+  grid-auto-rows: auto;
+  align-content: start;
 }
 
 body.home-menu-active.home-tab-shop .shop-item-card,
 body.home-menu-active.home-tab-shop .shop-theme-card {
-  min-height: 0;
+  min-height: auto;
 }
 
 body.home-menu-active.home-tab-learn .word-games-grid {
