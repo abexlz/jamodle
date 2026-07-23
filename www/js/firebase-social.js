@@ -60,6 +60,18 @@
   let authReadyWaiters = [];
   let idleListenersPaused = false;
 
+  function runAfterUserGesture(task) {
+    const run = () => {
+      global.removeEventListener('pointerdown', run);
+      global.removeEventListener('keydown', run);
+      global.removeEventListener('touchstart', run);
+      Promise.resolve().then(task).catch(() => {});
+    };
+    global.addEventListener('pointerdown', run, { once: true, passive: true });
+    global.addEventListener('keydown', run, { once: true, passive: true });
+    global.addEventListener('touchstart', run, { once: true, passive: true });
+  }
+
   function getTodayKey() {
     return new Intl.DateTimeFormat('en-CA', {
       timeZone: DAILY_TZ,
@@ -205,10 +217,12 @@
         try {
           userProfile = await ensureUserDoc(user);
           if (global.CloudSyncService?.syncOnLogin) {
-            await global.CloudSyncService.syncOnLogin(user.uid, db);
+            runAfterUserGesture(() => global.CloudSyncService.syncOnLogin(user.uid, db));
           }
-          pushLocalPublicProfile().catch(() => {});
-          pushLocalWordChainBestStreak().catch(() => {});
+          runAfterUserGesture(async () => {
+            await pushLocalPublicProfile();
+            await pushLocalWordChainBestStreak();
+          });
         } catch (err) {
           console.error('[Firebase] user profile load failed', err);
           userProfile = null;

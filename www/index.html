@@ -28,6 +28,8 @@
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#0097B2">
@@ -2507,7 +2509,7 @@ function newGame(){
   updateHintDock();
 
   if(state.gameMode === 'daily' && state.over){
-    setTimeout(() => showOverlay(state.won), 100);
+    setTimeout(() => showOverlay(state.won, { playSound: false }), 100);
   }
 }
 
@@ -2990,7 +2992,8 @@ function formatDailyTime(ms){
   return wt('timeSec', { s });
 }
 
-function showOverlay(won){
+function showOverlay(won, options = {}){
+  const playSound = options.playSound !== false;
   state.won = won;
   const overlay = document.getElementById('overlay');
   const modal = document.getElementById('modal');
@@ -3009,7 +3012,7 @@ function showOverlay(won){
   document.getElementById('share-toast').classList.remove('show');
   modal.classList.toggle('win', won);
   overlay.classList.toggle('loss', !won);
-  window.SoundEffects?.[won ? 'win' : 'lose']?.();
+  if (playSound) window.SoundEffects?.[won ? 'win' : 'lose']?.();
   overlay.classList.remove('show');
   window.scrollTo(0, 0);
   document.documentElement.scrollTop = 0;

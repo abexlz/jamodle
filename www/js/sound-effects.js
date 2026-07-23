@@ -6,6 +6,7 @@
   'use strict';
 
   let ctx = null;
+  let audioUnlocked = false;
   const sampleBuffers = new Map();
   const sampleLoading = new Map();
 
@@ -50,6 +51,7 @@
   }
 
   function getCtx() {
+    if (!audioUnlocked) return null;
     if (!ctx) {
       const AC = global.AudioContext || global.webkitAudioContext;
       if (!AC) return null;
@@ -89,7 +91,7 @@
   }
 
   function preloadSamples() {
-    if (!enabled()) return;
+    if (!enabled() || !audioUnlocked) return;
     Object.keys(SAMPLE_DEFS).forEach((key) => {
       loadSample(key).catch(() => {});
     });
@@ -107,8 +109,7 @@
 
   function playSample(key) {
     const def = SAMPLE_DEFS[key];
-    if (!def || !enabled()) return;
-    unlock();
+    if (!def || !enabled() || !audioUnlocked) return;
 
     const c = getCtx();
     if (!c) {
@@ -145,6 +146,9 @@
   }
 
   function unlock() {
+    if (!audioUnlocked) {
+      audioUnlocked = true;
+    }
     const c = getCtx();
     if (c?.state === 'suspended') {
       c.resume().catch(() => {});
@@ -153,10 +157,9 @@
   }
 
   function playTone({ freq, freqEnd, type = 'sine', duration = 0.08, peak = 0.11, delay = 0 }) {
-    if (!enabled()) return;
+    if (!enabled() || !audioUnlocked) return;
     const c = getCtx();
     if (!c) return;
-    unlock();
 
     const t0 = c.currentTime + delay;
     const amp = peak * masterGain();

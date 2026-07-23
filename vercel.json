@@ -1,6 +1,7 @@
 {
   "outputDirectory": "www",
   "rewrites": [
+    { "source": "/favicon.ico", "destination": "/favicon.svg" },
     { "source": "/api/(.*)", "destination": "/api/$1" }
   ]
 }
