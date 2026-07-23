@@ -493,10 +493,32 @@
     return daily.every((q) => q.claimed && q.progress >= q.target);
   }
 
+  function allDailyObjectivesComplete(qs) {
+    const daily = qs.daily || [];
+    if (!daily.length) return false;
+    return daily.every((q) => {
+      const target = q.target ?? QUEST_DEFS[q.questId]?.target ?? 1;
+      return q.progress >= target;
+    });
+  }
+
+  function claimCompletedDailies(profile) {
+    if (!profile) return [];
+    const qs = ensureQuestState(profile);
+    const pending = qs.daily.filter((q) => {
+      const target = q.target ?? QUEST_DEFS[q.questId]?.target ?? 1;
+      return !q.claimed && q.progress >= target;
+    });
+    if (!pending.length) return [];
+    const rewards = claimQuestRewards(profile, pending);
+    global.ProfileService?.saveProfile?.(profile);
+    return rewards;
+  }
+
   function isDailyWheelAvailable(profile) {
     if (!profile) return false;
     const qs = ensureQuestState(profile);
-    return allDailyComplete(qs) && !qs.dailyWheelClaimed;
+    return allDailyObjectivesComplete(qs) && !qs.dailyWheelClaimed;
   }
 
   function incrementQuestList(list, events) {
@@ -661,6 +683,8 @@
     countCompleted,
     isDailyWheelAvailable,
     allDailyComplete,
+    allDailyObjectivesComplete,
+    claimCompletedDailies,
     msUntilDailyReset,
     msUntilWeeklyReset,
     formatRefreshCountdown,

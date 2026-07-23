@@ -89,8 +89,7 @@
   }
 
   function renderDailyBonus(snap) {
-    const profile = global.ProfileService?.loadProfile?.();
-    const wheelReady = global.WheelService?.isDailyWheelAvailable?.(profile);
+    const wheelReady = QS()?.isDailyWheelAvailable?.(global.ProfileService?.loadProfile?.());
     const wheelClaimed = snap.dailyWheelClaimed;
 
     let stateClass = '';
@@ -105,7 +104,7 @@
       btnHtml = `<button type="button" class="quest-daily-bonus-btn" disabled>${escapeHtml(t('wheel.locked'))}</button>`;
     }
 
-    const doneCount = snap.daily.filter((q) => q.claimed).length;
+    const doneCount = snap.daily.filter((q) => q.progress >= q.target).length;
     const desc = wheelClaimed
       ? t('wheel.claimedDesc')
       : wheelReady
@@ -319,7 +318,7 @@
     startQuestTimer(root);
     const wheelBtn = root?.querySelector('#quest-wheel-btn')
       || document.getElementById('quest-wheel-btn');
-    wheelBtn?.addEventListener('click', () => global.WheelUI?.show?.());
+    wheelBtn?.addEventListener('click', () => global.WheelUI?.show?.({ autoSpin: true }));
 
     const scope = root || document;
     scope.querySelectorAll('[data-quest-scope]').forEach((btn) => {

@@ -88,6 +88,7 @@
     const result = WS()?.claimSpin?.();
     if (!result?.ok) {
       overlay.dataset.spinning = '0';
+      btn.disabled = false;
       closeOverlay(overlay);
       return;
     }
@@ -104,9 +105,10 @@
     }, 4400);
   }
 
-  function show() {
+  function show(options) {
+    global.QuestService?.getQuestSnapshot?.();
     const profile = global.ProfileService?.loadProfile?.();
-    if (!WS()?.isDailyWheelAvailable?.(profile)) return;
+    if (!WS()?.isDailyWheelAvailable?.(profile)) return false;
 
     const existing = document.getElementById('wheel-overlay');
     if (existing) existing.remove();
@@ -136,11 +138,16 @@
     const wheelEl = overlay.querySelector('#wheel-disc');
     const spinBtn = overlay.querySelector('#wheel-spin-btn');
     spinBtn?.addEventListener('click', () => runSpin(overlay, wheelEl, spinBtn));
+
+    if (options?.autoSpin) {
+      setTimeout(() => runSpin(overlay, wheelEl, spinBtn), 380);
+    }
+
+    return true;
   }
 
   function tryShow() {
-    const profile = global.ProfileService?.loadProfile?.();
-    if (WS()?.isDailyWheelAvailable?.(profile)) show();
+    return show({ autoSpin: false });
   }
 
   global.WheelUI = { show, tryShow };

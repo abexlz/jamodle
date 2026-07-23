@@ -56,11 +56,7 @@
   }
 
   function isDailyWheelAvailable(profile) {
-    if (!profile?.questState) return false;
-    const qs = profile.questState;
-    if (qs.dailyKey !== getTodayKey()) return false;
-    if (qs.dailyWheelClaimed) return false;
-    return global.QuestService?.allDailyComplete?.(qs) ?? false;
+    return global.QuestService?.isDailyWheelAvailable?.(profile) ?? false;
   }
 
   function applyPrize(profile, prize) {
@@ -85,8 +81,11 @@
   }
 
   function claimSpin() {
+    global.QuestService?.getQuestSnapshot?.();
     const profile = global.ProfileService?.loadProfile?.();
     if (!profile) return { ok: false, reason: 'no-profile' };
+
+    global.QuestService?.claimCompletedDailies?.(profile);
     if (!isDailyWheelAvailable(profile)) return { ok: false, reason: 'unavailable' };
 
     const today = getTodayKey();
