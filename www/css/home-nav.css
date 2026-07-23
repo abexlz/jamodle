@@ -2,13 +2,17 @@
 
 :root {
   --home-nav-offset: calc(
-    76px + var(--safe-bottom, env(safe-area-inset-bottom, 0px))
+    58px + var(--safe-bottom, env(safe-area-inset-bottom, 0px))
   );
+  --home-nav-bg: linear-gradient(180deg, #1a3344 0%, #122633 100%);
+  --home-nav-border: rgba(255, 214, 120, 0.28);
+  --home-nav-divider: rgba(255, 255, 255, 0.14);
+  --home-nav-active-accent: #ffd166;
 }
 
 html.large-text {
   --home-nav-offset: calc(
-    84px + var(--safe-bottom, env(safe-area-inset-bottom, 0px))
+    62px + var(--safe-bottom, env(safe-area-inset-bottom, 0px))
   );
 }
 
@@ -23,9 +27,9 @@ body > #home-bottom-bar.home-bottom-bar,
   width: 100%;
   box-sizing: border-box;
   padding: 0;
-  background: rgba(0, 72, 88, 0.96);
-  border-top: 2px solid rgba(123, 207, 255, 0.42);
-  box-shadow: 0 -6px 24px rgba(0, 40, 50, 0.35);
+  background: var(--home-nav-bg);
+  border-top: 2px solid var(--home-nav-border);
+  box-shadow: 0 -8px 28px rgba(8, 20, 30, 0.42);
   pointer-events: auto;
 }
 
@@ -34,7 +38,7 @@ body > #home-bottom-bar.home-bottom-bar,
 }
 
 [data-theme="dark"] .home-bottom-bar {
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 -6px 22px rgba(0, 0, 0, 0.38);
 }
 
 .home-bottom-bar-inner {
@@ -48,7 +52,7 @@ body > #home-bottom-bar.home-bottom-bar,
 .home-bottom-bar-inner.home-bottom-bar-inner--5 {
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 0;
-  min-height: calc(72px + var(--safe-bottom, env(safe-area-inset-bottom, 0px)));
+  min-height: calc(58px + var(--safe-bottom, env(safe-area-inset-bottom, 0px)));
   padding-bottom: var(--safe-bottom, env(safe-area-inset-bottom, 0px));
 }
 
@@ -57,28 +61,24 @@ body > #home-bottom-bar.home-bottom-bar,
   gap: 0;
 }
 
-/* ── Flat tab sections (no individual button chrome) ── */
+/* ── Flat tab sections (icon only, no press overlay) ── */
 .home-tab-btn {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 5px;
   width: 100%;
   min-width: 0;
-  min-height: 72px;
-  padding: 10px 6px 8px;
+  min-height: 58px;
+  padding: 8px 6px;
   margin: 0;
   border: none;
-  border-left: 2px solid rgba(123, 207, 255, 0.34);
+  border-left: 1px solid var(--home-nav-divider);
   border-radius: 0;
   background: transparent;
   background-image: none;
-  color: rgba(255, 255, 255, 0.78);
-  font-family: 'Jua', sans-serif;
-  font-size: clamp(10px, 2.8vw, 12px);
-  line-height: 1.15;
+  color: #ffffff;
   box-sizing: border-box;
   cursor: pointer;
   touch-action: manipulation;
@@ -86,7 +86,7 @@ body > #home-bottom-bar.home-bottom-bar,
   appearance: none;
   box-shadow: none;
   text-decoration: none;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .home-bottom-bar-inner--5 .home-tab-btn:first-child,
@@ -94,36 +94,17 @@ body > #home-bottom-bar.home-bottom-bar,
   border-left: none;
 }
 
-.home-bottom-bar-inner--5 .home-tab-btn > span:not(.home-tab-icon):not(.home-tab-badge),
-.home-bottom-bar-inner--4 .home-tab-btn > span:not(.home-tab-icon):not(.home-tab-badge) {
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  text-transform: uppercase;
-}
-
-.home-bottom-bar-inner--5 .home-tab-icon {
-  font-size: clamp(22px, 5.6vw, 28px);
-}
-
 .home-bottom-bar-inner--4 .home-tab-btn {
   min-height: 56px;
   padding: 8px 6px;
-  font-size: clamp(10px, 2.8vw, 12px);
-}
-
-.home-bottom-bar-inner--4 .home-tab-icon {
-  font-size: 18px;
 }
 
 html.large-text .home-bottom-bar-inner--5 .home-tab-btn {
-  min-height: 78px;
-  padding: 10px 4px 8px;
+  min-height: 62px;
 }
 
 .home-tab-btn--link {
-  color: rgba(255, 255, 255, 0.78);
+  color: #ffffff;
 }
 
 .home-bottom-bar .home-tab-btn {
@@ -132,31 +113,48 @@ html.large-text .home-bottom-bar-inner--5 .home-tab-btn {
 }
 
 .home-tab-btn:active,
-.home-tab-btn.is-pressed {
-  transform: none;
-  filter: none;
-  box-shadow: none;
-  background: rgba(255, 255, 255, 0.08);
-}
-
+.home-tab-btn.is-pressed,
 .home-tab-btn.is-active {
-  background: rgba(123, 207, 255, 0.16);
-  color: #ffffff;
-  box-shadow: none;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+  filter: none !important;
 }
 
-.home-tab-icon {
-  font-size: 20px;
-  line-height: 1;
+.home-tab-btn.is-active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 18%;
+  right: 18%;
+  height: 3px;
+  border-radius: 0 0 4px 4px;
+  background: var(--home-nav-active-accent);
+  box-shadow: 0 0 10px rgba(255, 209, 102, 0.45);
+}
+
+.home-tab-icon-img {
+  display: block;
+  width: clamp(24px, 6.4vw, 28px);
+  height: clamp(24px, 6.4vw, 28px);
+  object-fit: contain;
+  opacity: 0.68;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  pointer-events: none;
+}
+
+.home-tab-btn.is-active .home-tab-icon-img {
+  opacity: 1;
 }
 
 /* Override glossy button press rules for segmented nav */
 .home-bottom-bar .home-tab-btn:active:not(:disabled),
 .home-bottom-bar .home-tab-btn.is-pressed,
 .home-bottom-bar .home-tab-btn:hover:not(:disabled):not(.is-pressed) {
-  transform: none;
-  box-shadow: none;
-  filter: none;
+  transform: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+  background: transparent !important;
 }
 
 /* ── Page shell: menu fills viewport above the bar ── */

@@ -7,7 +7,7 @@
 
   const PRESSABLE =
     'button, a[role="button"], a.btn, .app-btn, .app-pressable, input[type="button"], input[type="submit"], ' +
-    '.race-btn, .home-tab-btn, .top-nav-btn, .back-link, .settings-back, .pause-btn, .learning-mode-card, .match-mode-btn, ' +
+    '.race-btn, .top-nav-btn, .back-link, .settings-back, .pause-btn, .learning-mode-card, .match-mode-btn, ' +
     '.key, .tile-btn, .dock-key, [data-pressable], ' +
     '.profile-nav-btn, .profile-modal-btn, .profile-login-btn, .profile-nickname-save, ' +
     '.avatar-option, .title-option, .frame-option, .pause-quit-btn, ' +
@@ -20,7 +20,7 @@
     '.settings-option-btn, .btn, .pronounce-btn, .answer-speak-btn, .done-lesson-btn, .level-mode-complete-btn, ' +
     '.profile-challenge-btn, ' +
     'a.daily-challenge-card, a.menu-single-player-game-btn, a.menu-tutorial-btn, a.featured-continue-cta, ' +
-    'a.race-btn, a.top-nav-btn, a.settings-back, a.home-tab-btn';
+    'a.race-btn, a.top-nav-btn, a.settings-back';
 
   const GAME_SOUND_SELECTORS = [
     '.key',
@@ -36,7 +36,6 @@
 
   const NAV_SOUND_SELECTORS = [
     'a',
-    '.home-tab-btn',
     '.top-nav-btn',
     '.back-link',
     '.settings-back',

@@ -32,29 +32,37 @@
     } catch { /* ignore */ }
   }
 
+  const NAV_ICONS = {
+    menu: 'assets/nav/home.png',
+    learn: 'assets/nav/learn.png',
+    quests: 'assets/nav/quests.png',
+    shop: 'assets/nav/shop.png',
+    settings: 'assets/nav/settings.png',
+  };
+
+  function renderTabIcon(tab) {
+    const src = NAV_ICONS[tab] || NAV_ICONS.menu;
+    return `<img class="home-tab-icon-img" src="${src}" alt="" width="28" height="28" decoding="async" draggable="false">`;
+  }
+
   function barMarkup() {
     return `
       <nav class="home-bottom-bar" id="${BAR_ID}" aria-label="Home sections">
         <div class="home-bottom-bar-inner home-bottom-bar-inner--5">
-          <button type="button" class="home-tab-btn" data-home-tab="menu" aria-selected="false">
-            <span class="home-tab-icon" aria-hidden="true">🏠</span>
-            <span data-i18n="nav.tabMenu">Menu</span>
+          <button type="button" class="home-tab-btn" data-home-tab="menu" aria-selected="false" data-i18n-aria="nav.tabMenu">
+            ${renderTabIcon('menu')}
           </button>
-          <button type="button" class="home-tab-btn" data-home-tab="learn" aria-selected="false">
-            <span class="home-tab-icon" aria-hidden="true">📚</span>
-            <span data-i18n="nav.tabLearn">Learn</span>
+          <button type="button" class="home-tab-btn" data-home-tab="learn" aria-selected="false" data-i18n-aria="nav.tabLearn">
+            ${renderTabIcon('learn')}
           </button>
-          <button type="button" class="home-tab-btn" data-home-tab="quests" aria-selected="false">
-            <span class="home-tab-icon" aria-hidden="true">🎯</span>
-            <span data-i18n="nav.tabQuests">Quests</span>
+          <button type="button" class="home-tab-btn" data-home-tab="quests" aria-selected="false" data-i18n-aria="nav.tabQuests">
+            ${renderTabIcon('quests')}
           </button>
-          <button type="button" class="home-tab-btn" data-home-tab="shop" aria-selected="false">
-            <span class="home-tab-icon" aria-hidden="true">🛒</span>
-            <span data-i18n="nav.tabShop">Shop</span>
+          <button type="button" class="home-tab-btn" data-home-tab="shop" aria-selected="false" data-i18n-aria="nav.tabShop">
+            ${renderTabIcon('shop')}
           </button>
           <a class="home-tab-btn home-tab-btn--link" href="settings.html" data-home-tab="settings" data-i18n-aria="nav.settings">
-            <span class="home-tab-icon" aria-hidden="true">⚙️</span>
-            <span data-i18n="nav.settings">Settings</span>
+            ${renderTabIcon('settings')}
           </a>
         </div>
       </nav>
