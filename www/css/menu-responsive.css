@@ -135,7 +135,7 @@ html.large-text body.home-menu-active {
   --menu-fluid-h: clamp(0.9, 0.22rem + 1.35dvh, 1.08);
   --menu-fluid: calc(var(--menu-fluid-w) * var(--menu-fluid-h));
 
-  --app-btn-title-size: clamp(18px, calc(4.6vw + 0.15rem), 28px);
+  --app-btn-title-size: clamp(22px, calc(5.4vw + 0.15rem), 32px);
   --app-btn-desc-size: clamp(11px, calc(2.7vw + 0.1rem), 15px);
   --app-btn-icon-size: clamp(22px, calc(5.6vw + 0.1rem), 34px);
   --app-btn-min-h: clamp(50px, calc(13.5vw + 0.35dvh), 78px);
@@ -150,7 +150,7 @@ html.large-text body.home-menu-active {
 
 @container menu (max-width: 340px) {
   #menu-screen {
-    --app-btn-title-size: clamp(16px, 4.8vw, 24px);
+    --app-btn-title-size: clamp(20px, 5.4vw, 28px);
     --app-btn-min-h: clamp(46px, 13.5vw, 68px);
     --menu-type-xl: clamp(16px, 4.6vw, 24px);
   }
@@ -168,7 +168,7 @@ html.large-text body.home-menu-active {
 
 @media (max-height: 620px) {
   #menu-screen {
-    --app-btn-title-size: clamp(15px, 4.2vw, 22px);
+    --app-btn-title-size: clamp(19px, 4.8vw, 26px);
     --menu-brand-top: 10px;
   }
 
@@ -225,6 +225,11 @@ body.home-menu-active.home-tab-menu #menu-screen .menu-top-daily-row.menu-daily-
 #menu-screen .menu-play-game-btn .mode-name {
   font-size: var(--app-btn-title-size) !important;
   line-height: 1.1;
+}
+
+#menu-screen .menu-daily-puzzle-bar .mode-name,
+#menu-screen .menu-top-daily-row .menu-daily-puzzle-main .mode-name {
+  font-size: clamp(26px, 6.6vw, 34px) !important;
 }
 
 #menu-screen .menu-mode-heading-text {

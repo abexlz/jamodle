@@ -1067,7 +1067,7 @@ button.ghost:disabled,
   width: auto;
   text-align: left;
   text-transform: uppercase;
-  font-size: clamp(20px, 5.4vw, 26px) !important;
+  font-size: clamp(24px, 6.2vw, 30px) !important;
   line-height: 1.1;
   color: #ffffff !important;
   text-shadow: 0 2px 0 rgba(120, 80, 0, 0.45) !important;
@@ -1200,7 +1200,7 @@ button.ghost:disabled,
   width: 100%;
   text-align: center;
   text-transform: uppercase;
-  font-size: clamp(18px, 4.8vw, 22px) !important;
+  font-size: clamp(22px, 5.6vw, 26px) !important;
   line-height: 1.05;
   color: #ffffff !important;
   white-space: nowrap;
@@ -1308,7 +1308,7 @@ button.ghost:disabled,
   width: 100%;
   text-align: center;
   text-transform: uppercase;
-  font-size: clamp(18px, 4.8vw, 22px) !important;
+  font-size: clamp(22px, 5.6vw, 26px) !important;
   line-height: 1.05;
   color: #ffffff !important;
   text-shadow: 0 2px 0 rgba(140, 40, 55, 0.45) !important;
@@ -1336,7 +1336,7 @@ button.ghost:disabled,
   width: 100%;
   text-align: center;
   text-transform: uppercase;
-  font-size: clamp(18px, 4.8vw, 22px) !important;
+  font-size: clamp(22px, 5.6vw, 26px) !important;
   line-height: 1.05;
   color: #ffffff !important;
   text-shadow: 0 2px 0 rgba(120, 80, 0, 0.45) !important;
@@ -1386,7 +1386,7 @@ button.ghost:disabled,
   text-align: center;
   width: 100%;
   text-transform: uppercase;
-  font-size: clamp(22px, 5.8vw, 28px);
+  font-size: clamp(26px, 6.6vw, 32px);
   line-height: 1.1;
 }
 
@@ -1501,7 +1501,7 @@ button.ghost:disabled,
 
 #menu-screen .menu-top-daily.daily-challenge-bar .mode-name,
 #menu-screen .menu-top-classic-label {
-  font-size: clamp(22px, 5.8vw, 28px) !important;
+  font-size: clamp(26px, 6.6vw, 32px) !important;
   line-height: 1.1;
 }
 
