@@ -32,9 +32,12 @@
     if (compact) {
       container.hidden = false;
       container.innerHTML = `
-        <div class="player-hud-compact" role="group" aria-label="${escapeHtml(t('shop.hudLabel'))}">
-          <span class="player-hud-coins" aria-label="${escapeHtml(t('shop.coins'))}">🪙 ${summary.coins}</span>
-        </div>
+        <a class="menu-hud-coins player-hud-compact" href="index.html?tab=shop"
+          role="group" aria-label="${escapeHtml(t('shop.hudLabel'))}">
+          <span class="menu-hud-coins-value" aria-label="${escapeHtml(t('shop.coins'))}">${summary.coins}</span>
+          <span class="menu-hud-coins-coin" aria-hidden="true">🪙</span>
+          <span class="menu-hud-coins-plus" aria-hidden="true">+</span>
+        </a>
       `;
       return;
     }

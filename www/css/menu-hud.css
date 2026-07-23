@@ -1,0 +1,385 @@
+/* Arcade-style menu HUD — spin wheel left, avatar center, coins right */
+
+:root {
+  --menu-hud-red-top: #e8334a;
+  --menu-hud-red-mid: #d41f38;
+  --menu-hud-red-low: #b81830;
+  --menu-hud-coin-pill: #5c1424;
+  --menu-hud-coin-pill-edge: #3d0d18;
+  --menu-hud-progress: #3ecfb0;
+  --menu-hud-star: #2f8fd4;
+}
+
+.menu-top-bar.menu-hud-bar {
+  grid-template-columns: minmax(64px, 1fr) auto minmax(72px, 1fr);
+  min-height: calc(var(--menu-bar-h) + var(--safe-top));
+  padding:
+    var(--safe-top)
+    max(8px, env(safe-area-inset-right, 0px))
+    4px
+    max(8px, env(safe-area-inset-left, 0px));
+  background:
+    radial-gradient(circle at 18% 120%, rgba(255, 220, 120, 0.22) 0%, transparent 42%),
+    radial-gradient(circle at 82% 130%, rgba(255, 180, 80, 0.18) 0%, transparent 38%),
+    linear-gradient(180deg, var(--menu-hud-red-top) 0%, var(--menu-hud-red-mid) 58%, var(--menu-hud-red-low) 100%);
+  border-bottom: 3px solid rgba(120, 10, 30, 0.45);
+  box-shadow: 0 4px 0 rgba(80, 8, 22, 0.55), 0 8px 20px rgba(0, 0, 0, 0.22);
+}
+
+.menu-top-bar.menu-hud-bar::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -10px;
+  height: 12px;
+  background:
+    radial-gradient(circle, rgba(255, 210, 90, 0.35) 0 2px, transparent 3px) 0 0 / 24px 12px repeat-x;
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+/* Left — mini spin wheel */
+.menu-hud-left .menu-hud-spin {
+  flex-shrink: 0;
+}
+
+.menu-hud-spin {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-decoration: none;
+  position: relative;
+  transition: transform 0.12s ease;
+}
+
+.menu-hud-spin:active {
+  transform: scale(0.94);
+}
+
+.menu-hud-spin-wheel {
+  width: clamp(44px, 12vw, 52px);
+  height: clamp(44px, 12vw, 52px);
+  border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow: 0 3px 0 rgba(80, 8, 22, 0.45), inset 0 2px 4px rgba(255, 255, 255, 0.35);
+  background: conic-gradient(
+    #ff6b9d 0deg 45deg,
+    #ffd166 45deg 90deg,
+    #7dd4ff 90deg 135deg,
+    #b388ff 135deg 180deg,
+    #6ee7a8 180deg 225deg,
+    #ff9f68 225deg 270deg,
+    #ffe566 270deg 315deg,
+    #ff6b9d 315deg 360deg
+  );
+  position: relative;
+}
+
+.menu-hud-spin-wheel::before {
+  content: '';
+  position: absolute;
+  inset: 22%;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.menu-hud-spin-wheel::after {
+  content: '';
+  position: absolute;
+  top: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-bottom: 11px solid #e63946;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.25));
+}
+
+.menu-hud-spin-label {
+  font-family: 'Jua', sans-serif;
+  font-size: clamp(11px, 3vw, 13px);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  color: #fff;
+  text-shadow: 0 2px 0 rgba(80, 8, 22, 0.55);
+  line-height: 1;
+}
+
+.menu-hud-bar .menu-wheel-nav {
+  min-width: 0;
+  height: auto;
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  animation: none;
+}
+
+.menu-hud-bar .menu-wheel-nav.is-ready .menu-hud-spin-wheel {
+  animation: menu-hud-spin-glow 1.8s ease-in-out infinite;
+}
+
+.menu-hud-bar .menu-wheel-nav.is-claimed {
+  opacity: 1;
+}
+
+.menu-hud-bar .menu-wheel-nav.is-claimed .menu-hud-spin-wheel {
+  filter: grayscale(0.35);
+  opacity: 0.85;
+}
+
+@keyframes menu-hud-spin-glow {
+  0%, 100% { box-shadow: 0 3px 0 rgba(80, 8, 22, 0.45), 0 0 8px rgba(255, 230, 120, 0.4); }
+  50% { box-shadow: 0 3px 0 rgba(80, 8, 22, 0.45), 0 0 16px rgba(255, 230, 120, 0.75); }
+}
+
+.menu-hud-spin-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
+  border-radius: 999px;
+  background: #ffeb3b;
+  border: 2px solid #fff;
+  color: #5c1424;
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 10px;
+  text-align: center;
+  box-shadow: 0 2px 0 rgba(80, 8, 22, 0.35);
+}
+
+/* Calendar chip — arcade style */
+.menu-hud-calendar {
+  flex-shrink: 0;
+  width: clamp(40px, 11vw, 46px);
+  height: clamp(40px, 11vw, 46px);
+  border-radius: 12px;
+  border: 2px solid #f4d35e;
+  background: linear-gradient(180deg, #fff4c8 0%, #ffd45a 55%, #f0b020 100%);
+  box-shadow: 0 3px 0 #9a7010, inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.menu-hud-calendar:active {
+  transform: translateY(2px) scale(0.96);
+  box-shadow: 0 1px 0 #9a7010, inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.menu-hud-calendar .menu-calendar-nav-month {
+  color: #8b4513;
+  font-weight: 700;
+}
+
+.menu-hud-calendar .menu-calendar-nav-day {
+  color: #5c1424;
+  font-weight: 800;
+}
+
+/* Center — circular avatar + arc progress */
+.menu-top-bar .menu-hud-profile {
+  pointer-events: auto;
+  z-index: 36;
+}
+
+.menu-hud-avatar {
+  --hud-size: var(--menu-profile-size, clamp(92px, 26vw, 112px));
+  position: relative;
+  width: var(--hud-size);
+  height: var(--hud-size);
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.28));
+}
+
+.menu-hud-avatar-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.menu-hud-avatar-track {
+  fill: none;
+  stroke: rgba(0, 0, 0, 0.22);
+  stroke-width: 7;
+}
+
+.menu-hud-avatar-fill {
+  fill: none;
+  stroke: var(--menu-hud-progress);
+  stroke-width: 7;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.35s ease;
+  filter: drop-shadow(0 0 4px rgba(62, 207, 176, 0.55));
+}
+
+.menu-hud-avatar-inner {
+  position: absolute;
+  inset: 12%;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #6ec8ff 0%, #3a8fd4 100%);
+  border: 4px solid #f4d35e;
+  box-shadow:
+    inset 0 3px 8px rgba(255, 255, 255, 0.35),
+    inset 0 -4px 8px rgba(0, 40, 80, 0.25),
+    0 3px 0 rgba(120, 80, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-hud-avatar-icon {
+  font-size: clamp(28px, 9vw, 40px);
+  line-height: 1;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.2));
+}
+
+.menu-hud-level-star {
+  position: absolute;
+  top: -4%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4;
+  min-width: 34%;
+  height: 28%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at 50% 35%, #7dd4ff 0%, var(--menu-hud-star) 55%, #1f5f9a 100%);
+  clip-path: polygon(50% 0%, 61% 32%, 98% 35%, 68% 57%, 79% 91%, 50% 72%, 21% 91%, 32% 57%, 2% 35%, 39% 32%);
+  filter: drop-shadow(0 2px 0 rgba(0, 40, 80, 0.45));
+}
+
+.menu-hud-level-num {
+  font-family: 'Jua', sans-serif;
+  font-size: clamp(11px, 3.2vw, 14px);
+  font-weight: 400;
+  color: #fff;
+  text-shadow: 0 1px 0 rgba(0, 40, 80, 0.55);
+  line-height: 1;
+  transform: translateY(-8%);
+}
+
+.menu-hud-shield {
+  position: absolute;
+  bottom: -2%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4;
+  width: 30%;
+  height: 24%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(14px, 4vw, 18px);
+  background: linear-gradient(180deg, #ffe566 0%, #f4b820 100%);
+  border: 2px solid #c49210;
+  border-radius: 8px 8px 12px 12px;
+  box-shadow: 0 2px 0 #9a7010;
+  line-height: 1;
+}
+
+/* Right — coin pill */
+.menu-top-bar .menu-hud-coins-slot {
+  pointer-events: auto;
+}
+
+.menu-hud-coins {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: clamp(88px, 24vw, 108px);
+  height: clamp(36px, 10vw, 42px);
+  padding: 0 38px 0 12px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #7a2038 0%, var(--menu-hud-coin-pill) 45%, var(--menu-hud-coin-pill-edge) 100%);
+  border: 2px solid rgba(255, 200, 120, 0.35);
+  box-shadow: 0 4px 0 rgba(40, 6, 14, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  text-decoration: none;
+  transition: transform 0.12s ease;
+}
+
+.menu-hud-coins:active {
+  transform: translateY(2px) scale(0.98);
+  box-shadow: 0 2px 0 rgba(40, 6, 14, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.menu-hud-coins-value {
+  flex: 1;
+  font-family: 'Jua', sans-serif;
+  font-size: clamp(16px, 4.5vw, 20px);
+  font-weight: 400;
+  color: #fff;
+  text-shadow: 0 2px 0 rgba(40, 6, 14, 0.55);
+  text-align: right;
+  line-height: 1;
+}
+
+.menu-hud-coins-coin {
+  position: absolute;
+  right: -4px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: clamp(36px, 10vw, 42px);
+  height: clamp(36px, 10vw, 42px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(22px, 6vw, 28px);
+  line-height: 1;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.25));
+}
+
+.menu-hud-coins-plus {
+  position: absolute;
+  right: -2px;
+  bottom: -4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #6ee7a8 0%, #22c57e 100%);
+  border: 2px solid #fff;
+  color: #fff;
+  font-family: 'Jua', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 14px;
+  text-align: center;
+  box-shadow: 0 2px 0 #1a9d62;
+}
+
+.menu-top-bar .player-hud-compact {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}
+
+.menu-header::before {
+  top: calc(var(--menu-bar-h) + var(--safe-top) + var(--menu-profile-overhang) * 0.28);
+  background: linear-gradient(180deg,
+    var(--menu-hud-red-low) 0%,
+    #c41e3a 18%,
+    rgba(0, 151, 178, 0.55) 52%,
+    rgba(0, 151, 178, 0) 100%);
+}
+
+@media (max-height: 760px) {
+  :root {
+    --menu-profile-size: clamp(80px, 22vw, 96px);
+    --menu-profile-drop: 10%;
+  }
+
+  .menu-hud-spin-wheel {
+    width: 40px;
+    height: 40px;
+  }
+}

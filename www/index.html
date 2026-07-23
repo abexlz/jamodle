@@ -242,67 +242,62 @@
     left: 0;
     right: 0;
     display: grid;
-    grid-template-columns: minmax(52px, 1fr) auto minmax(52px, 1fr);
+    grid-template-columns: minmax(88px, 1fr) auto minmax(88px, 1fr);
     grid-template-rows: 1fr;
-    align-items: center;
+    align-items: end;
     width: 100%;
     max-width: none;
     margin: 0;
     min-height: calc(var(--menu-bar-h) + var(--safe-top));
     padding:
       var(--safe-top)
-      max(10px, env(safe-area-inset-right, 0px))
-      0
-      max(10px, env(safe-area-inset-left, 0px));
-    background: linear-gradient(180deg,
-      var(--menu-bar-teal-top) 0%,
-      var(--menu-bar-teal-mid) 55%,
-      var(--menu-bar-teal-low) 100%);
-    border-bottom: 2px solid rgba(123, 207, 255, 0.38);
-    border-radius: 0;
-    box-shadow: 0 4px 18px rgba(8, 20, 30, 0.28);
+      max(8px, env(safe-area-inset-right, 0px))
+      4px
+      max(8px, env(safe-area-inset-left, 0px));
     z-index: 24;
     flex-shrink: 0;
     overflow: visible;
     pointer-events: none;
   }
 
-  .menu-top-bar .menu-top-bar-left {
+  .menu-top-bar .menu-top-bar-left,
+  .menu-top-bar .menu-hud-left {
     grid-column: 1;
     grid-row: 1;
     justify-self: start;
-    align-self: center;
+    align-self: end;
     display: flex;
-    align-items: center;
-    gap: 8px;
+    align-items: flex-end;
+    gap: clamp(6px, 2vw, 10px);
     pointer-events: auto;
     z-index: 30;
     padding-left: 2px;
+    margin-bottom: 4px;
   }
 
-  .menu-top-bar .menu-wheel-nav {
-    flex-shrink: 0;
-  }
-
-  .menu-top-bar .menu-profile-nav {
+  .menu-top-bar .menu-profile-nav,
+  .menu-top-bar .menu-hud-profile {
     grid-column: 2;
     grid-row: 1;
     align-self: end;
     margin: 0;
-    transform: translateY(var(--menu-profile-drop, 8%));
+    transform: translateY(var(--menu-profile-drop, 14%));
     pointer-events: auto;
     z-index: 35;
   }
 
-  .menu-top-bar .menu-profile-nav:active {
-    transform: translateY(var(--menu-profile-drop, 8%)) scale(0.94);
+  .menu-top-bar .menu-profile-nav:active,
+  .menu-top-bar .menu-hud-profile:active {
+    transform: translateY(var(--menu-profile-drop, 14%)) scale(0.94);
   }
 
-  .menu-top-bar .player-hud-slot {
+  .menu-top-bar .player-hud-slot,
+  .menu-top-bar .menu-hud-coins-slot {
     grid-column: 3;
     grid-row: 1;
     justify-self: end;
-    align-self: center;
+    align-self: end;
+    margin-bottom: 6px;
     pointer-events: auto;
   }
 
@@ -1589,22 +1584,23 @@
 <div id="menu-screen" class="screen">
   <div class="menu-inner">
     <header class="menu-header">
-      <div class="menu-top-bar">
-        <div class="menu-top-bar-left">
-          <a class="menu-wheel-nav" href="wheel.html" id="menu-wheel-nav" data-i18n-aria="wheel.pageNav">
-            <span class="menu-wheel-nav-icon" aria-hidden="true">🎡</span>
+      <div class="menu-top-bar menu-hud-bar">
+        <div class="menu-top-bar-left menu-hud-left">
+          <a class="menu-hud-spin menu-wheel-nav" href="wheel.html" id="menu-wheel-nav" data-i18n-aria="wheel.pageNav">
+            <span class="menu-hud-spin-wheel" aria-hidden="true"></span>
+            <span class="menu-hud-spin-label" data-i18n="wheel.spinShort">SPIN!</span>
           </a>
-          <button type="button" class="menu-calendar-nav" id="menu-calendar-nav" data-i18n-aria="dailyCalendar.pageNav">
+          <button type="button" class="menu-calendar-nav menu-hud-calendar" id="menu-calendar-nav" data-i18n-aria="dailyCalendar.pageNav">
             <span class="menu-calendar-nav-sheet" aria-hidden="true">
               <span class="menu-calendar-nav-month" id="menu-calendar-nav-month"></span>
               <span class="menu-calendar-nav-day" id="menu-calendar-nav-day"></span>
             </span>
           </button>
         </div>
-        <a class="menu-profile-nav" href="profile.html" id="nav-profile" data-i18n-aria="nav.profile">
+        <a class="menu-profile-nav menu-hud-profile" href="profile.html" id="nav-profile" data-i18n-aria="nav.profile">
           <span class="menu-profile-card" id="menu-profile-card"></span>
         </a>
-        <div class="player-hud-slot" id="player-hud" data-player-hud="compact"></div>
+        <div class="player-hud-slot menu-hud-coins-slot" id="player-hud" data-player-hud="compact"></div>
       </div>
       <div class="menu-top-bar-spacer" aria-hidden="true"></div>
       <h1 class="menu-brand menu-brand--jamodeul brand-intro" aria-label="한글들 hangjul-dle">

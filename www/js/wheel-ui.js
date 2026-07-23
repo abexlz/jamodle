@@ -201,11 +201,11 @@
     const claimed = snap?.dailyWheelClaimed;
     btn.classList.toggle('is-ready', !!ready);
     btn.classList.toggle('is-claimed', !!claimed && !ready);
-    let badge = btn.querySelector('.menu-wheel-nav-badge');
+    let badge = btn.querySelector('.menu-hud-spin-badge') || btn.querySelector('.menu-wheel-nav-badge');
     if (ready) {
       if (!badge) {
         badge = document.createElement('span');
-        badge.className = 'menu-wheel-nav-badge';
+        badge.className = 'menu-hud-spin-badge';
         badge.setAttribute('aria-hidden', 'true');
         btn.appendChild(badge);
       }

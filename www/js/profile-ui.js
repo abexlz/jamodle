@@ -349,12 +349,42 @@
     `;
   }
 
+  function renderMenuHudAvatar(summary) {
+    const pct = summary.xpToNext > 0
+      ? Math.min(100, Math.round((summary.xpInLevel / summary.xpToNext) * 100))
+      : 0;
+    const r = 42;
+    const circumference = 2 * Math.PI * r;
+    const offset = circumference * (1 - pct / 100);
+
+    return `
+      <div class="menu-hud-avatar" aria-hidden="true">
+        <svg class="menu-hud-avatar-svg" viewBox="0 0 96 96">
+          <circle class="menu-hud-avatar-track" cx="48" cy="48" r="${r}" />
+          <circle class="menu-hud-avatar-fill" cx="48" cy="48" r="${r}"
+            stroke-dasharray="${circumference.toFixed(2)}"
+            stroke-dashoffset="${offset.toFixed(2)}" />
+        </svg>
+        <div class="menu-hud-level-star">
+          <span class="menu-hud-level-num">${summary.level || 1}</span>
+        </div>
+        <div class="menu-hud-avatar-inner">
+          <span class="menu-hud-avatar-icon">${summary.avatarIcon || '🌸'}</span>
+        </div>
+        <div class="menu-hud-shield">🪙</div>
+      </div>
+    `;
+  }
+
   function renderMenuProfileCard(summary, { variant } = {}) {
     if (!summary) return '';
     ensureStyles();
     const isHero = variant === 'hero';
     const isMenu = variant === 'menu';
-    const cardClass = isHero ? ' menu-profile-card--hero' : isMenu ? ' menu-profile-card--menu' : '';
+    if (isMenu) {
+      return `<div class="menu-profile-card menu-profile-card--menu">${renderMenuHudAvatar(summary)}</div>`;
+    }
+    const cardClass = isHero ? ' menu-profile-card--hero' : '';
     return `
       <div class="menu-profile-card${cardClass}">
         ${renderBadgeCard(summary, { variant })}
