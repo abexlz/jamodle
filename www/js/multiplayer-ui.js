@@ -171,7 +171,7 @@
         </div>
         <div class="battle-matchmaking-step" data-matchmaking-step="pick">
           <p class="battle-matchmaking-lead" data-i18n="menu.battle.matchmakingPickLength">${escapeHtml(t('menu.battle.matchmakingPickLength'))}</p>
-          <p class="battle-matchmaking-note" data-i18n="menu.battle.matchmakingTurnOnly">${escapeHtml(t('menu.battle.matchmakingTurnOnly'))}</p>
+          <p class="battle-matchmaking-note" data-matchmaking-note data-i18n="menu.battle.matchmakingTurnOnly">${escapeHtml(t('menu.battle.matchmakingTurnOnly'))}</p>
           <div class="race-length-options race-length-options--grid-3 battle-matchmaking-lengths">
             ${koreanLengthButtonsHtml()}
           </div>
@@ -204,6 +204,11 @@
     });
     overlay.querySelector('[data-matchmaking-cancel]')?.addEventListener('click', (e) => {
       e.preventDefault();
+      const isWordChain = overlay.dataset.selectedGame === 'word-chain';
+      if (isWordChain) {
+        closeMatchmakingOverlay();
+        return;
+      }
       cancelMatchmakingSearch({ returnToPick: true });
     });
     overlay.querySelector('.battle-matchmaking-lengths')?.addEventListener('click', (e) => {
@@ -236,12 +241,42 @@
 
   function resetMatchmakingOverlay(overlay) {
     if (!overlay) return;
+    clearWordChainBotTimer(overlay);
     overlay.dataset.selectedLength = '';
     const pickedEl = overlay.querySelector('[data-matchmaking-picked]');
     if (pickedEl) pickedEl.textContent = '';
     const etaEl = overlay.querySelector('[data-matchmaking-eta]');
     if (etaEl) etaEl.textContent = '';
-    showMatchmakingStep(overlay, overlay.dataset.selectedGame === 'word-chain' ? 'unsupported' : 'pick');
+    const noteEl = overlay.querySelector('[data-matchmaking-note]');
+    if (noteEl) {
+      const isWordChain = overlay.dataset.selectedGame === 'word-chain';
+      noteEl.textContent = isWordChain
+        ? (t('menu.battle.matchmakingWordChainNote') || '')
+        : (t('menu.battle.matchmakingTurnOnly') || '');
+      noteEl.classList.toggle('hidden', isWordChain);
+    }
+    showMatchmakingStep(overlay, 'pick');
+  }
+
+  function clearWordChainBotTimer(overlay) {
+    if (!overlay?._botFallbackTimer) return;
+    clearTimeout(overlay._botFallbackTimer);
+    overlay._botFallbackTimer = null;
+  }
+
+  function getBotFallbackMs() {
+    return global.BotProfileService?.BOT_FALLBACK_MS ?? 25_000;
+  }
+
+  function redirectToBotMatch(game, options = {}) {
+    if (global.BotProfileService?.redirectToBotMatch) {
+      global.BotProfileService.redirectToBotMatch(game, options);
+      return;
+    }
+    const profile = global.BotProfileService?.pickRandomBotProfile?.();
+    if (!profile) return;
+    const url = global.BotProfileService.buildBotMatchUrl(game, profile, options);
+    global.location.href = url;
   }
 
   function openMatchmakingOverlay(game) {
@@ -259,6 +294,10 @@
     overlay.classList.remove('hidden');
     syncMultiplayerOpenClass();
     global.I18n?.applyToDocument?.(overlay);
+
+    if (game === 'word-chain') {
+      startWordChainMatchmakingSearch();
+    }
   }
 
   async function closeMatchmakingOverlay() {
@@ -270,11 +309,12 @@
   }
 
   async function cancelMatchmakingSearch(options = {}) {
+    const overlay = document.getElementById('battle-matchmaking-overlay');
+    clearWordChainBotTimer(overlay);
     try {
       await global.MatchQueueService?.leaveQueue?.();
     } catch (_) { /* ignore */ }
     if (options.returnToPick) {
-      const overlay = document.getElementById('battle-matchmaking-overlay');
       if (overlay) resetMatchmakingOverlay(overlay);
     }
   }
@@ -283,6 +323,34 @@
     const statusEl = overlay.querySelector('[data-matchmaking-status]');
     if (!statusEl) return;
     statusEl.textContent = t(key);
+  }
+
+  function setMatchmakingEta(overlay) {
+    const etaEl = overlay.querySelector('[data-matchmaking-eta]');
+    if (!etaEl) return;
+    const seconds = Math.ceil(getBotFallbackMs() / 1000);
+    etaEl.textContent = t('menu.battle.matchmakingExpectedWait', { seconds })
+      || `Expected wait: ~${seconds} sec`;
+  }
+
+  async function startWordChainMatchmakingSearch() {
+    const overlay = ensureMatchmakingOverlay();
+    overlay.dataset.selectedGame = 'word-chain';
+    const pickedEl = overlay.querySelector('[data-matchmaking-picked]');
+    if (pickedEl) {
+      pickedEl.textContent = battleGameLabel('word-chain');
+    }
+    setMatchmakingEta(overlay);
+    showMatchmakingStep(overlay, 'searching');
+    setMatchmakingStatus(overlay, 'menu.battle.matchmakingSearching');
+    syncMultiplayerOpenClass();
+
+    clearWordChainBotTimer(overlay);
+    overlay._botFallbackTimer = setTimeout(() => {
+      if (overlay.dataset.matchmakingStep !== 'searching') return;
+      setMatchmakingStatus(overlay, 'menu.battle.matchmakingFound');
+      redirectToBotMatch('word-chain');
+    }, getBotFallbackMs());
   }
 
   async function startMatchmakingSearch(wordLength) {
@@ -295,11 +363,7 @@
         || `${wordLength} letters`;
     }
     const etaEl = overlay.querySelector('[data-matchmaking-eta]');
-    if (etaEl) {
-      const seconds = 5 + Math.floor(Math.random() * 16);
-      etaEl.textContent = t('menu.battle.matchmakingExpectedWait', { seconds })
-        || `Expected wait: ~${seconds} sec`;
-    }
+    if (etaEl) setMatchmakingEta(overlay);
     showMatchmakingStep(overlay, 'searching');
     setMatchmakingStatus(overlay, 'menu.battle.matchmakingSearching');
     syncMultiplayerOpenClass();
@@ -330,6 +394,10 @@
           if (url) {
             global.location.href = url;
           }
+        },
+        onBotFallback: ({ wordLength: wl }) => {
+          setMatchmakingStatus(overlay, 'menu.battle.matchmakingFound');
+          redirectToBotMatch('jamodle', { wordLength: wl });
         },
         onError: () => {
           alert(t('menu.battle.matchmakingFailed'));

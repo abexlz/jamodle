@@ -51,7 +51,8 @@
         "matchmakingFailed": "Could not start matchmaking. Try again.",
         "matchmakingLogin": "Sign in to play random matches.",
         "matchmakingFound": "Opponent found!",
-        "matchmakingExpectedWait": "Expected wait: ~{{seconds}} sec"
+        "matchmakingExpectedWait": "Expected wait: ~{{seconds}} sec",
+        "matchmakingWordChainNote": "Searching for a Word Chain opponent."
       },
       "modes": {
         "level-mode": {
@@ -1495,7 +1496,8 @@
         "matchmakingFailed": "매칭을 시작하지 못했습니다. 다시 시도해 주세요.",
         "matchmakingLogin": "랜덤 매치를 하려면 로그인하세요.",
         "matchmakingFound": "상대를 찾았습니다!",
-        "matchmakingExpectedWait": "예상 대기: 약 {{seconds}}초"
+        "matchmakingExpectedWait": "예상 대기: 약 {{seconds}}초",
+        "matchmakingWordChainNote": "연관 단어 대결 상대를 찾는 중입니다."
       },
       "modes": {
         "level-mode": {

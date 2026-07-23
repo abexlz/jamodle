@@ -638,10 +638,32 @@
     };
   }
 
+  function parseBotProfileFromParams(params) {
+    const name = String(params.get('name') || '').trim();
+    if (!name) return null;
+    const BS = () => global.BadgeService;
+    const avatarId = String(params.get('avatarId') || 'default');
+    const frameId = String(params.get('frameId') || 'none');
+    const level = Number(params.get('level'));
+    return {
+      name,
+      avatarId,
+      avatarIcon: BS()?.getAvatarDef?.(avatarId)?.icon || '🌸',
+      frameId,
+      level: Number.isFinite(level) && level > 0 ? level : 5,
+      xpInLevel: 20 + Math.floor(Math.random() * 60),
+      xpToNext: 100,
+      totalXp: (Number.isFinite(level) ? level : 5) * 120,
+    };
+  }
+
   class MatchTurnBotApp {
     constructor(rootEl) {
       this.root = rootEl;
       const params = new URLSearchParams(global.location.search);
+      this.source = String(params.get('source') || '');
+      this.isMatchmakingBot = this.source === 'matchmaking';
+      this.botProfile = parseBotProfileFromParams(params);
       const wr = Number(params.get('winrate'));
       this.winRate = Number.isFinite(wr) ? Math.min(100, Math.max(0, wr)) / 100 : 0.5;
       const speedParam = String(params.get('speed') || 'medium').toLowerCase();
@@ -680,8 +702,44 @@
     }
 
     botName() {
+      if (this.botProfile?.name) return this.botProfile.name;
       const speedLabel = this.speed.charAt(0).toUpperCase() + this.speed.slice(1);
       return `🤖 Bot ${Math.round(this.winRate * 100)}% · ${speedLabel}`;
+    }
+
+    botSummary() {
+      if (!this.botProfile) {
+        return {
+          name: this.botName(),
+          displayName: this.botName(),
+          avatarId: 'default',
+          avatarIcon: '🤖',
+          frameId: 'none',
+          level: 1,
+          xpInLevel: 0,
+          xpToNext: 100,
+          totalXp: 0,
+        };
+      }
+      return {
+        name: this.botProfile.name,
+        displayName: this.botProfile.name,
+        avatarId: this.botProfile.avatarId,
+        avatarIcon: this.botProfile.avatarIcon,
+        frameId: this.botProfile.frameId,
+        level: this.botProfile.level,
+        xpInLevel: this.botProfile.xpInLevel,
+        xpToNext: this.botProfile.xpToNext,
+        totalXp: this.botProfile.totalXp,
+      };
+    }
+
+    renderBotOpponentCard() {
+      if (!this.els?.oppCard) return;
+      const summary = this.botSummary();
+      global.MatchEmotes?.renderOpponentBattleCard?.(this.els.oppCard, summary);
+      if (this.els.oppName) this.els.oppName.textContent = summary.name;
+      this.els.oppCard.dataset.loadedUid = BOT_UID;
     }
 
     speedProfile() {
@@ -693,7 +751,7 @@
       document.title = rt('pageTitle');
       this.renderShell();
 
-      if (global.DevBuild && !global.DevBuild.isDevModeActive()) {
+      if (global.DevBuild && !global.DevBuild.isDevModeActive() && !this.isMatchmakingBot) {
         this.renderMain(`
           <div class="race-panel">
             <p class="race-panel-msg">Bot fight is only available in dev mode.</p>
@@ -846,8 +904,10 @@
             this.els.centerSub.textContent = rt('roundTurn', { round: roundNum, turn: turnNum })
               || `Round ${roundNum} · Turn ${turnNum}`;
           }
+          this.renderBotOpponentCard();
         },
       });
+      this.renderBotOpponentCard();
     }
 
     applyPlayerTurn(payload) {

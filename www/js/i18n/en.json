@@ -47,7 +47,8 @@
       "matchmakingFailed": "Could not start matchmaking. Try again.",
       "matchmakingLogin": "Sign in to play random matches.",
       "matchmakingFound": "Opponent found!",
-      "matchmakingExpectedWait": "Expected wait: ~{{seconds}} sec"
+      "matchmakingExpectedWait": "Expected wait: ~{{seconds}} sec",
+      "matchmakingWordChainNote": "Searching for a Word Chain opponent."
     },
     "modes": {
       "level-mode": {

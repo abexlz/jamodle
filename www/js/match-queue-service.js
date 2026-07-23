@@ -7,6 +7,7 @@
   const QUEUE_STATUS = { searching: 'searching', matched: 'matched', cancelled: 'cancelled' };
   const QUEUE_STALE_MS = 3 * 60 * 1000;
   const PAIR_RETRY_MS = 1500;
+  const BOT_FALLBACK_MS = global.BotProfileService?.BOT_FALLBACK_MS ?? 25_000;
 
   let activeSession = null;
 
@@ -37,6 +38,7 @@
     if (session.ownUnsub) session.ownUnsub();
     if (session.opponentsUnsub) session.opponentsUnsub();
     if (session.pairTimer) clearInterval(session.pairTimer);
+    if (session.botTimeoutTimer) clearTimeout(session.botTimeoutTimer);
     session.onStatus?.({ phase: 'idle' });
   }
 
@@ -226,10 +228,12 @@
       uid,
       onStatus: options.onStatus || null,
       onMatched: options.onMatched || null,
+      onBotFallback: options.onBotFallback || null,
       onError: options.onError || null,
       ownUnsub: null,
       opponentsUnsub: null,
       pairTimer: null,
+      botTimeoutTimer: null,
     };
     activeSession = session;
 
@@ -259,6 +263,13 @@
     session.pairTimer = setInterval(() => {
       scanForOpponents(session).catch(() => {});
     }, PAIR_RETRY_MS);
+
+    session.botTimeoutTimer = setTimeout(async () => {
+      if (activeSession !== session) return;
+      const fallback = session.onBotFallback;
+      await leaveQueue();
+      fallback?.({ wordLength, game, playMode });
+    }, BOT_FALLBACK_MS);
 
     return session;
   }
