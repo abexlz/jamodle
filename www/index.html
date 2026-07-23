@@ -86,10 +86,12 @@
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
     --menu-bar-h: 52px;
-    --menu-header-gap: 10px;
+    --menu-header-gap: 28px;
+    --menu-content-top: 12px;
     --menu-header-fade-h: 72px;
     --menu-profile-size: clamp(88px, 24vw, 104px);
-    --menu-profile-overhang: calc(var(--menu-profile-size) * 0.32);
+    --menu-profile-overhang: calc(var(--menu-profile-size) * 0.36);
+    --menu-profile-drop: 8%;
     --menu-bar-teal-top: #12a3b8;
     --menu-bar-teal-mid: #0e92a6;
     --menu-bar-teal-low: #0a7f92;
@@ -270,9 +272,13 @@
     grid-row: 1;
     align-self: end;
     margin: 0;
-    transform: translateY(22%);
+    transform: translateY(var(--menu-profile-drop, 8%));
     pointer-events: auto;
     z-index: 35;
+  }
+
+  .menu-top-bar .menu-profile-nav:active {
+    transform: translateY(var(--menu-profile-drop, 8%)) scale(0.94);
   }
 
   .menu-top-bar .player-hud-slot {
@@ -302,7 +308,7 @@
 
   .menu-top-bar-spacer {
     width: 100%;
-    height: calc(var(--safe-top) + var(--menu-bar-h) + var(--menu-profile-overhang) + var(--menu-header-gap));
+    height: calc(var(--safe-top) + var(--menu-bar-h) + var(--menu-profile-overhang) + var(--menu-header-gap) + var(--menu-content-top, 0px));
     flex-shrink: 0;
     pointer-events: none;
   }
@@ -354,7 +360,7 @@
     align-items: center;
     gap: clamp(4px, 1.2vw, 8px);
     width: 100%;
-    margin: 4px 0 0;
+    margin: clamp(16px, 4.5vw, 22px) 0 0;
     padding: 0 4px;
     flex-wrap: nowrap;
     position: relative;
