@@ -710,7 +710,7 @@
     "tabs": {
       "label": "프로필 메뉴",
       "friends": "친구",
-      "cosmetics": "꾸미기",
+      "cosmetics": "장식",
       "stats": "통계"
     },
     "levelUp": {
@@ -1301,8 +1301,8 @@
     "coins": "코인",
     "balance": "보유 코인",
     "scopeItem": "아이템",
-    "scopeCosmetic": "코스메틱",
-    "tabCosmetics": "꾸미기",
+    "scopeCosmetic": "장식",
+    "tabCosmetics": "장식",
     "tabTitles": "칭호",
     "tabFrames": "프로필 프레임",
     "tabItems": "아이템",

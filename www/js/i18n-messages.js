@@ -2158,7 +2158,7 @@
       "tabs": {
         "label": "프로필 메뉴",
         "friends": "친구",
-        "cosmetics": "꾸미기",
+        "cosmetics": "장식",
         "stats": "통계"
       },
       "levelUp": {
