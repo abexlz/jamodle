@@ -1296,6 +1296,7 @@
       "readyDesc": "All dailies complete — spin the wheel!",
       "claimedDesc": "You already spun today. Come back tomorrow!",
       "spin": "Spin!",
+      "spinShort": "SPIN!",
       "locked": "Locked",
       "claimed": "Spun!",
       "wonTitle": "You won!",
@@ -1418,6 +1419,7 @@
     },
     "dailyCalendar": {
       "title": "Daily Match",
+      "pageNav": "Daily Match calendar",
       "close": "Close",
       "closeLabel": "Close calendar",
       "tabPuzzles": "PUZZLES",
@@ -2751,6 +2753,7 @@
       "readyDesc": "일일 퀘스트 완료 — 룰렛을 돌려보세요!",
       "claimedDesc": "오늘은 이미 돌렸어요. 내일 다시!",
       "spin": "돌리기!",
+      "spinShort": "SPIN!",
       "locked": "잠김",
       "claimed": "완료!",
       "wonTitle": "당첨!",
@@ -2873,6 +2876,7 @@
     },
     "dailyCalendar": {
       "title": "오늘의 자모게임",
+      "pageNav": "데일리 매치 달력",
       "close": "닫기",
       "closeLabel": "캘린더 닫기",
       "tabPuzzles": "퍼즐",

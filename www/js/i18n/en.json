@@ -1268,6 +1268,7 @@
     "readyDesc": "All dailies complete — spin the wheel!",
     "claimedDesc": "You already spun today. Come back tomorrow!",
     "spin": "Spin!",
+    "spinShort": "SPIN!",
     "locked": "Locked",
     "claimed": "Spun!",
     "wonTitle": "You won!",
@@ -1390,6 +1391,7 @@
   },
   "dailyCalendar": {
     "title": "Daily Match",
+    "pageNav": "Daily Match calendar",
     "close": "Close",
     "closeLabel": "Close calendar",
     "tabPuzzles": "PUZZLES",

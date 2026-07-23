@@ -474,6 +474,7 @@
   function refreshStatus() {
     const matchStatus = document.getElementById('daily-match-status');
     if (matchStatus) matchStatus.textContent = MP().getDailyMatchProgress();
+    global.DailyCalendarModal?.updateMenuCalendarNav?.();
   }
 
   function rerenderMenu() {

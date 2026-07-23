@@ -118,6 +118,8 @@
     global.MultiplayerUI?.mount?.();
     global.QuestUI?.updateTabBadge?.();
     global.WheelUI?.updateMenuWheelNav?.();
+    global.DailyCalendarModal?.updateMenuCalendarNav?.();
+    bindMenuTopBar();
   }
 
   function refreshMenu() {
@@ -127,6 +129,16 @@
       global.MenuComponents.refreshStatus();
     }
     updateTabBarUI();
+  }
+
+  function bindMenuTopBar() {
+    const btn = document.getElementById('menu-calendar-nav');
+    if (!btn || btn.dataset.bound === '1') return;
+    btn.dataset.bound = '1';
+    btn.addEventListener('click', () => {
+      global.DailyCalendarModal?.open?.();
+    });
+    global.DailyCalendarModal?.updateMenuCalendarNav?.();
   }
 
   /**
@@ -160,6 +172,7 @@
     mountMenu,
     refreshMenu,
     bindMenuActions,
+    bindMenuTopBar,
     setHomeTab,
     getHomeTab,
   };

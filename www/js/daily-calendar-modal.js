@@ -397,6 +397,45 @@
     });
   }
 
+  function getCalendarNavLabels() {
+    const now = new Date();
+    const lang = global.I18n?.getLanguage?.() || document.documentElement.lang || 'en';
+    const locale = lang === 'ko' ? 'ko-KR' : 'en-US';
+    const month = now.toLocaleDateString(locale, { month: 'short' }).replace(/\./g, '').trim();
+    const monthLabel = lang === 'ko' ? month : month.toUpperCase();
+    return {
+      month: monthLabel,
+      day: String(now.getDate()),
+    };
+  }
+
+  function updateMenuCalendarNav() {
+    const btn = document.getElementById('menu-calendar-nav');
+    if (!btn) return;
+
+    const labels = getCalendarNavLabels();
+    const monthEl = document.getElementById('menu-calendar-nav-month');
+    const dayEl = document.getElementById('menu-calendar-nav-day');
+    if (monthEl) monthEl.textContent = labels.month;
+    if (dayEl) dayEl.textContent = labels.day;
+
+    const pending = !SVC()?.isDateCompleted?.(SVC()?.getTodayKey?.());
+    btn.classList.toggle('is-pending', !!pending);
+
+    let badge = btn.querySelector('.menu-calendar-nav-badge');
+    if (pending) {
+      if (!badge) {
+        badge = document.createElement('span');
+        badge.className = 'menu-calendar-nav-badge';
+        badge.setAttribute('aria-hidden', 'true');
+        btn.appendChild(badge);
+      }
+      badge.textContent = '!';
+    } else if (badge) {
+      badge.remove();
+    }
+  }
+
   function open() {
     if (!SVC()) {
       console.warn('[Jamodeul] DailyCalendarService unavailable');
@@ -442,5 +481,5 @@
     requestAnimationFrame(() => overlayEl.classList.add('visible'));
   }
 
-  global.DailyCalendarModal = { open, close };
+  global.DailyCalendarModal = { open, close, updateMenuCalendarNav };
 })(typeof window !== 'undefined' ? window : globalThis);

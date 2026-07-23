@@ -12,7 +12,7 @@
     '.profile-nav-btn, .profile-modal-btn, .profile-login-btn, .profile-nickname-save, ' +
     '.avatar-option, .title-option, .frame-option, .pause-quit-btn, ' +
     '.wheel-spin-btn, .wheel-done-btn, .daily-gift-done-btn, .daily-gift-claim-btn, ' +
-    '.menu-wheel-nav, ' +
+    '.menu-wheel-nav, .menu-calendar-nav, ' +
     '.leaderboard-login-btn, .shop-buy-btn, .quest-claim-btn, .quest-daily-bonus-btn, .quest-scope-btn, ' +
     '.daily-challenge-card, .daily-leaderboard-btn, .menu-battle-game-btn, .battle-mode-action-btn, ' +
     '.match-hint-btn, .match-action-btn, .match-emote-btn, .match-emote-option, ' +

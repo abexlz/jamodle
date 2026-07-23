@@ -85,13 +85,13 @@
     --jamo-font-jong: 20px;
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
-    --menu-bar-h: 52px;
+    --menu-bar-h: 58px;
     --menu-header-gap: 28px;
     --menu-content-top: 12px;
     --menu-header-fade-h: 72px;
-    --menu-profile-size: clamp(88px, 24vw, 104px);
-    --menu-profile-overhang: calc(var(--menu-profile-size) * 0.36);
-    --menu-profile-drop: 8%;
+    --menu-profile-size: clamp(92px, 26vw, 112px);
+    --menu-profile-overhang: calc(var(--menu-profile-size) * 0.42);
+    --menu-profile-drop: 14%;
     --menu-bar-teal-top: #12a3b8;
     --menu-bar-teal-mid: #0e92a6;
     --menu-bar-teal-low: #0a7f92;
@@ -267,13 +267,21 @@
     pointer-events: none;
   }
 
-  .menu-top-bar .menu-wheel-nav {
+  .menu-top-bar .menu-top-bar-left {
     grid-column: 1;
     grid-row: 1;
     justify-self: start;
     align-self: center;
+    display: flex;
+    align-items: center;
+    gap: 8px;
     pointer-events: auto;
     z-index: 30;
+    padding-left: 2px;
+  }
+
+  .menu-top-bar .menu-wheel-nav {
+    flex-shrink: 0;
   }
 
   .menu-top-bar .menu-profile-nav {
@@ -1562,6 +1570,7 @@
 <link rel="stylesheet" href="css/cosmetic-themes.css">
 <link rel="stylesheet" href="css/shop.css">
 <link rel="stylesheet" href="css/profile.css">
+<link rel="stylesheet" href="css/menu-hud.css?v=1">
 <link rel="stylesheet" href="css/quests.css?v=20260711w">
 <link rel="stylesheet" href="css/wheel.css">
 <link rel="stylesheet" href="css/multiplayer.css?v=22">
@@ -1581,9 +1590,17 @@
   <div class="menu-inner">
     <header class="menu-header">
       <div class="menu-top-bar">
-        <a class="menu-wheel-nav" href="wheel.html" id="menu-wheel-nav" data-i18n-aria="wheel.pageNav">
-          <span class="menu-wheel-nav-icon" aria-hidden="true">🎡</span>
-        </a>
+        <div class="menu-top-bar-left">
+          <a class="menu-wheel-nav" href="wheel.html" id="menu-wheel-nav" data-i18n-aria="wheel.pageNav">
+            <span class="menu-wheel-nav-icon" aria-hidden="true">🎡</span>
+          </a>
+          <button type="button" class="menu-calendar-nav" id="menu-calendar-nav" data-i18n-aria="dailyCalendar.pageNav">
+            <span class="menu-calendar-nav-sheet" aria-hidden="true">
+              <span class="menu-calendar-nav-month" id="menu-calendar-nav-month"></span>
+              <span class="menu-calendar-nav-day" id="menu-calendar-nav-day"></span>
+            </span>
+          </button>
+        </div>
         <a class="menu-profile-nav" href="profile.html" id="nav-profile" data-i18n-aria="nav.profile">
           <span class="menu-profile-card" id="menu-profile-card"></span>
         </a>

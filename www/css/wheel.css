@@ -323,6 +323,85 @@ body.wheel-open {
   text-align: center;
 }
 
+/* Menu top-left daily calendar shortcut */
+.menu-calendar-nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 40px;
+  padding: 0;
+  border-radius: 12px;
+  border: 2px solid #d49210;
+  background: linear-gradient(180deg, #ffd45a 0%, #f0b020 100%);
+  box-shadow: 0 3px 0 #b87800, inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.12s ease, box-shadow 0.2s ease;
+}
+
+.menu-calendar-nav:active {
+  transform: translateY(2px) scale(0.96);
+  box-shadow: 0 1px 0 #b87800, inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.menu-calendar-nav-sheet {
+  width: 30px;
+  height: 30px;
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 1px 0 rgba(120, 80, 0, 0.28);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.menu-calendar-nav-month {
+  flex-shrink: 0;
+  padding: 2px 1px 1px;
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: 7px;
+  line-height: 1;
+  text-align: center;
+  color: #8a8f98;
+  border-bottom: 1px solid #e8e4e0;
+  text-transform: uppercase;
+}
+
+.menu-calendar-nav-day {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: 15px;
+  line-height: 1;
+  color: #f0a818;
+}
+
+.menu-calendar-nav.is-pending {
+  border-color: #1a9d62;
+  box-shadow: 0 3px 0 #1a9d62, 0 0 10px rgba(34, 197, 126, 0.35);
+  animation: menu-wheel-ready-pulse 2.2s ease-in-out infinite;
+}
+
+.menu-calendar-nav-badge {
+  position: absolute;
+  top: -5px;
+  right: -4px;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
+  border-radius: 999px;
+  background: #ff5a7a;
+  border: 1.5px solid #fff;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 11px;
+  text-align: center;
+}
+
 .quest-daily-bonus-btn--link {
   display: inline-block;
   text-decoration: none;
