@@ -171,12 +171,16 @@
   font-size: 32.5px;
 }
 
-#menu-screen .quest-card-title {
+#menu-screen .quest-card-task {
   font-size: 17.5px;
 }
 
+#menu-screen .quest-card-title {
+  display: none;
+}
+
 #menu-screen .quest-card-desc {
-  font-size: 15px;
+  display: none;
 }
 
 #menu-screen .quest-progress-label {
@@ -427,8 +431,7 @@ body.home-menu-active .wheel-done-btn {
 #menu-screen .menu-game-combo-count,
 #menu-screen .menu-game-combo-label,
 #menu-screen .menu-daily-puzzle-main .mode-name,
-#menu-screen .quest-card-title,
-#menu-screen .quest-card-desc,
+#menu-screen .quest-card-task,
 #menu-screen .shop-item-name,
 #menu-screen .shop-scope-btn,
 #menu-screen .quest-scope-btn {
@@ -476,7 +479,7 @@ body.home-menu-active .wheel-done-btn {
   min-width: 0;
 }
 
-#menu-screen .quest-card-desc,
+#menu-screen .quest-card-task,
 #menu-screen .shop-item-desc {
   display: -webkit-box;
   -webkit-line-clamp: 2;

@@ -18,9 +18,6 @@
       .replace(/"/g, '&quot;');
   }
 
-  function questTitle(questId) {
-    return t(`quests.defs.${questId}.title`) || questId;
-  }
 
   function questDesc(questId, target) {
     return t(`quests.defs.${questId}.desc`, { count: target }) || '';
@@ -34,6 +31,7 @@
     const pct = Math.min(100, Math.round((entry.progress / entry.target) * 100));
     const tierClass = def.tier === 'weekly' ? ' quest-card--weekly' : '';
     const stateClass = claimable ? ' is-claimable' : (claimed ? ' is-complete' : '');
+    const taskText = questDesc(entry.questId, entry.target);
 
     let rewardsHtml = '';
     if (claimable) {
@@ -46,11 +44,10 @@
     }
 
     return `
-      <article class="quest-card${tierClass}${stateClass}" data-quest-id="${escapeHtml(entry.questId)}"${claimable ? ' data-claimable="true"' : ''}>
+      <article class="quest-card${tierClass}${stateClass}" data-quest-id="${escapeHtml(entry.questId)}"${claimable ? ' data-claimable="true"' : ''} aria-label="${escapeHtml(taskText)}">
         <span class="quest-card-icon" aria-hidden="true">${def.icon}</span>
         <div class="quest-card-body">
-          <h3 class="quest-card-title">${escapeHtml(questTitle(entry.questId))}</h3>
-          <p class="quest-card-desc">${escapeHtml(questDesc(entry.questId, entry.target))}</p>
+          <p class="quest-card-task">${escapeHtml(taskText)}</p>
           <div class="quest-progress" role="progressbar"
             aria-valuemin="0" aria-valuemax="${entry.target}" aria-valuenow="${Math.min(entry.progress, entry.target)}">
             <div class="quest-progress-fill" style="width:${pct}%"></div>
