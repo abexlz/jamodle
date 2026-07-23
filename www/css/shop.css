@@ -528,19 +528,21 @@
 
 .menu-top-bar .player-hud-compact {
   justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
   width: auto;
   min-width: 0;
-  padding: 4px 10px 4px 12px;
+  padding: 6px 10px 6px 12px;
   margin: 0;
-  background: rgba(0, 0, 0, 0.28);
-  border: 2px solid rgba(255, 255, 255, 0.22);
+  background: linear-gradient(180deg, #ffe566 0%, #ffd739 100%);
+  border: 2px solid #e6b82e;
   border-radius: 999px;
-  box-shadow: none;
+  box-shadow: 0 3px 0 #c4a82d, inset 0 1px 0 rgba(255, 255, 255, 0.45);
 }
 
 .menu-top-bar .player-hud-coins {
-  color: #fff;
-  font-size: 14px;
+  color: #5a3d00;
+  font-size: clamp(14px, 3.8vw, 16px);
   font-weight: 700;
   text-shadow: none;
 }

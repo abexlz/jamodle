@@ -1,19 +1,23 @@
 /* Home bottom tab bar — fixed segmented nav on menu screens */
 
 :root {
+  --home-nav-section-h: clamp(76px, 12.5dvh, 94px);
   --home-nav-offset: calc(
-    58px + var(--safe-bottom, env(safe-area-inset-bottom, 0px))
+    var(--home-nav-section-h) + var(--safe-bottom, env(safe-area-inset-bottom, 0px))
   );
   --home-nav-bg: linear-gradient(180deg, #1a3344 0%, #122633 100%);
   --home-nav-border: rgba(255, 214, 120, 0.28);
   --home-nav-divider: rgba(255, 255, 255, 0.14);
   --home-nav-active-accent: #ffd166;
+  --home-nav-icon-size: clamp(34px, 8.2vw, 42px);
 }
 
 html.large-text {
+  --home-nav-section-h: clamp(82px, 13dvh, 100px);
   --home-nav-offset: calc(
-    62px + var(--safe-bottom, env(safe-area-inset-bottom, 0px))
+    var(--home-nav-section-h) + var(--safe-bottom, env(safe-area-inset-bottom, 0px))
   );
+  --home-nav-icon-size: clamp(36px, 8.6vw, 44px);
 }
 
 /* ── Bottom bar shell ── */
@@ -52,7 +56,7 @@ body > #home-bottom-bar.home-bottom-bar,
 .home-bottom-bar-inner.home-bottom-bar-inner--5 {
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 0;
-  min-height: calc(58px + var(--safe-bottom, env(safe-area-inset-bottom, 0px)));
+  min-height: calc(var(--home-nav-section-h) + var(--safe-bottom, env(safe-area-inset-bottom, 0px)));
   padding-bottom: var(--safe-bottom, env(safe-area-inset-bottom, 0px));
 }
 
@@ -70,8 +74,8 @@ body > #home-bottom-bar.home-bottom-bar,
   justify-content: center;
   width: 100%;
   min-width: 0;
-  min-height: 58px;
-  padding: 8px 6px;
+  min-height: var(--home-nav-section-h);
+  padding: 10px 8px;
   margin: 0;
   border: none;
   border-left: 1px solid var(--home-nav-divider);
@@ -99,10 +103,6 @@ body > #home-bottom-bar.home-bottom-bar,
   padding: 8px 6px;
 }
 
-html.large-text .home-bottom-bar-inner--5 .home-tab-btn {
-  min-height: 62px;
-}
-
 .home-tab-btn--link {
   color: #ffffff;
 }
@@ -125,9 +125,9 @@ html.large-text .home-bottom-bar-inner--5 .home-tab-btn {
   content: '';
   position: absolute;
   top: 0;
-  left: 18%;
-  right: 18%;
-  height: 3px;
+  left: 16%;
+  right: 16%;
+  height: 4px;
   border-radius: 0 0 4px 4px;
   background: var(--home-nav-active-accent);
   box-shadow: 0 0 10px rgba(255, 209, 102, 0.45);
@@ -135,11 +135,11 @@ html.large-text .home-bottom-bar-inner--5 .home-tab-btn {
 
 .home-tab-icon-img {
   display: block;
-  width: clamp(24px, 6.4vw, 28px);
-  height: clamp(24px, 6.4vw, 28px);
+  width: var(--home-nav-icon-size);
+  height: var(--home-nav-icon-size);
   object-fit: contain;
-  opacity: 0.68;
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  opacity: 0.72;
+  transition: opacity 0.15s ease;
   pointer-events: none;
 }
 
@@ -155,6 +155,11 @@ html.large-text .home-bottom-bar-inner--5 .home-tab-btn {
   box-shadow: none !important;
   filter: none !important;
   background: transparent !important;
+}
+
+.home-tab-badge {
+  top: clamp(8px, 2vw, 12px);
+  right: clamp(10px, 3.5vw, 16px);
 }
 
 /* ── Page shell: menu fills viewport above the bar ── */
@@ -183,7 +188,7 @@ body.has-home-bottom-bar.home-menu-active #menu-screen .menu-inner {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding-top: 8px;
+  padding-top: 4px;
   padding-bottom: 6px;
 }
 

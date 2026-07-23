@@ -42,7 +42,7 @@
 
   function renderTabIcon(tab) {
     const src = NAV_ICONS[tab] || NAV_ICONS.menu;
-    return `<img class="home-tab-icon-img" src="${src}" alt="" width="28" height="28" decoding="async" draggable="false">`;
+    return `<img class="home-tab-icon-img" src="${src}" alt="" width="40" height="40" decoding="async" draggable="false">`;
   }
 
   function barMarkup() {

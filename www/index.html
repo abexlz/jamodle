@@ -85,12 +85,14 @@
     --jamo-font-jong: 20px;
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
-    --menu-bar-h: 36px;
-    --menu-header-gap: 40px;
-    --menu-header-fade-h: 84px;
-    --menu-bar-teal-top: #22b5c9;
-    --menu-bar-teal-mid: #1596ae;
-    --menu-bar-teal-low: #0d7f96;
+    --menu-bar-h: 52px;
+    --menu-header-gap: 10px;
+    --menu-header-fade-h: 72px;
+    --menu-profile-size: clamp(88px, 24vw, 104px);
+    --menu-profile-overhang: calc(var(--menu-profile-size) * 0.52);
+    --menu-bar-teal-top: #1e3a4d;
+    --menu-bar-teal-mid: #182f3f;
+    --menu-bar-teal-low: #122633;
     --menu-bg-teal: #0097B2;
   }
   [data-theme="dark"]{
@@ -237,34 +239,47 @@
     top: 0;
     left: 0;
     right: 0;
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(52px, 1fr) auto minmax(52px, 1fr);
+    grid-template-rows: 1fr;
     align-items: center;
-    justify-content: flex-end;
     width: 100%;
     max-width: none;
     margin: 0;
     min-height: calc(var(--menu-bar-h) + var(--safe-top));
     padding:
       var(--safe-top)
-      max(12px, env(safe-area-inset-right, 0px))
-      8px
-      max(12px, env(safe-area-inset-left, 0px));
+      max(10px, env(safe-area-inset-right, 0px))
+      0
+      max(10px, env(safe-area-inset-left, 0px));
     background: linear-gradient(180deg,
       var(--menu-bar-teal-top) 0%,
-      var(--menu-bar-teal-top) 38%,
-      var(--menu-bar-teal-mid) 38%,
-      var(--menu-bar-teal-mid) 72%,
-      var(--menu-bar-teal-low) 72%,
+      var(--menu-bar-teal-mid) 55%,
       var(--menu-bar-teal-low) 100%);
+    border-bottom: 2px solid rgba(255, 214, 120, 0.22);
     border-radius: 0;
-    box-shadow: none;
-    z-index: 20;
+    box-shadow: 0 4px 18px rgba(8, 20, 30, 0.28);
+    z-index: 24;
     flex-shrink: 0;
     overflow: visible;
     pointer-events: none;
   }
 
+  .menu-top-bar .menu-profile-nav {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: end;
+    margin: 0;
+    transform: translateY(50%);
+    pointer-events: auto;
+    z-index: 35;
+  }
+
   .menu-top-bar .player-hud-slot {
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: end;
+    align-self: center;
     pointer-events: auto;
   }
 
@@ -273,15 +288,13 @@
     position: fixed;
     left: 0;
     right: 0;
-    top: calc(var(--menu-bar-h) + var(--safe-top));
+    top: calc(var(--menu-bar-h) + var(--safe-top) + var(--menu-profile-overhang) * 0.35);
     height: var(--menu-header-fade-h);
     background: linear-gradient(180deg,
       var(--menu-bar-teal-low) 0%,
-      #0e8da2 12%,
-      #1097ad 26%,
-      #119faf 40%,
-      rgba(0, 151, 178, 0.9) 56%,
-      rgba(0, 151, 178, 0.55) 74%,
+      #0e8da2 24%,
+      #119faf 48%,
+      rgba(0, 151, 178, 0.72) 68%,
       rgba(0, 151, 178, 0) 100%);
     z-index: 18;
     pointer-events: none;
@@ -289,27 +302,25 @@
 
   .menu-top-bar-spacer {
     width: 100%;
-    height: calc(var(--menu-bar-h) + var(--safe-top) + var(--menu-header-gap));
+    height: calc(var(--safe-top) + var(--menu-bar-h) + var(--menu-profile-overhang) + var(--menu-header-gap));
     flex-shrink: 0;
     pointer-events: none;
   }
 
   [data-theme="dark"] {
-    --menu-bar-teal-top: #1e8a9c;
-    --menu-bar-teal-mid: #186676;
-    --menu-bar-teal-low: #124f5c;
+    --menu-bar-teal-top: #1e3a4d;
+    --menu-bar-teal-mid: #182f3f;
+    --menu-bar-teal-low: #122633;
     --menu-bg-teal: #0d5a68;
   }
 
   [data-theme="dark"] .menu-header::before {
     background: linear-gradient(180deg,
       var(--menu-bar-teal-low) 0%,
-      #145a66 14%,
-      #16606e 28%,
-      #186676 42%,
-      rgba(13, 90, 104, 0.9) 58%,
-      rgba(13, 90, 104, 0.5) 76%,
-      rgba(13, 90, 104, 0) 100%);
+      #153544 18%,
+      #0e8da2 42%,
+      rgba(0, 151, 178, 0.55) 68%,
+      rgba(0, 151, 178, 0) 100%);
   }
 
   .menu-profile-nav {
@@ -322,7 +333,7 @@
     border: none;
     background: transparent;
     padding: 0;
-    margin: -24px auto 0;
+    margin: 0;
     cursor: pointer;
     touch-action: manipulation;
     transition: transform 0.12s ease;
@@ -343,7 +354,7 @@
     align-items: center;
     gap: clamp(4px, 1.2vw, 8px);
     width: 100%;
-    margin: 18px 0 0;
+    margin: 4px 0 0;
     padding: 0 4px;
     flex-wrap: nowrap;
     position: relative;
@@ -1531,7 +1542,7 @@
   .panel-close:hover{ color: var(--text); border-color: var(--text-soft); }
 
 </style>
-<link rel="stylesheet" href="css/home-nav.css?v=4">
+<link rel="stylesheet" href="css/home-nav.css?v=5">
 <link rel="stylesheet" href="css/app-theme.css?v=15">
 <link rel="stylesheet" href="css/cosmetic-themes.css">
 <link rel="stylesheet" href="css/shop.css">
@@ -1552,12 +1563,12 @@
   <div class="menu-inner">
     <header class="menu-header">
       <div class="menu-top-bar">
+        <a class="menu-profile-nav" href="profile.html" id="nav-profile" data-i18n-aria="nav.profile">
+          <span class="menu-profile-card" id="menu-profile-card"></span>
+        </a>
         <div class="player-hud-slot" id="player-hud" data-player-hud="compact"></div>
       </div>
       <div class="menu-top-bar-spacer" aria-hidden="true"></div>
-      <a class="menu-profile-nav" href="profile.html" id="nav-profile" data-i18n-aria="nav.profile">
-        <span class="menu-profile-card" id="menu-profile-card"></span>
-      </a>
       <h1 class="menu-brand menu-brand--jamodeul brand-intro" aria-label="자모들 JAMO GAME">
         <div class="menu-brand-line1">
           <span class="brand-tile brand-tile-ja" aria-hidden="true">자</span>

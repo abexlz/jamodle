@@ -1257,7 +1257,7 @@
 }
 
 .profile-badge-card--menu {
-  width: 100px;
+  width: var(--menu-profile-size, 100px);
 }
 
 .profile-badge-card--hero {
