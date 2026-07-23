@@ -1473,11 +1473,11 @@
       "recommended": "추천",
       "tutorialMode": "튜토리얼",
       "singlePlayer": {
-        "title": "싱글 모드"
+        "title": "일인모드"
       },
       "battle": {
         "title": "배틀 모드",
-        "jamodle": "자모게임",
+        "jamodle": "한글놀이",
         "wordChain": "단어 체인",
         "multiplayer": "랜덤 매치",
         "custom": "커스텀",

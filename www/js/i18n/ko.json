@@ -27,11 +27,11 @@
     "recommended": "추천",
     "tutorialMode": "튜토리얼",
     "singlePlayer": {
-      "title": "싱글 모드"
+      "title": "일인모드"
     },
     "battle": {
       "title": "배틀 모드",
-      "jamodle": "자모게임",
+      "jamodle": "한글놀이",
       "wordChain": "단어 체인",
       "multiplayer": "랜덤 매치",
       "custom": "커스텀",
@@ -66,7 +66,7 @@
         "subtitleKo": "자모를 끌어 단어를 완성해요"
       },
       "classic": {
-        "title": "자모게임",
+        "title": "한글놀이",
         "subtitleKo": "자모를 끌어 단어를 완성해요"
       },
       "match-multi-find": {
