@@ -390,7 +390,12 @@
 
       const fallbackName = side.querySelector('.race-results-duel-name')?.textContent || '?';
       let summary = null;
-      if (uid && uid === myUid) {
+      const BPS = global.BotProfileService;
+      if (BPS?.isLocalPlayerUid?.(uid)) {
+        summary = buildLocalBattleSummary();
+      } else if (BPS?.isBotMatchUid?.(uid)) {
+        summary = BPS.getActiveBotProfile?.();
+      } else if (uid && uid === myUid) {
         summary = buildLocalBattleSummary();
       } else if (uid) {
         summary = await fetchRemoteBattleSummary(uid);

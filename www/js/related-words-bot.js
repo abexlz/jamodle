@@ -199,6 +199,10 @@
         return;
       }
 
+      if (this.isMatchmakingBot && this.botProfile) {
+        global.BotProfileService?.storeActiveBotProfile?.(this.botProfile);
+      }
+
       this.renderMain(`
         <div class="race-panel race-countdown-panel">
           <p class="race-panel-title">${escapeHtml(rt('startingSoon'))}</p>

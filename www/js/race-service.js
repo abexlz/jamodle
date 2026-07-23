@@ -651,6 +651,31 @@
     };
   }
 
+  function buildWordChainMatchmakingMatchData(player1Uid, player2Uid, player1Name, player2Name, matchId) {
+    const chainId = pickRelatedWordsChain(matchId || `${player1Uid}-${player2Uid}`);
+    const raceTarget = getRelatedWordsLinkCount({ chainId });
+    return {
+      gameType: GAME_TYPES.relatedWords,
+      playMode: PLAY_MODES.race,
+      matchSource: 'matchmaking',
+      player1Uid,
+      player2Uid,
+      player1Name,
+      player2Name,
+      status: 'ready',
+      target: chainId,
+      chainId,
+      raceTarget,
+      wordLength: RELATED_WORDS_RACE_TARGET,
+      player1Ready: true,
+      player2Ready: true,
+      player1Progress: defaultProgress(),
+      player2Progress: defaultProgress(),
+      sharedState: defaultRelatedWordsSharedState(),
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    };
+  }
+
   async function createMatch(opponentUid, optionsOrWordLength) {
     const uid = getUid();
     const db = getDb();
@@ -2100,6 +2125,7 @@
     defaultRelatedWordsSharedState,
     createMatch,
     buildMatchmakingMatchData,
+    buildWordChainMatchmakingMatchData,
     matchesRef,
     createRematchMatch,
     acceptMatch,

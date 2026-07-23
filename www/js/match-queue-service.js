@@ -1,5 +1,5 @@
 /**
- * Random matchmaking queue — pairs strangers for turn-based Jamo 1v1.
+ * Random matchmaking queue — pairs strangers for Jamo turn 1v1 and Word Chain race.
  */
 (function (global) {
   'use strict';
@@ -56,10 +56,15 @@
     if (uid) await cleanupQueueEntry(uid);
   }
 
-  function buildMatchData(player1Uid, player2Uid, player1Name, player2Name, wordLength) {
+  function buildMatchData(player1Uid, player2Uid, player1Name, player2Name, entry, matchId) {
     const RS = global.RaceService;
-    if (!RS?.buildMatchmakingMatchData) throw new Error('race-service');
-    return RS.buildMatchmakingMatchData(player1Uid, player2Uid, player1Name, player2Name, wordLength);
+    if (!RS) throw new Error('race-service');
+    if (entry.game === 'word-chain') {
+      if (!RS.buildWordChainMatchmakingMatchData) throw new Error('race-service');
+      return RS.buildWordChainMatchmakingMatchData(player1Uid, player2Uid, player1Name, player2Name, matchId);
+    }
+    if (!RS.buildMatchmakingMatchData) throw new Error('race-service');
+    return RS.buildMatchmakingMatchData(player1Uid, player2Uid, player1Name, player2Name, entry.wordLength);
   }
 
   async function tryPairWith(myUid, myEntry, opponentUid, opponentEntry) {
@@ -103,7 +108,7 @@
         if (mine.game !== theirs.game || mine.playMode !== theirs.playMode) return;
         if (mine.wordLength !== theirs.wordLength) return;
 
-        const matchData = buildMatchData(player1Uid, player2Uid, player1Name, player2Name, mine.wordLength);
+        const matchData = buildMatchData(player1Uid, player2Uid, player1Name, player2Name, mine, matchRef.id);
         tx.set(matchRef, matchData);
         const matchedPatch = {
           status: QUEUE_STATUS.matched,
@@ -197,12 +202,8 @@
     if (!RS) throw new Error('race-service');
 
     const game = options.game === 'word-chain' ? 'word-chain' : 'korean-match';
-    const playMode = RS.PLAY_MODES.turn;
-    const wordLength = RS.normalizeWordLength(options.wordLength);
-
-    if (game !== 'korean-match') {
-      throw new Error('unsupported-game');
-    }
+    const playMode = game === 'word-chain' ? RS.PLAY_MODES.race : RS.PLAY_MODES.turn;
+    const wordLength = game === 'word-chain' ? 0 : RS.normalizeWordLength(options.wordLength);
 
     const displayName = global.FirebaseSocial?.getPublicName?.(
       global.FirebaseSocial?.getUserProfile?.()

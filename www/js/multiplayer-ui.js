@@ -241,7 +241,6 @@
 
   function resetMatchmakingOverlay(overlay) {
     if (!overlay) return;
-    clearWordChainBotTimer(overlay);
     overlay.dataset.selectedLength = '';
     const pickedEl = overlay.querySelector('[data-matchmaking-picked]');
     if (pickedEl) pickedEl.textContent = '';
@@ -256,12 +255,6 @@
       noteEl.classList.toggle('hidden', isWordChain);
     }
     showMatchmakingStep(overlay, 'pick');
-  }
-
-  function clearWordChainBotTimer(overlay) {
-    if (!overlay?._botFallbackTimer) return;
-    clearTimeout(overlay._botFallbackTimer);
-    overlay._botFallbackTimer = null;
   }
 
   function getBotFallbackMs() {
@@ -309,12 +302,11 @@
   }
 
   async function cancelMatchmakingSearch(options = {}) {
-    const overlay = document.getElementById('battle-matchmaking-overlay');
-    clearWordChainBotTimer(overlay);
     try {
       await global.MatchQueueService?.leaveQueue?.();
     } catch (_) { /* ignore */ }
     if (options.returnToPick) {
+      const overlay = document.getElementById('battle-matchmaking-overlay');
       if (overlay) resetMatchmakingOverlay(overlay);
     }
   }
@@ -333,41 +325,16 @@
       || `Expected wait: ~${seconds} sec`;
   }
 
-  async function startWordChainMatchmakingSearch() {
-    const overlay = ensureMatchmakingOverlay();
-    overlay.dataset.selectedGame = 'word-chain';
-    const pickedEl = overlay.querySelector('[data-matchmaking-picked]');
-    if (pickedEl) {
-      pickedEl.textContent = battleGameLabel('word-chain');
-    }
-    setMatchmakingEta(overlay);
-    showMatchmakingStep(overlay, 'searching');
-    setMatchmakingStatus(overlay, 'menu.battle.matchmakingSearching');
-    syncMultiplayerOpenClass();
-
-    clearWordChainBotTimer(overlay);
-    overlay._botFallbackTimer = setTimeout(() => {
-      if (overlay.dataset.matchmakingStep !== 'searching') return;
-      setMatchmakingStatus(overlay, 'menu.battle.matchmakingFound');
-      redirectToBotMatch('word-chain');
-    }, getBotFallbackMs());
+  function matchPageUrlForResult(result) {
+    const gameType = result.game === 'word-chain' ? 'related-words' : 'korean-match';
+    return global.RaceService?.getMatchPageUrl?.(result.matchId, { gameType });
   }
 
-  async function startMatchmakingSearch(wordLength) {
-    const overlay = ensureMatchmakingOverlay();
-    const game = overlay.dataset.selectedGame === 'word-chain' ? 'word-chain' : 'jamodle';
-    overlay.dataset.selectedLength = String(wordLength);
-    const pickedEl = overlay.querySelector('[data-matchmaking-picked]');
-    if (pickedEl) {
-      pickedEl.textContent = t('match.modes.letterCount', { n: wordLength })
-        || `${wordLength} letters`;
-    }
-    const etaEl = overlay.querySelector('[data-matchmaking-eta]');
-    if (etaEl) setMatchmakingEta(overlay);
-    showMatchmakingStep(overlay, 'searching');
-    setMatchmakingStatus(overlay, 'menu.battle.matchmakingSearching');
-    syncMultiplayerOpenClass();
+  function botGameKeyFromQueue(game) {
+    return game === 'word-chain' ? 'word-chain' : 'jamodle';
+  }
 
+  async function runMatchmakingQueue(overlay, { game, wordLength } = {}) {
     if (!global.MatchQueueService?.joinQueue) {
       alert(t('menu.battle.matchmakingFailed'));
       resetMatchmakingOverlay(overlay);
@@ -387,17 +354,16 @@
         wordLength,
         onMatched: (result) => {
           setMatchmakingStatus(overlay, 'menu.battle.matchmakingFound');
-          const url = global.RaceService?.getMatchPageUrl?.(result.matchId, {
-            gameType: 'korean-match',
-            playMode: 'turn',
-          });
-          if (url) {
-            global.location.href = url;
-          }
+          const url = matchPageUrlForResult(result);
+          if (url) global.location.href = url;
         },
-        onBotFallback: ({ wordLength: wl }) => {
+        onBotFallback: (ctx) => {
           setMatchmakingStatus(overlay, 'menu.battle.matchmakingFound');
-          redirectToBotMatch('jamodle', { wordLength: wl });
+          const botGame = botGameKeyFromQueue(ctx.game);
+          redirectToBotMatch(
+            botGame,
+            ctx.game === 'word-chain' ? {} : { wordLength: ctx.wordLength }
+          );
         },
         onError: () => {
           alert(t('menu.battle.matchmakingFailed'));
@@ -409,6 +375,36 @@
       alert(t('menu.battle.matchmakingFailed'));
       resetMatchmakingOverlay(overlay);
     }
+  }
+
+  async function startWordChainMatchmakingSearch() {
+    const overlay = ensureMatchmakingOverlay();
+    overlay.dataset.selectedGame = 'word-chain';
+    const pickedEl = overlay.querySelector('[data-matchmaking-picked]');
+    if (pickedEl) {
+      pickedEl.textContent = battleGameLabel('word-chain');
+    }
+    setMatchmakingEta(overlay);
+    showMatchmakingStep(overlay, 'searching');
+    setMatchmakingStatus(overlay, 'menu.battle.matchmakingSearching');
+    syncMultiplayerOpenClass();
+    await runMatchmakingQueue(overlay, { game: 'word-chain', wordLength: 0 });
+  }
+
+  async function startMatchmakingSearch(wordLength) {
+    const overlay = ensureMatchmakingOverlay();
+    overlay.dataset.selectedLength = String(wordLength);
+    const pickedEl = overlay.querySelector('[data-matchmaking-picked]');
+    if (pickedEl) {
+      pickedEl.textContent = t('match.modes.letterCount', { n: wordLength })
+        || `${wordLength} letters`;
+    }
+    const etaEl = overlay.querySelector('[data-matchmaking-eta]');
+    if (etaEl) setMatchmakingEta(overlay);
+    showMatchmakingStep(overlay, 'searching');
+    setMatchmakingStatus(overlay, 'menu.battle.matchmakingSearching');
+    syncMultiplayerOpenClass();
+    await runMatchmakingQueue(overlay, { game: 'korean-match', wordLength });
   }
 
   function bindBattleMode(root) {

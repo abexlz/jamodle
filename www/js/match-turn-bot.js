@@ -761,6 +761,10 @@
         return;
       }
 
+      if (this.isMatchmakingBot && this.botProfile) {
+        global.BotProfileService?.storeActiveBotProfile?.(this.botProfile);
+      }
+
       const target = pickTarget(this.wordLength);
       const roundStarter = RS().flipCoinStarter(MY_UID, BOT_UID, this.matchId, 1);
       this.matchData = {

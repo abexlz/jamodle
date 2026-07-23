@@ -14,7 +14,11 @@
     '받침킹', '연결고리', '끝말잇기왕', '연상달인', '자모요정', '한글챔피언',
   ];
 
-  const SPEED_POOL = ['slow', 'medium', 'medium', 'medium', 'fast'];
+  const SPEED_POOL = ['slow', 'medium', 'medium'];
+
+  const BOT_PROFILE_KEY = 'jamodeul-bot-opponent-profile';
+  const LOCAL_BOT_UIDS = new Set(['bot']);
+  const LOCAL_PLAYER_UIDS = new Set(['me', 'player']);
 
   function pickRandom(items) {
     return items[Math.floor(Math.random() * items.length)];
@@ -51,6 +55,43 @@
     };
   }
 
+  function storeActiveBotProfile(profile) {
+    if (!profile?.name) return;
+    try {
+      sessionStorage.setItem(BOT_PROFILE_KEY, JSON.stringify(profile));
+    } catch { /* ignore */ }
+  }
+
+  function getActiveBotProfile() {
+    try {
+      const raw = sessionStorage.getItem(BOT_PROFILE_KEY);
+      if (!raw) return null;
+      const profile = JSON.parse(raw);
+      if (!profile?.name) return null;
+      return {
+        name: profile.name,
+        displayName: profile.name,
+        avatarId: profile.avatarId || 'default',
+        avatarIcon: profile.avatarIcon || global.BadgeService?.getAvatarDef?.(profile.avatarId)?.icon || '🌸',
+        frameId: profile.frameId || 'none',
+        level: profile.level || 1,
+        xpInLevel: profile.xpInLevel || 0,
+        xpToNext: profile.xpToNext || 100,
+        totalXp: profile.totalXp || 0,
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  function isBotMatchUid(uid) {
+    return LOCAL_BOT_UIDS.has(String(uid || ''));
+  }
+
+  function isLocalPlayerUid(uid) {
+    return LOCAL_PLAYER_UIDS.has(String(uid || ''));
+  }
+
   function buildBotMatchUrl(game, profile, options = {}) {
     const difficulty = randomBotDifficulty();
     const params = new URLSearchParams({
@@ -72,6 +113,7 @@
 
   function redirectToBotMatch(game, options = {}) {
     const profile = pickRandomBotProfile();
+    storeActiveBotProfile(profile);
     global.location.href = buildBotMatchUrl(game, profile, options);
   }
 
@@ -79,6 +121,10 @@
     BOT_FALLBACK_MS,
     BOT_NAMES,
     pickRandomBotProfile,
+    storeActiveBotProfile,
+    getActiveBotProfile,
+    isBotMatchUid,
+    isLocalPlayerUid,
     buildBotMatchUrl,
     redirectToBotMatch,
   };
