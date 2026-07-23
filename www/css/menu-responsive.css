@@ -10,8 +10,56 @@ html.high-contrast body.home-menu-active,
 html.high-contrast body:has(#menu-screen:not(.hidden)),
 html.large-text body.home-menu-active,
 html.large-text body:has(#menu-screen:not(.hidden)) {
-  background: #0097B2 !important;
+  background-color: #0097B2 !important;
+  background-image: url('../assets/bg-phone-menu.jpg') !important;
+  background-size: cover !important;
+  background-position: center top !important;
+  background-repeat: no-repeat !important;
+  background-attachment: fixed !important;
   color: #ffffff !important;
+}
+
+@media (max-width: 599px) {
+  html[data-theme="dark"] body.home-tab-menu,
+  html.high-contrast body.home-tab-menu,
+  html.large-text body.home-tab-menu,
+  body.home-menu-active.home-tab-menu,
+  body:has(#menu-screen:not(.hidden)).home-tab-menu {
+    background-image: url('../assets/bg-phone-menu.jpg') !important;
+  }
+
+  html[data-theme="dark"] body.home-tab-learn,
+  html.high-contrast body.home-tab-learn,
+  html.large-text body.home-tab-learn,
+  body.home-menu-active.home-tab-learn,
+  body:has(#menu-screen:not(.hidden)).home-tab-learn {
+    background-image: url('../assets/bg-phone-learn.jpg') !important;
+  }
+
+  html[data-theme="dark"] body.home-tab-quests,
+  html[data-theme="dark"] body.home-tab-shop,
+  html.high-contrast body.home-tab-quests,
+  html.high-contrast body.home-tab-shop,
+  html.large-text body.home-tab-quests,
+  html.large-text body.home-tab-shop,
+  body.home-menu-active.home-tab-quests,
+  body.home-menu-active.home-tab-shop,
+  body:has(#menu-screen:not(.hidden)).home-tab-quests,
+  body:has(#menu-screen:not(.hidden)).home-tab-shop {
+    background-image: url('../assets/bg-phone-quests.jpg') !important;
+  }
+}
+
+@media (min-width: 600px) {
+  html[data-theme="dark"] body.home-menu-active,
+  html[data-theme="dark"] body:has(#menu-screen:not(.hidden)),
+  html.high-contrast body.home-menu-active,
+  html.high-contrast body:has(#menu-screen:not(.hidden)),
+  html.large-text body.home-menu-active,
+  html.large-text body:has(#menu-screen:not(.hidden)) {
+    background-image: url('../assets/bg-landscape.jpg') !important;
+    background-position: center center !important;
+  }
 }
 
 html[data-theme="dark"] body.home-menu-active #menu-screen,

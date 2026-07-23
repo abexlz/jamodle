@@ -1475,10 +1475,10 @@
       "recommended": "추천",
       "tutorialMode": "튜토리얼",
       "singlePlayer": {
-        "title": "일인모드"
+        "title": "1인모드"
       },
       "battle": {
-        "title": "배틀 모드",
+        "title": "대결모드",
         "jamodle": "한글놀이",
         "wordChain": "단어 체인",
         "multiplayer": "랜덤 매치",
@@ -2773,8 +2773,8 @@
       "coins": "코인",
       "balance": "보유 코인",
       "scopeItem": "아이템",
-      "scopeCosmetic": "코스메틱",
-      "tabCosmetics": "꾸미기",
+      "scopeCosmetic": "장식",
+      "tabCosmetics": "장식",
       "tabTitles": "칭호",
       "tabFrames": "프로필 프레임",
       "tabItems": "아이템",

@@ -27,10 +27,10 @@
     "recommended": "추천",
     "tutorialMode": "튜토리얼",
     "singlePlayer": {
-      "title": "일인모드"
+      "title": "1인모드"
     },
     "battle": {
-      "title": "배틀 모드",
+      "title": "대결모드",
       "jamodle": "한글놀이",
       "wordChain": "단어 체인",
       "multiplayer": "랜덤 매치",
