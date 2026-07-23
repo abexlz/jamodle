@@ -142,6 +142,10 @@ html.large-text body.home-menu-active {
   --app-btn-max-h: clamp(58px, calc(16vw + 0.45dvh), 88px);
   --app-btn-radius: clamp(14px, 3.6vw, 22px);
 
+  --menu-game-side-w: clamp(54px, 14vw, 66px);
+  --menu-game-title-size: clamp(20px, 5.4vw, 28px);
+  --menu-game-btn-min-h: clamp(60px, 16vw, 80px);
+
   --menu-type-base: clamp(13px, calc(3.35vw + 0.12rem), 17px);
   --menu-type-lg: clamp(16px, calc(4.1vw + 0.15rem), 22px);
   --menu-type-xl: clamp(18px, calc(4.8vw + 0.18rem), 28px);
@@ -212,12 +216,6 @@ body.home-menu-active.home-tab-menu #menu-screen .menu-top-daily-row.menu-daily-
 
 #menu-screen .mode-name,
 #menu-screen .app-btn-title,
-#menu-screen .menu-battle-game-bar .mode-name,
-#menu-screen .menu-battle-game-bar .app-btn-title,
-#menu-screen .menu-jamo-game-bar .mode-name,
-#menu-screen .menu-jamo-game-bar .app-btn-title,
-#menu-screen .menu-word-chain-bar .mode-name,
-#menu-screen .menu-word-chain-bar .app-btn-title,
 #menu-screen .menu-top-daily-row .menu-daily-puzzle-main .mode-name,
 #menu-screen .daily-challenge-bar .mode-name,
 #menu-screen .menu-top-classic-label,
@@ -225,6 +223,16 @@ body.home-menu-active.home-tab-menu #menu-screen .menu-top-daily-row.menu-daily-
 #menu-screen .menu-play-game-btn .mode-name {
   font-size: var(--app-btn-title-size) !important;
   line-height: 1.1;
+}
+
+#menu-screen .menu-battle-game-bar .mode-name,
+#menu-screen .menu-battle-game-bar .app-btn-title,
+#menu-screen .menu-jamo-game-bar .mode-name,
+#menu-screen .menu-jamo-game-bar .app-btn-title,
+#menu-screen .menu-word-chain-bar .mode-name,
+#menu-screen .menu-word-chain-bar .app-btn-title {
+  font-size: var(--menu-game-title-size) !important;
+  line-height: 1.08;
 }
 
 #menu-screen .menu-daily-puzzle-bar .mode-name,
@@ -241,11 +249,11 @@ body.home-menu-active.home-tab-menu #menu-screen .menu-top-daily-row.menu-daily-
 }
 
 #menu-screen .menu-game-combo {
-  width: clamp(50px, 13vw, 62px);
+  width: var(--menu-game-side-w);
 }
 
 #menu-screen .menu-game-combo-count {
-  font-size: clamp(20px, calc(5.8vw + 0.1rem), 32px);
+  font-size: clamp(24px, calc(6.8vw + 0.1rem), 34px);
 }
 
 #menu-screen .menu-game-combo-label {

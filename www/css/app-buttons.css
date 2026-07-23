@@ -1122,47 +1122,40 @@ button.ghost:disabled,
   color: #f0a818;
 }
 
-/* Game mode bars — combo pocket left, title right */
+/* Game mode bars — shared side pocket + two-line title */
 #menu-screen .menu-word-chain-bar.accent-mint.menu-single-player-game-btn,
-#menu-screen .menu-jamo-game-bar.menu-jamo-game-btn {
-  display: grid !important;
-  grid-template-columns: auto 1fr;
-  align-items: stretch !important;
-  justify-content: stretch !important;
-  gap: 0 !important;
-  padding: 0 !important;
-  overflow: hidden;
-  min-height: clamp(52px, 14vw, 60px) !important;
-  flex-direction: unset !important;
-  aspect-ratio: auto !important;
-}
-
+#menu-screen .menu-jamo-game-bar.menu-jamo-game-btn,
 #menu-screen .menu-battle-game-bar.menu-battle-game-btn {
   display: grid !important;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: var(--menu-game-side-w) minmax(0, 1fr) !important;
   grid-template-rows: 1fr;
   align-items: stretch !important;
   justify-content: stretch !important;
   gap: 0 !important;
   padding: 0 !important;
   overflow: hidden;
-  min-height: clamp(52px, 14vw, 60px) !important;
+  min-height: var(--menu-game-btn-min-h) !important;
   flex-direction: unset !important;
   aspect-ratio: auto !important;
 }
 
-#menu-screen .menu-battle-icon-slot {
+#menu-screen .menu-battle-icon-slot,
+#menu-screen .menu-game-combo {
   grid-column: 1;
   grid-row: 1;
+  width: 100%;
+  min-width: 0;
+  align-self: stretch;
+}
+
+#menu-screen .menu-battle-icon-slot {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: clamp(48px, 12.5vw, 56px);
   padding: 4px;
   box-sizing: border-box;
   flex-shrink: 0;
   overflow: hidden;
-  align-self: stretch;
 }
 
 #menu-screen .menu-battle-game-bar.menu-jamo-game-btn .menu-battle-icon-slot {
@@ -1176,8 +1169,8 @@ button.ghost:disabled,
 }
 
 #menu-screen .menu-battle-icon-slot .menu-mode-icon-img {
-  width: clamp(34px, 9vw, 40px) !important;
-  height: clamp(34px, 9vw, 40px) !important;
+  width: clamp(36px, 9.5vw, 44px) !important;
+  height: clamp(36px, 9.5vw, 44px) !important;
   max-width: 100%;
   max-height: 100%;
   margin: 0;
@@ -1185,27 +1178,37 @@ button.ghost:disabled,
   object-fit: contain;
 }
 
-#menu-screen .menu-battle-label {
+#menu-screen .menu-battle-label,
+#menu-screen .menu-jamo-game-main,
+#menu-screen .menu-word-chain-main {
   grid-column: 2;
   grid-row: 1;
   display: flex !important;
   align-items: center;
   justify-content: center;
   min-width: 0;
-  padding: 8px 6px;
+  min-height: 0;
+  height: 100%;
+  padding: 6px 4px;
+  align-self: stretch;
 }
 
+#menu-screen .menu-jamo-game-bar .mode-name,
+#menu-screen .menu-jamo-game-bar .app-btn-title,
+#menu-screen .menu-word-chain-bar .mode-name,
+#menu-screen .menu-word-chain-bar .app-btn-title,
 #menu-screen .menu-battle-game-bar .mode-name,
 #menu-screen .menu-battle-game-bar .app-btn-title {
   width: 100%;
   text-align: center;
   text-transform: uppercase;
-  font-size: clamp(16px, 4.2vw, 20px) !important;
-  line-height: 1.05;
+  font-size: var(--menu-game-title-size, clamp(20px, 5.4vw, 28px)) !important;
+  line-height: 1.08;
   color: #ffffff !important;
   white-space: normal;
   overflow: visible;
   text-overflow: unset;
+  word-break: keep-all;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1214,12 +1217,16 @@ button.ghost:disabled,
 }
 
 #menu-screen .menu-battle-word-chain-bar .mode-name,
-#menu-screen .menu-battle-word-chain-bar .app-btn-title {
+#menu-screen .menu-battle-word-chain-bar .app-btn-title,
+#menu-screen .menu-word-chain-bar .mode-name,
+#menu-screen .menu-word-chain-bar .app-btn-title {
   text-shadow: 0 2px 0 rgba(120, 80, 0, 0.45) !important;
 }
 
 #menu-screen .menu-battle-game-bar.menu-jamo-game-btn .mode-name,
-#menu-screen .menu-battle-game-bar.menu-jamo-game-btn .app-btn-title {
+#menu-screen .menu-battle-game-bar.menu-jamo-game-btn .app-btn-title,
+#menu-screen .menu-jamo-game-bar .mode-name,
+#menu-screen .menu-jamo-game-bar .app-btn-title {
   text-shadow: 0 2px 0 rgba(140, 40, 55, 0.45) !important;
 }
 
@@ -1236,7 +1243,6 @@ button.ghost:disabled,
   display: flex;
   align-items: center;
   justify-content: center;
-  width: clamp(48px, 12.5vw, 56px);
   padding: 6px 5px;
   box-sizing: border-box;
   overflow: visible;
@@ -1275,7 +1281,7 @@ button.ghost:disabled,
   position: relative;
   z-index: 1;
   font-family: 'Jua', 'Noto Sans KR', sans-serif;
-  font-size: clamp(22.5px, 6.3vw, 28.5px);
+  font-size: clamp(24px, 6.8vw, 32px);
   font-weight: 400;
   line-height: 1;
   color: #fff;
@@ -1291,7 +1297,7 @@ button.ghost:disabled,
   position: relative;
   z-index: 1;
   font-family: 'Jua', 'Noto Sans KR', sans-serif;
-  font-size: clamp(10.5px, 2.85vw, 12px);
+  font-size: clamp(11px, 3vw, 13px);
   font-weight: 400;
   line-height: 1;
   letter-spacing: 0.04em;
@@ -1300,70 +1306,14 @@ button.ghost:disabled,
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.18);
 }
 
-#menu-screen .menu-jamo-game-bar .menu-jamo-game-main {
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-  min-width: 0;
-  padding: 8px 6px;
-}
-
-#menu-screen .menu-jamo-game-bar .mode-name,
-#menu-screen .menu-jamo-game-bar .app-btn-title {
-  width: 100%;
-  text-align: center;
-  text-transform: uppercase;
-  font-size: clamp(16px, 4.2vw, 20px) !important;
-  line-height: 1.05;
-  color: #ffffff !important;
-  text-shadow: 0 2px 0 rgba(140, 40, 55, 0.45) !important;
-  white-space: normal;
-  overflow: visible;
-  text-overflow: unset;
-  word-break: keep-all;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
-}
-
 #menu-screen .menu-jamo-game-bar:active,
 #menu-screen .menu-jamo-game-bar.is-pressed {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 2px 0 #c94a5c, 0 4px 8px rgba(0, 40, 50, 0.1) !important;
 }
 
-#menu-screen .menu-word-chain-bar .menu-word-chain-main {
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-  min-width: 0;
-  padding: 8px 6px;
-}
-
-#menu-screen .menu-word-chain-bar .mode-name,
-#menu-screen .menu-word-chain-bar .app-btn-title {
-  width: 100%;
-  text-align: center;
-  text-transform: uppercase;
-  font-size: clamp(16px, 4.2vw, 20px) !important;
-  line-height: 1.05;
-  color: #ffffff !important;
-  text-shadow: 0 2px 0 rgba(120, 80, 0, 0.45) !important;
-  white-space: normal;
-  overflow: visible;
-  text-overflow: unset;
-  word-break: keep-all;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
-}
-
 #menu-screen .menu-title-line {
   display: block;
-  line-height: 1.05;
+  line-height: 1.08;
 }
 
 #menu-screen .menu-word-chain-bar:active,
@@ -1475,12 +1425,12 @@ button.ghost:disabled,
 #menu-screen .word-games-grid > * {
   grid-column: auto;
   width: 100%;
-  --app-btn-min-h: 46px;
+  --app-btn-min-h: var(--menu-game-btn-min-h, clamp(60px, 16vw, 80px));
   --app-btn-max-h: none;
   --app-btn-radius: 16px;
   aspect-ratio: auto;
-  padding: 8px 12px;
-  min-height: 46px;
+  padding: 0;
+  min-height: var(--menu-game-btn-min-h, clamp(60px, 16vw, 80px));
 }
 
 #menu-screen .daily-challenge-bar {
@@ -1494,10 +1444,12 @@ button.ghost:disabled,
 #menu-screen .menu-word-chain-bar.menu-single-player-game-btn,
 #menu-screen .menu-battle-game-bar.menu-battle-game-btn {
   display: grid !important;
+  grid-template-columns: var(--menu-game-side-w, clamp(54px, 14vw, 66px)) minmax(0, 1fr) !important;
   flex-direction: unset !important;
   align-items: stretch !important;
   justify-content: stretch !important;
   gap: 0 !important;
+  min-height: var(--menu-game-btn-min-h, clamp(60px, 16vw, 80px)) !important;
 }
 
 #menu-screen .daily-challenge-bar .mode-icon {

@@ -92,13 +92,13 @@
   position: relative;
   z-index: 1;
   aspect-ratio: auto;
-  min-height: clamp(55px, 15vw, 65px);
-  padding: 10px 12px;
+  min-height: var(--menu-game-btn-min-h, clamp(60px, 16vw, 80px)) !important;
+  padding: 0 !important;
   overflow: hidden;
   flex-direction: row !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-  gap: 8px !important;
+  align-items: stretch !important;
+  justify-content: stretch !important;
+  gap: 0 !important;
 }
 
 #menu-screen .menu-mode-panel .menu-battle-game-bar.menu-battle-game-btn,
@@ -106,7 +106,6 @@
 #menu-screen .menu-mode-panel .menu-word-chain-bar.menu-single-player-game-btn {
   padding: 0 !important;
   gap: 0 !important;
-  min-height: clamp(52px, 14vw, 60px) !important;
 }
 
 #menu-screen .menu-mode-panel .menu-battle-game-btn .mode-icon,
@@ -120,31 +119,20 @@
 #menu-screen .menu-mode-panel .menu-single-player-game-btn .daily-challenge-content {
   flex: 1;
   min-width: 0;
+  min-height: 0;
+  height: 100%;
   flex-direction: row;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   gap: 0;
 }
 
-#menu-screen .menu-mode-panel .menu-single-player-game-btn .mode-name {
-  text-align: center;
-  white-space: normal !important;
-  font-size: clamp(16px, 4.2vw, 20px) !important;
-  line-height: 1.08;
-  text-transform: none;
-  overflow: visible;
-  text-overflow: unset;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
+#menu-screen .menu-mode-panel .menu-single-player-game-btn .mode-name,
 #menu-screen .menu-mode-panel .menu-battle-game-bar .mode-name {
   text-align: center !important;
   white-space: normal !important;
-  font-size: clamp(16px, 4.2vw, 20px) !important;
-  line-height: 1.05;
+  font-size: var(--menu-game-title-size, clamp(20px, 5.4vw, 28px)) !important;
+  line-height: 1.08;
   text-transform: uppercase;
   overflow: visible;
   text-overflow: unset;
@@ -158,8 +146,8 @@
 #menu-screen .menu-battle-game-btn,
 #menu-screen .menu-single-player-game-btn {
   aspect-ratio: auto;
-  min-height: 46px;
-  padding: 8px 12px;
+  min-height: var(--menu-game-btn-min-h, clamp(60px, 16vw, 80px));
+  padding: 0;
 }
 
 #menu-screen .menu-battle-game-btn .daily-challenge-content,
