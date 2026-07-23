@@ -1328,6 +1328,8 @@
       "close": "Close",
       "coins": "coins",
       "balance": "Your balance",
+      "scopeItem": "Item",
+      "scopeCosmetic": "Cosmetic",
       "tabCosmetics": "Style",
       "tabTitles": "Titles",
       "tabFrames": "Profile frames",
@@ -1512,7 +1514,7 @@
           "subtitleKo": "자모를 끌어 단어를 완성해요"
         },
         "classic": {
-          "title": "자모게임",
+          "title": "한글놀이",
           "subtitleKo": "자모를 끌어 단어를 완성해요"
         },
         "match-multi-find": {
@@ -2770,6 +2772,8 @@
       "close": "닫기",
       "coins": "코인",
       "balance": "보유 코인",
+      "scopeItem": "아이템",
+      "scopeCosmetic": "코스메틱",
       "tabCosmetics": "꾸미기",
       "tabTitles": "칭호",
       "tabFrames": "프로필 프레임",

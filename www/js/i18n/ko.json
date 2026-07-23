@@ -1300,6 +1300,8 @@
     "close": "닫기",
     "coins": "코인",
     "balance": "보유 코인",
+    "scopeItem": "아이템",
+    "scopeCosmetic": "코스메틱",
     "tabCosmetics": "꾸미기",
     "tabTitles": "칭호",
     "tabFrames": "프로필 프레임",

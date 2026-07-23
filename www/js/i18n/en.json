@@ -1300,6 +1300,8 @@
     "close": "Close",
     "coins": "coins",
     "balance": "Your balance",
+    "scopeItem": "Item",
+    "scopeCosmetic": "Cosmetic",
     "tabCosmetics": "Style",
     "tabTitles": "Titles",
     "tabFrames": "Profile frames",

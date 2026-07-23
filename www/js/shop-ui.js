@@ -1,5 +1,5 @@
 /**
- * Shop — inline scroll section (cosmetics + items in one list).
+ * Shop — inline scroll section with Item / Cosmetic scope tabs.
  */
 (function (global) {
   'use strict';
@@ -158,10 +158,13 @@
     }).join('');
   }
 
+  let activeShopScope = 'item';
+
   function renderSection() {
     const inv = SS()?.getInventory?.() || {
       coins: 0, ownedThemes: [], extraGuessTokens: 0, selectedCosmeticTheme: 'default',
     };
+    const scope = activeShopScope;
 
     return `
       <section class="shop-section" id="shop-section" aria-labelledby="shop-section-heading">
@@ -169,17 +172,57 @@
           <h2 class="shop-section-title" id="shop-section-heading">🛒 ${escapeHtml(t('shop.title'))}</h2>
           <p class="shop-section-balance">${escapeHtml(t('shop.balance'))}: <strong>🪙 ${inv.coins}</strong></p>
         </div>
-        <h3 class="shop-subsection-title">${escapeHtml(t('shop.tabCosmetics'))}</h3>
-        <div class="shop-item-grid shop-theme-grid">${renderCosmeticsBlock(inv)}</div>
-        <h3 class="shop-subsection-title">${escapeHtml(t('shop.tabTitles'))}</h3>
-        <div class="shop-item-grid shop-consumables-list">${renderTitlesBlock(inv)}</div>
-        <h3 class="shop-subsection-title">${escapeHtml(t('shop.tabFrames'))}</h3>
-        <div class="shop-item-grid shop-frame-grid">${renderFramesBlock(inv)}</div>
-        <h3 class="shop-subsection-title">${escapeHtml(t('shop.tabItems'))}</h3>
-        <div class="shop-item-grid shop-consumables-list">${renderItemsBlock(inv)}</div>
+
+        <div class="shop-scope-bar">
+          <div class="shop-scope-switch" role="tablist" aria-label="${escapeHtml(t('shop.title'))}">
+            <button type="button" class="shop-scope-btn${scope === 'item' ? ' is-active' : ''}"
+              role="tab" aria-selected="${scope === 'item'}" data-shop-scope="item">
+              ${escapeHtml(t('shop.scopeItem'))}
+            </button>
+            <button type="button" class="shop-scope-btn${scope === 'cosmetic' ? ' is-active' : ''}"
+              role="tab" aria-selected="${scope === 'cosmetic'}" data-shop-scope="cosmetic">
+              ${escapeHtml(t('shop.scopeCosmetic'))}
+            </button>
+          </div>
+        </div>
+
+        <div class="shop-scope-panel${scope === 'item' ? '' : ' hidden'}" data-shop-scope-panel="item"
+          role="tabpanel" aria-labelledby="shop-scope-item">
+          <h3 class="shop-subsection-title" id="shop-scope-item">${escapeHtml(t('shop.tabItems'))}</h3>
+          <div class="shop-item-grid shop-consumables-list">${renderItemsBlock(inv)}</div>
+        </div>
+
+        <div class="shop-scope-panel${scope === 'cosmetic' ? '' : ' hidden'}" data-shop-scope-panel="cosmetic"
+          role="tabpanel" aria-labelledby="shop-scope-cosmetic">
+          <h3 class="shop-subsection-title" id="shop-scope-cosmetic">${escapeHtml(t('shop.tabCosmetics'))}</h3>
+          <div class="shop-item-grid shop-theme-grid">${renderCosmeticsBlock(inv)}</div>
+          <h3 class="shop-subsection-title">${escapeHtml(t('shop.tabTitles'))}</h3>
+          <div class="shop-item-grid shop-consumables-list">${renderTitlesBlock(inv)}</div>
+          <h3 class="shop-subsection-title">${escapeHtml(t('shop.tabFrames'))}</h3>
+          <div class="shop-item-grid shop-frame-grid">${renderFramesBlock(inv)}</div>
+        </div>
+
         <p class="shop-msg" id="shop-section-msg" hidden></p>
       </section>
     `;
+  }
+
+  function setShopScope(scope, root) {
+    if (scope !== 'item' && scope !== 'cosmetic') return;
+    activeShopScope = scope;
+
+    const section = root?.querySelector('#shop-section') || document.getElementById('shop-section');
+    if (!section) return;
+
+    section.querySelectorAll('[data-shop-scope]').forEach((btn) => {
+      const active = btn.dataset.shopScope === scope;
+      btn.classList.toggle('is-active', active);
+      btn.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
+
+    section.querySelectorAll('[data-shop-scope-panel]').forEach((panel) => {
+      panel.classList.toggle('hidden', panel.dataset.shopScopePanel !== scope);
+    });
   }
 
   function showMessage(root, text, kind) {
@@ -203,6 +246,13 @@
   function bindSection(root) {
     if (!root) return;
     const section = root.querySelector('#shop-section') || root;
+
+    section.querySelectorAll('[data-shop-scope]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const next = btn.dataset.shopScope;
+        if (next) setShopScope(next, root);
+      });
+    });
 
     section.querySelectorAll('[data-buy-theme]').forEach((btn) => {
       btn.addEventListener('click', () => {
