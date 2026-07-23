@@ -18,60 +18,6 @@
       .replace(/"/g, '&quot;');
   }
 
-  function themeNameKey(themeId) {
-    if (themeId === 'deep-sea') return 'deepSea';
-    if (themeId === 'dark-hanji') return 'darkHanji';
-    return themeId;
-  }
-
-  function renderCosmeticsBlock(inv) {
-    const selected = inv.selectedCosmeticTheme || 'default';
-    const themes = [
-      { id: 'default', price: 0 },
-      ...Object.values(SS().THEMES),
-    ];
-
-    return themes.map((theme) => {
-      const owned = theme.id === 'default' || inv.ownedThemes.includes(theme.id);
-      const isSelected = selected === theme.id;
-      const key = themeNameKey(theme.id);
-      const name = t(`shop.themes.${key}`);
-      const desc = t(`shop.themes.${key}Desc`);
-
-      let action = '';
-      if (theme.id === 'default' || owned) {
-        action = `
-          <label class="shop-theme-select" title="${escapeHtml(t('shop.applyTheme'))}">
-            <input type="radio" name="cosmetic-theme" value="${escapeHtml(theme.id)}"
-              ${isSelected ? 'checked' : ''} ${owned ? '' : 'disabled'}
-              aria-label="${escapeHtml(t('shop.applyTheme'))}">
-          </label>`;
-      } else {
-        action = `
-          <button type="button" class="shop-buy-btn shop-buy-btn--compact" data-buy-theme="${escapeHtml(theme.id)}"
-            ${inv.coins >= theme.price ? '' : 'disabled'}>
-            🪙 ${theme.price}
-          </button>`;
-      }
-
-      const ownedBadge = owned && theme.id !== 'default'
-        ? `<span class="shop-owned-badge">${escapeHtml(t('shop.owned'))}</span>`
-        : '';
-
-      return `
-        <article class="shop-item-card shop-theme-card${owned ? ' is-owned' : ''}${isSelected ? ' is-selected' : ''}"
-          title="${escapeHtml(desc)}">
-          <div class="shop-theme-swatch" data-theme-id="${escapeHtml(theme.id)}" aria-hidden="true"></div>
-          <div class="shop-theme-card-foot">
-            <span class="shop-item-name">${escapeHtml(name)}</span>
-            ${ownedBadge}
-            ${action}
-          </div>
-        </article>
-      `;
-    }).join('');
-  }
-
   function renderTitlesBlock(inv) {
     return Object.values(SS().TITLES).map((title) => {
       const owned = SS().ownsTitle(title.id);
@@ -102,6 +48,19 @@
     }).join('');
   }
 
+  function renderFramePreview(frameId) {
+    if (global.ProfileUI?.renderAvatarWithFrame) {
+      return global.ProfileUI.renderAvatarWithFrame({
+        icon: '🌸',
+        frameId,
+        size: 'picker',
+        shape: 'circle',
+      });
+    }
+    const frame = SS().FRAMES[frameId];
+    return `<div class="shop-frame-swatch" style="background:${frame?.swatch || '#ccc'}" aria-hidden="true"></div>`;
+  }
+
   function renderFramesBlock(inv) {
     return Object.values(SS().FRAMES).map((frame) => {
       const owned = SS().ownsFrame(frame.id);
@@ -122,7 +81,9 @@
       return `
         <article class="shop-item-card shop-cosmetic-card shop-frame-card${owned ? ' is-owned' : ''}"
           title="${escapeHtml(desc)}">
-          <div class="shop-frame-swatch" style="background:${frame.swatch}" aria-hidden="true"></div>
+          <div class="shop-frame-preview" aria-hidden="true">
+            ${renderFramePreview(frame.id)}
+          </div>
           <div class="shop-item-main">
             <span class="shop-item-name">${escapeHtml(name)}</span>
           </div>
@@ -194,9 +155,7 @@
 
         <div class="shop-scope-panel${scope === 'cosmetic' ? '' : ' hidden'}" data-shop-scope-panel="cosmetic"
           role="tabpanel" aria-labelledby="shop-scope-cosmetic">
-          <h3 class="shop-subsection-title" id="shop-scope-cosmetic">${escapeHtml(t('shop.tabCosmetics'))}</h3>
-          <div class="shop-item-grid shop-theme-grid">${renderCosmeticsBlock(inv)}</div>
-          <h3 class="shop-subsection-title">${escapeHtml(t('shop.tabTitles'))}</h3>
+          <h3 class="shop-subsection-title" id="shop-scope-cosmetic">${escapeHtml(t('shop.tabTitles'))}</h3>
           <div class="shop-item-grid shop-consumables-list">${renderTitlesBlock(inv)}</div>
           <h3 class="shop-subsection-title">${escapeHtml(t('shop.tabFrames'))}</h3>
           <div class="shop-item-grid shop-frame-grid">${renderFramesBlock(inv)}</div>
@@ -254,18 +213,6 @@
       });
     });
 
-    section.querySelectorAll('[data-buy-theme]').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const result = SS()?.buyTheme?.(btn.dataset.buyTheme);
-        if (result?.ok) {
-          showMessage(section.closest('.menu-sections') || section, t('shop.purchaseSuccess'), 'ok');
-          refreshSection(root);
-        } else if (result?.reason === 'insufficient') {
-          showMessage(section.closest('.menu-sections') || section, t('shop.insufficientCoins'), 'error');
-        }
-      });
-    });
-
     section.querySelectorAll('[data-buy-title]').forEach((btn) => {
       btn.addEventListener('click', () => {
         const result = SS()?.buyTitle?.(btn.dataset.buyTitle);
@@ -299,17 +246,6 @@
         } else if (result?.reason === 'insufficient') {
           showMessage(section.closest('.menu-sections') || section, t('shop.insufficientCoins'), 'error');
         }
-      });
-    });
-
-    section.querySelectorAll('input[name="cosmetic-theme"]').forEach((input) => {
-      input.addEventListener('change', () => {
-        if (!input.checked) return;
-        SS()?.selectTheme?.(input.value);
-        showMessage(section.closest('.menu-sections') || section, t('shop.themeApplied'), 'ok');
-        section.querySelectorAll('.shop-theme-card').forEach((card) => {
-          card.classList.toggle('is-selected', card.querySelector('input')?.value === input.value);
-        });
       });
     });
   }

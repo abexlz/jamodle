@@ -33,7 +33,11 @@
 }
 
 .quest-scope-bar {
-  margin-bottom: 14px;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .quest-scope-switch {
@@ -138,48 +142,72 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .quest-list-scroll::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 32px;
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 151, 178, 0) 0%,
-    rgba(0, 151, 178, 0.55) 45%,
-    rgba(0, 122, 142, 0.88) 100%
-  );
-  pointer-events: none;
-  z-index: 2;
+  display: none;
 }
 
 .quest-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   flex: 1 1 0;
   min-height: 0;
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: 18px;
-  scroll-padding-bottom: 18px;
+  padding-bottom: 8px;
+  scroll-padding-bottom: 8px;
+}
+
+.quest-wheel-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  align-self: center;
+  width: fit-content;
+  max-width: 100%;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 2px solid #73B5F2;
+  background: rgba(153, 204, 255, 0.72);
+  box-shadow: 0 3px 0 #5A9FDB;
+  color: #0a3d52 !important;
+  text-decoration: none;
+  font-family: 'Jua', sans-serif;
+  font-size: 13px;
+  line-height: 1.1;
+}
+
+.quest-wheel-chip.is-ready {
+  border-color: #1a9d62;
+  background: linear-gradient(180deg, #daf8ea 0%, #bfead4 100%);
+  box-shadow: 0 3px 0 #1fa863;
+  color: #0d4d32 !important;
+}
+
+.quest-wheel-chip.is-claimed {
+  opacity: 0.82;
+}
+
+.quest-wheel-chip-icon {
+  font-size: 16px;
+  line-height: 1;
 }
 
 .quest-card {
   display: grid;
   grid-template-columns: auto 1fr auto;
-  gap: 10px;
-  align-items: start;
-  padding: 12px;
+  gap: 8px;
+  align-items: center;
+  padding: 10px;
   border-radius: var(--radius-sm, 12px);
   border: 2px solid #73B5F2 !important;
   background: #99CCFF !important;
-  box-shadow: 0 4px 0 #5A9FDB !important;
+  box-shadow: 0 3px 0 #5A9FDB !important;
   color: #0a3d52;
 }
 
@@ -198,7 +226,7 @@
 
 .quest-card.is-claimable .quest-card-task,
 .quest-card.is-claimable .quest-progress-label,
-.quest-card.is-claimable .quest-reward {
+.quest-card.is-claimable .quest-reward-compact {
   color: #5c3a08;
 }
 
@@ -220,34 +248,37 @@
 }
 
 .quest-card-icon {
-  font-size: 26px;
+  font-size: 22px;
   line-height: 1;
-  padding-top: 2px;
   flex-shrink: 0;
 }
 
 .quest-card-task {
-  margin: 0 0 8px;
+  margin: 0 0 4px;
   font-family: 'Jua', sans-serif;
-  font-size: 14px;
+  font-size: 13px;
   color: #0a3d52;
-  line-height: 1.35;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.quest-card-desc {
-  display: none;
-}
-
-.quest-card-title {
-  display: none;
+.quest-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .quest-progress {
-  height: 8px;
+  flex: 1;
+  min-width: 0;
+  height: 6px;
   border-radius: 999px;
   background: rgba(10, 61, 82, 0.12);
   overflow: hidden;
-  margin-bottom: 4px;
+  margin-bottom: 0;
 }
 
 .quest-progress-fill {
@@ -268,8 +299,10 @@
 
 .quest-progress-label {
   margin: 0;
-  font-size: 11px;
+  font-size: 10px;
   color: rgba(10, 61, 82, 0.72);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .quest-progress-label--complete {
@@ -308,12 +341,21 @@
   color: #0d4d32;
 }
 
-.quest-card-rewards {
+.quest-card-status {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  justify-content: center;
   gap: 4px;
-  min-width: 56px;
+  min-width: 52px;
+}
+
+.quest-reward-compact {
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(10, 61, 82, 0.78);
+  white-space: nowrap;
+  text-align: right;
 }
 
 .quest-reward {
@@ -325,9 +367,9 @@
 
 .quest-claim-btn {
   font-family: 'Jua', sans-serif;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 400;
-  padding: 8px 14px;
+  padding: 6px 10px;
   border-radius: 999px;
   border: 2px solid #C4A82D;
   background: linear-gradient(180deg, #fff8d8 0%, #ffe566 100%);

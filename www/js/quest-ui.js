@@ -38,32 +38,23 @@
       target: entry.target,
     });
 
-    let rewardsHtml = '';
+    let statusHtml = '';
     if (claimable) {
-      rewardsHtml = `<button type="button" class="quest-claim-btn">${escapeHtml(t('quests.claim'))}</button>`;
+      statusHtml = `<button type="button" class="quest-claim-btn">${escapeHtml(t('quests.claim'))}</button>`;
     } else if (claimed) {
-      rewardsHtml = `<span class="quest-done-badge">${escapeHtml(t('quests.complete'))}</span>`;
+      statusHtml = `<span class="quest-done-badge">${escapeHtml(t('quests.complete'))}</span>`;
     } else {
-      rewardsHtml = `<span class="quest-reward">+${def.xp} XP</span>
-         <span class="quest-reward">🪙 ${def.coins}</span>`;
+      statusHtml = `<span class="quest-reward-compact">+${def.xp} XP · 🪙 ${def.coins}</span>`;
     }
 
-    let progressHtml = '';
-    if (claimed) {
-      progressHtml = `
-          <div class="quest-complete-mark" aria-hidden="true">
-            <span class="quest-complete-icon">✓</span>
-            <span class="quest-complete-label">${escapeHtml(t('quests.complete'))}</span>
-          </div>
-          <p class="quest-progress-label quest-progress-label--complete">${escapeHtml(progressLabel)}</p>`;
-    } else {
-      progressHtml = `
-          <div class="quest-progress" role="progressbar"
-            aria-valuemin="0" aria-valuemax="${entry.target}" aria-valuenow="${progressCurrent}">
-            <div class="quest-progress-fill" style="width:${pct}%"></div>
-          </div>
-          <p class="quest-progress-label">${escapeHtml(progressLabel)}</p>`;
-    }
+    const progressHtml = claimed ? '' : `
+          <div class="quest-card-meta">
+            <div class="quest-progress" role="progressbar"
+              aria-valuemin="0" aria-valuemax="${entry.target}" aria-valuenow="${progressCurrent}">
+              <div class="quest-progress-fill" style="width:${pct}%"></div>
+            </div>
+            <span class="quest-progress-label">${escapeHtml(progressLabel)}</span>
+          </div>`;
 
     return `
       <article class="quest-card${tierClass}${stateClass}" data-quest-id="${escapeHtml(entry.questId)}"${claimable ? ' data-claimable="true"' : ''} aria-label="${escapeHtml(taskText)}">
@@ -72,8 +63,8 @@
           <p class="quest-card-task">${escapeHtml(taskText)}</p>
           ${progressHtml}
         </div>
-        <div class="quest-card-rewards">
-          ${rewardsHtml}
+        <div class="quest-card-status">
+          ${statusHtml}
         </div>
       </article>
     `;
@@ -88,36 +79,21 @@
     `;
   }
 
-  function renderDailyBonus(snap) {
+  function renderWheelChip(snap) {
     const wheelReady = QS()?.isDailyWheelAvailable?.(global.ProfileService?.loadProfile?.());
     const wheelClaimed = snap.dailyWheelClaimed;
-
-    let stateClass = '';
-    let btnHtml = '';
-    if (wheelClaimed) {
-      stateClass = ' is-claimed';
-      btnHtml = `<a href="wheel.html" class="quest-daily-bonus-btn quest-daily-bonus-btn--link">${escapeHtml(t('wheel.claimed'))}</a>`;
-    } else if (wheelReady) {
-      stateClass = ' is-ready';
-      btnHtml = `<a href="wheel.html?spin=1" class="quest-daily-bonus-btn quest-daily-bonus-btn--link" id="quest-wheel-btn">${escapeHtml(t('wheel.spin'))}</a>`;
-    } else {
-      btnHtml = `<a href="wheel.html" class="quest-daily-bonus-btn quest-daily-bonus-btn--link">${escapeHtml(t('wheel.locked'))}</a>`;
-    }
-
-    const doneCount = snap.daily.filter((q) => q.progress >= q.target).length;
-    const desc = wheelClaimed
-      ? t('wheel.claimedDesc')
+    const href = wheelReady ? 'wheel.html?spin=1' : 'wheel.html';
+    const label = wheelClaimed
+      ? t('wheel.claimed')
       : wheelReady
-        ? t('wheel.readyDesc')
-        : t('wheel.lockedDesc', { done: doneCount, total: snap.daily.length });
-
+        ? t('wheel.spin')
+        : t('wheel.spinShort');
+    const stateClass = wheelClaimed ? ' is-claimed' : (wheelReady ? ' is-ready' : '');
     return `
-      <div class="quest-daily-bonus${stateClass}" id="quest-daily-bonus">
-        <span class="quest-daily-bonus-icon" aria-hidden="true">🎡</span>
-        <h4 class="quest-daily-bonus-title">${escapeHtml(t('wheel.bonusTitle'))}</h4>
-        <p class="quest-daily-bonus-desc">${escapeHtml(desc)}</p>
-        ${btnHtml}
-      </div>
+      <a href="${escapeHtml(href)}" class="quest-wheel-chip${stateClass}" id="quest-wheel-chip">
+        <span class="quest-wheel-chip-icon" aria-hidden="true">🎡</span>
+        <span class="quest-wheel-chip-label">${escapeHtml(label)}</span>
+      </a>
     `;
   }
 
@@ -157,21 +133,17 @@
               ${escapeHtml(t('quests.scopeWeekly'))}
             </button>
           </div>
+          ${scope === 'daily' ? renderWheelChip(snap) : ''}
           ${renderRefreshTimer(scope)}
         </div>
 
         <div class="quest-scope-panel${scope === 'daily' ? '' : ' hidden'}" data-quest-scope-panel="daily"
           role="tabpanel" aria-labelledby="quest-scope-daily">
-          <h3 class="quest-subsection-title" id="quest-scope-daily">${escapeHtml(t('quests.dailyTitle'))}</h3>
-          <p class="quest-subsection-hint">${escapeHtml(t('quests.dailyHint'))}</p>
           ${renderQuestList(dailyCards)}
-          ${renderDailyBonus(snap)}
         </div>
 
         <div class="quest-scope-panel${scope === 'weekly' ? '' : ' hidden'}" data-quest-scope-panel="weekly"
           role="tabpanel" aria-labelledby="quest-scope-weekly">
-          <h3 class="quest-subsection-title quest-subsection-title--weekly" id="quest-scope-weekly">${escapeHtml(t('quests.weeklyTitle'))}</h3>
-          <p class="quest-subsection-hint">${escapeHtml(t('quests.weeklyHint'))}</p>
           ${renderQuestList(weeklyCards)}
         </div>
       </section>

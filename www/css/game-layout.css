@@ -331,24 +331,13 @@ body.home-menu-active #menu-screen.is-quests-tab .quest-list-scroll {
 }
 
 body.home-menu-active #menu-screen.is-quests-tab .quest-list {
-  gap: clamp(4px, 0.7dvh, 6px);
+  gap: 8px;
 }
 
 body.home-menu-active #menu-screen.is-quests-tab .quest-card {
   flex: 0 0 auto;
   min-height: auto;
-  padding: clamp(6px, 1.2dvh, 10px) clamp(8px, 2vw, 12px);
-}
-
-body.home-menu-active #menu-screen.is-quests-tab .quest-subsection-title,
-body.home-menu-active #menu-screen.is-quests-tab .quest-subsection-hint {
-  display: none;
-}
-
-body.home-menu-active #menu-screen.is-quests-tab .quest-daily-bonus {
-  flex-shrink: 0;
-  margin-top: clamp(4px, 0.8dvh, 8px);
-  padding: clamp(8px, 1.2dvh, 12px);
+  padding: 8px 10px;
 }
 
 body.home-menu-active.home-tab-shop .shop-section-header,

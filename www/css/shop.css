@@ -454,8 +454,20 @@
 .shop-frame-card {
   flex-direction: column;
   align-items: stretch;
-  gap: 6px;
-  padding: 8px;
+  gap: 8px;
+  padding: 10px 8px;
+}
+
+.shop-frame-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+  padding: 4px 0;
+}
+
+.shop-frame-preview .profile-avatar-frame {
+  margin: 0 auto;
 }
 
 .shop-frame-swatch {
