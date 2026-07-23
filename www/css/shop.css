@@ -552,7 +552,7 @@
   margin-left: auto;
 }
 
-.menu-top-bar .player-hud-compact {
+.menu-top-bar .player-hud-compact:not(.menu-hud-coins) {
   justify-content: flex-end;
   align-items: center;
   gap: 6px;

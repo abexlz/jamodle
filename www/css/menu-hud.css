@@ -39,9 +39,14 @@
   pointer-events: none;
 }
 
-/* Left — mini spin wheel */
+/* Left cluster — wheel + calendar aligned on wheel disc row */
+.menu-hud-left {
+  align-items: flex-end;
+}
+
 .menu-hud-left .menu-hud-spin {
   flex-shrink: 0;
+  width: clamp(44px, 12vw, 52px);
 }
 
 .menu-hud-spin {
@@ -156,11 +161,12 @@
   box-shadow: 0 2px 0 rgba(80, 8, 22, 0.35);
 }
 
-/* Calendar chip — arcade style */
+/* Calendar chip — aligned with spin wheel disc (above SPIN label) */
 .menu-hud-calendar {
   flex-shrink: 0;
-  width: clamp(40px, 11vw, 46px);
-  height: clamp(40px, 11vw, 46px);
+  width: clamp(44px, 12vw, 52px);
+  height: clamp(44px, 12vw, 52px);
+  margin-bottom: calc(clamp(11px, 3vw, 13px) + 4px);
   border-radius: 12px;
   border: 2px solid #f4d35e;
   background: linear-gradient(180deg, #fff4c8 0%, #ffd45a 55%, #f0b020 100%);
@@ -182,148 +188,56 @@
   font-weight: 800;
 }
 
-/* Center — circular avatar + arc progress */
+/* Center — rectangular battle card profile */
 .menu-top-bar .menu-hud-profile {
   pointer-events: auto;
   z-index: 36;
 }
 
-.menu-hud-avatar {
-  --hud-size: var(--menu-profile-size, clamp(92px, 26vw, 112px));
-  position: relative;
-  width: var(--hud-size);
-  height: var(--hud-size);
+.menu-hud-bar .menu-profile-card--menu {
   filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.28));
 }
 
-.menu-hud-avatar-svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  transform: rotate(-90deg);
-}
-
-.menu-hud-avatar-track {
-  fill: none;
-  stroke: rgba(0, 0, 0, 0.22);
-  stroke-width: 7;
-}
-
-.menu-hud-avatar-fill {
-  fill: none;
-  stroke: var(--menu-hud-progress);
-  stroke-width: 7;
-  stroke-linecap: round;
-  transition: stroke-dashoffset 0.35s ease;
-  filter: drop-shadow(0 0 4px rgba(62, 207, 176, 0.55));
-}
-
-.menu-hud-avatar-inner {
-  position: absolute;
-  inset: 12%;
-  border-radius: 50%;
-  background: linear-gradient(180deg, #6ec8ff 0%, #3a8fd4 100%);
-  border: 4px solid #f4d35e;
-  box-shadow:
-    inset 0 3px 8px rgba(255, 255, 255, 0.35),
-    inset 0 -4px 8px rgba(0, 40, 80, 0.25),
-    0 3px 0 rgba(120, 80, 0, 0.35);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.menu-hud-avatar-icon {
-  font-size: clamp(28px, 9vw, 40px);
-  line-height: 1;
-  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.2));
-}
-
-.menu-hud-level-star {
-  position: absolute;
-  top: -4%;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 4;
-  min-width: 34%;
-  height: 28%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background:
-    radial-gradient(circle at 50% 35%, #7dd4ff 0%, var(--menu-hud-star) 55%, #1f5f9a 100%);
-  clip-path: polygon(50% 0%, 61% 32%, 98% 35%, 68% 57%, 79% 91%, 50% 72%, 21% 91%, 32% 57%, 2% 35%, 39% 32%);
-  filter: drop-shadow(0 2px 0 rgba(0, 40, 80, 0.45));
-}
-
-.menu-hud-level-num {
-  font-family: 'Jua', sans-serif;
-  font-size: clamp(11px, 3.2vw, 14px);
-  font-weight: 400;
-  color: #fff;
-  text-shadow: 0 1px 0 rgba(0, 40, 80, 0.55);
-  line-height: 1;
-  transform: translateY(-8%);
-}
-
-.menu-hud-shield {
-  position: absolute;
-  bottom: -2%;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 4;
-  width: 30%;
-  height: 24%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: clamp(14px, 4vw, 18px);
-  background: linear-gradient(180deg, #ffe566 0%, #f4b820 100%);
-  border: 2px solid #c49210;
-  border-radius: 8px 8px 12px 12px;
-  box-shadow: 0 2px 0 #9a7010;
-  line-height: 1;
-}
-
-/* Right — coin pill */
+/* Right — rectangular coin shop button */
 .menu-top-bar .menu-hud-coins-slot {
   pointer-events: auto;
 }
 
-.menu-hud-coins {
+.menu-hud-bar .menu-hud-coins.player-hud-compact {
   position: relative;
   display: inline-flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 6px;
-  min-width: clamp(88px, 24vw, 108px);
-  height: clamp(36px, 10vw, 42px);
-  padding: 0 38px 0 12px;
-  border-radius: 999px;
-  background: linear-gradient(180deg, #7a2038 0%, var(--menu-hud-coin-pill) 45%, var(--menu-hud-coin-pill-edge) 100%);
-  border: 2px solid rgba(255, 200, 120, 0.35);
-  box-shadow: 0 4px 0 rgba(40, 6, 14, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  min-width: clamp(92px, 26vw, 112px);
+  height: clamp(38px, 10.5vw, 44px);
+  padding: 0 40px 0 14px;
+  margin: 0;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #7a2038 0%, var(--menu-hud-coin-pill) 45%, var(--menu-hud-coin-pill-edge) 100%) !important;
+  border: 2px solid rgba(255, 200, 120, 0.4) !important;
+  box-shadow: 0 4px 0 rgba(40, 6, 14, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
   text-decoration: none;
   transition: transform 0.12s ease;
 }
 
-.menu-hud-coins:active {
+.menu-hud-bar .menu-hud-coins.player-hud-compact:active {
   transform: translateY(2px) scale(0.98);
-  box-shadow: 0 2px 0 rgba(40, 6, 14, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  box-shadow: 0 2px 0 rgba(40, 6, 14, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
 }
 
-.menu-hud-coins-value {
+.menu-hud-bar .menu-hud-coins-value {
   flex: 1;
   font-family: 'Jua', sans-serif;
   font-size: clamp(16px, 4.5vw, 20px);
   font-weight: 400;
-  color: #fff;
+  color: #fff !important;
   text-shadow: 0 2px 0 rgba(40, 6, 14, 0.55);
   text-align: right;
   line-height: 1;
 }
 
-.menu-hud-coins-coin {
+.menu-hud-bar .menu-hud-coins-coin {
   position: absolute;
   right: -4px;
   top: 50%;
@@ -338,7 +252,7 @@
   filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.25));
 }
 
-.menu-hud-coins-plus {
+.menu-hud-bar .menu-hud-coins-plus {
   position: absolute;
   right: -2px;
   bottom: -4px;
@@ -356,13 +270,6 @@
   box-shadow: 0 2px 0 #1a9d62;
 }
 
-.menu-top-bar .player-hud-compact {
-  background: transparent;
-  border: none;
-  box-shadow: none;
-  padding: 0;
-}
-
 .menu-header::before {
   top: calc(var(--menu-bar-h) + var(--safe-top) + var(--menu-profile-overhang) * 0.28);
   background: linear-gradient(180deg,
@@ -378,8 +285,13 @@
     --menu-profile-drop: 10%;
   }
 
-  .menu-hud-spin-wheel {
+  .menu-hud-calendar {
     width: 40px;
     height: 40px;
+    margin-bottom: 15px;
+  }
+
+  .menu-hud-left .menu-hud-spin {
+    width: 40px;
   }
 }
