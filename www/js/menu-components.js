@@ -241,22 +241,22 @@
     const leaderboardLabel = escapeHtml(t('menu.leaderboard') || 'Leaderboard');
 
     return `
-      <div class="menu-top-grid daily-challenges-grid">
-        <div class="daily-challenge-row menu-top-daily-row">
-          <a class="daily-leaderboard-btn" href="leaderboard.html?game=match" aria-label="${leaderboardLabel}">
+      <div class="menu-mode-panel menu-top-panel daily-challenges-grid">
+        <div class="daily-challenge-row menu-top-daily-row menu-daily-puzzle-bar${dailyComplete ? ' is-complete' : ''}">
+          <a class="daily-leaderboard-btn menu-daily-leaderboard-slot" href="leaderboard.html?game=match" aria-label="${leaderboardLabel}">
             <svg class="daily-leaderboard-icon" viewBox="0 0 24 24" width="26" height="26" aria-hidden="true">
               <rect x="3" y="13" width="5" height="8" rx="1.5" fill="currentColor"/>
               <rect x="9.5" y="9" width="5" height="12" rx="1.5" fill="currentColor"/>
               <rect x="16" y="5" width="5" height="16" rx="1.5" fill="currentColor"/>
             </svg>
           </a>
-          <button type="button" class="menu-top-daily menu-daily-puzzle-bar menu-btn-primary daily-challenge-card daily-challenge-bar word-game-bar accent-${daily.accent}${dailyComplete ? ' is-complete' : ''}" id="menu-${escapeHtml(daily.id)}" data-menu-action="daily-match">
+          <button type="button" class="menu-top-daily menu-daily-puzzle-trigger menu-btn-primary daily-challenge-card daily-challenge-bar word-game-bar accent-${daily.accent}" id="menu-${escapeHtml(daily.id)}" data-menu-action="daily-match">
             <span class="daily-challenge-content menu-daily-puzzle-main">
               <span class="mode-name app-btn-title">${escapeHtml(dailyTitle)}</span>
               <span id="daily-match-status" hidden>${escapeHtml(dailyProgress)}</span>
             </span>
-            ${renderDailyCalendarBadge()}
           </button>
+          ${renderDailyCalendarBadge()}
         </div>
       </div>
     `;

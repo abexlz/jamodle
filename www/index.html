@@ -614,10 +614,21 @@
 
   .menu-top-daily-row{
     display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 8px;
+    grid-template-columns: auto 1fr auto;
+    gap: 0;
     width: 100%;
     align-items: stretch;
+  }
+  .menu-top-daily-row .daily-leaderboard-btn{
+    border-radius: 0;
+    aspect-ratio: auto;
+    min-height: 0;
+  }
+  .menu-top-daily-row .menu-top-daily{
+    width: 100%;
+    background: transparent;
+    border: none;
+    box-shadow: none;
   }
 
   /* Daily Challenges — stacked full-width bars */

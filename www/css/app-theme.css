@@ -245,7 +245,7 @@ button.ghost,
   box-shadow: var(--app-btn-shadow-purple) !important;
 }
 
-#menu-screen .menu-btn-primary.daily-challenge-card:not(.menu-daily-puzzle-bar):not(.menu-jamo-game-btn) {
+#menu-screen .menu-btn-primary.daily-challenge-card:not(.menu-daily-puzzle-bar):not(.menu-daily-puzzle-trigger):not(.menu-jamo-game-btn) {
   background-color: var(--app-btn-fill) !important;
   background-image: var(--app-btn-gloss-overlay) !important;
   border-color: var(--app-btn-border-color) !important;

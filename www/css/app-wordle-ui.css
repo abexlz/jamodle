@@ -1183,7 +1183,7 @@ html body {
 }
 
 /* ── Menu category button colors (soft gloss overlays) ── */
-#menu-screen .menu-btn-primary.daily-challenge-card:not(.menu-daily-puzzle-bar):not(.menu-jamo-game-btn),
+#menu-screen .menu-btn-primary.daily-challenge-card:not(.menu-daily-puzzle-bar):not(.menu-daily-puzzle-trigger):not(.menu-jamo-game-btn),
 #menu-screen .featured-continue-cta,
 #menu-screen .daily-leaderboard-btn,
 #menu-screen .learning-mode-card:not(.accent-blue):not(.accent-battle):not(.accent-muted):not(.accent-mint),
