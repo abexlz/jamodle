@@ -40,21 +40,31 @@
       const y2 = cy + r * Math.sin(end);
       const large = slice > 180 ? 1 : 0;
       const mid = ((i + 0.5) * slice - 90) * (Math.PI / 180);
-      const tx = cx + r * 0.62 * Math.cos(mid);
-      const ty = cy + r * 0.62 * Math.sin(mid);
+      const tx = cx + r * 0.58 * Math.cos(mid);
+      const ty = cy + r * 0.58 * Math.sin(mid);
+      const rot = i * slice + slice / 2;
       return `
         <path d="M${cx},${cy} L${x1},${y1} A${r},${r} 0 ${large},1 ${x2},${y2} Z"
-          fill="${prize.color}" stroke="#fff" stroke-width="2"/>
+          fill="${prize.color}" stroke="#fff" stroke-width="2.5"/>
         <text x="${tx}" y="${ty}" text-anchor="middle" dominant-baseline="middle"
-          font-size="16" transform="rotate(${i * slice + slice / 2}, ${tx}, ${ty})">${prize.icon}</text>
+          font-size="22" transform="rotate(${rot}, ${tx}, ${ty})">${prize.icon}</text>
       `;
     }).join('');
 
     return `
       <svg class="wheel-svg" viewBox="0 0 220 220" aria-hidden="true">
-        <circle cx="${cx}" cy="${cy}" r="${r + 4}" fill="var(--heading, #7B8FD4)" opacity="0.15"/>
+        <defs>
+          <radialGradient id="wheel-rim" cx="50%" cy="50%" r="50%">
+            <stop offset="88%" stop-color="transparent"/>
+            <stop offset="100%" stop-color="rgba(10, 61, 82, 0.12)"/>
+          </radialGradient>
+        </defs>
+        <circle cx="${cx}" cy="${cy}" r="${r + 6}" fill="#0a3d52" opacity="0.08"/>
+        <circle cx="${cx}" cy="${cy}" r="${r + 4}" fill="none" stroke="#73b5f2" stroke-width="4"/>
         ${segments}
-        <circle cx="${cx}" cy="${cy}" r="18" fill="var(--card, #fff)" stroke="var(--heading, #7B8FD4)" stroke-width="3"/>
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#wheel-rim)"/>
+        <circle cx="${cx}" cy="${cy}" r="22" fill="#fff" stroke="#0a3d52" stroke-width="3"/>
+        <circle cx="${cx}" cy="${cy}" r="10" fill="#73b5f2"/>
       </svg>
     `;
   }
@@ -151,14 +161,20 @@
 
     return `
       <div class="wheel-panel${stateClass}${compact ? ' wheel-panel--compact' : ''}">
-        <h2 class="wheel-title">${escapeHtml(compact ? t('wheel.title') : t('wheel.pageTitle'))}</h2>
-        <p class="wheel-sub" id="wheel-status-msg">${escapeHtml(statusMessage(statusInfo))}</p>
-        <div class="wheel-stage${claimed ? ' wheel-stage--claimed' : ''}">
-          <div class="wheel-pointer" aria-hidden="true">▼</div>
-          <div class="wheel-disc" id="wheel-disc">${buildWheelSvg()}</div>
+        <header class="wheel-panel-header">
+          <h2 class="wheel-title">${escapeHtml(compact ? t('wheel.title') : t('wheel.pageTitle'))}</h2>
+        </header>
+        <p class="wheel-status-pill" id="wheel-status-msg">${escapeHtml(statusMessage(statusInfo))}</p>
+        <div class="wheel-stage-wrap">
+          <div class="wheel-stage${claimed ? ' wheel-stage--claimed' : ''}${ready ? ' wheel-stage--ready' : ''}">
+            <div class="wheel-pointer" aria-hidden="true"></div>
+            <div class="wheel-disc" id="wheel-disc">${buildWheelSvg()}</div>
+          </div>
         </div>
-        <button type="button" class="wheel-spin-btn" id="wheel-spin-btn"${spinDisabled ? ' disabled' : ''}>${escapeHtml(spinLabel)}</button>
-        ${!compact ? `<a class="wheel-quests-link" href="index.html?tab=quests">${escapeHtml(t('wheel.goQuests'))}</a>` : ''}
+        <footer class="wheel-actions">
+          <button type="button" class="wheel-spin-btn" id="wheel-spin-btn"${spinDisabled ? ' disabled' : ''}>${escapeHtml(spinLabel)}</button>
+          ${!compact ? `<a class="wheel-quests-link" href="index.html?tab=quests">${escapeHtml(t('wheel.goQuests'))}</a>` : ''}
+        </footer>
       </div>
     `;
   }
