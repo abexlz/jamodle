@@ -51,19 +51,25 @@
   width: 100%;
   padding: 12px 10px;
   border-radius: var(--radius-sm, 12px);
-  border: 2px solid #73B5F2;
-  background: rgba(153, 204, 255, 0.45);
-  color: #111;
-  box-shadow: 0 4px 0 #5A9FDB;
+  border: 2.5px solid #3d8fd4;
+  background: linear-gradient(180deg, rgba(170, 215, 255, 0.92) 0%, rgba(130, 195, 250, 0.88) 100%);
+  color: #0a3d52;
+  box-shadow: 0 4px 0 #2f7fc8, inset 0 1px 0 rgba(255, 255, 255, 0.45);
   cursor: pointer;
   text-align: center;
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
 }
 
 .quest-scope-btn.is-active {
   border-color: #E6B82E;
   background: linear-gradient(180deg, #FFE566 0%, #FFCC33 55%, #F5B820 100%);
-  box-shadow: 0 4px 0 #C4A82D;
+  box-shadow: 0 4px 0 #C4A82D, inset 0 1px 0 rgba(255, 255, 255, 0.5);
   color: #111;
+}
+
+.quest-scope-btn:not(.is-active):hover {
+  border-color: #2f7fc8;
+  background: linear-gradient(180deg, rgba(185, 222, 255, 0.98) 0%, rgba(145, 205, 252, 0.95) 100%);
 }
 
 .quest-scope-btn:active {
@@ -126,10 +132,42 @@
   color: #333 !important;
 }
 
+.quest-list-scroll {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.quest-list-scroll::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 32px;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 151, 178, 0) 0%,
+    rgba(0, 151, 178, 0.55) 45%,
+    rgba(0, 122, 142, 0.88) 100%
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
 .quest-list {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 18px;
+  scroll-padding-bottom: 18px;
 }
 
 .quest-card {
@@ -165,10 +203,16 @@
 }
 
 .quest-card.is-complete {
-  opacity: 0.92;
-  border-color: #73B5F2 !important;
-  background: #99CCFF !important;
-  box-shadow: 0 4px 0 #5A9FDB !important;
+  opacity: 1;
+  border-color: #2ecf7a !important;
+  background: linear-gradient(180deg, #daf8ea 0%, #bfead4 55%, #a8e0c6 100%) !important;
+  box-shadow: 0 4px 0 #1fa863 !important;
+  color: #0d4d32;
+}
+
+.quest-card.is-complete .quest-card-task,
+.quest-card.is-complete .quest-progress-label {
+  color: #0d4d32;
 }
 
 .quest-card-body {
@@ -228,6 +272,42 @@
   color: rgba(10, 61, 82, 0.72);
 }
 
+.quest-progress-label--complete {
+  color: rgba(13, 77, 50, 0.78);
+  font-weight: 600;
+}
+
+.quest-complete-mark {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.quest-complete-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #45e8a8 0%, #22c57e 100%);
+  border: 2px solid #1a9d62;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: 0 2px 0 #1a9d62, inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  flex-shrink: 0;
+}
+
+.quest-complete-label {
+  font-family: 'Jua', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: #0d4d32;
+}
+
 .quest-card-rewards {
   display: flex;
   flex-direction: column;
@@ -260,10 +340,15 @@
 .quest-done-badge {
   font-family: 'Jua', sans-serif;
   font-size: 11px;
-  padding: 4px 8px;
+  font-weight: 700;
+  padding: 5px 10px;
   border-radius: 999px;
-  background: rgba(10, 61, 82, 0.12);
-  color: #0a3d52;
+  background: linear-gradient(180deg, #45e8a8 0%, #22c57e 100%);
+  border: 2px solid #1a9d62;
+  color: #fff;
+  box-shadow: 0 2px 0 #1a9d62, inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  text-shadow: 0 1px 0 rgba(0, 60, 40, 0.25);
+  white-space: nowrap;
 }
 
 .quest-empty {

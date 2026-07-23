@@ -46,7 +46,9 @@ html.large-text body:has(#menu-screen:not(.hidden)) {
   body.home-menu-active.home-tab-shop,
   body:has(#menu-screen:not(.hidden)).home-tab-quests,
   body:has(#menu-screen:not(.hidden)).home-tab-shop {
-    background-image: url('../assets/bg-phone-quests.jpg') !important;
+    background-image:
+      linear-gradient(rgba(0, 90, 105, 0.2), rgba(0, 90, 105, 0.2)),
+      url('../assets/bg-phone-quests.jpg') !important;
   }
 }
 

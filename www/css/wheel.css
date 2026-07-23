@@ -141,18 +141,39 @@
 
 /* Daily bonus card in quest tab */
 .quest-daily-bonus {
+  position: relative;
+  isolation: isolate;
   margin: 12px 0 16px;
   padding: 14px 16px;
   border-radius: 14px;
   border: 2px dashed var(--lavender-btn, #CFC0F5);
-  background: linear-gradient(135deg, rgba(232, 222, 255, 0.5) 0%, rgba(255, 232, 212, 0.35) 100%);
+  background: linear-gradient(135deg, rgba(232, 222, 255, 0.62) 0%, rgba(255, 232, 212, 0.48) 100%);
   text-align: center;
+  overflow: hidden;
+}
+
+.quest-daily-bonus::before {
+  content: '🎡';
+  position: absolute;
+  right: -8px;
+  bottom: -18px;
+  font-size: clamp(88px, 24vw, 120px);
+  line-height: 1;
+  opacity: 0.07;
+  pointer-events: none;
+  z-index: 0;
+  transform: rotate(-12deg);
+}
+
+.quest-daily-bonus > * {
+  position: relative;
+  z-index: 1;
 }
 
 .quest-daily-bonus.is-ready {
   border-style: solid;
   border-color: var(--mint-btn, #98DDB8);
-  background: linear-gradient(135deg, rgba(200, 240, 224, 0.45) 0%, rgba(232, 222, 255, 0.35) 100%);
+  background: linear-gradient(135deg, rgba(200, 240, 224, 0.58) 0%, rgba(232, 222, 255, 0.45) 100%);
   animation: bonus-glow 2s ease-in-out infinite;
 }
 
@@ -177,7 +198,7 @@
 
 .quest-daily-bonus-title {
   margin: 0 0 4px;
-  font-family: 'Junegull', sans-serif;
+  font-family: 'Jua', sans-serif;
   font-size: 15px;
   color: var(--heading, #7B8FD4);
 }
@@ -189,23 +210,51 @@
 }
 
 .quest-daily-bonus-btn {
+  position: relative;
+  z-index: 2;
   padding: 10px 22px;
   border-radius: 999px;
   border: 2px solid var(--lavender-btn, #CFC0F5);
   background: var(--lavender, #E8DEFF);
-  font-family: 'Junegull', sans-serif;
+  font-family: 'Jua', sans-serif;
   font-size: 14px;
   color: var(--heading, #7B8FD4);
   cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.quest-daily-bonus:not(.is-claimed) .quest-daily-bonus-btn {
+  animation: quest-wheel-btn-pulse 2.6s ease-in-out infinite;
 }
 
 .quest-daily-bonus.is-ready .quest-daily-bonus-btn {
-  border-color: var(--mint-btn, #98DDB8);
-  background: var(--mint, #C8F0E0);
+  border-color: #1a9d62;
+  background: linear-gradient(180deg, #45e8a8 0%, #22c57e 100%);
+  color: #fff;
+  text-shadow: 0 1px 0 rgba(0, 60, 40, 0.25);
+  animation: quest-wheel-btn-pulse-ready 1.8s ease-in-out infinite;
+}
+
+@keyframes quest-wheel-btn-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(123, 143, 212, 0);
+  }
+  50% {
+    box-shadow: 0 0 12px 3px rgba(123, 143, 212, 0.35);
+  }
+}
+
+@keyframes quest-wheel-btn-pulse-ready {
+  0%, 100% {
+    box-shadow: 0 3px 0 #1a9d62, 0 0 0 0 rgba(34, 197, 126, 0.45);
+  }
+  50% {
+    box-shadow: 0 3px 0 #1a9d62, 0 0 18px 5px rgba(34, 197, 126, 0.55);
+  }
 }
 
 .quest-daily-bonus-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.72;
   cursor: default;
 }
 

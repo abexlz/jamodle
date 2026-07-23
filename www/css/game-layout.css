@@ -324,14 +324,12 @@ body.home-menu-active #menu-screen.is-quests-tab .quest-scope-panel.hidden {
   display: none;
 }
 
-body.home-menu-active #menu-screen.is-quests-tab .quest-list {
+body.home-menu-active #menu-screen.is-quests-tab .quest-list-scroll {
   flex: 1 1 0;
   min-height: 0;
-  overflow-x: hidden;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  display: flex;
-  flex-direction: column;
+}
+
+body.home-menu-active #menu-screen.is-quests-tab .quest-list {
   gap: clamp(4px, 0.7dvh, 6px);
 }
 

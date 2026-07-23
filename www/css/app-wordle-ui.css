@@ -1096,7 +1096,9 @@ html body {
 
   body.home-tab-quests,
   body.home-tab-shop {
-    background-image: url('../assets/bg-phone-quests.jpg') !important;
+    background-image:
+      linear-gradient(rgba(0, 90, 105, 0.2), rgba(0, 90, 105, 0.2)),
+      url('../assets/bg-phone-quests.jpg') !important;
   }
 }
 

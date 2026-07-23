@@ -32,6 +32,11 @@
     const tierClass = def.tier === 'weekly' ? ' quest-card--weekly' : '';
     const stateClass = claimable ? ' is-claimable' : (claimed ? ' is-complete' : '');
     const taskText = questDesc(entry.questId, entry.target);
+    const progressCurrent = Math.min(entry.progress, entry.target);
+    const progressLabel = t('quests.progress', {
+      current: progressCurrent,
+      target: entry.target,
+    });
 
     let rewardsHtml = '';
     if (claimable) {
@@ -43,24 +48,43 @@
          <span class="quest-reward">🪙 ${def.coins}</span>`;
     }
 
+    let progressHtml = '';
+    if (claimed) {
+      progressHtml = `
+          <div class="quest-complete-mark" aria-hidden="true">
+            <span class="quest-complete-icon">✓</span>
+            <span class="quest-complete-label">${escapeHtml(t('quests.complete'))}</span>
+          </div>
+          <p class="quest-progress-label quest-progress-label--complete">${escapeHtml(progressLabel)}</p>`;
+    } else {
+      progressHtml = `
+          <div class="quest-progress" role="progressbar"
+            aria-valuemin="0" aria-valuemax="${entry.target}" aria-valuenow="${progressCurrent}">
+            <div class="quest-progress-fill" style="width:${pct}%"></div>
+          </div>
+          <p class="quest-progress-label">${escapeHtml(progressLabel)}</p>`;
+    }
+
     return `
       <article class="quest-card${tierClass}${stateClass}" data-quest-id="${escapeHtml(entry.questId)}"${claimable ? ' data-claimable="true"' : ''} aria-label="${escapeHtml(taskText)}">
         <span class="quest-card-icon" aria-hidden="true">${def.icon}</span>
         <div class="quest-card-body">
           <p class="quest-card-task">${escapeHtml(taskText)}</p>
-          <div class="quest-progress" role="progressbar"
-            aria-valuemin="0" aria-valuemax="${entry.target}" aria-valuenow="${Math.min(entry.progress, entry.target)}">
-            <div class="quest-progress-fill" style="width:${pct}%"></div>
-          </div>
-          <p class="quest-progress-label">${escapeHtml(t('quests.progress', {
-            current: Math.min(entry.progress, entry.target),
-            target: entry.target,
-          }))}</p>
+          ${progressHtml}
         </div>
         <div class="quest-card-rewards">
           ${rewardsHtml}
         </div>
       </article>
+    `;
+  }
+
+  function renderQuestList(cardsHtml) {
+    const inner = cardsHtml || `<p class="quest-empty">${escapeHtml(t('quests.empty'))}</p>`;
+    return `
+      <div class="quest-list-scroll">
+        <div class="quest-list">${inner}</div>
+      </div>
     `;
   }
 
@@ -141,7 +165,7 @@
           role="tabpanel" aria-labelledby="quest-scope-daily">
           <h3 class="quest-subsection-title" id="quest-scope-daily">${escapeHtml(t('quests.dailyTitle'))}</h3>
           <p class="quest-subsection-hint">${escapeHtml(t('quests.dailyHint'))}</p>
-          <div class="quest-list">${dailyCards || `<p class="quest-empty">${escapeHtml(t('quests.empty'))}</p>`}</div>
+          ${renderQuestList(dailyCards)}
           ${renderDailyBonus(snap)}
         </div>
 
@@ -149,7 +173,7 @@
           role="tabpanel" aria-labelledby="quest-scope-weekly">
           <h3 class="quest-subsection-title quest-subsection-title--weekly" id="quest-scope-weekly">${escapeHtml(t('quests.weeklyTitle'))}</h3>
           <p class="quest-subsection-hint">${escapeHtml(t('quests.weeklyHint'))}</p>
-          <div class="quest-list">${weeklyCards || `<p class="quest-empty">${escapeHtml(t('quests.empty'))}</p>`}</div>
+          ${renderQuestList(weeklyCards)}
         </div>
       </section>
     `;
