@@ -4,7 +4,7 @@
   global.I18nMessages = {
   "en": {
     "app": {
-      "name": "자모들",
+      "name": "한글들",
       "tagline": "Learn Korean letters by building real words.",
       "taglineKo": "실제 단어를 만들며 한글을 배워요",
       "description": "Learn Korean by building real words."
@@ -180,7 +180,7 @@
       },
       "levels": {
         "l01": {
-          "title": "Welcome to 자모들",
+          "title": "Welcome to 한글들",
           "desc": "Korean words are built from jamo — consonants and vowels. You will drag them into slots to make syllables, then words."
         },
         "l02": {
@@ -1624,7 +1624,7 @@
       },
       "levels": {
         "l01": {
-          "title": "자모들에 오신 것을 환영해요",
+          "title": "한글들에 오신 것을 환영해요",
           "desc": "한국어 단어는 자모(자음·모음)로 만들어져요. 슬롯에 끌어 넣어 음절과 단어를 완성해요."
         },
         "l02": {
@@ -2792,7 +2792,7 @@
       "hudLabel": "레벨과 코인",
       "themes": {
         "default": "기본",
-        "defaultDesc": "자모들 기본 색상",
+        "defaultDesc": "한글들 기본 색상",
         "cherry": "벚꽃",
         "cherryDesc": "부드러운 핑크 톤",
         "deepSea": "심해",

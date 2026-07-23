@@ -320,18 +320,24 @@ body.home-menu-active #menu-screen.is-quests-tab .quest-scope-panel {
   flex-direction: column;
 }
 
+body.home-menu-active #menu-screen.is-quests-tab .quest-scope-panel.hidden {
+  display: none;
+}
+
 body.home-menu-active #menu-screen.is-quests-tab .quest-list {
   flex: 1 1 0;
   min-height: 0;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   display: flex;
   flex-direction: column;
   gap: clamp(4px, 0.7dvh, 6px);
 }
 
 body.home-menu-active #menu-screen.is-quests-tab .quest-card {
-  flex: 1 1 0;
-  min-height: 0;
+  flex: 0 0 auto;
+  min-height: auto;
   padding: clamp(6px, 1.2dvh, 10px) clamp(8px, 2vw, 12px);
 }
 
@@ -414,8 +420,9 @@ body.home-menu-active.home-tab-learn .section-header {
   }
 
   body.home-menu-active .menu-brand--jamodeul .brand-tile {
-    width: clamp(48px, 13vw, 62px);
-    height: clamp(52px, 14vw, 68px);
+    width: clamp(54px, 14.5vw, 72px);
+    height: clamp(58px, 15.5vw, 76px);
+    font-size: clamp(38px, 11vw, 54px);
   }
 }
 

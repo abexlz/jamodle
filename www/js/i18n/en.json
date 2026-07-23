@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "자모들",
+    "name": "한글들",
     "tagline": "Learn Korean letters by building real words.",
     "taglineKo": "실제 단어를 만들며 한글을 배워요",
     "description": "Learn Korean by building real words."
@@ -176,7 +176,7 @@
     },
     "levels": {
       "l01": {
-        "title": "Welcome to 자모들",
+        "title": "Welcome to 한글들",
         "desc": "Korean words are built from jamo — consonants and vowels. You will drag them into slots to make syllables, then words."
       },
       "l02": {

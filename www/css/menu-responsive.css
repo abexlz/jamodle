@@ -251,9 +251,9 @@ body.home-menu-active.home-tab-menu #menu-screen .menu-top-daily-row.menu-daily-
 }
 
 #menu-screen .menu-brand--jamodeul .brand-tile {
-  font-size: var(--menu-type-2xl);
-  width: clamp(54px, 15vw, 76px);
-  height: clamp(60px, 16.5vw, 84px);
+  font-size: clamp(44px, 12.5vw, 64px);
+  width: clamp(60px, 16.5vw, 84px);
+  height: clamp(66px, 18vw, 92px);
 }
 
 #menu-screen .menu-daily-calendar-month {

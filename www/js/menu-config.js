@@ -45,7 +45,7 @@
 
   const MENU = {
     header: {
-      title: '자모들',
+      title: '한글들',
       subtitle: 'Learn Korean letters by building real words.',
       subtitleKo: '실제 단어를 만들며 한글을 배워요',
     },

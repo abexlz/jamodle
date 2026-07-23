@@ -171,10 +171,15 @@
   box-shadow: 0 4px 0 #5A9FDB !important;
 }
 
+.quest-card-body {
+  min-width: 0;
+}
+
 .quest-card-icon {
   font-size: 26px;
   line-height: 1;
   padding-top: 2px;
+  flex-shrink: 0;
 }
 
 .quest-card-task {
