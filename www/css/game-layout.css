@@ -1,0 +1,452 @@
+/**
+ * Viewport-fit shell — no page scroll during menu + active games.
+ * Modals/overlays may still scroll internally.
+ */
+
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --viewport-fit-pad-x: 14px;
+  --viewport-fit-pad-y: 6px;
+}
+
+/* ── Shared viewport lock ── */
+html.viewport-fit-lock,
+body.viewport-fit-lock,
+body.game-active,
+body.match-page,
+body.match-race-page,
+body.match-turn-page,
+body.rw-race-page,
+body:has(#race-root.race-app),
+body:has(#related-words-app),
+body:has(#match-app),
+body:has(.level-mode-app) {
+  height: 100dvh;
+  max-height: 100dvh;
+  min-height: 0;
+  overflow: hidden !important;
+}
+
+body.viewport-fit-lock,
+body.game-active,
+body.match-page,
+body.match-race-page,
+body.match-turn-page,
+body.rw-race-page,
+body:has(#race-root.race-app),
+body:has(#related-words-app) {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+body.game-active {
+  padding:
+    calc(var(--viewport-fit-pad-y) + var(--safe-top))
+    var(--viewport-fit-pad-x)
+    calc(var(--viewport-fit-pad-y) + var(--safe-bottom)) !important;
+}
+
+body.match-page,
+body.match-race-page,
+body.match-turn-page {
+  padding:
+    calc(var(--viewport-fit-pad-y) + var(--safe-top))
+    10px
+    calc(var(--viewport-fit-pad-y) + var(--safe-bottom)) !important;
+}
+
+body:has(#race-root.race-app),
+body:has(#related-words-app) {
+  padding:
+    calc(8px + var(--safe-top))
+    14px
+    calc(8px + var(--safe-bottom)) !important;
+}
+
+/* ── Index: daily Wordle game screen ── */
+body.game-active #game-screen {
+  flex: 1 1 0;
+  min-height: 0;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+body.game-active #game-screen .app {
+  flex: 1 1 0;
+  min-height: 0;
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  overflow: hidden;
+}
+
+body.game-active #game-screen .header,
+body.game-active #game-screen .mode-badge,
+body.game-active #game-screen .subtitle,
+body.game-active #game-screen #input-row,
+body.game-active #game-screen #message,
+body.game-active #game-screen #hint-panel {
+  flex-shrink: 0;
+}
+
+body.game-active #game-screen #board {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  margin-bottom: 6px;
+}
+
+body.game-active #game-screen #bottom-bar {
+  flex-shrink: 0;
+  margin-top: auto;
+  padding-bottom: var(--safe-bottom);
+}
+
+@media (max-height: 700px) {
+  body.game-active {
+    --syl-size: clamp(42px, 11vw, 52px);
+    --row-gap: 6px;
+    --board-gap: 5px;
+  }
+
+  body.game-active #game-screen .header {
+    margin-bottom: 2px;
+  }
+
+  body.game-active #game-screen .seal {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+
+  body.game-active #game-screen h1 {
+    font-size: 22px;
+  }
+
+  body.game-active #game-screen #bottom-bar {
+    gap: 6px;
+    margin-top: 4px;
+  }
+
+  body.game-active #game-screen #bottom-bar .hint-dock-btn {
+    min-height: 32px;
+    max-height: 36px;
+    padding: 4px 8px;
+  }
+}
+
+/* ── Match practice / race ── */
+body.match-page,
+body.match-race-page {
+  overflow: hidden !important;
+}
+
+body.match-page #match-app,
+body.match-race-page #match-app {
+  flex: 1 1 0;
+  min-height: 0 !important;
+  max-height: none !important;
+  height: auto !important;
+  overflow: hidden !important;
+}
+
+body.match-race-page .race-app,
+body.match-race-page .race-main {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+body.match-race-page .race-main #match-app {
+  overflow: hidden !important;
+}
+
+/* ── Race / word-chain pages ── */
+body:has(#race-root.race-app) #race-root.race-app,
+body:has(#race-root.race-app) .race-app {
+  flex: 1 1 0;
+  min-height: 0 !important;
+  max-height: none;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+body:has(#race-root.race-app) .race-main {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Related words solo ── */
+body:has(#related-words-app) #related-words-app,
+body:has(#related-words-app) .app#related-words-app {
+  flex: 1 1 0;
+  min-height: 0 !important;
+  max-height: none;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+body:has(#related-words-app) .rw-board {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ── RW race ── */
+body.rw-race-page .race-app,
+body.rw-race-page .race-main,
+body.rw-race-page #rw-race-game {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ── Home menu: fit without #menu-root scroll ── */
+body.home-menu-active #menu-screen .menu-inner {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  justify-content: stretch;
+  min-height: 0;
+  overflow: hidden;
+}
+
+body.home-menu-active #menu-screen #menu-root {
+  overflow: hidden !important;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+body.home-menu-active #menu-screen #menu-root > .menu-sections {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(3px, 0.7dvh, 8px);
+}
+
+/* Main home tab: daily + 2 mode panels share height */
+body.home-menu-active.home-tab-menu #menu-root > .menu-sections {
+  display: grid;
+  grid-template-rows: minmax(0, 0.82fr) minmax(0, 1fr) minmax(0, 1fr);
+  align-content: stretch;
+}
+
+body.home-menu-active.home-tab-menu .menu-top-panel,
+body.home-menu-active.home-tab-menu .menu-mode-panel {
+  min-height: 0;
+  overflow: hidden;
+  padding-top: 4px !important;
+  padding-bottom: 6px !important;
+}
+
+body.home-menu-active.home-tab-menu .menu-mode-panel .daily-challenges-grid {
+  flex: 1 1 0;
+  min-height: 0;
+  display: grid !important;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr;
+  gap: clamp(4px, 0.8dvh, 8px);
+  align-content: stretch;
+}
+
+body.home-menu-active.home-tab-menu .menu-mode-panel .daily-challenges-grid > * {
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: none !important;
+}
+
+body.home-menu-active.home-tab-menu .menu-top-daily-row.menu-daily-puzzle-bar {
+  min-height: 0 !important;
+  height: 100%;
+}
+
+body.home-menu-active.home-tab-menu .menu-mode-heading-wrap {
+  padding-bottom: 0;
+}
+
+body.home-menu-active.home-tab-menu .menu-mode-heading-badge {
+  min-height: 24px;
+  padding: 2px clamp(10px, 3vw, 16px);
+}
+
+/* Quest / shop / learn tabs */
+body.home-menu-active.home-tab-quests #menu-root > .menu-sections,
+body.home-menu-active.home-tab-shop #menu-root > .menu-sections,
+body.home-menu-active.home-tab-learn #menu-root > .menu-sections {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+body.home-menu-active #menu-screen.is-quests-tab .quest-section,
+body.home-menu-active #menu-screen.is-quests-tab .shop-section {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+body.home-menu-active #menu-screen.is-quests-tab .quest-scope-bar {
+  flex-shrink: 0;
+  margin-bottom: 8px;
+}
+
+body.home-menu-active #menu-screen.is-quests-tab .quest-scope-panel {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+body.home-menu-active #menu-screen.is-quests-tab .quest-list {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(4px, 0.7dvh, 6px);
+}
+
+body.home-menu-active #menu-screen.is-quests-tab .quest-card {
+  flex: 1 1 0;
+  min-height: 0;
+  padding: clamp(6px, 1.2dvh, 10px) clamp(8px, 2vw, 12px);
+}
+
+body.home-menu-active #menu-screen.is-quests-tab .quest-subsection-title,
+body.home-menu-active #menu-screen.is-quests-tab .quest-subsection-hint {
+  display: none;
+}
+
+body.home-menu-active #menu-screen.is-quests-tab .quest-daily-bonus {
+  flex-shrink: 0;
+  margin-top: clamp(4px, 0.8dvh, 8px);
+  padding: clamp(8px, 1.2dvh, 12px);
+}
+
+body.home-menu-active.home-tab-shop .shop-scope-panel {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+body.home-menu-active.home-tab-shop .shop-item-grid {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+  gap: clamp(4px, 0.7dvh, 6px);
+}
+
+body.home-menu-active.home-tab-shop .shop-theme-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  align-content: stretch;
+}
+
+body.home-menu-active.home-tab-shop .shop-item-card,
+body.home-menu-active.home-tab-shop .shop-theme-card {
+  min-height: 0;
+}
+
+body.home-menu-active.home-tab-learn .word-games-grid {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(4px, 0.8dvh, 8px);
+}
+
+body.home-menu-active.home-tab-learn .word-games-grid > * {
+  flex: 1 1 0;
+  min-height: 0;
+}
+
+body.home-menu-active.home-tab-learn .learn-tab-section {
+  min-height: 0 !important;
+}
+
+body.home-menu-active.home-tab-learn .section-header {
+  flex-shrink: 0;
+  margin-bottom: 4px;
+}
+
+/* Compact header on short phones */
+@media (max-height: 760px) {
+  body.home-menu-active {
+    --menu-header-gap: 10px;
+    --menu-content-top: 2px;
+    --menu-profile-size: clamp(72px, 19vw, 88px);
+  }
+
+  body.home-menu-active .menu-brand-line2 {
+    display: none;
+  }
+
+  body.home-menu-active .menu-brand {
+    margin-top: 6px !important;
+    gap: 6px !important;
+  }
+
+  body.home-menu-active .menu-brand--jamodeul .brand-tile {
+    width: clamp(48px, 13vw, 62px);
+    height: clamp(52px, 14vw, 68px);
+  }
+}
+
+@media (max-height: 680px) {
+  body.home-menu-active {
+    --menu-header-gap: 6px;
+    --menu-profile-size: clamp(64px, 17vw, 80px);
+    --home-nav-section-h: clamp(64px, 10.5dvh, 80px);
+  }
+
+  body.home-menu-active #menu-screen .quest-section-header {
+    display: none;
+  }
+
+  body.home-menu-active #menu-screen .shop-section-header {
+    margin-bottom: 4px;
+  }
+}
+
+/* Scale-to-fit fallback for very short viewports */
+@supports (height: 1dvh) {
+  body.home-menu-active {
+    --menu-fit-scale: clamp(0.82, calc(0.55 + (100dvh - 520px) / 380), 1);
+  }
+
+  @media (max-height: 640px) {
+    body.home-menu-active.home-tab-menu #menu-root > .menu-sections {
+      transform: scale(var(--menu-fit-scale));
+      transform-origin: top center;
+      width: calc(100% / var(--menu-fit-scale));
+      margin-inline: auto;
+    }
+  }
+}

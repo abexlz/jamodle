@@ -133,6 +133,7 @@
     const bar = document.getElementById(BAR_ID) || inject();
     bar.classList.remove('hidden');
     document.body.classList.add('has-home-bottom-bar');
+    document.documentElement.classList.add('viewport-fit-lock');
     if (isIndexPage()) {
       document.body.classList.add('home-menu-active');
     }
@@ -143,6 +144,9 @@
     const bar = document.getElementById(BAR_ID);
     if (bar) bar.classList.add('hidden');
     document.body.classList.remove('home-menu-active');
+    if (!document.body.classList.contains('game-active')) {
+      document.documentElement.classList.remove('viewport-fit-lock');
+    }
   }
 
   global.HomeNav = {
