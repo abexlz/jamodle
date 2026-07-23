@@ -1,0 +1,485 @@
+/* Menu typography — 25% larger than base, with box-safe text wrapping */
+
+#menu-screen {
+  --menu-type-scale: 1.25;
+  --app-btn-title-size: clamp(21.25px, 5.25vw, 27.5px);
+  --app-btn-desc-size: clamp(12.5px, 3vw, 15px);
+  --app-btn-icon-size: clamp(27.5px, 6.875vw, 35px);
+}
+
+#menu-screen .menu-brand-line2 {
+  font-size: clamp(25px, 6.875vw, 32.5px);
+}
+
+#menu-screen .menu-brand--jamodeul .brand-tile {
+  font-size: clamp(45px, 12.5vw, 65px);
+}
+
+#menu-screen .profile-badge-card--menu .profile-battle-card-level {
+  font-size: clamp(11.25px, 3.5vw, 16.25px);
+}
+
+#menu-screen .profile-badge-card--menu .profile-battle-card-icon {
+  font-size: clamp(25px, 12.5vw, 40px);
+}
+
+#menu-screen .profile-badge-level-num {
+  font-size: 15px;
+}
+
+#menu-screen .profile-badge-level-star--lg .profile-badge-level-num {
+  font-size: 18.75px;
+}
+
+#menu-screen .seal {
+  font-size: 25px;
+}
+
+#menu-screen h1 {
+  font-size: 32.5px;
+}
+
+#menu-screen .menu-tagline {
+  font-size: 15px;
+}
+
+#menu-screen .section-title {
+  font-size: 17.5px;
+}
+
+#menu-screen .featured-continue-title {
+  font-size: 21.25px;
+}
+
+#menu-screen .featured-continue-progress {
+  font-size: 13.75px;
+}
+
+#menu-screen .menu-top-daily-row .menu-daily-puzzle-main .mode-name {
+  font-size: clamp(25px, 6.75vw, 32.5px) !important;
+}
+
+#menu-screen .menu-daily-calendar-month {
+  font-size: clamp(10px, 2.75vw, 12.5px);
+}
+
+#menu-screen .menu-daily-calendar-day {
+  font-size: clamp(22.5px, 6.25vw, 30px);
+}
+
+#menu-screen .menu-battle-game-bar .app-btn-title {
+  font-size: clamp(22.5px, 6vw, 27.5px) !important;
+}
+
+#menu-screen .menu-game-combo-count {
+  font-size: clamp(28.13px, 7.88vw, 35.63px);
+}
+
+#menu-screen .menu-game-combo-label {
+  font-size: clamp(13.13px, 3.56vw, 15px);
+}
+
+#menu-screen .menu-jamo-game-bar .app-btn-title {
+  font-size: clamp(22.5px, 6vw, 27.5px) !important;
+}
+
+#menu-screen .menu-word-chain-bar .app-btn-title {
+  font-size: clamp(22.5px, 6vw, 27.5px) !important;
+}
+
+#menu-screen .menu-top-icon-box {
+  font-size: clamp(40px, 10vw, 50px);
+}
+
+#menu-screen .menu-top-classic-label {
+  font-size: clamp(27.5px, 7.25vw, 35px) !important;
+}
+
+#menu-screen .menu-top-daily .mode-name {
+  font-size: clamp(27.5px, 7.25vw, 35px);
+}
+
+#menu-screen .menu-play-game-btn .mode-name {
+  font-size: clamp(20px, 5.25vw, 25px) !important;
+}
+
+#menu-screen .daily-challenge-bar .mode-name {
+  font-size: clamp(22.5px, 6vw, 27.5px);
+}
+
+#menu-screen .daily-challenge-bar .mode-icon {
+  font-size: clamp(32.5px, 7.75vw, 40px);
+}
+
+#menu-screen .mode-status {
+  font-size: 11.25px;
+}
+
+#menu-screen .mode-lock-badge {
+  font-size: 10px;
+}
+
+#menu-screen .mode-name {
+  font-size: clamp(22.5px, 6vw, 27.5px);
+}
+
+#menu-screen .menu-mode-heading-text {
+  font-size: clamp(23.75px, 6.25vw, 26.25px);
+}
+
+#menu-screen .menu-battle-title {
+  font-size: clamp(20px, 5.25vw, 22.5px);
+}
+
+#menu-screen .menu-mode-panel .menu-single-player-game-btn .mode-icon {
+  font-size: clamp(35px, 9.38vw, 43.75px);
+}
+
+#menu-screen .menu-mode-panel .menu-single-player-game-btn .mode-name {
+  font-size: clamp(22.5px, 6vw, 27.5px) !important;
+}
+
+#menu-screen .menu-mode-panel .menu-battle-game-bar .mode-name {
+  font-size: clamp(22.5px, 6vw, 27.5px) !important;
+}
+
+#menu-screen .quest-section-title {
+  font-size: 22.5px;
+}
+
+#menu-screen .quest-scope-btn {
+  font-size: 17.5px;
+}
+
+#menu-screen .quest-refresh-timer {
+  font-size: 15px;
+}
+
+#menu-screen .quest-refresh-time {
+  font-size: 16.25px;
+}
+
+#menu-screen .quest-subsection-title {
+  font-size: 18.75px;
+}
+
+#menu-screen .quest-subsection-hint {
+  font-size: 15px;
+}
+
+#menu-screen .quest-card-icon {
+  font-size: 32.5px;
+}
+
+#menu-screen .quest-card-title {
+  font-size: 17.5px;
+}
+
+#menu-screen .quest-card-desc {
+  font-size: 15px;
+}
+
+#menu-screen .quest-progress-label {
+  font-size: 13.75px;
+}
+
+#menu-screen .quest-reward {
+  font-size: 13.75px;
+}
+
+#menu-screen .quest-claim-btn {
+  font-size: 15px;
+}
+
+#menu-screen .quest-done-badge {
+  font-size: 13.75px;
+}
+
+#menu-screen .quest-empty {
+  font-size: 16.25px;
+}
+
+.home-tab-badge {
+  font-size: 12.5px;
+}
+
+#menu-screen .quest-toast-icon {
+  font-size: 27.5px;
+}
+
+#menu-screen .quest-toast-text {
+  font-size: 17.5px;
+}
+
+#menu-screen .shop-section-title {
+  font-size: 22.5px;
+}
+
+#menu-screen .shop-section-balance {
+  font-size: 16.25px;
+}
+
+#menu-screen .shop-section-balance strong {
+  font-size: 18.75px;
+}
+
+#menu-screen .shop-subsection-title {
+  font-size: 17.5px;
+}
+
+.menu-top-bar .player-hud-compact {
+  font-size: 15px;
+}
+
+#menu-screen .shop-modal-header h2 {
+  font-size: 27.5px;
+}
+
+#menu-screen .shop-close-btn {
+  font-size: 20px;
+}
+
+#menu-screen .shop-balance-label {
+  font-size: 17.5px;
+}
+
+#menu-screen .shop-balance-coins {
+  font-size: 25px;
+}
+
+#menu-screen .shop-scope-btn {
+  font-size: 17.5px;
+}
+
+#menu-screen .shop-item-icon {
+  font-size: 27.5px;
+}
+
+#menu-screen .shop-item-name {
+  font-size: 17.5px;
+}
+
+#menu-screen .shop-item-qty {
+  font-size: 13.75px;
+}
+
+#menu-screen .shop-owned-badge {
+  font-size: 11.25px;
+}
+
+#menu-screen .shop-buy-btn {
+  font-size: 15px;
+}
+
+#menu-screen .shop-msg {
+  font-size: 16.25px;
+}
+
+.menu-top-bar .player-hud-coins {
+  font-size: clamp(17.5px, 4.75vw, 20px);
+}
+
+body.daily-cal-open .daily-cal-close-icon {
+  font-size: 27.5px;
+}
+
+body.daily-cal-open .daily-cal-tab {
+  font-size: 16.25px;
+}
+
+body.daily-cal-open .daily-cal-prizes-title {
+  font-size: 17.5px;
+}
+
+body.daily-cal-open .daily-cal-wins-count {
+  font-size: 22.5px;
+}
+
+body.daily-cal-open .daily-cal-wins-remaining {
+  font-size: 15px;
+}
+
+body.daily-cal-open .daily-cal-badge-icon {
+  font-size: 30px;
+}
+
+body.daily-cal-open .daily-cal-badge-label {
+  font-size: 12.5px;
+}
+
+body.daily-cal-open .daily-cal-progress-text {
+  font-size: 15px;
+}
+
+body.daily-cal-open .daily-cal-month-btn {
+  font-size: 22.5px;
+}
+
+body.daily-cal-open .daily-cal-month-label {
+  font-size: 21.25px;
+}
+
+body.daily-cal-open .daily-cal-weekday {
+  font-size: 13.75px;
+}
+
+body.daily-cal-open .daily-cal-day {
+  font-size: 21.25px;
+}
+
+body.daily-cal-open .daily-cal-day-check {
+  font-size: 11.25px;
+}
+
+body.daily-cal-open .daily-cal-stat-value {
+  font-size: 20px;
+}
+
+body.daily-cal-open .daily-cal-stat-label {
+  font-size: 12.5px;
+}
+
+body.daily-cal-open .daily-cal-play-btn {
+  font-size: 21.25px;
+}
+
+body.daily-cal-open .daily-cal-unlock-btn {
+  font-size: 16.25px;
+}
+
+body.daily-cal-open .daily-cal-free-tag {
+  font-size: 11.25px;
+}
+
+body.daily-cal-open .daily-cal-trophy-card .daily-cal-badge-icon {
+  font-size: 45px;
+}
+
+body.home-menu-active .wheel-title {
+  font-size: 27.5px;
+}
+
+body.home-menu-active .wheel-sub {
+  font-size: 16.25px;
+}
+
+body.home-menu-active .wheel-pointer {
+  font-size: 27.5px;
+}
+
+body.home-menu-active .wheel-spin-btn {
+  font-size: 22.5px;
+}
+
+body.home-menu-active .wheel-reveal-icon {
+  font-size: 65px;
+}
+
+body.home-menu-active .wheel-reveal-title {
+  font-size: 25px;
+}
+
+body.home-menu-active .wheel-reveal-prize {
+  font-size: 20px;
+}
+
+body.home-menu-active .wheel-done-btn {
+  font-size: 20px;
+}
+
+#menu-screen .quest-daily-bonus-icon {
+  font-size: 35px;
+}
+
+#menu-screen .quest-daily-bonus-title {
+  font-size: 18.75px;
+}
+
+#menu-screen .quest-daily-bonus-desc {
+  font-size: 15px;
+}
+
+#menu-screen .quest-daily-bonus-btn {
+  font-size: 17.5px;
+}
+
+/* Slightly taller mode bars for larger labels */
+#menu-screen .menu-top-daily-row.menu-daily-puzzle-bar {
+  min-height: clamp(64px, 17vw, 76px) !important;
+}
+
+#menu-screen .menu-word-chain-bar.menu-single-player-game-btn,
+#menu-screen .menu-jamo-game-bar.menu-jamo-game-btn,
+#menu-screen .menu-battle-game-bar.menu-battle-game-btn {
+  min-height: clamp(58px, 15.5vw, 68px) !important;
+}
+
+#menu-screen .menu-mode-panel .menu-battle-game-btn,
+#menu-screen .menu-mode-panel .menu-single-player-game-btn {
+  min-height: clamp(62px, 17vw, 72px) !important;
+}
+
+/* Keep scaled text inside buttons, cards, and badges */
+#menu-screen .mode-name,
+#menu-screen .app-btn-title,
+#menu-screen .menu-mode-heading-text,
+#menu-screen .menu-battle-title,
+#menu-screen .menu-game-combo-count,
+#menu-screen .menu-game-combo-label,
+#menu-screen .menu-daily-puzzle-main .mode-name,
+#menu-screen .quest-card-title,
+#menu-screen .quest-card-desc,
+#menu-screen .shop-item-name,
+#menu-screen .shop-scope-btn,
+#menu-screen .quest-scope-btn {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: keep-all;
+  line-height: 1.12;
+}
+
+#menu-screen .menu-game-combo {
+  width: clamp(52px, 13.5vw, 60px);
+}
+
+#menu-screen .menu-game-combo-count {
+  font-size: clamp(26px, 7.25vw, 32px);
+}
+
+#menu-screen .menu-game-combo-label {
+  font-size: clamp(12px, 3.25vw, 14px);
+  letter-spacing: 0.02em;
+}
+
+#menu-screen .menu-mode-heading-badge {
+  max-width: 100%;
+}
+
+#menu-screen .menu-mode-heading-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: min(100%, 42vw);
+}
+
+#menu-screen .menu-top-daily-row .menu-daily-puzzle-main .mode-name {
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#menu-screen .quest-card-body,
+#menu-screen .shop-item-card-body {
+  min-width: 0;
+}
+
+#menu-screen .quest-card-desc,
+#menu-screen .shop-item-desc {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
