@@ -42,30 +42,30 @@
     if (claimable) {
       statusHtml = `<button type="button" class="quest-claim-btn">${escapeHtml(t('quests.claim'))}</button>`;
     } else if (claimed) {
-      statusHtml = `<span class="quest-done-badge">${escapeHtml(t('quests.complete'))}</span>`;
+      statusHtml = `<span class="quest-done-label">${escapeHtml(t('quests.complete'))}</span>`;
     } else {
       statusHtml = `<span class="quest-reward-compact">+${def.xp} XP · 🪙 ${def.coins}</span>`;
     }
 
-    const progressHtml = claimed ? '' : `
-          <div class="quest-card-meta">
-            <div class="quest-progress" role="progressbar"
-              aria-valuemin="0" aria-valuemax="${entry.target}" aria-valuenow="${progressCurrent}">
-              <div class="quest-progress-fill" style="width:${pct}%"></div>
-            </div>
-            <span class="quest-progress-label">${escapeHtml(progressLabel)}</span>
-          </div>`;
+    const displayPct = claimed ? 100 : pct;
+    const footHtml = `
+        <div class="quest-card-foot">
+          <div class="quest-progress" role="progressbar"
+            aria-valuemin="0" aria-valuemax="100" aria-valuenow="${displayPct}"
+            aria-label="${escapeHtml(progressLabel)}">
+            <div class="quest-progress-fill" style="width:${displayPct}%"></div>
+          </div>
+          <span class="quest-progress-pct">${displayPct}%</span>
+        </div>`;
 
     return `
       <article class="quest-card${tierClass}${stateClass}" data-quest-id="${escapeHtml(entry.questId)}"${claimable ? ' data-claimable="true"' : ''} aria-label="${escapeHtml(taskText)}">
-        <span class="quest-card-icon" aria-hidden="true">${def.icon}</span>
-        <div class="quest-card-body">
+        <div class="quest-card-top">
+          <span class="quest-card-icon" aria-hidden="true">${def.icon}</span>
           <p class="quest-card-task">${escapeHtml(taskText)}</p>
-          ${progressHtml}
+          <div class="quest-card-status">${statusHtml}</div>
         </div>
-        <div class="quest-card-status">
-          ${statusHtml}
-        </div>
+        ${footHtml}
       </article>
     `;
   }
