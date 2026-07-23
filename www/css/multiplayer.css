@@ -128,23 +128,31 @@
 
 #menu-screen .menu-mode-panel .menu-single-player-game-btn .mode-name {
   text-align: center;
-  white-space: nowrap !important;
-  font-size: clamp(22px, 5.6vw, 26px) !important;
+  white-space: normal !important;
+  font-size: clamp(16px, 4.2vw, 20px) !important;
   line-height: 1.08;
   text-transform: none;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: visible;
+  text-overflow: unset;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 #menu-screen .menu-mode-panel .menu-battle-game-bar .mode-name {
   text-align: center !important;
-  white-space: nowrap !important;
-  font-size: clamp(22px, 5.6vw, 26px) !important;
+  white-space: normal !important;
+  font-size: clamp(16px, 4.2vw, 20px) !important;
   line-height: 1.05;
   text-transform: uppercase;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: visible;
+  text-overflow: unset;
   margin-left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 #menu-screen .menu-battle-game-btn,

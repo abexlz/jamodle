@@ -333,7 +333,27 @@
   }
 
   function renderWordChainTitle(text) {
-    return escapeHtml(String(text || '').trim());
+    const raw = String(text || '').trim();
+    if (!raw) return '';
+
+    if (/^hangul[-\s]?dle$/i.test(raw)) {
+      return '<span class="menu-title-line menu-title-line1">Hangul</span><span class="menu-title-line menu-title-line2">-dle</span>';
+    }
+    if (raw === '한글놀이') {
+      return '<span class="menu-title-line menu-title-line1">한글</span><span class="menu-title-line menu-title-line2">놀이</span>';
+    }
+
+    const hyphenSplit = raw.match(/^(.+?)[-–](.+)$/);
+    if (hyphenSplit) {
+      return `<span class="menu-title-line menu-title-line1">${escapeHtml(hyphenSplit[1])}</span><span class="menu-title-line menu-title-line2">-${escapeHtml(hyphenSplit[2])}</span>`;
+    }
+
+    const parts = raw.split(/\s+/);
+    if (parts.length >= 2) {
+      return `<span class="menu-title-line menu-title-line1">${escapeHtml(parts[0])}</span><span class="menu-title-line menu-title-line2">${escapeHtml(parts.slice(1).join(' '))}</span>`;
+    }
+
+    return escapeHtml(raw);
   }
 
   function renderMenuComboBadge(bestCombo, labelKey = 'match.bestCombo') {
@@ -411,24 +431,24 @@
   }
 
   function renderBattleModeSection() {
-    const jamodleLabel = escapeHtml(t('menu.battle.jamodle') || t('menu.modes.classic.title') || 'Jamo Game');
-    const wordChainLabel = escapeHtml(t('menu.battle.wordChain') || t('menu.modes.related-words.title') || 'Word Chain');
+    const jamodleLabel = t('menu.battle.jamodle') || t('menu.modes.classic.title') || 'Hangul-dle';
+    const wordChainLabel = t('menu.battle.wordChain') || t('menu.modes.related-words.title') || 'Word Chain';
     const title = escapeHtml(t('menu.battle.title') || t('nav.multiplayer') || 'Battle Mode');
     const buttons = `
-      <button type="button" class="daily-challenge-card daily-challenge-bar word-game-bar menu-jamo-game-btn menu-battle-game-btn menu-battle-game-bar" data-battle-game="jamodle" aria-label="${jamodleLabel}">
+      <button type="button" class="daily-challenge-card daily-challenge-bar word-game-bar menu-jamo-game-btn menu-battle-game-btn menu-battle-game-bar" data-battle-game="jamodle" aria-label="${escapeHtml(jamodleLabel)}">
         <span class="menu-battle-icon-slot" aria-hidden="true">
           ${renderMenuModeIcon('jamoGame')}
         </span>
         <span class="menu-battle-label daily-challenge-content">
-          <span class="mode-name app-btn-title">${jamodleLabel}</span>
+          <span class="mode-name app-btn-title">${renderWordChainTitle(jamodleLabel)}</span>
         </span>
       </button>
-      <button type="button" class="daily-challenge-card daily-challenge-bar word-game-bar accent-mint menu-battle-game-btn menu-battle-game-bar menu-battle-word-chain-bar" data-battle-game="word-chain" aria-label="${wordChainLabel}">
+      <button type="button" class="daily-challenge-card daily-challenge-bar word-game-bar accent-mint menu-battle-game-btn menu-battle-game-bar menu-battle-word-chain-bar" data-battle-game="word-chain" aria-label="${escapeHtml(wordChainLabel)}">
         <span class="menu-battle-icon-slot" aria-hidden="true">
           ${renderMenuModeIcon('wordChain')}
         </span>
         <span class="menu-battle-label daily-challenge-content">
-          <span class="mode-name app-btn-title">${wordChainLabel}</span>
+          <span class="mode-name app-btn-title">${renderWordChainTitle(wordChainLabel)}</span>
         </span>
       </button>
     `;

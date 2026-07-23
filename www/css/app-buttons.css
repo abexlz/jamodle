@@ -1200,12 +1200,17 @@ button.ghost:disabled,
   width: 100%;
   text-align: center;
   text-transform: uppercase;
-  font-size: clamp(22px, 5.6vw, 26px) !important;
+  font-size: clamp(16px, 4.2vw, 20px) !important;
   line-height: 1.05;
   color: #ffffff !important;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
 }
 
 #menu-screen .menu-battle-word-chain-bar .mode-name,
@@ -1308,14 +1313,19 @@ button.ghost:disabled,
   width: 100%;
   text-align: center;
   text-transform: uppercase;
-  font-size: clamp(22px, 5.6vw, 26px) !important;
+  font-size: clamp(16px, 4.2vw, 20px) !important;
   line-height: 1.05;
   color: #ffffff !important;
   text-shadow: 0 2px 0 rgba(140, 40, 55, 0.45) !important;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
   word-break: keep-all;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
 }
 
 #menu-screen .menu-jamo-game-bar:active,
@@ -1336,14 +1346,24 @@ button.ghost:disabled,
   width: 100%;
   text-align: center;
   text-transform: uppercase;
-  font-size: clamp(22px, 5.6vw, 26px) !important;
+  font-size: clamp(16px, 4.2vw, 20px) !important;
   line-height: 1.05;
   color: #ffffff !important;
   text-shadow: 0 2px 0 rgba(120, 80, 0, 0.45) !important;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
   word-break: keep-all;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+
+#menu-screen .menu-title-line {
+  display: block;
+  line-height: 1.05;
 }
 
 #menu-screen .menu-word-chain-bar:active,

@@ -35,7 +35,7 @@
       },
       "battle": {
         "title": "Battle Mode",
-        "jamodle": "Jamo Game",
+        "jamodle": "Hangul-dle",
         "wordChain": "Word Chain",
         "multiplayer": "Random Match",
         "custom": "Custom",
@@ -71,7 +71,7 @@
           "subtitleKo": "자모를 끌어 단어를 완성해요"
         },
         "classic": {
-          "title": "Jamo Game",
+          "title": "Hangul-dle",
           "subtitleKo": "자모를 끌어 단어를 완성해요"
         },
         "match-multi-find": {
