@@ -904,7 +904,6 @@ button.ghost,
 .wheel-spin-btn,
 .shop-buy-btn,
 .quest-daily-bonus-btn,
-.home-tab-btn,
 .menu-icon-btn,
 .player-hud-btn {
   background-image: var(--app-btn-gloss-overlay) !important;

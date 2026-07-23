@@ -5,10 +5,10 @@
   --home-nav-offset: calc(
     var(--home-nav-section-h) + var(--safe-bottom, env(safe-area-inset-bottom, 0px))
   );
-  --home-nav-bg: linear-gradient(180deg, #1a3344 0%, #122633 100%);
-  --home-nav-border: rgba(255, 214, 120, 0.28);
-  --home-nav-divider: rgba(255, 255, 255, 0.14);
-  --home-nav-active-accent: #ffd166;
+  --home-nav-bg: linear-gradient(180deg, #0a8fa5 0%, #077a8e 55%, #066978 100%);
+  --home-nav-border: rgba(123, 207, 255, 0.5);
+  --home-nav-divider: rgba(255, 255, 255, 0.22);
+  --home-nav-active-accent: #ffe566;
   --home-nav-icon-size: clamp(34px, 8.2vw, 42px);
 }
 
@@ -108,6 +108,8 @@ body > #home-bottom-bar.home-bottom-bar,
 }
 
 .home-bottom-bar .home-tab-btn {
+  background: transparent !important;
+  background-color: transparent !important;
   background-image: none !important;
   box-shadow: none !important;
 }
