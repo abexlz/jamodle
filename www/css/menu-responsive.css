@@ -262,7 +262,18 @@ body.home-menu-active.home-tab-menu #menu-screen .menu-top-daily-row.menu-daily-
 }
 
 #menu-screen .menu-brand-line2 {
-  font-size: var(--menu-type-xl);
+  margin-top: 2px;
+}
+
+#menu-screen .brand-en-wordmark {
+  gap: clamp(4px, 1vw, 6px);
+  padding: clamp(5px, 1.2vw, 7px) clamp(10px, 2.6vw, 14px);
+}
+
+#menu-screen .brand-en-letter {
+  width: clamp(20px, 5.5vw, 28px);
+  height: clamp(26px, 6.8vw, 34px);
+  font-size: clamp(15px, 4.1vw, 20px);
 }
 
 #menu-screen .menu-brand--jamodeul .brand-tile {
