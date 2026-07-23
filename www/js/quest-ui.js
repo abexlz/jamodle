@@ -172,18 +172,18 @@
 
   function updateTabBadge() {
     const snap = QS()?.getQuestSnapshot?.();
-    const incomplete = QS()?.countIncomplete?.(snap) ?? 0;
+    const completed = QS()?.countCompleted?.(snap) ?? 0;
     const btn = document.querySelector('[data-home-tab="quests"]');
     if (!btn) return;
     let badge = btn.querySelector('.home-tab-badge');
-    if (incomplete > 0) {
+    if (completed > 0) {
       if (!badge) {
         badge = document.createElement('span');
         badge.className = 'home-tab-badge';
         badge.setAttribute('aria-hidden', 'true');
         btn.appendChild(badge);
       }
-      badge.textContent = String(incomplete);
+      badge.textContent = String(completed);
     } else if (badge) {
       badge.remove();
     }

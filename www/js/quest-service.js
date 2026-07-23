@@ -600,6 +600,11 @@
     return { ok: true, rewards, wheelAvailable };
   }
 
+  function countCompleted(snapshot) {
+    const all = [...(snapshot?.daily || []), ...(snapshot?.weekly || [])];
+    return all.filter((q) => q.progress >= q.target).length;
+  }
+
   function countIncomplete(snapshot) {
     const all = [...(snapshot?.daily || []), ...(snapshot?.weekly || [])];
     let count = all.filter((q) => !q.claimed).length;
@@ -653,6 +658,7 @@
     recordActivity,
     claimQuest,
     countIncomplete,
+    countCompleted,
     isDailyWheelAvailable,
     allDailyComplete,
     msUntilDailyReset,

@@ -1,18 +1,18 @@
-/* Home bottom tab bar — fixed to viewport on all menu screens */
+/* Home bottom tab bar — fixed segmented nav on menu screens */
 
 :root {
   --home-nav-offset: calc(
-    100px + var(--safe-bottom, env(safe-area-inset-bottom, 0px))
+    76px + var(--safe-bottom, env(safe-area-inset-bottom, 0px))
   );
 }
 
 html.large-text {
   --home-nav-offset: calc(
-    108px + var(--safe-bottom, env(safe-area-inset-bottom, 0px))
+    84px + var(--safe-bottom, env(safe-area-inset-bottom, 0px))
   );
 }
 
-/* ── Bottom bar ── */
+/* ── Bottom bar shell ── */
 body > #home-bottom-bar.home-bottom-bar,
 .home-bottom-bar {
   position: fixed;
@@ -22,11 +22,9 @@ body > #home-bottom-bar.home-bottom-bar,
   z-index: 220;
   width: 100%;
   box-sizing: border-box;
-  padding: 14px max(12px, env(safe-area-inset-left, 0px))
-    calc(16px + var(--safe-bottom, env(safe-area-inset-bottom, 0px)))
-    max(12px, env(safe-area-inset-right, 0px));
-  background: rgba(0, 72, 88, 0.94);
-  border-top: 2px solid rgba(123, 207, 255, 0.4);
+  padding: 0;
+  background: rgba(0, 72, 88, 0.96);
+  border-top: 2px solid rgba(123, 207, 255, 0.42);
   box-shadow: 0 -6px 24px rgba(0, 40, 50, 0.35);
   pointer-events: auto;
 }
@@ -44,58 +42,72 @@ body > #home-bottom-bar.home-bottom-bar,
   max-width: 100%;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
   box-sizing: border-box;
-}
-
-@media (min-width: 440px) {
-  .home-bottom-bar-inner {
-    max-width: 420px;
-  }
 }
 
 .home-bottom-bar-inner.home-bottom-bar-inner--5 {
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 6px;
+  gap: 0;
+  min-height: calc(72px + var(--safe-bottom, env(safe-area-inset-bottom, 0px)));
+  padding-bottom: var(--safe-bottom, env(safe-area-inset-bottom, 0px));
 }
 
-.home-bottom-bar-inner--5 .home-tab-btn {
+.home-bottom-bar-inner.home-bottom-bar-inner--4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+}
+
+/* ── Flat tab sections (no individual button chrome) ── */
+.home-tab-btn {
+  position: relative;
+  display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: 5px;
-  min-height: 68px;
+  width: 100%;
+  min-width: 0;
+  min-height: 72px;
   padding: 10px 6px 8px;
+  margin: 0;
+  border: none;
+  border-left: 2px solid rgba(123, 207, 255, 0.34);
+  border-radius: 0;
+  background: transparent;
+  background-image: none;
+  color: rgba(255, 255, 255, 0.78);
+  font-family: 'Jua', sans-serif;
   font-size: clamp(10px, 2.8vw, 12px);
-  border-color: rgba(123, 207, 255, 0.28);
-  background: rgba(0, 55, 68, 0.55);
-}
-
-.home-bottom-bar-inner--5 .home-tab-icon {
-  font-size: clamp(22px, 5.6vw, 28px);
-}
-
-.home-bottom-bar-inner--5 .home-tab-btn > span:not(.home-tab-icon) {
-  max-width: 100%;
   line-height: 1.15;
+  box-sizing: border-box;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-appearance: none;
+  appearance: none;
+  box-shadow: none;
+  text-decoration: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.home-bottom-bar-inner--5 .home-tab-btn:first-child,
+.home-bottom-bar-inner--4 .home-tab-btn:first-child {
+  border-left: none;
+}
+
+.home-bottom-bar-inner--5 .home-tab-btn > span:not(.home-tab-icon):not(.home-tab-badge),
+.home-bottom-bar-inner--4 .home-tab-btn > span:not(.home-tab-icon):not(.home-tab-badge) {
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   text-transform: uppercase;
 }
 
-.home-tab-btn--link {
-  text-decoration: none;
-  color: var(--text-soft);
-}
-
-.home-bottom-bar-inner.home-bottom-bar-inner--4 {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 6px;
+.home-bottom-bar-inner--5 .home-tab-icon {
+  font-size: clamp(22px, 5.6vw, 28px);
 }
 
 .home-bottom-bar-inner--4 .home-tab-btn {
-  flex-direction: column;
-  gap: 4px;
   min-height: 56px;
   padding: 8px 6px;
   font-size: clamp(10px, 2.8vw, 12px);
@@ -105,56 +117,46 @@ body > #home-bottom-bar.home-bottom-bar,
   font-size: 18px;
 }
 
-.home-tab-btn {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  width: 100%;
-  min-width: 0;
-  min-height: 52px;
-  padding: 8px 10px;
-  border: 2px solid var(--border-soft);
-  border-radius: var(--radius-sm, 14px);
-  background-color: var(--bg-soft);
-  background-image: var(--app-btn-gloss-overlay);
-  color: var(--text-soft);
-  font-family: 'Jua', sans-serif;
-  font-size: 13px;
-  line-height: 1.2;
-  box-sizing: border-box;
-  cursor: pointer;
-  touch-action: manipulation;
-  -webkit-appearance: none;
-  appearance: none;
-  box-shadow: var(--app-btn-gloss-inset), 0 4px 0 rgba(0, 40, 50, 0.32), var(--app-btn-gloss-ambient);
-  transition: background .15s ease, border-color .15s ease, color .15s ease, transform .15s ease, box-shadow .15s ease;
+html.large-text .home-bottom-bar-inner--5 .home-tab-btn {
+  min-height: 78px;
+  padding: 10px 4px 8px;
 }
 
-html.large-text .home-bottom-bar-inner--5 .home-tab-btn {
-  min-height: 74px;
-  padding: 10px 4px 8px;
+.home-tab-btn--link {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.home-bottom-bar .home-tab-btn {
+  background-image: none !important;
+  box-shadow: none !important;
 }
 
 .home-tab-btn:active,
 .home-tab-btn.is-pressed {
-  transform: translateY(var(--app-btn-press-shift, 2px)) scale(var(--app-btn-press-scale, 0.976));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 2px 0 rgba(0, 40, 50, 0.32), 0 4px 8px rgba(0, 40, 50, 0.1);
-  filter: brightness(0.96);
+  transform: none;
+  filter: none;
+  box-shadow: none;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .home-tab-btn.is-active {
-  background-color: rgba(123, 207, 255, 0.22);
-  background-image: var(--app-btn-gloss-overlay);
-  border-color: rgba(123, 207, 255, 0.55);
+  background: rgba(123, 207, 255, 0.16);
   color: #ffffff;
-  box-shadow: var(--app-btn-gloss-inset), 0 4px 0 rgba(0, 40, 50, 0.28), var(--app-btn-gloss-ambient);
+  box-shadow: none;
 }
 
 .home-tab-icon {
   font-size: 20px;
   line-height: 1;
+}
+
+/* Override glossy button press rules for segmented nav */
+.home-bottom-bar .home-tab-btn:active:not(:disabled),
+.home-bottom-bar .home-tab-btn.is-pressed,
+.home-bottom-bar .home-tab-btn:hover:not(:disabled):not(.is-pressed) {
+  transform: none;
+  box-shadow: none;
+  filter: none;
 }
 
 /* ── Page shell: menu fills viewport above the bar ── */

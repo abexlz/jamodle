@@ -124,4 +124,13 @@ QS.recordActivity('wordChain', { won: false });
 const wcSnap2 = QS.getQuestSnapshot();
 assert.equal(wcSnap2.weekly.find((q) => q.questId === 'weekly-word-chain-2')?.progress, 1, 'word chain loss does not advance win quest');
 
+assert.equal(QS.countCompleted({
+  daily: [{ progress: 1, target: 1, claimed: false }],
+  weekly: [{ progress: 0, target: 2, claimed: false }],
+}), 1, 'completed count tracks beaten quests only');
+assert.equal(QS.countIncomplete({
+  daily: [{ progress: 1, target: 1, claimed: false }],
+  weekly: [{ progress: 0, target: 2, claimed: false }],
+}), 2, 'incomplete count still tracks unclaimed quests');
+
 console.log('quest-service.test.js: all passed');

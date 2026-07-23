@@ -280,15 +280,15 @@
 
 .home-tab-badge {
   position: absolute;
-  top: 4px;
-  right: 4px;
+  top: 6px;
+  right: clamp(4px, 2vw, 10px);
   min-width: 16px;
   height: 16px;
   padding: 0 4px;
   border-radius: 999px;
-  background: #ff2b2b;
-  border: 1.5px solid #fff;
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.35);
+  background: #2ecf7a;
+  border: 1.5px solid rgba(255, 255, 255, 0.92);
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.28);
   color: #fff;
   font-size: 10px;
   font-weight: 700;
