@@ -441,6 +441,32 @@
     return zone.zoneType === ZONE.JUNG_H || zone.zoneType === ZONE.JUNG_V;
   }
 
+  function isConsonantMatchZone(zone) {
+    return zone && (zone.zoneType === ZONE.CHO || zone.zoneType === ZONE.JONG);
+  }
+
+  /** Vowels: same orientation only. Consonants: any 초성/종성 pair counts as 자음. */
+  function isSameMatchZoneKind(sourceZone, targetZone) {
+    if (!sourceZone || !targetZone || sourceZone === targetZone) return false;
+    if (sourceZone.zoneType === targetZone.zoneType) return true;
+    return isConsonantMatchZone(sourceZone) && isConsonantMatchZone(targetZone);
+  }
+
+  /**
+   * Board drag swap between two occupied slots of the same kind.
+   * Vowels require both tiles to fit the opposite slot; consonants swap across 초성/종성.
+   */
+  function canMatchZoneDragSwap(tile, existing, sourceZone, targetZone) {
+    if (!tile || !existing || !isSameMatchZoneKind(sourceZone, targetZone)) return false;
+    if (!isValidMatchPlacement(tile, targetZone)) return false;
+
+    if (isConsonantMatchZone(targetZone)) {
+      return isConsonantTile(tile) && isConsonantTile(existing)
+        && isValidMatchPlacement(existing, sourceZone);
+    }
+    return isValidMatchPlacement(existing, sourceZone);
+  }
+
   /** Stricter check for Hangul Builder — tile must match the expected jamo */
   function isCorrectTilePlacement(tile, zone) {
     if (!isValidTilePlacement(tile, zone)) return false;
@@ -756,6 +782,43 @@
   }
 
   /**
+   * Build step-by-step rotation path for orient-hint animation.
+   * Falls back to a single jump when intermediate steps cannot be resolved.
+   */
+  function buildOrientAnimationSteps(char, zoneType, target, options = {}) {
+    const final = orientTileJamo(char, zoneType, target, options);
+    if (!final) return [];
+    if (final.char === char && final.zoneType === zoneType) return [];
+
+    const steps = [];
+    let cur = char;
+    let zt = zoneType;
+
+    for (let i = 0; i < 8; i++) {
+      if (cur === final.char && zt === final.zoneType) return steps;
+
+      let next = null;
+      if (options.inMergeSlot) {
+        next = rotateJamoInMergeSlot(cur);
+      } else {
+        next = rotateJamoForZone(cur, zt, {
+          inVowelSlot: options.inVowelSlot,
+          otherSlotOccupied: options.otherSlotOccupied,
+        });
+      }
+      if (!next) break;
+      steps.push(next);
+      cur = next.char;
+      zt = next.zoneType;
+    }
+
+    if (cur !== final.char || zt !== final.zoneType) {
+      return [{ char: final.char, zoneType: final.zoneType }];
+    }
+    return steps;
+  }
+
+  /**
    * Apply random rotation steps to a rotatable jamo.
    * @param {string} char
    * @param {boolean} ensureChange — if true, result differs from start when possible
@@ -819,6 +882,9 @@
     tileMatchesZoneExpected,
     isValidTilePlacement,
     isValidMatchPlacement,
+    isSameMatchZoneKind,
+    canMatchZoneDragSwap,
+    isConsonantTile,
     isCorrectTilePlacement,
     buildTilesFromWord,
     getSyllableSlotDefs,
@@ -833,6 +899,7 @@
     zoneTypeForRotatedJamo,
     orientJamoToTarget,
     orientTileJamo,
+    buildOrientAnimationSteps,
     randomRotateJamo,
   };
 })(typeof window !== 'undefined' ? window : globalThis);

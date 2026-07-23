@@ -641,11 +641,8 @@
     },
 
     findZoneEl(x, y) {
-      const d = KoreanMatchDrag;
-      const ignore = [d.ghost, d.tile?.el];
-      const el = global.DragHitTest?.elementAtPoint(x, y, ignore)
-        ?? document.elementFromPoint(x, y);
-      return el?.closest('.drop-zone:not(.locked):not(.hint-disabled)') || null;
+      const zone = this.zoneFromElementAtPoint(x, y, KoreanMatchGame.instance);
+      return zone?.el || null;
     },
 
     /** Hit-test by bounding rect — catches flex gaps and preview overlays */
@@ -664,22 +661,26 @@
       return hit;
     },
 
+    zoneFromElementAtPoint(x, y, game) {
+      if (!game) return null;
+      const ignore = this.active ? [this.ghost, this.tile?.el] : [];
+      const el = global.DragHitTest?.elementAtPoint(x, y, ignore)
+        ?? document.elementFromPoint(x, y);
+      const zoneEl = el?.closest('.drop-zone:not(.locked):not(.hint-disabled)');
+      if (!zoneEl) return null;
+      const sylIdx = parseInt(zoneEl.dataset.syllable, 10);
+      if (!Number.isFinite(sylIdx)) return null;
+      const zoneKey = zoneEl.dataset.zone === 'jungV'
+        ? `jungV-${zoneEl.dataset.subIndex || '0'}`
+        : zoneEl.dataset.zone;
+      const zone = game.blocks[sylIdx]?.zones[zoneKey];
+      if (zone && !zone.locked && !zone.hintDisabled) return zone;
+      return null;
+    },
+
     resolveZoneAtPoint(x, y, game) {
-      if (this.active) {
-        return this.findZoneAtPoint(x, y, game);
-      }
-      const zoneEl = this.findZoneEl(x, y);
-      if (zoneEl && game) {
-        const sylIdx = parseInt(zoneEl.dataset.syllable, 10);
-        const zoneKey = zoneEl.dataset.zone === 'jungV'
-          ? `jungV-${zoneEl.dataset.subIndex || '0'}`
-          : zoneEl.dataset.zone;
-        const zone = game.blocks[sylIdx]?.zones[zoneKey];
-        if (zone && !zone.locked && !zone.hintDisabled) {
-          return zone;
-        }
-      }
-      return this.findZoneAtPoint(x, y, game);
+      return this.zoneFromElementAtPoint(x, y, game)
+        || this.findZoneAtPoint(x, y, game);
     },
 
     findRotationDock(x, y) {
@@ -1033,6 +1034,12 @@
         ${statsRow}
         <section class="hint-area" id="match-hint" aria-label="Word hint"></section>
         <p class="hint-meaning hidden" id="match-meaning" aria-live="polite"></p>
+        <div class="meaning-hint-popup hidden" id="match-meaning-popup" aria-live="polite">
+          <div class="meaning-hint-popup-inner">
+            <span class="meaning-hint-popup-label" data-i18n="match.hints.meaning">${t('match.hints.meaning')}</span>
+            <p class="meaning-hint-popup-text" id="match-meaning-popup-text"></p>
+          </div>
+        </div>
         <section class="blocks-area opp-submission-area hidden" id="match-opp-area" aria-live="polite">
           <p class="section-label" id="match-opp-label"></p>
           <div class="syllable-blocks-row" id="match-opp-blocks"></div>
@@ -1074,6 +1081,8 @@
       this.els = {
         hint: this.root.querySelector('#match-hint'),
         meaning: this.root.querySelector('#match-meaning'),
+        meaningPopup: this.root.querySelector('#match-meaning-popup'),
+        meaningPopupText: this.root.querySelector('#match-meaning-popup-text'),
         oppArea: this.root.querySelector('#match-opp-area'),
         oppLabel: this.root.querySelector('#match-opp-label'),
         oppBlocks: this.root.querySelector('#match-opp-blocks'),
@@ -1292,6 +1301,24 @@
       el.textContent = show ? (this.meaningText || t('match.hints.noMeaning')) : '';
     }
 
+    hideMeaningPopup() {
+      const popup = this.els.meaningPopup;
+      if (!popup) return;
+      popup.classList.remove('is-visible');
+      popup.classList.add('hidden');
+      if (this.els.meaningPopupText) this.els.meaningPopupText.textContent = '';
+    }
+
+    showMeaningPopup(text) {
+      const popup = this.els.meaningPopup;
+      const popupText = this.els.meaningPopupText;
+      if (!popup || !popupText) return;
+      popupText.textContent = text || t('match.hints.noMeaning');
+      popup.classList.remove('hidden', 'is-visible');
+      void popup.offsetWidth;
+      popup.classList.add('is-visible');
+    }
+
     async useMeaningHint() {
       if (this.meaningRevealed || this.checkedComplete || this.checking) return;
       if (!this.versus) {
@@ -1307,9 +1334,9 @@
       this.meaningText = text || t('match.hints.noMeaning');
       this.meaningRevealed = true;
       this.hintsUsedThisRound = true;
+      this.showMeaningPopup(this.meaningText);
       this.updateMeaningDisplay();
       this.updateHintButtons();
-      this.feedback.show('info', t('match.hints.meaningDone'));
     }
 
     updateLearningStreakDisplay() {
@@ -1466,6 +1493,7 @@
       this.disableHintUsed = false;
       this.meaningRevealed = false;
       this.meaningText = '';
+      this.hideMeaningPopup();
       this._meaningPromise = null;
       this._meaningWord = '';
       this.hintsUsedThisRound = false;
@@ -2135,6 +2163,10 @@
         if (!this.mergeDock?.canAcceptInSlot(tileB)) return false;
         return this.swapTiles(tileA, tileB);
       }
+      if (tileA.zoneRef && tileB.zoneRef
+          && HC.canMatchZoneDragSwap(tileA, tileB, tileA.zoneRef, tileB.zoneRef)) {
+        return this.swapTiles(tileA, tileB);
+      }
       if (tileB.zoneRef && HC.isValidMatchPlacement(tileA, tileB.zoneRef)) {
         return this.swapTiles(tileA, tileB);
       }
@@ -2320,6 +2352,10 @@
       tile.mergeDockSlot = null;
       zone.setPlaced(tileEl, tile.id);
       tile.setInZone(zone);
+      if (zone.zoneType === 'cho' || zone.zoneType === 'jong') {
+        tile.zoneType = zone.zoneType;
+        tile.syllableIndex = zone.syllableIndex;
+      }
       zone.placedTileId = tile.id;
       this.pulseLiveAction('move');
       this.notifyTurnLiveChange();
@@ -2698,34 +2734,71 @@
         return;
       }
 
-      let count = 0;
+      const pending = [];
       Object.values(this.tileMap).forEach((tile) => {
         if (tile.locked || tile.isMerged) return;
         const expected = this.getExpectedForTile(tile);
         if (!expected) return;
         const inVowelSlot = !!(tile.zoneRef
           && (tile.zoneRef.zoneType === 'jungH' || tile.zoneRef.zoneType === 'jungV'));
-        const oriented = HC.orientTileJamo(tile.char, tile.zoneType, expected, {
+        const options = {
           inMergeSlot: tile.mergeDockRef === 'slot',
           inVowelSlot,
           otherSlotOccupied: inVowelSlot ? this.isOtherVowelSlotOccupied(tile) : false,
-        });
-        if (!oriented || oriented.char === tile.char) return;
-        tile.zoneType = oriented.zoneType;
-        tile.setChar(oriented.char);
-        this.bounceTile(tile.el);
-        count += 1;
+        };
+        const oriented = HC.orientTileJamo(tile.char, tile.zoneType, expected, options);
+        if (!oriented || (oriented.char === tile.char && oriented.zoneType === tile.zoneType)) return;
+        pending.push({ tile, oriented, options, expected });
       });
 
       this.orientHintUsed = true;
       this.hintsUsedThisRound = true;
-      if (count > 0) this.mergeDock?.updatePreview?.();
       this.updateHintButtons();
-      this.updateCheckButton();
-      this.feedback.show(
-        count ? 'success' : 'info',
-        count ? t('match.hints.orientDone', { n: count }) : t('match.hints.orientNone')
-      );
+
+      if (!pending.length) {
+        this.feedback.show('info', t('match.hints.orientNone'));
+        return;
+      }
+
+      Promise.all(pending.map((item) => this.animateTileOrient(item))).then(() => {
+        if (pending.length > 0) this.mergeDock?.updatePreview?.();
+        this.updateCheckButton();
+        this.feedback.show('success', t('match.hints.orientDone', { n: pending.length }));
+      });
+    }
+
+    animateTileOrient({ tile, oriented, options, expected }) {
+      const steps = HC.buildOrientAnimationSteps(tile.char, tile.zoneType, expected, options);
+      const path = steps.length ? steps : [oriented];
+      const last = path[path.length - 1];
+      if (last.char !== oriented.char || last.zoneType !== oriented.zoneType) {
+        path.push(oriented);
+      }
+
+      const totalMs = 1000;
+      const stepMs = Math.max(120, totalMs / path.length);
+
+      return new Promise((resolve) => {
+        tile.el.classList.add('orient-hint-pulse');
+        let i = 0;
+
+        const advance = () => {
+          if (i >= path.length) {
+            tile.zoneType = oriented.zoneType;
+            tile.setChar(oriented.char);
+            tile.el.classList.remove('orient-hint-pulse');
+            resolve();
+            return;
+          }
+          const step = path[i];
+          i += 1;
+          tile.zoneType = step.zoneType;
+          tile.setChar(step.char);
+          setTimeout(advance, stepMs);
+        };
+
+        advance();
+      });
     }
 
     useDisableHint() {
@@ -2773,11 +2846,14 @@
       if (zone.placedTileId && zone.placedTileId !== tile.id) {
         const existing = this.tileMap[zone.placedTileId];
         if (existing && !existing.locked) {
-          if (sourceZone && sourceZone !== zone && HC.isValidMatchPlacement(existing, sourceZone)) {
-            return this.swapTiles(tile, existing, {
-              locA: { type: 'zone', zone },
-              locB: { type: 'zone', zone: sourceZone },
-            });
+          if (sourceZone && sourceZone !== zone) {
+            if (HC.canMatchZoneDragSwap(tile, existing, sourceZone, zone)) {
+              return this.swapTiles(tile, existing, {
+                locA: { type: 'zone', zone: sourceZone },
+                locB: { type: 'zone', zone },
+              });
+            }
+            return false;
           }
           return this.swapTiles(tile, existing);
         }
