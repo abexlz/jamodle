@@ -436,6 +436,7 @@
         won: iWon,
         friendBattle: isFriend,
         coopWin: iWon && battleMode === 'turn',
+        jamodlePvpWin: iWon && (battleMode === 'race' || battleMode === 'turn'),
       });
     } catch (err) {
       console.warn('[RaceResults] quest progress failed', err);

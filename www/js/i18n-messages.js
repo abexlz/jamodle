@@ -1208,12 +1208,12 @@
           "desc": "Solve one Related Words link"
         },
         "classic-play-3": {
-          "title": "Classic Jamo Game",
-          "desc": "Play {{count}} Classic Jamo Game rounds"
+          "title": "Jamo Game",
+          "desc": "Play {{count}} Jamo Game rounds"
         },
         "friend-battle": {
           "title": "Friend battle",
-          "desc": "Play one 1v1 battle with a friend"
+          "desc": "Play one 1v1 Jamo Game or Word Chain battle with a friend"
         },
         "login-streak-3": {
           "title": "Login streak",
@@ -1225,50 +1225,50 @@
         },
         "classic-first-try": {
           "title": "First try!",
-          "desc": "Solve a Classic Jamo Game word on your first try"
+          "desc": "Solve a Jamo Game word on your first try"
         },
         "race-win": {
-          "title": "Jamo duel",
+          "title": "Jamo Game",
           "desc": "Win a 1v1 Jamo Game match"
         },
         "coop-win": {
-          "title": "Turn win",
-          "desc": "Win a turn-based match with a friend"
+          "title": "Jamo Game",
+          "desc": "Win a turn-based Jamo Game match"
         },
         "total-5-wins": {
           "title": "Daily scorer",
           "desc": "Get {{count}} correct answers today"
         },
         "match-1": {
-          "title": "Match maker",
-          "desc": "Win {{count}} Korean Match word"
+          "title": "Jamo Game",
+          "desc": "Win {{count}} Jamo Game round"
         },
         "play-2": {
           "title": "Keep learning",
           "desc": "Finish {{count}} activities today"
         },
         "weekly-match-8": {
-          "title": "Match master",
-          "desc": "Win {{count}} Korean Match words this week"
+          "title": "Jamo Game",
+          "desc": "Win {{count}} Jamo Game rounds this week"
         },
         "weekly-match-3": {
-          "title": "Quick matcher",
-          "desc": "Win {{count}} Korean Match words this week"
+          "title": "Jamo Game",
+          "desc": "Win {{count}} Jamo Game rounds this week"
         },
         "weekly-jamodle-5": {
-          "title": "Jamo Game warrior",
-          "desc": "Win {{count}} Jamo Game games this week"
+          "title": "Jamo Game",
+          "desc": "Win {{count}} Jamo Game rounds this week"
         },
         "weekly-related-3": {
-          "title": "Chain linker",
+          "title": "Related Words",
           "desc": "Finish {{count}} full Related Words chains this week"
         },
         "weekly-related-links-5": {
-          "title": "Link collector",
+          "title": "Related Words",
           "desc": "Solve {{count}} Related Words links this week"
         },
         "weekly-word-chain-2": {
-          "title": "Word chain duelist",
+          "title": "Word Chain",
           "desc": "Win {{count}} Word Chain battles this week"
         },
         "weekly-daily-4": {
@@ -2642,76 +2642,76 @@
       "rewardToast": "퀘스트 완료! +{{xp}} XP · 🪙 {{coins}}",
       "defs": {
         "daily-play": {
-          "title": "오늘의 자모게임",
-          "desc": "오늘의 자모게임 1번 플레이 (승패 무관)"
+          "title": "데일리 자모게임",
+          "desc": "데일리 자모게임 1번 플레이 (승패 무관)"
         },
         "daily-related-chain": {
-          "title": "연관 단어",
-          "desc": "연관 단어 링크 1개 풀기"
+          "title": "연관단어",
+          "desc": "연관단어 링크 1개 풀기"
         },
         "classic-play-3": {
-          "title": "자모들 놀이",
-          "desc": "자모들 놀이 {{count}}판 플레이"
+          "title": "자모게임",
+          "desc": "자모게임 {{count}}판 플레이"
         },
         "friend-battle": {
           "title": "친구 대결",
-          "desc": "친구와 1v1 대결 1판 (승패 무관)"
+          "desc": "친구와 1v1 자모게임 또는 단어 체인 1판 (승패 무관)"
         },
         "login-streak-3": {
           "title": "연속 출석",
           "desc": "3일 연속 출석"
         },
         "daily-under-3": {
-          "title": "오늘의 날카로운 정답",
-          "desc": "오늘의 자모들 3번 시도 이내 정답"
+          "title": "데일리 날카로운 정답",
+          "desc": "데일리 자모게임 3번 시도 이내 정답"
         },
         "classic-first-try": {
           "title": "첫 시도 정답",
-          "desc": "자모들 놀이에서 첫 시도 정답"
+          "desc": "자모게임에서 첫 시도 정답"
         },
         "race-win": {
-          "title": "자모 대결",
+          "title": "자모게임",
           "desc": "1v1 자모게임에서 승리"
         },
         "coop-win": {
-          "title": "턴제 승리",
-          "desc": "턴제 모드에서 팀으로 승리"
+          "title": "자모게임",
+          "desc": "턴제 자모게임에서 승리"
         },
         "total-5-wins": {
           "title": "오늘의 정답",
           "desc": "오늘 하루 총 {{count}}번 정답"
         },
         "match-1": {
-          "title": "Match 한 판",
-          "desc": "Korean Match {{count}}판 승리"
+          "title": "자모게임",
+          "desc": "자모게임 {{count}}판 승리"
         },
         "play-2": {
           "title": "꾸준히 학습",
           "desc": "오늘 활동 {{count}}번 완료"
         },
         "weekly-match-8": {
-          "title": "Match 마스터",
-          "desc": "이번 주 Korean Match {{count}}판 승리"
+          "title": "자모게임",
+          "desc": "이번 주 자모게임 {{count}}판 승리"
         },
         "weekly-match-3": {
-          "title": "빠른 매치",
-          "desc": "이번 주 Korean Match {{count}}판 승리"
+          "title": "자모게임",
+          "desc": "이번 주 자모게임 {{count}}판 승리"
         },
         "weekly-jamodle-5": {
-          "title": "자모게임 워리어",
-          "desc": "이번 주 Jamo Game {{count}}판 승리"
+          "title": "자모게임",
+          "desc": "이번 주 자모게임 {{count}}판 승리"
         },
         "weekly-related-3": {
-          "title": "체인 링커",
-          "desc": "이번 주 연관 단어 체인 {{count}}개 완주"
+          "title": "연관단어",
+          "desc": "이번 주 연관단어 체인 {{count}}개 완주"
         },
         "weekly-related-links-5": {
-          "title": "링크 수집가",
-          "desc": "이번 주 연관 단어 링크 {{count}}개 풀기"
+          "title": "연관단어",
+          "desc": "이번 주 연관단어 링크 {{count}}개 풀기"
         },
         "weekly-word-chain-2": {
-          "title": "끝말잇기 듀얼",
-          "desc": "이번 주 끝말잇기 {{count}}번 승리"
+          "title": "단어 체인",
+          "desc": "이번 주 단어 체인 {{count}}번 승리"
         },
         "weekly-daily-4": {
           "title": "데일리 헌신",

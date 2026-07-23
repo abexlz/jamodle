@@ -10,9 +10,9 @@ global.LearningStreak = {
   loadStreak: () => ({ currentStreak: 4 }),
 };
 
-global.ProfileService = {
-  getTodayKey: () => '2026-07-14',
-  loadProfile: () => ({
+let savedProfile = null;
+function makeProfile(overrides = {}) {
+  return {
     totalXp: 0,
     coins: 0,
     questState: {
@@ -30,9 +30,18 @@ global.ProfileService = {
       ],
       weeklyPlayDays: [],
       dailyWheelClaimed: false,
+      ...overrides.questState,
     },
-  }),
-  saveProfile: () => {},
+    ...overrides,
+  };
+}
+
+global.ProfileService = {
+  getTodayKey: () => '2026-07-14',
+  loadProfile: () => savedProfile || makeProfile(),
+  saveProfile: (profile) => {
+    savedProfile = profile;
+  },
 };
 
 require('../www/js/quest-service.js');
@@ -48,8 +57,9 @@ assert(!QS.QUEST_DEFS['weekly-builder-5'], 'builder weekly quest removed');
 assert(!QS.QUEST_DEFS['weekly-vowel'], 'vowel weekly quest removed');
 assert(QS.QUEST_DEFS['weekly-word-chain-2']?.type === 'word_chain_win', 'word chain quest added');
 assert(QS.QUEST_DEFS['weekly-jamodle-5']?.type === 'korean_match_win', 'weekly jamodle uses match wins');
-assert(QS.QUEST_DEFS['race-win']?.type === 'coop_win', 'race-win tracks 1v1 jamodle wins');
+assert(QS.QUEST_DEFS['race-win']?.type === 'jamodle_pvp_win', 'race-win tracks 1v1 jamodle wins');
 assert(QS.DAILY_POOL.includes('race-win'), 'race-win stays in daily pool');
+assert(!QS.DAILY_POOL.includes('login-streak-3'), 'login-streak removed from daily pool');
 assert(!QS.DAILY_POOL.includes('coop-win'), 'coop-win removed from daily pool');
 
 const snap = QS.getQuestSnapshot();
@@ -67,5 +77,51 @@ if (dailyPlay) {
   const updated = snap2.daily.find((q) => q.questId === 'daily-play');
   assert(updated && updated.progress >= 1, 'daily play counts before win');
 }
+
+let raceWinDay = null;
+for (let offset = 0; offset < 500; offset += 1) {
+  const d = new Date(Date.UTC(2026, 0, 1 + offset));
+  const key = d.toISOString().slice(0, 10);
+  if (QS.buildDailyQuestIds(key).includes('race-win')) {
+    raceWinDay = key;
+    break;
+  }
+}
+assert(raceWinDay, 'found a day with race-win quest');
+global.ProfileService.getTodayKey = () => raceWinDay;
+savedProfile = makeProfile({
+  questState: {
+    dailyKey: raceWinDay,
+    daily: QS.buildDailyQuestIds(raceWinDay).map((questId) => ({
+      questId,
+      progress: 0,
+      claimed: false,
+      target: QS.QUEST_DEFS[questId].target,
+    })),
+    weeklyKey: '2026-07-07',
+    weekly: [],
+    weeklyPlayDays: [],
+    dailyWheelClaimed: false,
+  },
+});
+const raceResult = QS.recordActivity('battle', { won: true, jamodlePvpWin: true });
+assert(raceResult.readyToClaim?.some((q) => q.questId === 'race-win'), 'race win counts jamodle pvp wins');
+
+savedProfile = makeProfile({
+  questState: {
+    dailyKey: '2026-07-14',
+    daily: [],
+    weeklyKey: '2026-07-07',
+    weekly: [{ questId: 'weekly-word-chain-2', progress: 0, claimed: false, target: 2 }],
+    weeklyPlayDays: [],
+    dailyWheelClaimed: false,
+  },
+});
+QS.recordActivity('wordChain', { won: true });
+const wcSnap = QS.getQuestSnapshot();
+assert.equal(wcSnap.weekly.find((q) => q.questId === 'weekly-word-chain-2')?.progress, 1, 'word chain win counts on victory only');
+QS.recordActivity('wordChain', { won: false });
+const wcSnap2 = QS.getQuestSnapshot();
+assert.equal(wcSnap2.weekly.find((q) => q.questId === 'weekly-word-chain-2')?.progress, 1, 'word chain loss does not advance win quest');
 
 console.log('quest-service.test.js: all passed');

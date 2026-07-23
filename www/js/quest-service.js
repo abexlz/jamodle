@@ -81,7 +81,7 @@
     'race-win': {
       id: 'race-win',
       scope: 'daily',
-      type: 'coop_win',
+      type: 'jamodle_pvp_win',
       target: 1,
       xp: 50,
       coins: 25,
@@ -229,13 +229,13 @@
     'daily-jamodle',
     'daily-match',
     'classic-jamodle-3',
+    'login-streak-3',
   ]);
 
   const DAILY_POOL = [
     'daily-play',
     'classic-play-3',
     'friend-battle',
-    'login-streak-3',
     'daily-under-3',
     'classic-first-try',
     'race-win',
@@ -258,7 +258,7 @@
     dailyMatch: ['daily_match_play', 'complete_daily_match', 'complete_daily_any', 'any_activity'],
     relatedWords: ['related_words_link', 'any_activity'],
     relatedWordsChain: ['complete_related_chain', 'any_activity'],
-    wordChain: ['word_chain_win', 'any_activity'],
+    wordChain: ['any_activity'],
     tutorial: ['any_activity'],
     battle: [],
   };
@@ -319,14 +319,18 @@
         add('total_wins_today');
         if (guessCount === 1) add('korean_match_first_try');
       }
-    } else if (mode === 'wordChain' && won) {
-      add('total_wins_today');
+    } else if (mode === 'wordChain') {
+      if (won) {
+        add('word_chain_win');
+        add('total_wins_today');
+      }
     } else if (mode === 'relatedWords' && won) {
       add('total_wins_today');
     }
 
     if (meta?.friendBattle) add('friend_battle_play');
     if (meta?.coopWin) add('coop_win');
+    if (meta?.jamodlePvpWin) add('jamodle_pvp_win');
 
     return events;
   }
@@ -641,6 +645,7 @@
     WEEKLY_COUNT,
     QUEST_DEFS,
     DAILY_POOL,
+    buildDailyQuestIds,
     getTodayKey,
     getWeekKey,
     getQuestDef,

@@ -1180,12 +1180,12 @@
         "desc": "Solve one Related Words link"
       },
       "classic-play-3": {
-        "title": "Classic Jamo Game",
-        "desc": "Play {{count}} Classic Jamo Game rounds"
+        "title": "Jamo Game",
+        "desc": "Play {{count}} Jamo Game rounds"
       },
       "friend-battle": {
         "title": "Friend battle",
-        "desc": "Play one 1v1 battle with a friend"
+        "desc": "Play one 1v1 Jamo Game or Word Chain battle with a friend"
       },
       "login-streak-3": {
         "title": "Login streak",
@@ -1197,50 +1197,50 @@
       },
       "classic-first-try": {
         "title": "First try!",
-        "desc": "Solve a Classic Jamo Game word on your first try"
+        "desc": "Solve a Jamo Game word on your first try"
       },
       "race-win": {
-        "title": "Jamo duel",
+        "title": "Jamo Game",
         "desc": "Win a 1v1 Jamo Game match"
       },
       "coop-win": {
-        "title": "Turn win",
-        "desc": "Win a turn-based match with a friend"
+        "title": "Jamo Game",
+        "desc": "Win a turn-based Jamo Game match"
       },
       "total-5-wins": {
         "title": "Daily scorer",
         "desc": "Get {{count}} correct answers today"
       },
       "match-1": {
-        "title": "Match maker",
-        "desc": "Win {{count}} Korean Match word"
+        "title": "Jamo Game",
+        "desc": "Win {{count}} Jamo Game round"
       },
       "play-2": {
         "title": "Keep learning",
         "desc": "Finish {{count}} activities today"
       },
       "weekly-match-8": {
-        "title": "Match master",
-        "desc": "Win {{count}} Korean Match words this week"
+        "title": "Jamo Game",
+        "desc": "Win {{count}} Jamo Game rounds this week"
       },
       "weekly-match-3": {
-        "title": "Quick matcher",
-        "desc": "Win {{count}} Korean Match words this week"
+        "title": "Jamo Game",
+        "desc": "Win {{count}} Jamo Game rounds this week"
       },
       "weekly-jamodle-5": {
-        "title": "Jamo Game warrior",
-        "desc": "Win {{count}} Jamo Game games this week"
+        "title": "Jamo Game",
+        "desc": "Win {{count}} Jamo Game rounds this week"
       },
       "weekly-related-3": {
-        "title": "Chain linker",
+        "title": "Related Words",
         "desc": "Finish {{count}} full Related Words chains this week"
       },
       "weekly-related-links-5": {
-        "title": "Link collector",
+        "title": "Related Words",
         "desc": "Solve {{count}} Related Words links this week"
       },
       "weekly-word-chain-2": {
-        "title": "Word chain duelist",
+        "title": "Word Chain",
         "desc": "Win {{count}} Word Chain battles this week"
       },
       "weekly-daily-4": {
