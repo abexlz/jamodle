@@ -1315,16 +1315,22 @@
       }
     },
     "dailyGift": {
-      "title": "Daily gift!",
-      "subtitle": "Pick one box — today's surprise awaits!",
-      "pickOne": "Pick a gift",
-      "revealedTitle": "You got…",
-      "coinsAwarded": "+{{coins}} coins!",
+      "title": "Daily login rewards",
+      "subtitle": "Day {{day}} of {{total}} — log in each day to keep your streak!",
+      "streakBroken": "Streak reset — start again from day 1!",
+      "trackLabel": "30-day login reward track",
+      "dayLabel": "Day {{day}}",
+      "claim": "Claim reward",
+      "claimedToday": "Come back tomorrow",
+      "revealedTitle": "Reward claimed!",
+      "dayComplete": "Day {{day}} complete",
+      "cycleComplete": "You finished the 30-day track! A new cycle starts tomorrow.",
       "continue": "Nice!",
-      "gifts": {
-        "peach": "Peach pouch",
-        "mint": "Mint pouch",
-        "star": "Star pouch"
+      "rewards": {
+        "coins": "+{{amount}} coins",
+        "xp": "+{{amount}} XP",
+        "hintToken": "+{{amount}} hint token",
+        "extraGuess": "+{{amount}} extra guess"
       }
     },
     "shop": {
@@ -2764,16 +2770,22 @@
       }
     },
     "dailyGift": {
-      "title": "오늘의 선물!",
-      "subtitle": "상자 하나를 골라보세요!",
-      "pickOne": "선물 고르기",
-      "revealedTitle": "당첨!",
-      "coinsAwarded": "+{{coins}} 코인!",
+      "title": "출석 보상",
+      "subtitle": "{{total}}일 중 {{day}}일차 — 매일 로그인해서 연속 출석을 이어가세요!",
+      "streakBroken": "연속 출석이 끊겼어요 — 1일차부터 다시 시작!",
+      "trackLabel": "30일 출석 보상 트랙",
+      "dayLabel": "{{day}}일차",
+      "claim": "보상 받기",
+      "claimedToday": "내일 다시 와주세요",
+      "revealedTitle": "보상을 받았어요!",
+      "dayComplete": "{{day}}일차 완료",
+      "cycleComplete": "30일 트랙을 완주했어요! 내일부터 새 사이클이 시작됩니다.",
       "continue": "좋아요!",
-      "gifts": {
-        "peach": "복숭아 주머니",
-        "mint": "민트 주머니",
-        "star": "별 주머니"
+      "rewards": {
+        "coins": "+{{amount}} 코인",
+        "xp": "+{{amount}} XP",
+        "hintToken": "힌트 토큰 +{{amount}}",
+        "extraGuess": "추가 시도권 +{{amount}}"
       }
     },
     "shop": {

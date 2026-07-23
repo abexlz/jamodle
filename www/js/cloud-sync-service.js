@@ -93,11 +93,31 @@
       if ((l.dailyKey || '') >= (r.dailyKey || '') && (l.weeklyKey || '') >= (r.weeklyKey || '')) return l;
       return r;
     };
+    const pickLoginStreak = () => {
+      const lKey = left.lastDailyGiftDayKey || '';
+      const rKey = right.lastDailyGiftDayKey || '';
+      if (lKey > rKey) {
+        return { last: lKey, day: Math.max(1, parseInt(left.dailyLoginStreakDay, 10) || 1) };
+      }
+      if (rKey > lKey) {
+        return { last: rKey, day: Math.max(1, parseInt(right.dailyLoginStreakDay, 10) || 1) };
+      }
+      return {
+        last: lKey,
+        day: Math.max(
+          Math.max(1, parseInt(left.dailyLoginStreakDay, 10) || 1),
+          Math.max(1, parseInt(right.dailyLoginStreakDay, 10) || 1),
+        ),
+      };
+    };
+    const loginStreak = pickLoginStreak();
     const merged = {
       ...left,
       totalXp: maxInt(left.totalXp, right.totalXp),
       coins: maxInt(left.coins, right.coins),
       extraGuessTokens: maxInt(left.extraGuessTokens, right.extraGuessTokens),
+      lastDailyGiftDayKey: loginStreak.last,
+      dailyLoginStreakDay: loginStreak.day,
       lastCelebratedLevel: maxInt(left.lastCelebratedLevel, right.lastCelebratedLevel),
       ownedThemes: unionStrings(left.ownedThemes, right.ownedThemes),
       purchasedTitleIds: unionStrings(left.purchasedTitleIds, right.purchasedTitleIds),

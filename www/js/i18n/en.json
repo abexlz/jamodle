@@ -1287,16 +1287,22 @@
     }
   },
   "dailyGift": {
-    "title": "Daily gift!",
-    "subtitle": "Pick one box — today's surprise awaits!",
-    "pickOne": "Pick a gift",
-    "revealedTitle": "You got…",
-    "coinsAwarded": "+{{coins}} coins!",
+    "title": "Daily login rewards",
+    "subtitle": "Day {{day}} of {{total}} — log in each day to keep your streak!",
+    "streakBroken": "Streak reset — start again from day 1!",
+    "trackLabel": "30-day login reward track",
+    "dayLabel": "Day {{day}}",
+    "claim": "Claim reward",
+    "claimedToday": "Come back tomorrow",
+    "revealedTitle": "Reward claimed!",
+    "dayComplete": "Day {{day}} complete",
+    "cycleComplete": "You finished the 30-day track! A new cycle starts tomorrow.",
     "continue": "Nice!",
-    "gifts": {
-      "peach": "Peach pouch",
-      "mint": "Mint pouch",
-      "star": "Star pouch"
+    "rewards": {
+      "coins": "+{{amount}} coins",
+      "xp": "+{{amount}} XP",
+      "hintToken": "+{{amount}} hint token",
+      "extraGuess": "+{{amount}} extra guess"
     }
   },
   "shop": {
