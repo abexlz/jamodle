@@ -1154,7 +1154,7 @@
       ko.textContent = word;
       row.appendChild(ko);
 
-      if (this.shouldShowTrailSpeaker()) {
+      if (this.shouldShowTrailSpeaker() && isClue) {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'rw-trail-speak-btn app-pressable';
