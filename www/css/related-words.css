@@ -186,7 +186,7 @@
 
 .rw-trail-track {
   position: relative;
-  height: clamp(138px, 38vw, 172px);
+  height: clamp(148px, 40vw, 184px);
   margin: 0 auto;
   max-width: 100%;
   overflow: visible;
@@ -310,14 +310,14 @@
 .rw-trail-word[data-slot="2"] .rw-trail-word-def,
 .rw-trail-word.clue .rw-trail-word-def {
   display: block;
-  margin-top: 2px;
-  font-size: clamp(11px, 3vw, 13px);
+  margin-top: 4px;
+  font-size: clamp(15px, 4.2vw, 19px);
   font-weight: 600;
   color: #5AADA0;
   opacity: 1;
   white-space: normal;
   line-height: 1.25;
-  max-width: min(88%, 260px);
+  max-width: min(88%, 280px);
 }
 
 .rw-trail-track.advancing .rw-trail-word {
@@ -484,7 +484,7 @@
 }
 
 .rw-solo-mode .rw-trail-track {
-  height: clamp(132px, 36vw, 166px);
+  height: clamp(142px, 38vw, 178px);
 }
 
 .rw-solo-mode .rw-trail-word[data-slot="2"],
