@@ -27,6 +27,10 @@
   const REVEAL_FORM_MS = 520;
   const REVEAL_FORM_HOLD_MS = 140;
 
+  const TRAIL_SPEAKER_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">'
+    + '<path fill="currentColor" d="M3 10v4h4l5 5V5L7 10H3zm13.5 2c0-1.77-1.02-3.29-2.5-4.03v8.06c1.48-.74 2.5-2.26 2.5-4.03zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>'
+    + '</svg>';
+
   const t = (key, vars) => global.I18n?.t(key, vars) ?? key;
   const prefs = () => global.UserPreferences;
   const reduceMotion = () => prefs()?.shouldReduceMotion?.() === true;
@@ -408,6 +412,7 @@
 
       this.els.overlayBtn.addEventListener('click', () => this.onOverlayContinue());
       this.els.revealBtn?.addEventListener('click', () => this.onRevealButtonClick());
+      this.bindTrailSpeak();
 
       if (this.raceMode) {
         this.root.classList.add('rw-race-mode');
@@ -455,11 +460,11 @@
         if (!resolved) return [];
         const chain = RW().getChain(resolved.chainId);
         if (!chain?.words) return [];
-        return chain.words.slice(Math.max(0, resolved.linkIndex - 2), resolved.linkIndex);
+        return chain.words.slice(Math.max(0, resolved.linkIndex - 3), resolved.linkIndex);
       }
       const chain = RW().getChain(chainId || this.puzzle?.chainId);
       if (!chain?.words) return [];
-      return chain.words.slice(Math.max(0, linkIndex - 2), linkIndex);
+      return chain.words.slice(Math.max(0, linkIndex - 3), linkIndex);
     }
 
     puzzleLocation(globalLinkIndex) {
@@ -1123,14 +1128,100 @@
       }
 
       const ageOffset = Math.max(0, 3 - count);
-      track.innerHTML = words.map((word, index) => {
+      track.innerHTML = '';
+      words.forEach((word, index) => {
         const slot = ageOffset + index;
         const isClue = index === count - 1;
-        return `<span class="rw-trail-word${isClue ? ' clue' : ''}" data-slot="${slot}">${word}</span>`;
-      }).join('');
+        track.appendChild(this.createTrailWordElement(word, { slot, isClue }));
+      });
       track.classList.remove('advancing', 'active');
       track.classList.toggle('rw-trail--race', this.raceMode);
       track.classList.toggle('rw-trail--solo', this.raceMode && count === 1);
+      this.loadTrailDefinitions(words);
+    }
+
+    createTrailWordElement(word, { slot = 0, isClue = false, isEntering = false } = {}) {
+      const el = document.createElement('span');
+      el.className = `rw-trail-word${isClue ? ' clue' : ''}${isEntering ? ' entering' : ''}`;
+      el.dataset.slot = String(slot);
+      el.dataset.word = word;
+
+      const row = document.createElement('span');
+      row.className = 'rw-trail-word-row';
+
+      const ko = document.createElement('span');
+      ko.className = 'rw-trail-word-ko';
+      ko.textContent = word;
+      row.appendChild(ko);
+
+      if (this.shouldShowTrailSpeaker()) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'rw-trail-speak-btn app-pressable';
+        btn.dataset.word = word;
+        btn.setAttribute('aria-label', t('match.answerSpeak') || 'Hear pronunciation');
+        btn.innerHTML = TRAIL_SPEAKER_SVG;
+        row.appendChild(btn);
+      }
+
+      const def = document.createElement('span');
+      def.className = 'rw-trail-word-def is-empty';
+      def.dataset.word = word;
+
+      el.appendChild(row);
+      el.appendChild(def);
+      return el;
+    }
+
+    shouldShowTrailSpeaker() {
+      return global.UserPreferences?.get?.().pronunciation !== false;
+    }
+
+    shouldShowTrailDefinitions() {
+      return global.UserPreferences?.shouldShowEnglish?.() !== false;
+    }
+
+    bindTrailSpeak() {
+      if (this._trailSpeakBound || !this.els.trailTrack) return;
+      this._trailSpeakBound = true;
+      this._trailMeaningCache = new Map();
+      this.els.trailTrack.addEventListener('click', (e) => {
+        const btn = e.target.closest('.rw-trail-speak-btn');
+        if (!btn) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const word = btn.dataset.word;
+        if (!word) return;
+        global.KoreanTTS?.prime?.();
+        global.KoreanTTS?.speak?.(word, { repeats: 1 });
+      });
+    }
+
+    updateTrailDefinition(word, meaning) {
+      const track = this.els.trailTrack;
+      if (!track || !word) return;
+      track.querySelectorAll(`.rw-trail-word-def[data-word="${word}"]`).forEach((el) => {
+        el.textContent = meaning || '';
+        el.classList.toggle('is-empty', !meaning);
+      });
+    }
+
+    async loadTrailDefinitions(words) {
+      if (!this.shouldShowTrailDefinitions() || !Array.isArray(words) || !words.length) {
+        return;
+      }
+      const DS = global.DictionaryService;
+      if (!DS?.resolveEnglishMeaning) return;
+
+      await Promise.all(words.map(async (word) => {
+        if (this._trailMeaningCache?.has(word)) {
+          this.updateTrailDefinition(word, this._trailMeaningCache.get(word));
+          return;
+        }
+        const meaning = await DS.resolveEnglishMeaning(word);
+        this._trailMeaningCache?.set(word, meaning || '');
+        this.updateTrailDefinition(word, meaning || '');
+      }));
     }
 
     async animateTrailAdvance(solvedWord, nextLinkIndex) {
@@ -1144,10 +1235,7 @@
         return;
       }
 
-      const incoming = document.createElement('span');
-      incoming.className = 'rw-trail-word clue entering';
-      incoming.dataset.slot = '2';
-      incoming.textContent = solvedWord;
+      const incoming = this.createTrailWordElement(solvedWord, { slot: 2, isClue: true, isEntering: true });
 
       track.classList.add('advancing');
       void track.offsetWidth;
@@ -1192,10 +1280,7 @@
       }
 
       const existing = [...track.querySelectorAll('.rw-trail-word:not(.entering)')];
-      const incoming = document.createElement('span');
-      incoming.className = 'rw-trail-word clue entering';
-      incoming.dataset.slot = '2';
-      incoming.textContent = solvedWord;
+      const incoming = this.createTrailWordElement(solvedWord, { slot: 2, isClue: true, isEntering: true });
 
       track.classList.add('advancing');
       void track.offsetWidth;
@@ -2952,6 +3037,7 @@
       if (!word) return;
       global.KoreanTTS?.prime?.();
       global.KoreanTTS?.speak?.(word, { repeats: 1 });
+      global.DictionaryService?.prefetchWord?.(word);
     }
 
     getChainLabel(chain) {

@@ -965,7 +965,7 @@
       dockTiles: buildDock(answer, chain.words, chain.id, linkIndex),
       recentClues: linkIndex === 0
         ? []
-        : chain.words.slice(Math.max(0, linkIndex - 2), linkIndex),
+        : chain.words.slice(Math.max(0, linkIndex - 3), linkIndex),
     };
   }
 

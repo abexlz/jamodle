@@ -186,7 +186,7 @@
 
 .rw-trail-track {
   position: relative;
-  height: clamp(112px, 31vw, 142px);
+  height: clamp(156px, 42vw, 196px);
   margin: 0 auto;
   max-width: 100%;
 }
@@ -196,39 +196,152 @@
   left: 0;
   right: 0;
   margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
   text-align: center;
   font-family: 'Jua', sans-serif;
   line-height: 1.1;
 }
 
+.rw-trail-word-row {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(4px, 1.2vw, 8px);
+  max-width: 100%;
+}
+
+.rw-trail-word-ko {
+  display: inline-block;
+}
+
+.rw-trail-speak-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  border: 1.5px solid #7b4fe8;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #c9b0ff 0%, #9b6fff 100%);
+  box-shadow: 0 2px 0 #6238d0;
+  color: #fff;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.rw-trail-speak-btn svg {
+  display: block;
+}
+
+.rw-trail-speak-btn:active,
+.rw-trail-speak-btn.is-pressed {
+  transform: translateY(1px);
+  box-shadow: 0 1px 0 #6238d0;
+}
+
+.rw-trail-word-def {
+  display: block;
+  max-width: min(92%, 280px);
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: clamp(10px, 2.8vw, 12px);
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--text-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rw-trail-word-def.is-empty {
+  display: none;
+}
+
 .rw-trail-word[data-slot="0"] {
-  top: clamp(10px, 2.8vw, 14px);
+  top: clamp(2px, 0.8vw, 6px);
+}
+
+.rw-trail-word[data-slot="0"] .rw-trail-word-ko {
   font-size: clamp(15px, 4vw, 18px);
   opacity: 0.5;
   color: var(--text-soft);
 }
 
+.rw-trail-word[data-slot="0"] .rw-trail-speak-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+}
+
+.rw-trail-word[data-slot="0"] .rw-trail-speak-btn svg {
+  width: 12px;
+  height: 12px;
+}
+
 .rw-trail-word[data-slot="1"] {
-  top: clamp(26px, 7vw, 34px);
+  top: clamp(34px, 9.5vw, 46px);
+}
+
+.rw-trail-word[data-slot="1"] .rw-trail-word-ko {
   font-size: clamp(22px, 6vw, 28px);
   opacity: 0.75;
   color: var(--text-soft);
 }
 
+.rw-trail-word[data-slot="1"] .rw-trail-speak-btn {
+  width: 26px;
+  height: 26px;
+}
+
+.rw-trail-word[data-slot="1"] .rw-trail-speak-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
 .rw-trail-word[data-slot="2"],
 .rw-trail-word.clue {
-  top: clamp(56px, 16vw, 74px);
+  top: clamp(78px, 22vw, 102px);
+}
+
+.rw-trail-word[data-slot="2"] .rw-trail-word-ko,
+.rw-trail-word.clue .rw-trail-word-ko {
   font-size: clamp(46px, 14.4vw, 60px);
   color: #5AADA0;
   opacity: 1;
+}
+
+.rw-trail-word[data-slot="2"] .rw-trail-speak-btn,
+.rw-trail-word.clue .rw-trail-speak-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+}
+
+.rw-trail-word[data-slot="2"] .rw-trail-speak-btn svg,
+.rw-trail-word.clue .rw-trail-speak-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.rw-trail-word[data-slot="2"] .rw-trail-word-def,
+.rw-trail-word.clue .rw-trail-word-def {
+  font-size: clamp(11px, 3vw, 13px);
+  color: var(--text);
 }
 
 .rw-trail-track.advancing .rw-trail-word {
   transition:
     top 0.48s cubic-bezier(0.34, 1.05, 0.64, 1),
     opacity 0.42s ease,
-    font-size 0.48s cubic-bezier(0.34, 1.05, 0.64, 1),
     color 0.35s ease;
+}
+
+.rw-trail-track.advancing .rw-trail-word-ko {
+  transition: font-size 0.48s cubic-bezier(0.34, 1.05, 0.64, 1);
 }
 
 .rw-trail-word.entering {
@@ -237,6 +350,9 @@
 
 .rw-trail-track.advancing.active .rw-trail-word.entering {
   opacity: 1;
+}
+
+.rw-trail-track.advancing.active .rw-trail-word.entering .rw-trail-word-ko {
   animation: rw-trail-green-flash 0.55s ease;
 }
 
@@ -381,12 +497,12 @@
 }
 
 .rw-solo-mode .rw-trail-track {
-  height: clamp(108px, 30vw, 136px);
+  height: clamp(148px, 40vw, 188px);
 }
 
 .rw-solo-mode .rw-trail-word[data-slot="2"],
 .rw-solo-mode .rw-trail-word.clue {
-  top: clamp(52px, 15vw, 68px);
+  top: clamp(72px, 20vw, 94px);
 }
 
 .rw-solo-mode .rw-board {
