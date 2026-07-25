@@ -287,42 +287,46 @@
             <p class="rw-chain-progress" id="rw-chain-progress"></p>
           </div>
           <div class="rw-topbar-end">
-            <div class="wc-combo-wrap wc-combo-wrap--inline">
-              <div class="wc-combo-badge wc-combo-badge--zero" id="rw-solo-streak" aria-live="polite" aria-label="">
-                <span class="wc-combo-badge__glow" aria-hidden="true"></span>
-                <span class="wc-combo-badge__pill">
-                  <span class="wc-combo-badge__count-stack">
-                    <span class="wc-combo-badge__flame" aria-hidden="true"></span>
-                    <span class="wc-combo-badge__count" id="rw-solo-streak-count">0</span>
-                  </span>
-                  <span class="wc-combo-badge__label" data-i18n="relatedWords.comboLabel">COMBO</span>
-                </span>
-              </div>
-            </div>
             <div class="rw-lives" id="rw-lives" aria-label="${t('relatedWords.livesLabel')}"></div>
           </div>
         </header>
 
-        <section class="rw-clue-area">
-          <div class="rw-trail" id="rw-trail">
-            <div class="rw-trail-track" id="rw-trail-track"></div>
-          </div>
-        </section>
-
-        <div class="rw-board" id="rw-board">
-          <section class="rw-answer-area">
-            <div class="rw-slots" id="rw-slots"></div>
-          </section>
-
-          <div class="rw-divider" role="presentation"></div>
-
-          <section class="rw-dock-area">
-            <div class="rw-dock" id="rw-dock"></div>
-            <div class="rw-reveal-skip hidden" id="rw-reveal-skip" aria-live="polite">
-              <button type="button" class="race-btn race-btn--ghost rw-reveal-btn hidden" id="rw-reveal-btn" data-i18n="relatedWordsRace.revealAnswer">${t('relatedWordsRace.revealAnswer')}</button>
-              <p class="rw-reveal-status hidden" id="rw-reveal-status"></p>
+        <div class="rw-stage">
+          <section class="rw-clue-area">
+            <div class="rw-clue-toolbar">
+              <div class="wc-combo-wrap wc-combo-wrap--floating">
+                <div class="wc-combo-badge wc-combo-badge--zero" id="rw-solo-streak" aria-live="polite" aria-label="">
+                  <span class="wc-combo-badge__glow" aria-hidden="true"></span>
+                  <span class="wc-combo-badge__pill">
+                    <span class="wc-combo-badge__count-stack">
+                      <span class="wc-combo-badge__flame" aria-hidden="true"></span>
+                      <span class="wc-combo-badge__count" id="rw-solo-streak-count">0</span>
+                    </span>
+                    <span class="wc-combo-badge__label" data-i18n="relatedWords.comboLabel">COMBO</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="rw-trail" id="rw-trail">
+              <div class="rw-trail-track" id="rw-trail-track"></div>
             </div>
           </section>
+
+          <div class="rw-board" id="rw-board">
+            <section class="rw-answer-area">
+              <div class="rw-slots" id="rw-slots"></div>
+            </section>
+
+            <div class="rw-divider" role="presentation"></div>
+
+            <section class="rw-dock-area">
+              <div class="rw-dock" id="rw-dock"></div>
+              <div class="rw-reveal-skip hidden" id="rw-reveal-skip" aria-live="polite">
+                <button type="button" class="race-btn race-btn--ghost rw-reveal-btn hidden" id="rw-reveal-btn" data-i18n="relatedWordsRace.revealAnswer">${t('relatedWordsRace.revealAnswer')}</button>
+                <p class="rw-reveal-status hidden" id="rw-reveal-status"></p>
+              </div>
+            </section>
+          </div>
         </div>
 
         <div class="rw-feedback hidden" id="rw-feedback" role="status" aria-live="polite"></div>
@@ -420,7 +424,7 @@
       if (this.raceMode) {
         this.root.classList.add('rw-race-mode');
         this.root.querySelector('.rw-topbar')?.classList.add('hidden');
-        this.els.soloStreak?.closest('.wc-combo-wrap')?.classList.add('hidden');
+        this.root.querySelector('.rw-clue-toolbar')?.classList.add('hidden');
       } else if (!this.showOppPreview) {
         this.root.classList.add('rw-solo-mode');
       }
@@ -758,6 +762,7 @@
       el.setAttribute('aria-label', t('relatedWords.streak', { count: streak }));
       el.classList.toggle('wc-combo-badge--zero', streak <= 0);
       el.classList.toggle('is-burning', streak > 0);
+      el.closest('.wc-combo-wrap')?.classList.toggle('hidden', streak <= 0);
       this.applyComboFireTier(el, streak);
       el.classList.remove('hidden');
       const animate = opts.animate !== false;

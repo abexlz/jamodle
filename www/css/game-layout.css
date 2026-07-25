@@ -204,10 +204,21 @@ body:has(#related-words-app) .app#related-words-app {
   flex-direction: column;
 }
 
+body:has(#related-words-app) .rw-stage {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
 body:has(#related-words-app) .rw-board {
   flex: 1 1 0;
   min-height: 0;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 /* ── RW race ── */

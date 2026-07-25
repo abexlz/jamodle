@@ -154,8 +154,44 @@
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px 12px;
-  margin-bottom: 10px;
-  min-height: 44px;
+  margin-bottom: 4px;
+  min-height: 40px;
+  flex-shrink: 0;
+}
+
+.rw-stage {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.rw-clue-area {
+  position: relative;
+  flex-shrink: 0;
+  text-align: center;
+  margin-bottom: 0;
+  padding-top: 2px;
+}
+
+.rw-clue-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  min-height: 0;
+  margin: 0 0 -6px;
+  padding-right: 2px;
+  pointer-events: none;
+}
+
+.rw-clue-toolbar .wc-combo-wrap {
+  pointer-events: auto;
+}
+
+.wc-combo-wrap--floating {
+  margin: 0;
+  min-height: 0;
 }
 
 .rw-topbar-start {
@@ -197,11 +233,6 @@
 }
 
 /* ── Word trail (3 deep, oldest smallest → clue largest) ── */
-
-.rw-clue-area {
-  text-align: center;
-  margin-bottom: 12px;
-}
 
 .rw-trail {
   margin-bottom: 10px;
@@ -477,36 +508,32 @@
 }
 
 /* Solo mode — uniform large slots for 2–4+ syllables */
-/* Solo layout — trail is the hero, play area anchors to bottom */
+/* Solo layout — trail up top, play area centered in remaining space */
 .rw-solo-mode {
   display: flex;
   flex-direction: column;
-  min-height: calc(100dvh - 56px);
+  min-height: 0;
+  height: 100%;
 }
 
 .rw-solo-mode .rw-topbar {
-  margin-bottom: 6px;
+  margin-bottom: 2px;
 }
 
 .rw-solo-mode .rw-topbar-main {
   padding-right: 4px;
 }
 
-.rw-solo-mode .wc-combo-wrap--inline {
-  margin: 0;
-  min-height: 0;
-}
-
-.rw-solo-mode .wc-combo-wrap--inline .wc-combo-badge__pill {
+.rw-solo-mode .wc-combo-wrap--floating .wc-combo-badge__pill {
   padding: 3px 8px 3px 6px;
   gap: 4px;
 }
 
-.rw-solo-mode .wc-combo-wrap--inline .wc-combo-badge__count-stack {
+.rw-solo-mode .wc-combo-wrap--floating .wc-combo-badge__count-stack {
   min-width: clamp(28px, 8vw, 36px);
 }
 
-.rw-solo-mode .wc-combo-wrap--inline .wc-combo-badge__label {
+.rw-solo-mode .wc-combo-wrap--floating .wc-combo-badge__label {
   font-size: 9px;
 }
 
@@ -514,9 +541,14 @@
   margin: 0;
 }
 
+.rw-solo-mode .rw-stage {
+  flex: 1 1 0;
+  min-height: 0;
+}
+
 .rw-solo-mode .rw-clue-area {
   margin-top: 0;
-  margin-bottom: 8px;
+  margin-bottom: 0;
   flex-shrink: 0;
 }
 
@@ -534,29 +566,34 @@
 }
 
 .rw-solo-mode .rw-board {
+  flex: 1 1 0;
+  min-height: 0;
   margin-top: 0;
-  flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  min-height: 0;
+  justify-content: center;
+  align-items: stretch;
+  padding: clamp(8px, 2.5dvh, 20px) 0 clamp(12px, 3dvh, 28px);
 }
 
 .rw-solo-mode .rw-answer-area {
-  margin-top: -2px;
-  margin-bottom: 6px;
+  margin-top: 0;
+  margin-bottom: 10px;
+  flex-shrink: 0;
 }
 
 .rw-solo-mode .rw-divider {
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+  flex-shrink: 0;
 }
 
 .rw-solo-mode .rw-dock-area {
-  margin-top: 10px;
+  margin-top: 0;
+  flex-shrink: 0;
 }
 
 .rw-solo-mode .rw-dock {
-  margin-top: 6px;
+  margin-top: 0;
 }
 
 .rw-solo-mode .rw-slots {
@@ -1260,12 +1297,14 @@ html.reduce-motion .rw-confetti-piece {
 .rw-board {
   display: flex;
   flex-direction: column;
-  flex: 1;
+  flex: 1 1 0;
   min-height: 0;
 }
 
 #related-words-app {
   display: flex;
   flex-direction: column;
-  min-height: calc(100dvh - 56px);
+  flex: 1 1 0;
+  min-height: 0;
+  height: 100%;
 }
