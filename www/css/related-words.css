@@ -52,6 +52,105 @@
   font-family: 'Jua', sans-serif;
   font-size: clamp(18px, 5vw, 22px);
   animation: rw-feedback-pop 0.35s ease;
+  white-space: pre-line;
+  line-height: 1.35;
+}
+
+.rw-chain-title {
+  margin: 0 0 4px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--heading);
+  transition: opacity 0.32s ease, transform 0.32s ease;
+}
+
+.rw-chain-title--swap-out {
+  animation: rw-chain-title-out 0.42s ease forwards;
+}
+
+.rw-chain-title--swap-in {
+  animation: rw-chain-title-in 0.55s cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
+}
+
+@keyframes rw-chain-title-out {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-14px) scale(0.9); }
+}
+
+@keyframes rw-chain-title-in {
+  0% { opacity: 0; transform: translateY(18px) scale(0.88); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.rw-chain-swap-flash {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 38%, rgba(139, 92, 246, 0.38), transparent 62%),
+    radial-gradient(circle at 50% 62%, rgba(125, 255, 216, 0.22), transparent 55%);
+  pointer-events: none;
+  z-index: 60;
+  opacity: 0;
+  animation: rw-chain-swap-flash 0.95s ease-out forwards;
+}
+
+.rw-chain-swap-ring {
+  position: fixed;
+  left: 50%;
+  top: 42%;
+  width: min(72vw, 280px);
+  height: min(72vw, 280px);
+  margin: calc(min(72vw, 280px) / -2) 0 0 calc(min(72vw, 280px) / -2);
+  border-radius: 50%;
+  border: 3px solid rgba(139, 92, 246, 0.55);
+  box-shadow:
+    0 0 0 6px rgba(139, 92, 246, 0.12),
+    inset 0 0 24px rgba(125, 255, 216, 0.18);
+  pointer-events: none;
+  z-index: 61;
+  animation: rw-chain-swap-ring 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes rw-chain-swap-flash {
+  0% { opacity: 0; }
+  28% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes rw-chain-swap-ring {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.35);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.35);
+  }
+}
+
+.rw-board.rw-fade-in-active {
+  animation: rw-board-fade-in 0.48s ease forwards;
+}
+
+@keyframes rw-board-fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.rw-trail.rw-trail--chain-reset {
+  animation: rw-trail-chain-reset 0.5s ease forwards;
+}
+
+@keyframes rw-trail-chain-reset {
+  0% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-16px); }
 }
 
 @keyframes rw-feedback-pop {
@@ -64,14 +163,6 @@
   align-items: flex-start;
   gap: 12px;
   margin-bottom: 16px;
-}
-
-.rw-chain-title {
-  margin: 0 0 4px;
-  text-align: center;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--heading);
 }
 
 .rw-chain-progress {
@@ -936,6 +1027,15 @@ html.reduce-motion .rw-opp-fail-shake {
 html.reduce-motion .rw-feedback.success,
 html.reduce-motion .rw-feedback.chain-complete {
   animation: none;
+}
+
+html.reduce-motion .rw-chain-title--swap-out,
+html.reduce-motion .rw-chain-title--swap-in,
+html.reduce-motion .rw-board.rw-fade-in-active,
+html.reduce-motion .rw-trail.rw-trail--chain-reset,
+html.reduce-motion .rw-chain-swap-flash,
+html.reduce-motion .rw-chain-swap-ring {
+  animation: none !important;
 }
 
 html.reduce-motion .rw-life--wrong {

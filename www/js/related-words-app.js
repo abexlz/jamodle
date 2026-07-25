@@ -571,7 +571,11 @@
       this.hideExtraGuessPrompt();
       this.els.feedback.classList.add('hidden');
       this.els.feedback.classList.remove('success', 'chain-complete');
-      this.els.board.classList.remove('rw-fade-out', 'rw-fade-in', 'rw-round-locked');
+      if (!opts.chainSwap) {
+        this.els.board.classList.remove('rw-fade-out', 'rw-fade-in', 'rw-round-locked', 'rw-fade-in-active');
+      } else {
+        this.els.board.classList.remove('rw-fade-in', 'rw-round-locked', 'rw-fade-in-active');
+      }
 
       if (!skipTrail) {
         const trailIdx = this.useThemeRotation ? this.globalLinkIndex : linkIndex;
@@ -982,11 +986,14 @@
       }
 
       await this.onRoundAdvanceLivesReset();
-      global.SoundEffects?.roundAdvance?.();
+      if (!opts.chainSwap) {
+        global.SoundEffects?.roundAdvance?.();
+      }
 
       const solvedWord = this.puzzle?.answer;
-      const skipTrailAnim = opts.skipTrail === true || this._animatedTrailLinkIndex === linkIndex;
-      const skipSlotFlip = opts.skipSlotFlip === true;
+      const skipTrailAnim = opts.skipTrail === true || opts.chainSwap === true
+        || this._animatedTrailLinkIndex === linkIndex;
+      const skipSlotFlip = opts.skipSlotFlip === true || opts.chainSwap === true;
 
       if (!skipTrailAnim && solvedWord && !opts.skipped && !skipSlotFlip) {
         if (opts.opponentWon) {
@@ -1045,7 +1052,11 @@
       await this.flipDockToNewLetters(nextPuzzle.dockTiles, { fast: this.raceMode });
       global.SoundEffects?.dockFlip?.();
 
-      const applyOpts = { skipTrail: true, skipDockRender: true };
+      const applyOpts = {
+        skipTrail: true,
+        skipDockRender: true,
+        chainSwap: opts.chainSwap === true,
+      };
       if (this.useThemeRotation) {
         this.applyLinkState(linkIndex, applyOpts);
       } else {
@@ -1055,6 +1066,10 @@
       this.dock = nextPuzzle.dockTiles.map((tile) => ({ ...tile, used: false, slotIndex: null }));
       if (reduceMotion()) {
         this.renderDock();
+      }
+
+      if (opts.chainSwap) {
+        await this.finishChainSwapTransition(opts.nextChainLabel);
       }
     }
 
@@ -2509,6 +2524,7 @@
 
     placeFromDock(tileId) {
       if (!this.enabled || this.roundLocked || this.isStunned() || this.awaitingExtraGuess) return;
+      global.KoreanTTS?.prime?.();
       const tile = this.dock.find((item) => item.id === tileId && !item.used);
       if (!tile) return;
       const slotIndex = this.slots.findIndex((slot) => slot === null);
@@ -2682,6 +2698,7 @@
       const sharedRace = this.raceMode && this.sharedRace;
 
       global.SoundEffects?.win?.();
+      this.speakCorrectWord();
 
       if (sharedRace && this.onRoundWin) {
         const points = global.RelatedWordsChains?.relatedWordsRoundPoints?.(this.puzzle.answer) ?? 1;
@@ -2805,12 +2822,21 @@
         }
 
         const chain = RW().pickChain(loadProgress());
+        const nextChainLabel = this.getChainLabel(chain);
         this.progress = saveProgress({
           chainId: chain.id,
           linkIndex: 0,
           solvedInChain: [],
         });
-        await this.loadLink(chain.id, 0, { useTileFlipTransition: true });
+        await this.playChainSwapCeremony({
+          linkCount: this.puzzle.linkCount,
+          nextChainLabel,
+        });
+        await this.loadLink(chain.id, 0, {
+          useTileFlipTransition: true,
+          chainSwap: true,
+          nextChainLabel,
+        });
       } else {
         await this.loadLink(advance.chainId, advance.linkIndex, {
           useTileFlipTransition: true,
@@ -2901,12 +2927,12 @@
       }
     }
 
-    spawnConfetti() {
+    spawnConfetti(count = 28) {
       if (reduceMotion()) return;
       const colors = ['#8FE8B0', '#FFE566', '#A8D4F5', '#CFC0F5', '#FFB8D0', '#98DDB8'];
       const origin = this.els.slots.getBoundingClientRect();
-      const count = 28;
-      for (let i = 0; i < count; i++) {
+      const pieceCount = Math.max(8, Number(count) || 28);
+      for (let i = 0; i < pieceCount; i++) {
         const piece = document.createElement('div');
         piece.className = 'rw-confetti-piece';
         piece.style.left = `${origin.left + origin.width * (0.2 + Math.random() * 0.6)}px`;
@@ -2919,6 +2945,78 @@
         document.body.appendChild(piece);
         setTimeout(() => piece.remove(), 1800);
       }
+    }
+
+    speakCorrectWord() {
+      const word = this.puzzle?.answer;
+      if (!word) return;
+      global.KoreanTTS?.prime?.();
+      global.KoreanTTS?.speak?.(word, { repeats: 1 });
+    }
+
+    getChainLabel(chain) {
+      if (!chain) return '';
+      const titled = chain.titleKey ? t(chain.titleKey) : '';
+      if (titled && titled !== chain.titleKey) return titled;
+      return global.RelatedWordsChains?.chainLabel?.(chain) || titled || '';
+    }
+
+    spawnChainSwapFx() {
+      if (reduceMotion()) return;
+      const flash = document.createElement('div');
+      flash.className = 'rw-chain-swap-flash';
+      document.body.appendChild(flash);
+      const ring = document.createElement('div');
+      ring.className = 'rw-chain-swap-ring';
+      document.body.appendChild(ring);
+      setTimeout(() => {
+        flash.remove();
+        ring.remove();
+      }, 1100);
+    }
+
+    async playChainSwapCeremony({ linkCount, nextChainLabel } = {}) {
+      const title = t('relatedWords.chainCompleteTitle');
+      const sub = t('relatedWords.chainCompleteSub', { count: linkCount });
+      const nextLine = nextChainLabel
+        ? t('relatedWords.nextChainTitle', { title: nextChainLabel })
+        : '';
+      const message = nextLine ? `${title}\n${sub}\n${nextLine}` : `${title}\n${sub}`;
+
+      this.showFeedback(message, 'chain-complete');
+      global.SoundEffects?.win?.();
+      this.spawnConfetti(52);
+      this.spawnChainSwapFx();
+
+      if (reduceMotion()) {
+        await this.delay(700);
+        this.els.feedback.classList.add('hidden');
+        return;
+      }
+
+      this.els.chainTitle.classList.remove('rw-chain-title--swap-in');
+      this.els.chainTitle.classList.add('rw-chain-title--swap-out');
+      this.els.trail?.classList.add('rw-trail--chain-reset');
+      this.els.board.classList.remove('rw-fade-in-active');
+      this.els.board.classList.add('rw-fade-out');
+
+      await this.delay(820);
+      this.els.feedback.classList.add('hidden');
+      await this.delay(120);
+    }
+
+    async finishChainSwapTransition(nextChainLabel) {
+      this.els.trail?.classList.remove('rw-trail--chain-reset');
+      this.els.chainTitle.classList.remove('rw-chain-title--swap-out');
+      this.els.chainTitle.classList.add('rw-chain-title--swap-in');
+      this.els.board.classList.remove('rw-fade-out');
+      this.els.board.classList.add('rw-fade-in-active');
+      global.SoundEffects?.roundAdvance?.();
+
+      await this.delay(reduceMotion() ? 120 : 480);
+
+      this.els.board.classList.remove('rw-fade-in-active');
+      this.els.chainTitle.classList.remove('rw-chain-title--swap-in');
     }
 
     delay(ms) {
