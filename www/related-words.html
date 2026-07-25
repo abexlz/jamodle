@@ -33,43 +33,20 @@
 <link rel="stylesheet" href="css/app-buttons.css?v=10">
 <link rel="stylesheet" href="css/app-theme.css?v=10">
 <link rel="stylesheet" href="css/app-wordle-ui.css?v=9">
-<link rel="stylesheet" href="css/related-words.css?v=20260725g">
+<link rel="stylesheet" href="css/related-words.css?v=20260725h">
 <link rel="stylesheet" href="css/word-chain-combo.css?v=6">
 <link rel="stylesheet" href="css/pause-quit.css?v=2">
 <style>
-  :root {
-    --bg: #FFF8F5;
-    --card: #FFFFFF;
-    --text: #5D6470;
-    --text-soft: #9AA3AD;
-    --heading: #7B8FD4;
-    --border: #E8E4E0;
-    --error: #D47870;
-    --shadow: 0 4px 14px rgba(93, 100, 112, 0.08);
-    --safe-top: env(safe-area-inset-top, 0px);
-    --safe-bottom: env(safe-area-inset-bottom, 0px);
-  }
-  [data-theme="dark"] {
-    --bg: #1A1D28;
-    --card: #2A2E3E;
-    --text: #E4E8F0;
-    --text-soft: #9AA3B8;
-    --heading: #B8C4F0;
-    --border: #3A3E50;
-    --error: #F87171;
-    --shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
-  }
   * { box-sizing: border-box; }
-  body {
+  body.rw-page {
     margin: 0;
     min-height: 100dvh;
     display: flex;
     flex-direction: column;
-    color: var(--text);
     font-family: 'Noto Sans KR', sans-serif;
-    padding: calc(12px + var(--safe-top)) 16px calc(24px + var(--safe-bottom));
+    padding: calc(8px + env(safe-area-inset-top, 0px)) 14px calc(16px + env(safe-area-inset-bottom, 0px));
   }
-  .app {
+  body.rw-page .app {
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -77,11 +54,14 @@
     width: 100%;
     margin: 0 auto;
   }
+  body.rw-page .top-nav-actions {
+    display: none;
+  }
 </style>
 <link rel="stylesheet" href="css/game-layout.css?v=2">
 <link rel="stylesheet" href="css/app-fonts.css?v=3">
 </head>
-<body>
+<body class="rw-page">
 
 <div class="top-nav-actions">
   <a class="top-nav-btn" href="settings.html" id="nav-settings" data-i18n-aria="nav.settings">⚙️</a>
@@ -110,7 +90,7 @@
 <script src="js/related-words-chains.js?v=20260710e"></script>
 <script src="js/related-words-puzzles.js?v=20260709f"></script>
 <script src="js/pause-quit-ui.js?v=2"></script>
-<script src="js/related-words-app.js?v=20260725g"></script>
+<script src="js/related-words-app.js?v=20260725h"></script>
 <script>
 (async function () {
   try {

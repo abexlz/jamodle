@@ -286,27 +286,26 @@
             <p class="rw-chain-title" id="rw-chain-title"></p>
             <p class="rw-chain-progress" id="rw-chain-progress"></p>
           </div>
-          <div class="rw-topbar-end">
+          <div class="rw-topbar-end rw-hud-cluster">
+            <div class="wc-combo-wrap wc-combo-wrap--hud">
+              <div class="wc-combo-badge wc-combo-badge--zero" id="rw-solo-streak" aria-live="polite" aria-label="">
+                <span class="wc-combo-badge__glow" aria-hidden="true"></span>
+                <span class="wc-combo-badge__pill">
+                  <span class="wc-combo-badge__count-stack">
+                    <span class="wc-combo-badge__flame" aria-hidden="true"></span>
+                    <span class="wc-combo-badge__count" id="rw-solo-streak-count">0</span>
+                  </span>
+                  <span class="wc-combo-badge__label" data-i18n="relatedWords.comboLabel">COMBO</span>
+                </span>
+              </div>
+            </div>
             <div class="rw-lives" id="rw-lives" aria-label="${t('relatedWords.livesLabel')}"></div>
+            <a class="top-nav-btn rw-settings-btn" href="settings.html" id="rw-settings-btn" data-i18n-aria="nav.settings">⚙️</a>
           </div>
         </header>
 
         <div class="rw-stage">
           <section class="rw-clue-area">
-            <div class="rw-clue-toolbar">
-              <div class="wc-combo-wrap wc-combo-wrap--floating">
-                <div class="wc-combo-badge wc-combo-badge--zero" id="rw-solo-streak" aria-live="polite" aria-label="">
-                  <span class="wc-combo-badge__glow" aria-hidden="true"></span>
-                  <span class="wc-combo-badge__pill">
-                    <span class="wc-combo-badge__count-stack">
-                      <span class="wc-combo-badge__flame" aria-hidden="true"></span>
-                      <span class="wc-combo-badge__count" id="rw-solo-streak-count">0</span>
-                    </span>
-                    <span class="wc-combo-badge__label" data-i18n="relatedWords.comboLabel">COMBO</span>
-                  </span>
-                </div>
-              </div>
-            </div>
             <div class="rw-trail" id="rw-trail">
               <div class="rw-trail-track" id="rw-trail-track"></div>
             </div>
@@ -424,7 +423,8 @@
       if (this.raceMode) {
         this.root.classList.add('rw-race-mode');
         this.root.querySelector('.rw-topbar')?.classList.add('hidden');
-        this.root.querySelector('.rw-clue-toolbar')?.classList.add('hidden');
+        this.els.soloStreak?.closest('.wc-combo-wrap')?.classList.add('hidden');
+        this.root.querySelector('.rw-settings-btn')?.classList.add('hidden');
       } else if (!this.showOppPreview) {
         this.root.classList.add('rw-solo-mode');
       }
@@ -1210,9 +1210,10 @@
 
     updateTrailDefinition(word, meaning) {
       const def = this.els.trailTrack?.querySelector('.rw-trail-word.clue .rw-trail-word-def');
-      if (!def || def.dataset.word !== word) return;
+      if (!def) return;
       def.textContent = meaning || '';
       def.classList.toggle('is-empty', !meaning);
+      if (word) def.dataset.word = word;
     }
 
     async loadClueDefinition(word) {
