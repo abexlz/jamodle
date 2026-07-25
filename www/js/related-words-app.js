@@ -278,27 +278,30 @@
         : `<a class="back-link" href="index.html" data-i18n="relatedWords.back">${t('relatedWords.back')}</a>`;
 
       this.root.innerHTML = `
-        <header class="rw-header">
-          ${headerNav}
-          <div class="rw-banner" data-i18n="relatedWords.banner">${t('relatedWords.banner')}</div>
-        </header>
-
-        <p class="rw-chain-title" id="rw-chain-title"></p>
-        <p class="rw-chain-progress" id="rw-chain-progress"></p>
-        <div class="wc-combo-wrap">
-          <div class="wc-combo-badge wc-combo-badge--zero" id="rw-solo-streak" aria-live="polite" aria-label="">
-            <span class="wc-combo-badge__glow" aria-hidden="true"></span>
-            <span class="wc-combo-badge__pill">
-              <span class="wc-combo-badge__count-stack">
-                <span class="wc-combo-badge__flame" aria-hidden="true"></span>
-                <span class="wc-combo-badge__count" id="rw-solo-streak-count">0</span>
-              </span>
-              <span class="wc-combo-badge__label" data-i18n="relatedWords.comboLabel">COMBO</span>
-            </span>
+        <header class="rw-topbar">
+          <div class="rw-topbar-start">
+            ${headerNav}
           </div>
-        </div>
-
-        <div class="rw-lives" id="rw-lives" aria-label="${t('relatedWords.livesLabel')}"></div>
+          <div class="rw-topbar-main">
+            <p class="rw-chain-title" id="rw-chain-title"></p>
+            <p class="rw-chain-progress" id="rw-chain-progress"></p>
+          </div>
+          <div class="rw-topbar-end">
+            <div class="wc-combo-wrap wc-combo-wrap--inline">
+              <div class="wc-combo-badge wc-combo-badge--zero" id="rw-solo-streak" aria-live="polite" aria-label="">
+                <span class="wc-combo-badge__glow" aria-hidden="true"></span>
+                <span class="wc-combo-badge__pill">
+                  <span class="wc-combo-badge__count-stack">
+                    <span class="wc-combo-badge__flame" aria-hidden="true"></span>
+                    <span class="wc-combo-badge__count" id="rw-solo-streak-count">0</span>
+                  </span>
+                  <span class="wc-combo-badge__label" data-i18n="relatedWords.comboLabel">COMBO</span>
+                </span>
+              </div>
+            </div>
+            <div class="rw-lives" id="rw-lives" aria-label="${t('relatedWords.livesLabel')}"></div>
+          </div>
+        </header>
 
         <section class="rw-clue-area">
           <div class="rw-trail" id="rw-trail">
@@ -416,7 +419,7 @@
 
       if (this.raceMode) {
         this.root.classList.add('rw-race-mode');
-        this.root.querySelector('.rw-header')?.classList.add('hidden');
+        this.root.querySelector('.rw-topbar')?.classList.add('hidden');
         this.els.soloStreak?.closest('.wc-combo-wrap')?.classList.add('hidden');
       } else if (!this.showOppPreview) {
         this.root.classList.add('rw-solo-mode');

@@ -56,15 +56,6 @@
   line-height: 1.35;
 }
 
-.rw-chain-title {
-  margin: 0 0 4px;
-  text-align: center;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--heading);
-  transition: opacity 0.32s ease, transform 0.32s ease;
-}
-
 .rw-chain-title--swap-out {
   animation: rw-chain-title-out 0.42s ease forwards;
 }
@@ -158,17 +149,50 @@
   100% { opacity: 1; transform: scale(1) translateY(0); }
 }
 
-.rw-header {
+.rw-topbar {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px 12px;
+  margin-bottom: 10px;
+  min-height: 44px;
+}
+
+.rw-topbar-start {
   display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 16px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.rw-topbar-main {
+  min-width: 0;
+}
+
+.rw-topbar-end {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.rw-chain-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--heading);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: opacity 0.32s ease, transform 0.32s ease;
 }
 
 .rw-chain-progress {
-  margin: 0 0 12px;
-  text-align: center;
-  font-size: 12px;
+  margin: 2px 0 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
   color: var(--text-soft);
 }
 
@@ -176,7 +200,7 @@
 
 .rw-clue-area {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 
 .rw-trail {
@@ -368,29 +392,12 @@
   color: var(--text-soft);
 }
 
-.rw-banner {
-  flex: 1;
-  margin-top: 4px;
-  padding: 14px 18px;
-  text-align: center;
-  font-family: 'Jua', sans-serif;
-  font-size: clamp(18px, 4.5vw, 22px);
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  color: #fff;
-  background: #FFD743;
-  background-image: none;
-  clip-path: polygon(4% 0%, 96% 0%, 100% 100%, 0% 100%);
-  border-radius: 4px 4px 12px 12px;
-  box-shadow: 0 4px 0 #C87A00;
-}
-
 .rw-lives {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: clamp(8px, 2.5vw, 12px);
-  margin: 8px 0 20px;
+  gap: clamp(6px, 2vw, 10px);
+  margin: 0;
 }
 
 .rw-life {
@@ -470,13 +477,47 @@
 }
 
 /* Solo mode — uniform large slots for 2–4+ syllables */
+/* Solo layout — trail is the hero, play area anchors to bottom */
+.rw-solo-mode {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100dvh - 56px);
+}
+
+.rw-solo-mode .rw-topbar {
+  margin-bottom: 6px;
+}
+
+.rw-solo-mode .rw-topbar-main {
+  padding-right: 4px;
+}
+
+.rw-solo-mode .wc-combo-wrap--inline {
+  margin: 0;
+  min-height: 0;
+}
+
+.rw-solo-mode .wc-combo-wrap--inline .wc-combo-badge__pill {
+  padding: 3px 8px 3px 6px;
+  gap: 4px;
+}
+
+.rw-solo-mode .wc-combo-wrap--inline .wc-combo-badge__count-stack {
+  min-width: clamp(28px, 8vw, 36px);
+}
+
+.rw-solo-mode .wc-combo-wrap--inline .wc-combo-badge__label {
+  font-size: 9px;
+}
+
 .rw-solo-mode .rw-lives {
-  margin-bottom: 10px;
+  margin: 0;
 }
 
 .rw-solo-mode .rw-clue-area {
-  margin-top: 10px;
-  margin-bottom: 2px;
+  margin-top: 0;
+  margin-bottom: 8px;
+  flex-shrink: 0;
 }
 
 .rw-solo-mode .rw-trail {
@@ -493,7 +534,12 @@
 }
 
 .rw-solo-mode .rw-board {
-  margin-top: 2px;
+  margin-top: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 0;
 }
 
 .rw-solo-mode .rw-answer-area {
@@ -697,11 +743,12 @@
 }
 
 .rw-divider {
-  height: 2px;
-  margin: 0 auto 24px;
-  max-width: 280px;
+  height: 1px;
+  margin: 0 auto 18px;
+  max-width: 240px;
   background: var(--border);
   border-radius: 1px;
+  opacity: 0.85;
 }
 
 .rw-dock-area {
@@ -1220,5 +1267,5 @@ html.reduce-motion .rw-confetti-piece {
 #related-words-app {
   display: flex;
   flex-direction: column;
-  min-height: calc(100dvh - 48px);
+  min-height: calc(100dvh - 56px);
 }
