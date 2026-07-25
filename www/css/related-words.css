@@ -222,6 +222,28 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  justify-content: center;
+}
+
+.rw-play-cluster {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.rw-combo-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 0;
+  margin: 0;
+}
+
+.rw-combo-row.hidden {
+  display: none;
 }
 
 .rw-clue-area {
@@ -572,6 +594,16 @@
 .rw-solo-mode .rw-stage {
   flex: 1 1 0;
   min-height: 0;
+  justify-content: center;
+  padding-bottom: clamp(8px, 2dvh, 20px);
+}
+
+.rw-solo-mode .rw-play-cluster {
+  gap: 4px;
+}
+
+.rw-solo-mode .rw-combo-row {
+  margin-bottom: 2px;
 }
 
 .rw-solo-mode .rw-clue-area {
@@ -585,33 +617,33 @@
 }
 
 .rw-solo-mode .rw-trail-track {
-  height: clamp(168px, 44vw, 208px);
+  height: clamp(158px, 40vw, 196px);
 }
 
 .rw-solo-mode .rw-trail-word[data-slot="2"],
 .rw-solo-mode .rw-trail-word.clue {
-  top: clamp(46px, 13vw, 60px);
+  top: clamp(42px, 12vw, 56px);
 }
 
 .rw-solo-mode .rw-board {
-  flex: 1 1 0;
+  flex: 0 0 auto;
   min-height: 0;
   margin-top: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: stretch;
-  padding: clamp(8px, 2.5dvh, 20px) 0 clamp(12px, 3dvh, 28px);
+  padding: 0;
 }
 
 .rw-solo-mode .rw-answer-area {
   margin-top: 0;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   flex-shrink: 0;
 }
 
 .rw-solo-mode .rw-divider {
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   flex-shrink: 0;
 }
 

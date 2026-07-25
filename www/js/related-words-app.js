@@ -287,31 +287,35 @@
             <p class="rw-chain-progress" id="rw-chain-progress"></p>
           </div>
           <div class="rw-topbar-end rw-hud-cluster">
-            <div class="wc-combo-wrap wc-combo-wrap--hud">
-              <div class="wc-combo-badge wc-combo-badge--zero" id="rw-solo-streak" aria-live="polite" aria-label="">
-                <span class="wc-combo-badge__glow" aria-hidden="true"></span>
-                <span class="wc-combo-badge__pill">
-                  <span class="wc-combo-badge__count-stack">
-                    <span class="wc-combo-badge__flame" aria-hidden="true"></span>
-                    <span class="wc-combo-badge__count" id="rw-solo-streak-count">0</span>
-                  </span>
-                  <span class="wc-combo-badge__label" data-i18n="relatedWords.comboLabel">COMBO</span>
-                </span>
-              </div>
-            </div>
             <div class="rw-lives" id="rw-lives" aria-label="${t('relatedWords.livesLabel')}"></div>
             <a class="top-nav-btn rw-settings-btn" href="settings.html" id="rw-settings-btn" data-i18n-aria="nav.settings">⚙️</a>
           </div>
         </header>
 
         <div class="rw-stage">
-          <section class="rw-clue-area">
-            <div class="rw-trail" id="rw-trail">
-              <div class="rw-trail-track" id="rw-trail-track"></div>
+          <div class="rw-play-cluster">
+            <div class="rw-combo-row">
+              <div class="wc-combo-wrap wc-combo-wrap--hud">
+                <div class="wc-combo-badge wc-combo-badge--zero" id="rw-solo-streak" aria-live="polite" aria-label="">
+                  <span class="wc-combo-badge__glow" aria-hidden="true"></span>
+                  <span class="wc-combo-badge__pill">
+                    <span class="wc-combo-badge__count-stack">
+                      <span class="wc-combo-badge__flame" aria-hidden="true"></span>
+                      <span class="wc-combo-badge__count" id="rw-solo-streak-count">0</span>
+                    </span>
+                    <span class="wc-combo-badge__label" data-i18n="relatedWords.comboLabel">COMBO</span>
+                  </span>
+                </div>
+              </div>
             </div>
-          </section>
 
-          <div class="rw-board" id="rw-board">
+            <section class="rw-clue-area">
+              <div class="rw-trail" id="rw-trail">
+                <div class="rw-trail-track" id="rw-trail-track"></div>
+              </div>
+            </section>
+
+            <div class="rw-board" id="rw-board">
             <section class="rw-answer-area">
               <div class="rw-slots" id="rw-slots"></div>
             </section>
@@ -325,6 +329,7 @@
                 <p class="rw-reveal-status hidden" id="rw-reveal-status"></p>
               </div>
             </section>
+          </div>
           </div>
         </div>
 
@@ -423,6 +428,7 @@
       if (this.raceMode) {
         this.root.classList.add('rw-race-mode');
         this.root.querySelector('.rw-topbar')?.classList.add('hidden');
+        this.root.querySelector('.rw-combo-row')?.classList.add('hidden');
         this.els.soloStreak?.closest('.wc-combo-wrap')?.classList.add('hidden');
         this.root.querySelector('.rw-settings-btn')?.classList.add('hidden');
       } else if (!this.showOppPreview) {
@@ -763,6 +769,7 @@
       el.classList.toggle('wc-combo-badge--zero', streak <= 0);
       el.classList.toggle('is-burning', streak > 0);
       el.closest('.wc-combo-wrap')?.classList.toggle('hidden', streak <= 0);
+      el.closest('.rw-combo-row')?.classList.toggle('hidden', streak <= 0);
       this.applyComboFireTier(el, streak);
       el.classList.remove('hidden');
       const animate = opts.animate !== false;

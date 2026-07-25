@@ -213,12 +213,12 @@ body:has(#related-words-app) .rw-stage {
 }
 
 body:has(#related-words-app) .rw-board {
-  flex: 1 1 0;
+  flex: 0 0 auto;
   min-height: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 /* ── RW race ── */
