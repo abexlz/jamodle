@@ -1137,7 +1137,7 @@
       track.classList.remove('advancing', 'active');
       track.classList.toggle('rw-trail--race', this.raceMode);
       track.classList.toggle('rw-trail--solo', this.raceMode && count === 1);
-      this.loadTrailDefinitions(words);
+      this.loadClueDefinition(words[words.length - 1]);
     }
 
     createTrailWordElement(word, { slot = 0, isClue = false, isEntering = false } = {}) {
@@ -1164,12 +1164,15 @@
         row.appendChild(btn);
       }
 
-      const def = document.createElement('span');
-      def.className = 'rw-trail-word-def is-empty';
-      def.dataset.word = word;
-
       el.appendChild(row);
-      el.appendChild(def);
+
+      if (isClue) {
+        const def = document.createElement('span');
+        def.className = 'rw-trail-word-def is-empty';
+        def.dataset.word = word;
+        el.appendChild(def);
+      }
+
       return el;
     }
 
@@ -1198,30 +1201,30 @@
     }
 
     updateTrailDefinition(word, meaning) {
-      const track = this.els.trailTrack;
-      if (!track || !word) return;
-      track.querySelectorAll(`.rw-trail-word-def[data-word="${word}"]`).forEach((el) => {
-        el.textContent = meaning || '';
-        el.classList.toggle('is-empty', !meaning);
-      });
+      const def = this.els.trailTrack?.querySelector('.rw-trail-word.clue .rw-trail-word-def');
+      if (!def || def.dataset.word !== word) return;
+      def.textContent = meaning || '';
+      def.classList.toggle('is-empty', !meaning);
     }
 
-    async loadTrailDefinitions(words) {
-      if (!this.shouldShowTrailDefinitions() || !Array.isArray(words) || !words.length) {
-        return;
-      }
+    async loadClueDefinition(word) {
+      if (!word || !this.shouldShowTrailDefinitions()) return;
       const DS = global.DictionaryService;
       if (!DS?.resolveEnglishMeaning) return;
 
-      await Promise.all(words.map(async (word) => {
-        if (this._trailMeaningCache?.has(word)) {
-          this.updateTrailDefinition(word, this._trailMeaningCache.get(word));
-          return;
-        }
-        const meaning = await DS.resolveEnglishMeaning(word);
-        this._trailMeaningCache?.set(word, meaning || '');
-        this.updateTrailDefinition(word, meaning || '');
-      }));
+      if (this._trailMeaningCache?.has(word)) {
+        this.updateTrailDefinition(word, this._trailMeaningCache.get(word));
+        return;
+      }
+
+      const meaning = await DS.resolveEnglishMeaning(word);
+      this._trailMeaningCache?.set(word, meaning || '');
+      this.updateTrailDefinition(word, meaning || '');
+    }
+
+    async loadTrailDefinitions(words) {
+      const clueWord = Array.isArray(words) ? words[words.length - 1] : '';
+      await this.loadClueDefinition(clueWord);
     }
 
     async animateTrailAdvance(solvedWord, nextLinkIndex) {
