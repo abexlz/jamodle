@@ -720,14 +720,23 @@ html.reduce-motion .rw-reveal-letter {
 .rw-vs-panel-slots {
   position: relative;
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: center;
   gap: clamp(6px, 2vw, 10px);
   perspective: 900px;
 }
 
-.rw-vs-slots.rw-slots--3 .rw-vs-panel-slots {
-  flex-wrap: nowrap;
+.rw-vs-slots .rw-slot.flip-tile,
+.rw-vs-slots .rw-opp-slot.flip-tile {
+  flex: 1 1 0;
+  min-width: 0;
+  width: auto;
+  max-width: calc((100% - (var(--rw-slot-count, 3) - 1) * clamp(4px, 1.6vw, 6px)) / var(--rw-slot-count, 3));
+  aspect-ratio: 1;
+  height: auto;
+}
+
+.rw-vs-slots.rw-slots--3 {
   gap: clamp(4px, 1.6vw, 6px);
 }
 
@@ -735,6 +744,8 @@ html.reduce-motion .rw-reveal-letter {
 .rw-vs-slots.rw-slots--3 .rw-opp-slot.flip-tile {
   width: clamp(53px, 14.85vw, 68px);
   height: clamp(53px, 14.85vw, 68px);
+  max-width: clamp(53px, 14.85vw, 68px);
+  flex: 0 0 auto;
 }
 
 .rw-vs-slots.rw-slots--3 .rw-opp-slot {

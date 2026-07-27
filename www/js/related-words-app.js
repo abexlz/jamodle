@@ -1770,7 +1770,8 @@
           </button>`;
         }).join('');
 
-        this.els.slots.className = `rw-slots rw-vs-slots${this.slots.length === 3 ? ' rw-slots--3' : ''}`;
+        this.els.slots.className = `rw-slots rw-vs-slots rw-slots--${this.slots.length}`;
+        this.els.slots.style.setProperty('--rw-slot-count', String(this.slots.length));
         this.els.slots.innerHTML = `
           <div class="rw-vs-column rw-vs-column--enemy">
             <div class="rw-vs-column-head rw-vs-column-head--enemy">
@@ -1804,6 +1805,7 @@
         }
       } else {
         this.els.slots.className = 'rw-slots';
+        this.els.slots.style.setProperty('--rw-slot-count', String(this.slots.length));
         this.els.slots.innerHTML = this.slots.map((tile, index) => {
           const isFlying = this._flyingSlotIndex === index;
           const filled = tile !== null && !isFlying;

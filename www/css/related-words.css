@@ -556,7 +556,7 @@
 
 .rw-slots {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: center;
   gap: clamp(8px, 2.5vw, 12px);
   max-width: 100%;
@@ -564,7 +564,6 @@
 }
 
 .rw-slots--3 {
-  flex-wrap: nowrap;
   gap: clamp(6px, 2vw, 8px);
 }
 
@@ -667,21 +666,26 @@
 }
 
 .rw-solo-mode .rw-slots {
-  flex-wrap: wrap;
-  gap: clamp(10px, 3vw, 14px);
-  max-width: min(100%, 400px);
+  flex-wrap: nowrap;
+  gap: clamp(6px, 2vw, 10px);
+  width: 100%;
+  max-width: 100%;
   margin-inline: auto;
 }
 
 .rw-solo-mode .rw-slot.flip-tile {
-  width: clamp(72px, 22vw, 92px);
-  height: clamp(72px, 22vw, 92px);
+  flex: 1 1 0;
+  min-width: 0;
+  width: auto;
+  max-width: min(92px, calc((100% - (var(--rw-slot-count, 3) - 1) * clamp(6px, 2vw, 10px)) / var(--rw-slot-count, 3)));
+  aspect-ratio: 1;
+  height: auto;
   border-radius: 16px;
 }
 
 .rw-solo-mode .rw-slot-face {
   border-radius: 16px;
-  font-size: clamp(34px, 10vw, 44px);
+  font-size: clamp(22px, calc(44px * 3 / var(--rw-slot-count, 3)), 44px);
 }
 
 .rw-solo-mode .rw-slot.flip-tile.rw-slot--correct .rw-slot-front {
