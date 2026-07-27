@@ -221,6 +221,21 @@ body:has(#related-words-app) .rw-board {
   justify-content: flex-start;
 }
 
+body:has(#related-words-app) .rw-solo-mode .rw-stage {
+  justify-content: flex-start;
+}
+
+body:has(#related-words-app) .rw-solo-mode .rw-play-cluster {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+body:has(#related-words-app) .rw-solo-mode .rw-board {
+  flex: 1 1 0;
+  justify-content: center;
+}
+
 /* ── RW race ── */
 body.rw-race-page .race-app,
 body.rw-race-page .race-main,

@@ -312,10 +312,9 @@
             <section class="rw-clue-area">
               <div class="rw-trail" id="rw-trail">
                 <div class="rw-trail-track" id="rw-trail-track"></div>
+                <p class="rw-clue-meaning is-empty" id="rw-clue-meaning" aria-live="polite"></p>
               </div>
             </section>
-
-            <p class="rw-clue-meaning is-empty" id="rw-clue-meaning" aria-live="polite"></p>
 
             <div class="rw-board" id="rw-board">
             <section class="rw-answer-area">
