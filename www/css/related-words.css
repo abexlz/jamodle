@@ -1151,7 +1151,7 @@ html.reduce-motion .rw-heartbeat-icon {
 }
 
 .rw-feedback.hidden {
-  visibility: hidden;
+  display: none;
 }
 
 .rw-slots.shake,

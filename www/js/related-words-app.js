@@ -1225,19 +1225,74 @@
       el.classList.toggle('is-empty', !meaning);
     }
 
-    async loadClueDefinition(word) {
-      if (!word || !this.shouldShowTrailDefinitions()) return;
-      const DS = global.DictionaryService;
-      if (!DS?.resolveEnglishMeaning) return;
+    getCurrentClueWord() {
+      const track = this.els.trailTrack;
+      if (!track) return '';
+      const clueEl = track.querySelector('.rw-trail-word.clue')
+        || track.querySelector('.rw-trail-word:last-child');
+      return clueEl?.dataset.word || '';
+    }
 
-      if (this._trailMeaningCache?.has(word)) {
-        this.updateTrailDefinition(word, this._trailMeaningCache.get(word));
+    async resolveClueMeaning(word) {
+      const q = String(word || '').trim();
+      if (!q) return '';
+
+      const DS = global.DictionaryService;
+      if (DS?.resolveEnglishMeaning) {
+        const direct = await DS.resolveEnglishMeaning(q);
+        if (direct) return direct;
+
+        if (DS.lookupWord) {
+          try {
+            const result = await DS.lookupWord(q);
+            const entryMeaning = DS.formatEntryMeaning?.(result?.entry);
+            if (entryMeaning) return entryMeaning;
+            for (const candidate of result?.candidates || []) {
+              if (candidate?.word !== q) continue;
+              const candidateMeaning = DS.formatEntryMeaning?.(candidate);
+              if (candidateMeaning) return candidateMeaning;
+            }
+          } catch { /* offline or API error */ }
+        }
+      }
+
+      const glossary = global.MatchWordMeanings?.[q]
+        || global.LearningWords?.getWordMeaning?.(q);
+      if (glossary) return glossary;
+
+      const entry = global.LearningWords?.findWordEntry?.(q);
+      if (entry) {
+        const normalized = global.LearningWords?.getNormalizedWord?.(q)
+          || global.LearningWordModel?.normalizeLearningWord?.(entry);
+        const curated = global.LearningWordModel?.getDisplayMeaning?.(normalized);
+        if (curated) return curated;
+      }
+
+      return '';
+    }
+
+    async loadClueDefinition(word) {
+      if (!word || !this.shouldShowTrailDefinitions()) {
+        this.updateTrailDefinition('', '');
         return;
       }
 
-      const meaning = await DS.resolveEnglishMeaning(word);
-      this._trailMeaningCache?.set(word, meaning || '');
-      this.updateTrailDefinition(word, meaning || '');
+      const cached = this._trailMeaningCache?.get(word);
+      if (cached) {
+        this.updateTrailDefinition(word, cached);
+        return;
+      }
+
+      global.DictionaryService?.prefetchWord?.(word);
+      const requestId = (this._clueMeaningRequestId = (this._clueMeaningRequestId || 0) + 1);
+      const meaning = await this.resolveClueMeaning(word);
+      if (requestId !== this._clueMeaningRequestId) return;
+      if (this.getCurrentClueWord() !== word) return;
+
+      if (meaning) {
+        this._trailMeaningCache?.set(word, meaning);
+      }
+      this.updateTrailDefinition(word, meaning);
     }
 
     async loadTrailDefinitions(words) {
@@ -2717,7 +2772,7 @@
       global.SoundEffects?.wrong?.();
       this.guessCount++;
       this.updateLives();
-      this.showFeedback(t('relatedWords.wrong'), 'error');
+      this.hideFeedback();
 
       const youPanel = this.els.slots.querySelector('.rw-vs-panel--you');
       if (!youPanel || reduceMotion()) {
@@ -2763,14 +2818,14 @@
         }
 
         this.resetSlots();
-        this.showFeedback(t('relatedWords.tryAgain'), 'info');
+        this.hideFeedback();
         this.syncRwLive();
         this.checking = false;
       } else {
         global.SoundEffects?.wrong?.();
         this.guessCount++;
         this.updateLives();
-        this.showFeedback(t('relatedWords.wrong'), 'error');
+        this.hideFeedback();
         this.els.slots.classList.add('shake');
         this.els.dock.classList.add('shake');
         await this.delay(500);
@@ -2782,7 +2837,7 @@
             this.guessCount = 0;
             this.updateLives();
             this.resetSlots();
-            this.showFeedback(t('relatedWords.tryAgain'), 'info');
+            this.hideFeedback();
             this.checking = false;
             return;
           }
@@ -2790,7 +2845,7 @@
           await this.showExtraGuessPrompt();
         } else {
           this.resetSlots();
-          this.showFeedback(t('relatedWords.tryAgain'), 'info');
+          this.hideFeedback();
         }
         this.checking = false;
       }
@@ -3005,6 +3060,12 @@
       this.slots = this.puzzle.answerSyllables.map(() => null);
       this.renderSlots();
       this.renderDock();
+    }
+
+    hideFeedback() {
+      if (!this.els.feedback) return;
+      this.els.feedback.textContent = '';
+      this.els.feedback.className = 'rw-feedback hidden';
     }
 
     showFeedback(message, type) {
