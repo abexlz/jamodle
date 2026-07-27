@@ -299,9 +299,27 @@
   overflow: visible;
 }
 
+.rw-clue-meaning {
+  margin: 0;
+  padding: 6px 12px 10px;
+  text-align: center;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: clamp(16px, 4.5vw, 21px);
+  font-weight: 600;
+  line-height: 1.3;
+  color: rgba(255, 255, 255, 0.94);
+  text-shadow: 0 1px 8px rgba(0, 40, 50, 0.35);
+  min-height: clamp(28px, 7vw, 36px);
+  flex-shrink: 0;
+}
+
+.rw-clue-meaning.is-empty {
+  display: none;
+}
+
 .rw-trail-track {
   position: relative;
-  height: clamp(172px, 46vw, 214px);
+  height: clamp(132px, 36vw, 168px);
   margin: 0 auto;
   max-width: 100%;
   overflow: visible;
@@ -421,20 +439,6 @@
 .rw-trail-word.clue .rw-trail-speak-btn svg {
   width: 16px;
   height: 16px;
-}
-
-.rw-trail-word[data-slot="2"] .rw-trail-word-def,
-.rw-trail-word.clue .rw-trail-word-def {
-  display: block;
-  margin-top: 4px;
-  font-size: clamp(15px, 4.2vw, 19px);
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.92);
-  opacity: 1;
-  white-space: normal;
-  line-height: 1.25;
-  max-width: min(88%, 280px);
-  text-shadow: 0 1px 6px rgba(0, 40, 50, 0.35);
 }
 
 .rw-trail-track.advancing .rw-trail-word {
@@ -599,7 +603,7 @@
 }
 
 .rw-solo-mode .rw-play-cluster {
-  gap: 4px;
+  gap: 2px;
 }
 
 .rw-solo-mode .rw-combo-row {
@@ -617,7 +621,13 @@
 }
 
 .rw-solo-mode .rw-trail-track {
-  height: clamp(158px, 40vw, 196px);
+  height: clamp(124px, 34vw, 156px);
+}
+
+.rw-solo-mode .rw-clue-meaning {
+  margin-top: -2px;
+  margin-bottom: 2px;
+  padding: 4px 12px 8px;
 }
 
 .rw-solo-mode .rw-trail-word[data-slot="2"],

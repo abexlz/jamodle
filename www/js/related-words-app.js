@@ -315,6 +315,8 @@
               </div>
             </section>
 
+            <p class="rw-clue-meaning is-empty" id="rw-clue-meaning" aria-live="polite"></p>
+
             <div class="rw-board" id="rw-board">
             <section class="rw-answer-area">
               <div class="rw-slots" id="rw-slots"></div>
@@ -370,6 +372,7 @@
         pauseBtn: this.root.querySelector('#rw-pause-btn'),
         trail: this.root.querySelector('#rw-trail'),
         trailTrack: this.root.querySelector('#rw-trail-track'),
+        clueMeaning: this.root.querySelector('#rw-clue-meaning'),
         lives: this.root.querySelector('#rw-lives'),
         slots: this.root.querySelector('#rw-slots'),
         revealSkip: this.root.querySelector('#rw-reveal-skip'),
@@ -1139,6 +1142,7 @@
       if (!count) {
         track.innerHTML = '';
         track.classList.remove('advancing', 'active');
+        this.updateTrailDefinition('', '');
         return;
       }
 
@@ -1180,14 +1184,6 @@
       }
 
       el.appendChild(row);
-
-      if (isClue) {
-        const def = document.createElement('span');
-        def.className = 'rw-trail-word-def is-empty';
-        def.dataset.word = word;
-        el.appendChild(def);
-      }
-
       return el;
     }
 
@@ -1216,11 +1212,17 @@
     }
 
     updateTrailDefinition(word, meaning) {
-      const def = this.els.trailTrack?.querySelector('.rw-trail-word.clue .rw-trail-word-def');
-      if (!def) return;
-      def.textContent = meaning || '';
-      def.classList.toggle('is-empty', !meaning);
-      if (word) def.dataset.word = word;
+      const el = this.els.clueMeaning;
+      if (!el) return;
+      if (!this.shouldShowTrailDefinitions() || !word) {
+        el.textContent = '';
+        el.classList.add('is-empty');
+        el.removeAttribute('data-word');
+        return;
+      }
+      el.dataset.word = word;
+      el.textContent = meaning || '';
+      el.classList.toggle('is-empty', !meaning);
     }
 
     async loadClueDefinition(word) {
