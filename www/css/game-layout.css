@@ -232,8 +232,8 @@ body:has(#related-words-app) .rw-solo-mode .rw-play-cluster {
 }
 
 body:has(#related-words-app) .rw-solo-mode .rw-board {
-  flex: 1 1 0;
-  justify-content: center;
+  flex: 0 0 auto;
+  justify-content: flex-start;
 }
 
 /* ── RW race ── */

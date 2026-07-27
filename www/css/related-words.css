@@ -618,8 +618,9 @@
 .rw-solo-mode .rw-play-cluster {
   flex: 1 1 0;
   min-height: 0;
-  gap: 4px;
+  gap: 0;
   overflow: hidden;
+  justify-content: flex-start;
 }
 
 .rw-solo-mode .rw-combo-row {
@@ -628,8 +629,8 @@
 }
 
 .rw-solo-mode .rw-clue-area {
-  margin-top: 0;
-  margin-bottom: 0;
+  margin-top: auto;
+  margin-bottom: clamp(2px, 0.6dvh, 6px);
   flex-shrink: 0;
 }
 
@@ -642,8 +643,8 @@
 }
 
 .rw-solo-mode .rw-clue-meaning:not(.is-empty) {
-  margin-top: -10px;
-  margin-bottom: 6px;
+  margin-top: -8px;
+  margin-bottom: clamp(2px, 0.6dvh, 6px);
   padding: 0 12px;
 }
 
@@ -653,20 +654,21 @@
 }
 
 .rw-solo-mode .rw-board {
-  flex: 1 1 0;
+  flex: 0 0 auto;
   min-height: 0;
   margin-top: 0;
+  margin-bottom: auto;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: stretch;
-  padding: clamp(10px, 2.5dvh, 20px) 0;
-  overflow: hidden;
+  padding: 0;
+  overflow: visible;
   gap: clamp(14px, 3.5dvh, 22px);
 }
 
 .rw-solo-mode .rw-answer-area {
-  margin-top: clamp(10px, 2.5dvh, 20px);
+  margin-top: 0;
   margin-bottom: 0;
   flex-shrink: 0;
 }
