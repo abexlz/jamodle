@@ -1081,30 +1081,18 @@ button.ghost,
 
 /* ── Global page backgrounds (load after page CSS) ── */
 html body {
-  background-color: #0097B2 !important;
-  background-image: url('../assets/bg-phone-menu.jpg') !important;
+  background-color: #a8c8dc !important;
+  background-image: url('../assets/bg-phone-pavilion.jpg') !important;
   background-size: cover !important;
   background-position: center top !important;
   background-repeat: no-repeat !important;
   background-attachment: fixed !important;
 }
 
-@media (max-width: 599px) {
-  body.home-tab-learn {
-    background-image: url('../assets/bg-phone-learn.jpg') !important;
-  }
-
-  body.home-tab-quests,
-  body.home-tab-shop {
-    background-image:
-      linear-gradient(rgba(0, 90, 105, 0.2), rgba(0, 90, 105, 0.2)),
-      url('../assets/bg-phone-quests.jpg') !important;
-  }
-}
-
 @media (min-width: 600px) {
   html body {
-    background-image: url('../assets/bg-landscape.jpg') !important;
+    background-color: #a8c8dc !important;
+    background-image: url('../assets/bg-landscape-pavilion.jpg') !important;
     background-position: center center !important;
   }
 }
