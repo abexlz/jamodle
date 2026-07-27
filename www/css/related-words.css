@@ -252,6 +252,7 @@
   text-align: center;
   margin-bottom: 0;
   padding-top: 0;
+  width: 100%;
 }
 
 .rw-topbar-start {
@@ -299,11 +300,12 @@
   overflow: visible;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
+  width: 100%;
 }
 
 .rw-clue-meaning {
-  margin: -10px 0 0;
+  margin: 4px 0 0;
   padding: 0 12px 2px;
   text-align: center;
   font-family: 'Noto Sans KR', sans-serif;
@@ -315,6 +317,9 @@
   min-height: 0;
   flex-shrink: 0;
   width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .rw-clue-meaning.is-empty {
@@ -325,6 +330,7 @@
 
 .rw-trail-track {
   position: relative;
+  width: 100%;
   height: clamp(132px, 36vw, 168px);
   margin: 0 auto;
   max-width: 100%;
@@ -355,6 +361,7 @@
 
 .rw-trail-word-ko {
   display: inline-block;
+  white-space: nowrap;
 }
 
 .rw-trail-speak-btn {
@@ -631,18 +638,18 @@
 }
 
 .rw-solo-mode .rw-trail-track {
-  height: clamp(92px, 25vw, 112px);
+  height: clamp(108px, 29vw, 132px);
 }
 
-.rw-solo-mode .rw-clue-meaning {
-  margin-top: -14px;
-  margin-bottom: 2px;
+.rw-solo-mode .rw-clue-meaning:not(.is-empty) {
+  margin-top: -10px;
+  margin-bottom: 6px;
   padding: 0 12px;
 }
 
 .rw-solo-mode .rw-trail-word[data-slot="2"],
 .rw-solo-mode .rw-trail-word.clue {
-  top: clamp(30px, 8.5vw, 40px);
+  top: clamp(36px, 10vw, 48px);
 }
 
 .rw-solo-mode .rw-board {
@@ -651,21 +658,22 @@
   margin-top: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
   align-items: stretch;
   padding: 0;
   overflow: hidden;
+  gap: clamp(6px, 1.5dvh, 12px);
 }
 
 .rw-solo-mode .rw-answer-area {
   margin-top: 0;
-  margin-bottom: clamp(8px, 2dvh, 14px);
+  margin-bottom: 0;
   flex-shrink: 0;
 }
 
 .rw-solo-mode .rw-divider {
-  margin-bottom: 10px;
-  flex-shrink: 0;
+  display: none;
+  margin: 0;
 }
 
 .rw-solo-mode .rw-dock-area {
@@ -686,12 +694,12 @@
 }
 
 .rw-solo-mode .rw-slot.flip-tile {
-  flex: 1 1 0;
-  min-width: 0;
-  width: auto;
+  flex: 0 0 auto;
+  width: clamp(52px, 14vw, 72px);
+  height: clamp(52px, 14vw, 72px);
+  min-width: clamp(48px, 13vw, 64px);
+  min-height: clamp(48px, 13vw, 64px);
   max-width: min(92px, calc((100% - (var(--rw-slot-count, 3) - 1) * clamp(6px, 2vw, 10px)) / var(--rw-slot-count, 3)));
-  aspect-ratio: 1;
-  height: auto;
   border-radius: 16px;
 }
 
