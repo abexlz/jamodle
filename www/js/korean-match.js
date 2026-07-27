@@ -865,13 +865,11 @@
         ? ''
         : isJamoSolo && global.PauseQuitUI
         ? global.PauseQuitUI.pauseButtonHtml('match-pause-btn')
-        : `<a class="back-link" href="index.html" data-i18n="match.back">${t('match.back')}</a>`;
+        : `<a class="back-link match-hud-back" href="index.html" data-i18n="match.back">${t('match.back')}</a>`;
 
-      const headerBadge = this.versus
+      const headerEnd = this.versus
         ? ''
-        : (this.isDaily
-          ? `<div class="streak-badge daily-badge" id="match-streak" title="Daily">📅 Day ${dayNum}</div>`
-          : `<div class="streak-badge" id="match-streak" title="연속 정답">🔥 0</div>`);
+        : `<a class="match-hud-btn match-hud-settings" href="settings.html" id="match-settings-btn" data-i18n-aria="nav.settings">⚙️</a>`;
 
       const learningStreakBar = '';
 
@@ -882,10 +880,44 @@
         </div>`
         : this.turnBased
         ? ''
-        : `<div class="match-attempts-bar" id="match-attempts-bar" aria-live="polite">
-          <span id="match-guesses">${t('match.guesses', { n: 0 })}</span>
-          <span id="match-timer" class="match-timer-hidden" aria-hidden="true">0:00</span>
-        </div>`;
+        : '';
+
+      const hudMetaParts = [];
+      if (!this.versus && !this.turnBased) {
+        if (this.isDaily) {
+          hudMetaParts.push(`<span class="match-hud-chip" id="match-streak" title="Daily">📅 Day ${dayNum}</span>`);
+        } else if (!this.tutorialMode && !this.multiFindMode) {
+          hudMetaParts.push(`<span class="match-hud-chip match-hud-chip--streak" id="match-streak" title="연속 정답">🔥 0</span>`);
+        }
+        hudMetaParts.push(`<span class="match-hud-stat" id="match-guesses">${t('match.guesses', { n: 0 })}</span>`);
+      }
+      const hudMetaHtml = hudMetaParts.length
+        ? `<div class="match-hud-meta" id="match-attempts-bar" aria-live="polite">
+            ${hudMetaParts.join('<span class="match-hud-meta-sep" aria-hidden="true">·</span>')}
+            <span id="match-timer" class="match-timer-hidden" aria-hidden="true">0:00</span>
+          </div>`
+        : '';
+
+      const headerHtml = this.versus
+        ? `<header class="match-header">
+          ${headerBack}
+          <div class="title-block">
+            <h1 data-i18n="${titleKey}">${t(titleKey)}</h1>
+            <p data-i18n="${subtitleKey}">${t(subtitleKey, subtitleVars)}</p>
+          </div>
+          ${headerEnd}
+        </header>`
+        : `<header class="match-hud">
+          <div class="match-hud-bar">
+            <div class="match-hud-start">${headerBack}</div>
+            <div class="match-hud-title title-block">
+              <h1 data-i18n="${titleKey}">${t(titleKey)}</h1>
+              <p data-i18n="${subtitleKey}">${t(subtitleKey, subtitleVars)}</p>
+            </div>
+            <div class="match-hud-end">${headerEnd}</div>
+          </div>
+          ${hudMetaHtml}
+        </header>`;
 
       const showEnglish = prefs()?.shouldShowEnglish?.() !== false;
       const meaningBtnHtml = showEnglish
@@ -1021,14 +1053,7 @@
         : '';
 
       this.root.innerHTML = `
-        <header class="match-header">
-          ${headerBack}
-          <div class="title-block">
-            <h1 data-i18n="${titleKey}">${t(titleKey)}</h1>
-            <p data-i18n="${subtitleKey}">${t(subtitleKey, subtitleVars)}</p>
-          </div>
-          ${headerBadge}
-        </header>
+        ${headerHtml}
         ${tutorialLessonBar}
         ${learningStreakBar}
         ${statsRow}
@@ -1197,7 +1222,7 @@
       } else if (this.tutorialMode) {
         this.root.classList.add('tutorial-match');
         this.els.reset?.classList.add('hidden');
-        this.root.querySelector('.match-header .back-link')?.classList.add('hidden');
+        this.root.querySelector('.match-hud-back, .match-header .back-link')?.classList.add('hidden');
         document.getElementById('match-learning-streak')?.classList.add('hidden');
         document.querySelector('.match-hint-dock')?.classList.add('hidden');
         document.querySelector('.live-stats')?.classList.add('hidden');

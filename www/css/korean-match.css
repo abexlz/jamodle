@@ -1954,6 +1954,156 @@
     display: none !important;
   }
 
+  body.match-page .top-nav-actions {
+    display: none;
+  }
+
+  body.match-page .match-hud {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    border-radius: 18px;
+    background: rgba(0, 55, 68, 0.38);
+    border: 2px solid rgba(123, 207, 255, 0.42);
+    box-shadow: 0 4px 14px rgba(0, 40, 50, 0.18);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    overflow: hidden;
+  }
+
+  body.match-page .match-hud-bar {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px 6px;
+  }
+
+  body.match-page .match-hud-start,
+  body.match-page .match-hud-end {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+  }
+
+  body.match-page .match-hud-title {
+    min-width: 0;
+    text-align: center;
+  }
+
+  body.match-page .match-hud-title h1 {
+    margin: 0;
+    font-size: clamp(17px, 4.6vw, 22px);
+    line-height: 1.15;
+    letter-spacing: 0.04em;
+  }
+
+  body.match-page .match-hud-title p {
+    display: none;
+  }
+
+  body.tutorial-page .match-hud-title p {
+    display: block;
+    margin: 2px 0 0;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.78) !important;
+  }
+
+  body.match-page .match-hud-btn,
+  body.match-page .match-hud .pause-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    max-width: 40px;
+    max-height: 40px;
+    padding: 0;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255, 255, 255, 0.55) !important;
+    background: rgba(0, 70, 85, 0.82) !important;
+    background-image: none !important;
+    color: #fff !important;
+    box-shadow: 0 3px 0 rgba(0, 55, 68, 0.55) !important;
+    text-decoration: none;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    touch-action: manipulation;
+    flex-shrink: 0;
+  }
+
+  body.match-page .match-hud-btn:active,
+  body.match-page .match-hud-btn.is-pressed,
+  body.match-page .match-hud .pause-btn:active,
+  body.match-page .match-hud .pause-btn.is-pressed {
+    transform: translateY(2px) scale(0.97);
+    box-shadow: 0 1px 0 rgba(0, 55, 68, 0.55) !important;
+  }
+
+  body.match-page .match-hud .pause-btn-bars span {
+    background: currentColor;
+  }
+
+  body.match-page .match-hud-back {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    height: 40px;
+    padding: 0 8px;
+    border-radius: 999px;
+    border: 1.5px solid rgba(255, 255, 255, 0.55) !important;
+    background: rgba(0, 70, 85, 0.82) !important;
+    background-image: none !important;
+    color: #fff !important;
+    box-shadow: 0 3px 0 rgba(0, 55, 68, 0.55) !important;
+    font-family: 'Jua', 'Noto Sans KR', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  body.match-page .match-hud-meta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 6px 12px 8px;
+    border-top: 1px solid rgba(123, 207, 255, 0.22);
+    font-family: 'Jua', 'Noto Sans KR', sans-serif;
+    font-size: clamp(12px, 3.3vw, 14px);
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.92);
+    text-align: center;
+  }
+
+  body.match-page .match-hud-meta-sep {
+    opacity: 0.45;
+    font-weight: 400;
+  }
+
+  body.match-page .match-hud-chip,
+  body.match-page .match-hud-stat {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    line-height: 1.2;
+  }
+
+  body.match-page .match-hud-chip--streak {
+    letter-spacing: 0.02em;
+    text-transform: none;
+  }
+
   body.match-page .match-attempts-bar {
     padding: 7px 12px;
     margin: 0;
