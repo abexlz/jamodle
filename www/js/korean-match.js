@@ -39,10 +39,10 @@
     });
   }
 
-  /** Columns used for block sizing; 5–6 syllable words use the 3-column width. */
+  /** Columns used for block sizing — one column per syllable so long words stay on one row. */
   function layoutSylColumnCount(syllableCount) {
     const n = Number(syllableCount) || 0;
-    return n > 4 ? 3 : Math.max(n, 1);
+    return Math.max(n, 1);
   }
 
   /** Jamo dock: keep up to 12 tiles on row 1; wrap the 13th+ to the next row. */
