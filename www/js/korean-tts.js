@@ -164,8 +164,12 @@
 
   async function fetchServerAudio(text, options = {}) {
     const gender = preferredVoiceGender();
-    const pace = options.syllablePace === 'fast' ? 'fast' : 'normal';
-    const key = `v7:${gender}:${pace}:${text.trim()}`;
+    const pace = options.syllablePace === 'quick' || options.syllablePace === '0.4'
+      ? 'quick'
+      : options.syllablePace === 'fast'
+        ? 'fast'
+        : 'normal';
+    const key = `v8:${gender}:${pace}:${text.trim()}`;
     if (audioCache.has(key)) return audioCache.get(key);
 
     const url = `${getApiBase()}/api/tts/speak?text=${encodeURIComponent(text.trim())}`
@@ -356,5 +360,6 @@
     speakWithWebSpeech,
     normalizeWord,
     waitForVoices,
+    SYLLABLE_GAP_MS,
   };
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -37,6 +37,20 @@
     return t('race.' + key, vars) || '';
   }
 
+  /** Local player's nickname / display name for Battle UI. */
+  function myDisplayName(fallbackName) {
+    const nick = global.FirebaseSocial?.getCurrentNickname?.();
+    if (nick && String(nick).trim()) return String(nick).trim();
+    const summary = global.ProfileService?.getProfileSummary?.()?.displayName;
+    if (summary && String(summary).trim()) return String(summary).trim();
+    const local = global.ProfileService?.loadProfile?.()?.displayName;
+    if (local && String(local).trim()) return String(local).trim();
+    if (fallbackName && String(fallbackName).trim() && String(fallbackName).trim() !== rt('me')) {
+      return String(fallbackName).trim();
+    }
+    return rt('me') || 'Me';
+  }
+
   function ct(key) {
     return global.I18n?.t('common.' + key) ?? '';
   }
@@ -515,11 +529,18 @@
       const el = this.els.roundReveal;
       if (!el) return;
       const winnerUid = data.roundWinnerUid || null;
-      const winnerName = winnerUid === data.player1Uid
-        ? (data.player1Name || rt('me'))
-        : winnerUid === data.player2Uid
-          ? (data.player2Name || rt('opponent'))
-          : rt('opponent');
+      const myStoredName = data.player1Uid === this.myUid
+        ? data.player1Name
+        : data.player2Uid === this.myUid
+          ? data.player2Name
+          : '';
+      const winnerName = winnerUid === this.myUid
+        ? myDisplayName(myStoredName)
+        : winnerUid === data.player1Uid
+          ? (data.player1Name || rt('opponent'))
+          : winnerUid === data.player2Uid
+            ? (data.player2Name || rt('opponent'))
+            : rt('opponent');
       const word = data.sharedState?.solvedWord || data.lastRoundTarget || data.target || '';
       const line = rt('roundPlayerWins', { name: winnerName }) || `${winnerName} wins`;
 
@@ -1239,7 +1260,13 @@
         battleQuestMode: 'turn',
         battleFriend: !!global.RaceResultsUI?.isFriendBattleMatch?.(data, this.matchId),
         players: [
-          { uid: this.myUid, name: rt('me'), statHtml: `${shared.guessCount || 0} ${escapeHtml(rt('turns'))}` },
+          {
+            uid: this.myUid,
+            name: myDisplayName(
+              data.player1Uid === this.myUid ? data.player1Name : data.player2Name
+            ),
+            statHtml: `${shared.guessCount || 0} ${escapeHtml(rt('turns'))}`,
+          },
           { uid: opp?.uid, name: opp?.name || rt('opponent'), statHtml: `${shared.guessCount || 0} ${escapeHtml(rt('turns'))}` },
         ],
         answerTilesHtml: RUI.buildMatchWinTiles(displayWord),

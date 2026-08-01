@@ -118,6 +118,8 @@
     return global.KoreanTTS.speak(word, {
       repeats,
       gapMs: REPEAT_GAP_MS,
+      syllablePace: options.syllablePace,
+      syllableGapMs: options.syllableGapMs,
     }).then((ok) => {
       if (session === activeSession) isPlaying = false;
       return session === activeSession ? ok : false;
@@ -173,7 +175,16 @@
       if (isPlaying) return;
       lastClickAt = now;
       noteUserGesture();
-      playWord(btn.dataset.speakWord, { repeats: 1 });
+      const clickN = (Number(btn.dataset.speakClickCount) || 0) + 1;
+      btn.dataset.speakClickCount = String(clickN);
+      // Odd clicks: normal syllable pause; even clicks: 40% of normal.
+      const even = clickN % 2 === 0;
+      const baseGap = global.KoreanTTS?.SYLLABLE_GAP_MS || 200;
+      playWord(btn.dataset.speakWord, {
+        repeats: 1,
+        syllablePace: even ? 'quick' : 'normal',
+        syllableGapMs: even ? baseGap * 0.4 : baseGap,
+      });
     });
   }
 

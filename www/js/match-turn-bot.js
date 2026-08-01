@@ -209,6 +209,17 @@
     return t('race.' + key, vars) || '';
   }
 
+  /** Local player's nickname / display name for Battle UI. */
+  function myDisplayName() {
+    const nick = global.FirebaseSocial?.getCurrentNickname?.();
+    if (nick && String(nick).trim()) return String(nick).trim();
+    const summary = global.ProfileService?.getProfileSummary?.()?.displayName;
+    if (summary && String(summary).trim()) return String(summary).trim();
+    const local = global.ProfileService?.loadProfile?.()?.displayName;
+    if (local && String(local).trim()) return String(local).trim();
+    return rt('me') || 'Me';
+  }
+
   function escapeHtml(str) {
     return String(str)
       .replace(/&/g, '&amp;')
@@ -1181,7 +1192,7 @@
         wordLength: this.wordLength,
         player1Uid: MY_UID,
         player2Uid: BOT_UID,
-        player1Name: rt('me'),
+        player1Name: myDisplayName(),
         player2Name: this.botName(),
         currentTurnUid: roundStarter,
         coinFlipStarterUid: roundStarter,
@@ -1485,7 +1496,7 @@
       if (!el) return;
       const winnerUid = data.roundWinnerUid || null;
       const winnerName = winnerUid === MY_UID
-        ? (data.player1Name || rt('me'))
+        ? myDisplayName()
         : (data.player2Name || this.botName());
       const word = data.sharedState?.solvedWord || data.lastRoundTarget || data.target || '';
       const line = rt('roundPlayerWins', { name: winnerName }) || `${winnerName} wins`;
@@ -1917,7 +1928,7 @@
         battleMatchId: this.matchId,
         battleQuestMode: 'turn',
         players: [
-          { uid: MY_UID, name: rt('me'), statHtml: `${shared.guessCount || 0} ${escapeHtml(rt('turns'))}` },
+          { uid: MY_UID, name: myDisplayName(), statHtml: `${shared.guessCount || 0} ${escapeHtml(rt('turns'))}` },
           { uid: BOT_UID, name: this.botName(), statHtml: `${shared.guessCount || 0} ${escapeHtml(rt('turns'))}` },
         ],
         answerTilesHtml: RUI.buildMatchWinTiles(displayWord),
