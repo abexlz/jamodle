@@ -1133,6 +1133,7 @@
         removeTile: (id) => this.removeTile(id),
         createMergedTile: (opts) => this.createMergedTile(opts),
         createBasicTile: (opts) => this.createBasicTile(opts),
+        reviveMergeIngredient: (char, opts) => this.reviveMergeIngredient(char, opts),
         renderTileInSlot: (tile) => tile.el,
         swapTiles: (a, b) => this.swapTiles(a, b),
       });
@@ -2458,6 +2459,13 @@
     recoverAllTileMounts({ showDock = true } = {}) {
       Object.values(this.tileMap || {}).forEach((tile) => {
         if (!tile) return;
+        if (this.isMergeConsumedTile(tile)) {
+          if (this.els.bank && !tile.zoneRef && !tile.mergeDockRef) {
+            tile.setInBank(this.els.bank);
+            tile.hideInBank();
+          }
+          return;
+        }
         if (tile.locked) {
           if (tile.zoneRef) this.mountLockedTileInZone(tile.zoneRef, tile);
           else this.ensureTileMounted(tile);
@@ -3106,6 +3114,8 @@
           tile.el.remove();
         }
       }
+      tile.mergeDockRef = null;
+      tile.mergeDockSlot = null;
       tile.setInBank(this.els.bank);
       this.updateCheckButton();
       this.syncDockTileSize();
@@ -3121,6 +3131,53 @@
       tile.isBasic = true;
       this.tileMap[id] = tile;
       return tile;
+    }
+
+    /**
+     * Revive a vowel consumed by a merge (hidden/parked) so unmerge yields exactly
+     * 2 tiles instead of creating extras alongside the old ingredients.
+     */
+    reviveMergeIngredient(char, { syllableIndex } = {}) {
+      if (!char) return null;
+      const removed = this._removedTileIds || [];
+      const removedIdx = removed.findIndex((id) => {
+        const t = this.tileMap[id];
+        return t && !t.locked && !t.isMerged && t.char === char;
+      });
+      let tile = null;
+      if (removedIdx >= 0) {
+        const id = removed[removedIdx];
+        this._removedTileIds.splice(removedIdx, 1);
+        tile = this.tileMap[id] || null;
+      }
+      if (!tile) {
+        tile = Object.values(this.tileMap).find((t) => (
+          t
+          && !t.locked
+          && !t.isMerged
+          && t.char === char
+          && !t.zoneRef
+          && !t.mergeDockRef
+          && t.el?.classList.contains('hidden-in-bank')
+        )) || null;
+      }
+      if (!tile) return null;
+      this._removedTileIds = (this._removedTileIds || []).filter((id) => id !== tile.id);
+      tile.isBasic = true;
+      tile.isMerged = false;
+      tile.mergeSources = null;
+      tile.mergeDockRef = null;
+      tile.mergeDockSlot = null;
+      tile.zoneType = 'jungV';
+      if (syllableIndex != null) tile.syllableIndex = syllableIndex;
+      tile.el?.classList.remove('hidden-in-bank');
+      return tile;
+    }
+
+    /** True when a tile was consumed by a merge and must not reappear in the dock. */
+    isMergeConsumedTile(tile) {
+      if (!tile?.id) return false;
+      return (this._removedTileIds || []).includes(tile.id);
     }
 
     createMergedTile({ char, syllableIndex, mergeSources }) {
@@ -4236,9 +4293,16 @@
         (Array.isArray(live?.removed) ? live.removed : []).forEach((id) => {
           const tile = this.tileMap[id];
           if (!tile || tile.locked) return;
-          // In watch mode the dock is shared inventory — never destroy tiles.
-          // Park them hidden in the dock so they return when the live bank lists them again.
+          // Split composites are gone for good — never keep a ghost ㅐ beside ㅏ+ㅣ.
+          if (tile.isMerged || HC.isVerticalMergeMedial?.(tile.char)) {
+            this.removeTile(id);
+            return;
+          }
+          // In watch mode the dock is shared inventory — never destroy basic tiles.
+          // Park them hidden until an unmerge revives them (or the live bank lists them).
           if (this.watchMode || this.turnBased) {
+            this._removedTileIds = this._removedTileIds || [];
+            if (!this._removedTileIds.includes(id)) this._removedTileIds.push(id);
             tile.mergeDockRef = null;
             tile.mergeDockSlot = null;
             if (tile.zoneRef) {
@@ -4255,6 +4319,10 @@
         });
         bankEntries.forEach((entry) => {
           if (!entry?.id || !entry.char) return;
+          // Tile is playable again (e.g. after an unmerge) — clear consumed mark.
+          if (this._removedTileIds?.includes(entry.id)) {
+            this._removedTileIds = this._removedTileIds.filter((id) => id !== entry.id);
+          }
           let tile = this.tileMap[entry.id];
           if (!tile) {
             tile = new JamoTile({
@@ -4264,7 +4332,10 @@
               syllableIndex: 0,
               subIndex: 0,
             });
-            if (HC.getMergePairComponents?.(entry.char)) tile.isMerged = true;
+            if (HC.getMergePairComponents?.(entry.char)) {
+              tile.isMerged = true;
+              tile.mergeSources = HC.getMergePairComponents(entry.char);
+            }
             this.tileMap[entry.id] = tile;
             tile.setInBank(this.els.bank);
             return;
@@ -4273,6 +4344,10 @@
           if (tile.char !== entry.char) {
             tile.zoneType = HC.zoneTypeForRotatedJamo(entry.char, tile.zoneType);
             tile.setChar(entry.char);
+          }
+          if (HC.isVerticalMergeMedial?.(entry.char)) {
+            tile.isMerged = true;
+            tile.mergeSources = HC.getMergePairComponents?.(entry.char) || tile.mergeSources;
           }
         });
       } catch (err) {
@@ -4662,6 +4737,15 @@
     restoreDockVisibility() {
       Object.values(this.tileMap).forEach((tile) => {
         if (!tile || tile.locked) return;
+        // Merge ingredients stay consumed until an unmerge revives them —
+        // otherwise the dock briefly shows ㅐ + ㅏ + ㅣ (3 vowels).
+        if (this.isMergeConsumedTile(tile)) {
+          if (this.els.bank && !tile.zoneRef && !tile.mergeDockRef) {
+            tile.setInBank(this.els.bank);
+            tile.hideInBank();
+          }
+          return;
+        }
         // Recover tiles that were detached from both board and dock.
         if (!tile.inBank && !tile.zoneRef && !tile.mergeDockRef && this.els.bank) {
           tile.setInBank(this.els.bank);

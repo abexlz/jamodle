@@ -156,8 +156,7 @@
     }
 
     if (HC()?.isVerticalMergeMedial?.(goalChar)) {
-      const components = (HC().getMedialComponents?.(goalChar) || [])
-        .filter((c) => HC().PLACEABLE_VERTICAL_VOWELS?.has(c));
+      const components = HC().getMergePairComponents?.(goalChar) || [];
       if (components.length === 2) {
         const [a, b] = components;
         if (a === b) {
@@ -572,6 +571,50 @@
       this.selected = null;
     }
 
+    /**
+     * Split a composite vowel into exactly 2 basic vowels.
+     * Prefer returning original ingredient ids when known; otherwise mint split ids.
+     */
+    commitUnmerge(mergedId, pairChars, ingredientIds = null) {
+      const pair = Array.isArray(pairChars) ? pairChars.slice(0, 2) : [];
+      if (pair.length !== 2 || !mergedId) return null;
+
+      this.removed.push(mergedId);
+      this.onBoard.delete(mergedId);
+      this.bank = this.bank.filter((b) => b.id !== mergedId);
+      if (this.merge.resultId === mergedId) {
+        this.merge.result = null;
+        this.merge.resultId = null;
+      }
+
+      const outIds = [];
+      pair.forEach((char, i) => {
+        let id = Array.isArray(ingredientIds) ? ingredientIds[i] : null;
+        if (id) {
+          this.removed = this.removed.filter((rid) => rid !== id);
+          this.onBoard.delete(id);
+          if (!this.bank.find((b) => b.id === id)) {
+            this.bank.push({ id, char });
+          } else {
+            this.updateBankChar(id, char);
+          }
+        } else {
+          id = `bot-split-${mergedId}-${i}`;
+          this.bank.push({ id, char });
+        }
+        this.merge.slots[i] = char;
+        this.merge.slotIds[i] = id;
+        outIds.push(id);
+      });
+      this.selected = null;
+      return outIds;
+    }
+
+    /** Return merged compound tiles currently sitting in the visible dock. */
+    findMergedDockTiles() {
+      return this.visibleBank().filter((b) => HC()?.isVerticalMergeMedial?.(b.char));
+    }
+
     pickWrongZone(zones, correctZone) {
       const sameType = zones.filter((z) => (
         z.zone === correctZone.zone
@@ -613,6 +656,50 @@
 
     t += randRange(profile.readMin, profile.readMax);
 
+    // Plan as if leftover composite vowels were already split into exactly 2 basics.
+    const pendingUnmerges = sim.findMergedDockTiles().map((tile) => {
+      const pair = HC().getMergePairComponents?.(tile.char);
+      if (!pair || pair.length !== 2) return null;
+      return { tile, pair: pair.slice() };
+    }).filter(Boolean);
+
+    const planningBank = sim.bank.map((b) => ({ ...b }));
+    pendingUnmerges.forEach(({ tile, pair }) => {
+      const idx = planningBank.findIndex((b) => b.id === tile.id);
+      if (idx >= 0) planningBank.splice(idx, 1);
+      planningBank.push({ id: `bot-split-${tile.id}-0`, char: pair[0] });
+      planningBank.push({ id: `bot-split-${tile.id}-1`, char: pair[1] });
+    });
+
+    // If the human left a combined vowel undecomposed, split it on this bot turn
+    // (covers the bot's 1st or 2nd turn whenever the leftover is still present).
+    pendingUnmerges.forEach(({ tile, pair }) => {
+      push(randRange(profile.selectMin, profile.selectMax), () => {
+        sim.selectBank(tile.id);
+      }, 'select', { selected: { type: 'bank', tileId: tile.id } });
+
+      push(randRange(profile.mergeStepMin, profile.mergeStepMax), () => {
+        sim.merge.result = tile.char;
+        sim.merge.resultId = tile.id;
+        sim.onBoard.add(tile.id);
+        sim.selected = null;
+      }, 'move');
+
+      push(randRange(profile.selectMin, profile.selectMax), () => {
+        sim.selectMergeResult();
+      }, 'select', { selected: { type: 'merge-result' } });
+
+      push(randRange(profile.mergeStepMin, profile.mergeStepMax), () => {
+        sim.commitUnmerge(tile.id, pair);
+      }, 'split', { fromResultId: tile.id, pair: [...pair] });
+
+      push(randRange(profile.placeMin, profile.placeMax), () => {
+        sim.merge.slots = [null, null];
+        sim.merge.slotIds = [null, null];
+        sim.selected = null;
+      }, 'move');
+    });
+
     const lockedKeys = new Set((locked || []).map((p) => placementKey(p)));
     const allZones = iterTargetZones(target);
     const zones = allZones.filter((z) => !lockedKeys.has(placementKey(z)));
@@ -628,7 +715,7 @@
 
     let finalPlacements;
     let won = false;
-    const dockBank = sim.bank;
+    const dockBank = planningBank;
     if (triesSolve) {
       finalPlacements = buildPlacements(target, locked, { wrong: false, partial: false }, dockBank);
       won = isWinningSubmission(finalPlacements, locked, target);
@@ -647,6 +734,21 @@
     });
 
     const syllables = HC().decomposeWordForMatch(target);
+
+    const findPlanningTile = (char) => {
+      if (!char) return null;
+      return planningBank.find((b) => b.char === char)
+        || planningBank.find((b) => canRotateToChar(b.char, char))
+        || null;
+    };
+
+    const claimPlanningTile = (char) => {
+      const tile = findPlanningTile(char);
+      if (!tile) return null;
+      const idx = planningBank.findIndex((b) => b.id === tile.id);
+      if (idx >= 0) planningBank.splice(idx, 1);
+      return tile;
+    };
 
     const scheduleRotateToChar = (tile, goalChar) => {
       if (!tile) return;
@@ -688,11 +790,10 @@
       }, 'move');
     };
 
-    const scheduleMergeAndPlace = (zone, goalChar, sylData) => {
-      const components = (HC().getMedialComponents?.(sylData.jung) || [])
-        .filter((c) => HC().PLACEABLE_VERTICAL_VOWELS?.has(c));
-      if (components.length < 2) {
-        const tile = sim.findBankTile(goalChar);
+    const scheduleMergeAndPlace = (zone, goalChar) => {
+      const components = HC().getMergePairComponents?.(goalChar) || [];
+      if (components.length !== 2) {
+        const tile = claimPlanningTile(goalChar);
         if (!tile) return;
         scheduleRotateToChar(tile, goalChar);
         schedulePlaceChar(zone, goalChar, tile.id);
@@ -700,11 +801,13 @@
       }
 
       const [left, right] = components;
-      const leftTile = sim.findBankTile(left);
-      const rightTile = sim.findBankTile(right);
+      const leftTile = claimPlanningTile(left);
+      const rightTile = claimPlanningTile(right);
       if (!leftTile || !rightTile) {
-        // Components missing from dock — fall back to a single dock tile if possible.
-        const tile = sim.findBankTile(goalChar);
+        // Put claimed tiles back if we only got one side.
+        if (leftTile) planningBank.push(leftTile);
+        if (rightTile) planningBank.push(rightTile);
+        const tile = claimPlanningTile(goalChar);
         if (!tile) return;
         scheduleRotateToChar(tile, goalChar);
         schedulePlaceChar(zone, goalChar, tile.id);
@@ -773,12 +876,12 @@
         const sylData = syllables[zone.syl];
         const needsMerge = zone.zone === 'jungV'
           && sylData
-          && HC().isVerticalMergeMedial?.(sylData.jung);
+          && HC().isVerticalMergeMedial?.(fin.char || sylData.jung);
 
         if (needsMerge) {
-          scheduleMergeAndPlace(zone, fin.char, sylData);
+          scheduleMergeAndPlace(zone, fin.char);
         } else {
-          const tile = sim.findBankTile(fin.char);
+          const tile = claimPlanningTile(fin.char);
           if (!tile) return;
           scheduleRotateToChar(tile, fin.char);
           schedulePlaceChar(zone, fin.char, tile.id);

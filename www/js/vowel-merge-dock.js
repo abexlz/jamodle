@@ -336,13 +336,13 @@
     unmergeTile(mergedTile) {
       if (!mergedTile?.isMerged) return false;
 
-      const pair = (mergedTile.mergeSources?.length === 2
-        ? mergedTile.mergeSources
-        : HC().getMergePairComponents(mergedTile.char));
+      // Always split into the canonical 2-jamo pair (ignore stale/longer mergeSources).
+      const pair = HC().getMergePairComponents(mergedTile.char);
       if (!pair || pair.length !== 2) return false;
 
       const fromResult = mergedTile.mergeDockRef === 'result';
       const syllableIndex = mergedTile.syllableIndex;
+      const mergedId = mergedTile.id;
 
       if (fromResult) {
         if (!this.canSplit()) return false;
@@ -355,7 +355,12 @@
       }
 
       pair.forEach((char, i) => {
-        const basic = this.callbacks.createBasicTile({
+        // Prefer reviving a merge-consumed ingredient so we never end up with 3 tiles.
+        const revived = this.callbacks.reviveMergeIngredient?.(char, {
+          syllableIndex,
+          excludeMergedId: mergedId,
+        });
+        const basic = revived || this.callbacks.createBasicTile({
           char,
           syllableIndex,
           zoneType: 'jungV',

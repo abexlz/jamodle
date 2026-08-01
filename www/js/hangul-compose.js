@@ -98,6 +98,14 @@
 
   const VERTICAL_MERGE_MEDIALS = new Set(['ㅐ', 'ㅒ', 'ㅔ', 'ㅖ']);
 
+  /** Canonical 2-jamo split for each vertical merge medial (never 3+). */
+  const VERTICAL_MERGE_PAIRS = {
+    'ㅐ': ['ㅏ', 'ㅣ'],
+    'ㅒ': ['ㅑ', 'ㅣ'],
+    'ㅔ': ['ㅓ', 'ㅣ'],
+    'ㅖ': ['ㅕ', 'ㅣ'],
+  };
+
   /** Build drop-zone slots from basic medial components */
   function buildVowelSlots(medialComponents, medial) {
     if (medial && isVerticalMergeMedial(medial)) {
@@ -188,12 +196,11 @@
     return VERTICAL_MERGE_RULES[`${first}+${second}`] || null;
   }
 
-  /** Basic jamo pair for un-merging dock compounds */
+  /** Basic jamo pair for un-merging dock compounds — always exactly 2 or null. */
   function getMergePairComponents(medial) {
     if (!isVerticalMergeMedial(medial)) return null;
-    for (const [key, val] of Object.entries(VERTICAL_MERGE_RULES)) {
-      if (val === medial) return key.split('+');
-    }
+    const pair = VERTICAL_MERGE_PAIRS[medial];
+    if (Array.isArray(pair) && pair.length === 2) return pair.slice();
     return null;
   }
 
@@ -860,6 +867,7 @@
     tryComposeVerticalMedial,
     isVerticalMergeMedial,
     VERTICAL_MERGE_RULES,
+    VERTICAL_MERGE_PAIRS,
     getMergePairComponents,
     isValidMedialCombination,
     isComposedMedial,
