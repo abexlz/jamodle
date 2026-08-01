@@ -495,15 +495,45 @@
     banner.insertAdjacentHTML('beforeend', buildRewardsPillHtml(rewards));
   }
 
-  function afterResultsMount(root) {
+  function playResultsSfx(root) {
+    if (!root) return;
+    if (root.querySelector('.race-results--win')) {
+      global.SoundEffects?.battleVictory?.();
+      return;
+    }
+    if (root.querySelector('.race-results--loss')) {
+      global.SoundEffects?.battleDefeat?.();
+      return;
+    }
+    if (root.querySelector('.race-results--draw')) {
+      global.SoundEffects?.battleDraw?.();
+    }
+  }
+
+  /**
+   * Speak the answer twice in Korean, then play result music.
+   * Used when a series ends without a round-break reveal (e.g. 2–1).
+   */
+  async function speakAnswerThenPlayResultsSfx(root, word) {
+    try {
+      global.AnswerTTS?.noteUserGesture?.();
+      if (word) {
+        await global.AnswerTTS?.playWord?.(word, { repeats: 2 });
+      }
+    } catch { /* offline / blocked */ }
+    playResultsSfx(root);
+  }
+
+  function afterResultsMount(root, options = {}) {
     if (!root) return;
     tryRecordBattleQuests(root);
     tryRecordBattleStats(root);
+    const deferSfx = !!options.deferSfx;
     const winPanel = root.querySelector('.race-results--win');
     const lossPanel = root.querySelector('.race-results--loss');
 
     if (winPanel) {
-      global.SoundEffects?.battleVictory?.();
+      if (!deferSfx) global.SoundEffects?.battleVictory?.();
       spawnVictoryConfetti();
       addWinnerDuelSparkles(root);
       void hydrateResultsBattleCards(root);
@@ -518,7 +548,7 @@
     }
 
     if (lossPanel) {
-      global.SoundEffects?.battleDefeat?.();
+      if (!deferSfx) global.SoundEffects?.battleDefeat?.();
       addWinnerDuelSparkles(root);
       void hydrateResultsBattleCards(root);
       requestAnimationFrame(() => {
@@ -529,7 +559,7 @@
 
     const drawPanel = root.querySelector('.race-results--draw');
     if (drawPanel) {
-      global.SoundEffects?.battleDraw?.();
+      if (!deferSfx) global.SoundEffects?.battleDraw?.();
       void hydrateResultsBattleCards(root);
       requestAnimationFrame(() => {
         drawPanel.classList.add('race-results--mounted');
@@ -631,6 +661,8 @@
     buildRewardsPillHtml,
     renderResultsPanel,
     afterResultsMount,
+    playResultsSfx,
+    speakAnswerThenPlayResultsSfx,
     hydrateResultsBattleCards,
     fillAnswerMeaning,
     isFriendBattleMatch,

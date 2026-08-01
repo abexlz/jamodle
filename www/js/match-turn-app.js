@@ -1244,8 +1244,12 @@
         profileHref: 'index.html',
       }));
 
-      RUI.afterResultsMount(this.els.main);
+      // Series-deciding rounds skip round_break, so speak the answer twice
+      // before victory/defeat music (same as mid-series round reveal TTS).
+      this.hideRoundRevealOverlay?.();
+      RUI.afterResultsMount(this.els.main, { deferSfx: true });
       void RUI.fillAnswerMeaning(this.els.main, displayWord, { autoplay: false });
+      void RUI.speakAnswerThenPlayResultsSfx(this.els.main, displayWord);
       this.mountRematchUi();
     }
   }
