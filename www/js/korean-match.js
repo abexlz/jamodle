@@ -839,37 +839,17 @@
         return;
       }
 
-      const dayNum = this.isDaily && MD ? MD.getDayNumber(MD.getActiveDateKey()) : null;
-
-      const titleKey = this.tutorialMode
-        ? 'tutorial.title'
-        : this.multiFindMode
-        ? 'match.modes.multiFind'
-        : this.versus
-        ? 'matchRace.title'
-        : (this.isDaily ? 'match.titleDaily' : 'match.title');
-      const subtitleKey = this.tutorialMode
-        ? 'tutorial.subtitle'
-        : this.multiFindMode
-        ? 'match.modes.multiFindSubtitle'
-        : this.versus
-        ? 'match.modes.letterCountSubtitle'
-        : (this.isDaily ? 'match.subtitleDaily' : 'match.modes.letterCountSubtitle');
-      const subtitleVars = this.multiFindMode
-        ? undefined
-        : (this.versus || !this.isDaily ? { n: this.wordLength } : undefined);
-
       const isJamoSolo = !this.versus && !this.isDaily && !this.tutorialMode && !this.multiFindMode && !this.turnBased;
 
       const headerBack = this.versus
         ? ''
         : isJamoSolo && global.PauseQuitUI
         ? global.PauseQuitUI.pauseButtonHtml('match-pause-btn')
-        : `<a class="back-link match-hud-back" href="index.html" data-i18n="match.back">${t('match.back')}</a>`;
+        : `<a class="back-link match-chrome-back" href="index.html" data-i18n="match.back">${t('match.back')}</a>`;
 
       const headerEnd = this.versus
         ? ''
-        : `<a class="match-hud-btn match-hud-settings" href="settings.html" id="match-settings-btn" data-i18n-aria="nav.settings">⚙️</a>`;
+        : `<a class="match-chrome-btn match-chrome-settings" href="settings.html" id="match-settings-btn" data-i18n-aria="nav.settings">⚙️</a>`;
 
       const learningStreakBar = '';
 
@@ -882,42 +862,22 @@
         ? ''
         : '';
 
-      const hudMetaParts = [];
-      if (!this.versus && !this.turnBased) {
-        if (this.isDaily) {
-          hudMetaParts.push(`<span class="match-hud-chip" id="match-streak" title="Daily">📅 Day ${dayNum}</span>`);
-        } else if (!this.tutorialMode && !this.multiFindMode) {
-          hudMetaParts.push(`<span class="match-hud-chip match-hud-chip--streak" id="match-streak" title="연속 정답">🔥 0</span>`);
-        }
-        hudMetaParts.push(`<span class="match-hud-stat" id="match-guesses">${t('match.guesses', { n: 0 })}</span>`);
-      }
-      const hudMetaHtml = hudMetaParts.length
-        ? `<div class="match-hud-meta" id="match-attempts-bar" aria-live="polite">
-            ${hudMetaParts.join('<span class="match-hud-meta-sep" aria-hidden="true">·</span>')}
-            <span id="match-timer" class="match-timer-hidden" aria-hidden="true">0:00</span>
+      // Keep streak/guesses/timer nodes in DOM for game updates; chrome is nav-only.
+      const hiddenStatsHtml = (!this.versus && !this.turnBased)
+        ? `<div class="match-chrome-stats" aria-hidden="true">
+            <span id="match-streak"></span>
+            <span id="match-guesses">${t('match.guesses', { n: 0 })}</span>
+            <span id="match-timer">0:00</span>
           </div>`
         : '';
 
-      const headerHtml = this.versus
-        ? `<header class="match-header">
-          ${headerBack}
-          <div class="title-block">
-            <h1 data-i18n="${titleKey}">${t(titleKey)}</h1>
-            <p data-i18n="${subtitleKey}">${t(subtitleKey, subtitleVars)}</p>
-          </div>
-          ${headerEnd}
-        </header>`
-        : `<header class="match-hud">
-          <div class="match-hud-bar">
-            <div class="match-hud-start">${headerBack}</div>
-            <div class="match-hud-title title-block">
-              <h1 data-i18n="${titleKey}">${t(titleKey)}</h1>
-              <p data-i18n="${subtitleKey}">${t(subtitleKey, subtitleVars)}</p>
-            </div>
-            <div class="match-hud-end">${headerEnd}</div>
-          </div>
-          ${hudMetaHtml}
-        </header>`;
+      const headerHtml = (headerBack || headerEnd)
+        ? `<header class="match-chrome">
+            <div class="match-chrome-start">${headerBack}</div>
+            <div class="match-chrome-end">${headerEnd}</div>
+            ${hiddenStatsHtml}
+          </header>`
+        : hiddenStatsHtml;
 
       const showEnglish = prefs()?.shouldShowEnglish?.() !== false;
       const meaningBtnHtml = showEnglish
@@ -1222,7 +1182,7 @@
       } else if (this.tutorialMode) {
         this.root.classList.add('tutorial-match');
         this.els.reset?.classList.add('hidden');
-        this.root.querySelector('.match-hud-back, .match-header .back-link')?.classList.add('hidden');
+        this.root.querySelector('.match-chrome-back, .match-hud-back, .match-header .back-link')?.classList.add('hidden');
         document.getElementById('match-learning-streak')?.classList.add('hidden');
         document.querySelector('.match-hint-dock')?.classList.add('hidden');
         document.querySelector('.live-stats')?.classList.add('hidden');
@@ -1239,7 +1199,7 @@
       this.updateLearningStreakDisplay();
 
       if (this.versus && !this.turnBased) {
-        this.feedback.show('info', t('matchRace.prompt'));
+        this.feedback.show('empty');
       }
 
       if (global.I18n) {
@@ -1595,7 +1555,7 @@
       this.startTimer();
       this.updateCheckButton();
       this.updateHintButtons();
-      this.feedback.show('info', this.isDaily ? t('match.feedbackDaily') : t('match.feedbackCheck'));
+      this.feedback.show('empty');
     }
 
     startMultiRound(puzzle) {

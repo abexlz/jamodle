@@ -58,18 +58,6 @@
       global.__koreanMatchGameInstance = this.game;
       this.game.mount();
 
-      const title = root.querySelector('.title-block h1');
-      const subtitle = root.querySelector('.title-block p');
-      if (title) {
-        title.textContent = t('tutorial.title');
-        title.dataset.i18n = 'tutorial.title';
-      }
-      if (subtitle) {
-        subtitle.textContent = t('tutorial.subtitle');
-        subtitle.dataset.i18n = 'tutorial.subtitle';
-        subtitle.style.display = '';
-      }
-
       this.game.els.continue?.addEventListener('click', (e) => {
         e.preventDefault();
         this.onResultsContinue();
@@ -136,7 +124,6 @@
         '.merge-result',
         '.vowel-merge-dock',
         '.game-feedback',
-        '.title-block',
       ];
       root.querySelectorAll(allGuideTargets.join(', ')).forEach((el) => {
         el.classList.remove('tutorial-dimmed', 'tutorial-focus');
@@ -150,7 +137,6 @@
           '.rotation-dock',
           '.vowel-merge-dock',
           '.game-feedback',
-          '.title-block',
         ]
         : [
           '.drop-zone',

@@ -1950,7 +1950,8 @@
   body.match-page .learning-streak-bar,
   body.match-page .live-stats,
   body.match-page #match-hint,
-  body.match-page .blocks-area .section-label {
+  body.match-page .blocks-area .section-label,
+  body.match-page .bank-section .section-label {
     display: none !important;
   }
 
@@ -1958,60 +1959,39 @@
     display: none;
   }
 
-  body.match-page .match-hud {
+  body.match-page .match-chrome {
     flex-shrink: 0;
     display: flex;
-    flex-direction: column;
-    border-radius: 18px;
-    background: rgba(0, 55, 68, 0.38);
-    border: 2px solid rgba(123, 207, 255, 0.42);
-    box-shadow: 0 4px 14px rgba(0, 40, 50, 0.18);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    overflow: hidden;
-  }
-
-  body.match-page .match-hud-bar {
-    display: grid;
-    grid-template-columns: 44px minmax(0, 1fr) 44px;
     align-items: center;
+    justify-content: space-between;
     gap: 8px;
-    padding: 8px 10px 6px;
+    min-height: 44px;
+    margin: 0 0 4px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
   }
 
-  body.match-page .match-hud-start,
-  body.match-page .match-hud-end {
+  body.match-page .match-chrome-start,
+  body.match-page .match-chrome-end {
     display: flex;
     align-items: center;
     justify-content: center;
     min-height: 40px;
   }
 
-  body.match-page .match-hud-title {
-    min-width: 0;
-    text-align: center;
+  body.match-page .match-chrome-stats {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
   }
 
-  body.match-page .match-hud-title h1 {
-    margin: 0;
-    font-size: clamp(17px, 4.6vw, 22px);
-    line-height: 1.15;
-    letter-spacing: 0.04em;
-  }
-
-  body.match-page .match-hud-title p {
-    display: none;
-  }
-
-  body.tutorial-page .match-hud-title p {
-    display: block;
-    margin: 2px 0 0;
-    font-size: 11px;
-    color: rgba(255, 255, 255, 0.78) !important;
-  }
-
-  body.match-page .match-hud-btn,
-  body.match-page .match-hud .pause-btn {
+  body.match-page .match-chrome-btn,
+  body.match-page .match-chrome .pause-btn {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2036,72 +2016,62 @@
     flex-shrink: 0;
   }
 
-  body.match-page .match-hud-btn:active,
-  body.match-page .match-hud-btn.is-pressed,
-  body.match-page .match-hud .pause-btn:active,
-  body.match-page .match-hud .pause-btn.is-pressed {
+  body.match-page .match-chrome-btn:active,
+  body.match-page .match-chrome-btn.is-pressed,
+  body.match-page .match-chrome .pause-btn:active,
+  body.match-page .match-chrome .pause-btn.is-pressed {
     transform: translateY(2px) scale(0.97);
     box-shadow: 0 1px 0 rgba(0, 55, 68, 0.55) !important;
   }
 
-  body.match-page .match-hud .pause-btn-bars span {
-    background: currentColor;
+  body.match-page .match-chrome .pause-btn-bars span {
+    background: #fff;
   }
 
-  body.match-page .match-hud-back {
+  body.match-page .match-chrome-back {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 40px;
-    height: 40px;
-    padding: 0 8px;
+    min-height: 40px;
+    padding: 0 14px;
     border-radius: 999px;
-    border: 1.5px solid rgba(255, 255, 255, 0.55) !important;
-    background: rgba(0, 70, 85, 0.82) !important;
-    background-image: none !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.55);
+    background: rgba(0, 70, 85, 0.82);
     color: #fff !important;
-    box-shadow: 0 3px 0 rgba(0, 55, 68, 0.55) !important;
-    font-family: 'Jua', 'Noto Sans KR', sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.03em;
     text-decoration: none;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    box-shadow: 0 3px 0 rgba(0, 55, 68, 0.55);
     white-space: nowrap;
   }
 
-  body.match-page .match-hud-meta {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 8px;
-    padding: 6px 12px 8px;
-    border-top: 1px solid rgba(123, 207, 255, 0.22);
-    font-family: 'Jua', 'Noto Sans KR', sans-serif;
-    font-size: clamp(12px, 3.3vw, 14px);
-    font-weight: 700;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.92);
-    text-align: center;
+  body.match-page .match-chrome-back:active,
+  body.match-page .match-chrome-back.is-pressed {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 rgba(0, 55, 68, 0.55);
   }
 
-  body.match-page .match-hud-meta-sep {
-    opacity: 0.45;
-    font-weight: 400;
+  body.match-page .match-hud,
+  body.match-page .match-header {
+    display: none !important;
   }
 
-  body.match-page .match-hud-chip,
-  body.match-page .match-hud-stat {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    line-height: 1.2;
+  body.match-page .game-feedback.empty {
+    display: none;
+    min-height: 0;
+    padding: 0;
+    margin: 0;
+    border: none;
+    background: transparent;
   }
 
-  body.match-page .match-hud-chip--streak {
-    letter-spacing: 0.02em;
-    text-transform: none;
+  body.match-page .game-feedback:not(.empty) {
+    flex-shrink: 0;
+    min-height: 28px;
+    padding: 6px 10px;
+    font-size: 12px;
+    line-height: 1.3;
   }
 
   body.match-page .match-attempts-bar {
@@ -2114,25 +2084,6 @@
     font-size: clamp(13px, 3.6vw, 15px);
     box-shadow: none;
     backdrop-filter: blur(6px);
-  }
-
-  body.match-page .match-header {
-    flex-shrink: 0;
-    gap: 6px;
-  }
-
-  body.match-page .title-block h1 {
-    font-size: clamp(18px, 4.8vw, 24px);
-  }
-
-  body.match-page .title-block p {
-    display: none;
-  }
-
-  body.tutorial-page .title-block p {
-    display: block;
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.85) !important;
   }
 
   body.match-page .back-link,
@@ -2683,7 +2634,14 @@
     min-height: 0;
   }
 
-  body.match-page .game-feedback {
+  body.match-page .game-feedback.empty {
+    display: none;
+    min-height: 0;
+    padding: 0;
+    margin: 0;
+  }
+
+  body.match-page .game-feedback:not(.empty) {
     flex-shrink: 0;
     min-height: 28px;
     padding: 6px 10px;
