@@ -248,6 +248,7 @@ body.rw-race-page #rw-race-game {
 }
 
 body.rw-race-page #rw-race-game.rw-race-mode {
+  position: relative;
   min-height: 0;
 }
 
@@ -267,10 +268,20 @@ body.rw-race-page .rw-race-mode .rw-divider {
   flex-shrink: 0;
 }
 
+body.rw-race-page .rw-race-mode .rw-answer-area {
+  overflow: visible;
+}
+
 body.rw-race-page .rw-race-mode .rw-dock-area {
+  position: relative;
   flex: 0 0 auto;
   margin-top: auto;
   min-height: 0;
+}
+
+/* Status text overlays the board — never steals height from the dock */
+body.rw-race-page .rw-race-mode > .rw-feedback {
+  position: absolute;
 }
 
 /* ── Home menu: fit without #menu-root scroll ── */

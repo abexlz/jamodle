@@ -2522,7 +2522,7 @@
       this.checking = false;
 
       global.SoundEffects?.win?.();
-      this.showFeedback(t('relatedWordsRace.oppGotRound'), 'info');
+      // No bottom status text — it shifts the fixed 9-tile dock.
     }
 
     getPlayerSlotEl(slotIndex) {
@@ -3092,7 +3092,6 @@
       if (sharedRace && this.onRoundWin) {
         const points = global.RelatedWordsChains?.relatedWordsRoundPoints?.(this.puzzle.answer) ?? 1;
         await this.flashSlotsGreen('.rw-slot.flip-tile', { fast: this.raceMode });
-        await this.showCorrectAnswerFeedback();
         this.onScoreFlyPrepare?.({ side: 'my', points });
 
         let roundResult = { applied: false };
@@ -3143,7 +3142,6 @@
 
       if (this.raceMode) {
         await this.flashSlotsGreen('.rw-slot.flip-tile', { fast: this.raceMode });
-        await this.showCorrectAnswerFeedback();
         const points = global.RelatedWordsChains?.relatedWordsRoundPoints?.(this.puzzle.answer) ?? 1;
         let slotFlipPromise = null;
         await this.playScoreFly({
@@ -3499,7 +3497,6 @@
         if (opts.opponentWon) {
           this.lockRoundForOpponent();
           if (!this._oppFlippedThisRound) {
-            this.showFeedback(t('relatedWordsRace.oppGotRound'), 'info');
             await this.delay(reduceMotion() ? 60 : 120);
           }
         }
@@ -3521,7 +3518,7 @@
       this.enabled = enabled !== false;
       if (!this.enabled) {
         this.gameOver = true;
-        this.showFeedback(t('relatedWordsRace.oppFinishedFirst'), 'info');
+        // Match-end UI owns the message — avoid bottom text that shifts the dock.
       }
     }
 

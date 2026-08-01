@@ -518,16 +518,22 @@ body.rw-race-page .race-main #rw-race-game {
   padding: 0;
   background: transparent;
   box-shadow: none;
+  overflow: visible;
 }
 
 .rw-race-mode .rw-dock-area .rw-reveal-skip {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  width: 100%;
-  max-width: 300px;
-  margin: 14px auto 0;
+  width: max-content;
+  max-width: min(300px, 92%);
+  margin: 0;
+  z-index: 6;
 }
 
 .rw-race-mode .rw-reveal-skip.hidden {
@@ -722,18 +728,21 @@ html.reduce-motion .rw-reveal-letter {
   display: flex;
   flex-wrap: nowrap;
   justify-content: center;
+  align-items: center;
   gap: clamp(6px, 2vw, 10px);
+  min-height: clamp(64px, 17.6vw, 84px);
   perspective: 900px;
+  overflow: visible;
 }
 
 .rw-vs-slots .rw-slot.flip-tile,
 .rw-vs-slots .rw-opp-slot.flip-tile {
-  flex: 1 1 0;
-  min-width: 0;
-  width: auto;
-  max-width: calc((100% - (var(--rw-slot-count, 3) - 1) * clamp(4px, 1.6vw, 6px)) / var(--rw-slot-count, 3));
-  aspect-ratio: 1;
-  height: auto;
+  flex: 0 0 auto;
+  min-width: clamp(44px, 12vw, 56px);
+  width: clamp(53px, 14.85vw, 68px);
+  max-width: clamp(53px, 14.85vw, 68px);
+  height: clamp(53px, 14.85vw, 68px);
+  aspect-ratio: auto;
 }
 
 .rw-vs-slots.rw-slots--3 {
@@ -805,6 +814,10 @@ html.reduce-motion .rw-reveal-letter {
   position: relative;
   padding: 0;
   border: none;
+  width: clamp(64px, 17.6vw, 84px);
+  height: clamp(64px, 17.6vw, 84px);
+  max-width: clamp(64px, 17.6vw, 84px);
+  flex: 0 0 auto;
   transform-style: preserve-3d;
   transform: rotateX(0deg);
   transform-origin: center center;
@@ -907,6 +920,8 @@ html.reduce-motion .rw-reveal-letter {
 .rw-vs-panel--you .rw-slot.flip-tile {
   width: clamp(64px, 17.6vw, 84px);
   height: clamp(64px, 17.6vw, 84px);
+  max-width: clamp(64px, 17.6vw, 84px);
+  flex: 0 0 auto;
 }
 
 .rw-vs-panel--you .rw-slot-face {
@@ -1047,11 +1062,19 @@ html.reduce-motion .rw-reveal-letter {
     font-size: clamp(20px, 6vw, 28px);
   }
 
+  .rw-vs-slots .rw-slot.flip-tile,
+  .rw-vs-slots .rw-opp-slot.flip-tile,
   .rw-vs-slots.rw-slots--3 .rw-slot.flip-tile,
-  .rw-vs-slots.rw-slots--3 .rw-opp-slot.flip-tile {
+  .rw-vs-slots.rw-slots--3 .rw-opp-slot.flip-tile,
+  .rw-vs-panel--you .rw-slot.flip-tile,
+  .rw-vs-panel--enemy .rw-opp-slot.flip-tile {
     width: clamp(44px, 12vw, 56px);
     height: clamp(44px, 12vw, 56px);
     max-width: clamp(44px, 12vw, 56px);
+  }
+
+  .rw-vs-panel-slots {
+    min-height: clamp(44px, 12vw, 56px);
   }
 }
 
@@ -1099,13 +1122,14 @@ html.reduce-motion .rw-reveal-letter {
 }
 
 .rw-race-mode .rw-feedback {
-  margin-top: 8px;
+  top: 38%;
+  margin-top: 0;
   font-size: 15px;
 }
 
 .rw-race-mode .rw-feedback.success.rw-feedback--answer {
   --rw-answer-size: clamp(26px, 7vw, 36px);
-  margin-top: 6px;
+  margin-top: 0;
   color: #111;
 }
 

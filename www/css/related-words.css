@@ -57,7 +57,8 @@
   color: #111;
   font-size: var(--rw-answer-size);
   line-height: 1.15;
-  min-height: calc(var(--rw-answer-size) * 1.6);
+  min-height: 0;
+  transform: translate(-50%, -50%);
 }
 
 .rw-feedback--answer .rw-feedback-ko {
@@ -751,6 +752,11 @@
   flex-shrink: 0;
 }
 
+.rw-solo-mode .rw-hint-row {
+  bottom: auto;
+  top: calc(100% + 8px);
+}
+
 .rw-solo-mode .rw-dock {
   margin-top: 0;
 }
@@ -953,7 +959,9 @@
 }
 
 .rw-dock-area {
+  position: relative;
   margin-top: auto;
+  flex-shrink: 0;
 }
 
 .rw-dock-label {
@@ -974,10 +982,16 @@
 }
 
 .rw-hint-row {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 6px);
+  transform: translateX(-50%);
   display: flex;
   justify-content: center;
-  margin: 16px auto 0;
+  margin: 0;
   max-width: 300px;
+  width: max-content;
+  z-index: 5;
 }
 
 .rw-hint-row[hidden] {
@@ -1293,11 +1307,23 @@ html.reduce-motion .rw-heartbeat-icon {
 }
 
 .rw-feedback {
-  margin-top: 16px;
+  position: absolute;
+  left: 50%;
+  right: auto;
+  bottom: auto;
+  top: 42%;
+  transform: translate(-50%, -50%);
+  width: max-content;
+  max-width: min(92%, 360px);
+  margin: 0;
+  padding: 0 10px;
   text-align: center;
   font-size: 14px;
   font-weight: 600;
-  min-height: 20px;
+  min-height: 0;
+  z-index: 40;
+  pointer-events: none;
+  /* Never participate in flex layout — keeps the 9-tile dock fixed */
 }
 
 .rw-feedback.error {
@@ -1546,6 +1572,7 @@ html.reduce-motion .rw-confetti-piece {
 }
 
 #related-words-app {
+  position: relative;
   display: flex;
   flex-direction: column;
   flex: 1 1 0;
