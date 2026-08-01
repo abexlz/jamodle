@@ -246,7 +246,17 @@
     }
   }
 
-  function buildPlayerDuelSideHtml(player, role) {
+  function playerDuelRole(player, winnerUid) {
+    if (!winnerUid) return 'draw';
+    return player.uid === winnerUid ? 'winner' : 'loser';
+  }
+
+  function playerScoreValue(player) {
+    if (player?.score == null || player.score === '') return null;
+    return Math.max(0, Math.floor(Number(player.score) || 0));
+  }
+
+  function buildPlayerDuelSideHtml(player, role, { scoreMode = false } = {}) {
     const roleClass = role === 'winner'
       ? 'race-results-duel-side--winner'
       : role === 'loser'
@@ -255,13 +265,9 @@
     const crown = role === 'winner'
       ? '<span class="race-results-duel-crown" aria-hidden="true">👑</span>'
       : '';
-    const hasScore = player.score != null && player.score !== '';
-    const scoreNum = hasScore ? Math.max(0, Math.floor(Number(player.score) || 0)) : null;
-    const nameHtml = hasScore
+    const nameHtml = `<p class="race-results-duel-name">${escapeHtml(player.name || '')}</p>`;
+    const statHtml = scoreMode
       ? ''
-      : `<p class="race-results-duel-name">${escapeHtml(player.name || '')}</p>`;
-    const statHtml = hasScore
-      ? `<p class="race-results-duel-score" aria-label="${scoreNum}">${scoreNum}</p>`
       : `<p class="race-results-duel-stat">${player.statHtml || ''}</p>`;
 
     return `
@@ -277,20 +283,36 @@
     `;
   }
 
+  function buildScorelineHtml(players) {
+    const scores = (players || []).map((p) => playerScoreValue(p) ?? 0);
+    if (scores.length < 2) return '';
+    const label = scores.join(' : ');
+    return `
+      <div class="race-results-duel-scoreline" aria-label="${escapeHtml(label)}">
+        <span class="race-results-duel-score">${scores[0]}</span>
+        <span class="race-results-duel-score-sep" aria-hidden="true">:</span>
+        <span class="race-results-duel-score">${scores[1]}</span>
+      </div>
+    `;
+  }
+
   function buildPlayersDuelHtml(players, winnerUid, kind) {
     const statsClass = kind === 'win'
       ? 'race-results-stats race-results-stats--victory'
       : kind === 'loss'
         ? 'race-results-stats race-results-stats--defeat'
         : 'race-results-stats';
+    const list = players || [];
+    const scoreMode = list.some((p) => playerScoreValue(p) != null);
 
-    const sides = (players || []).map((p) => {
-      let role = 'draw';
-      if (winnerUid) role = p.uid === winnerUid ? 'winner' : 'loser';
-      return buildPlayerDuelSideHtml(p, role);
-    }).join('');
+    const sides = list.map((p) => (
+      buildPlayerDuelSideHtml(p, playerDuelRole(p, winnerUid), { scoreMode })
+    )).join('');
 
-    return `<div class="race-results-duel ${statsClass}" role="group">${sides}</div>`;
+    const scoreline = scoreMode ? buildScorelineHtml(list) : '';
+    const modeClass = scoreMode ? ' race-results-duel--scores' : '';
+
+    return `<div class="race-results-duel${modeClass} ${statsClass}" role="group">${sides}${scoreline}</div>`;
   }
 
   function buildFallbackBattleSummary(name) {
@@ -411,7 +433,14 @@
         summary = await fetchRemoteBattleSummary(uid);
       }
 
-      renderBattleCardSlot(slot, summary || buildFallbackBattleSummary(fallbackName));
+      const resolved = summary || buildFallbackBattleSummary(fallbackName);
+      renderBattleCardSlot(slot, resolved);
+      const nameEl = side.querySelector('.race-results-duel-name');
+      const resolvedName = resolved.displayName || resolved.name;
+      if (nameEl && resolvedName && resolvedName !== '?') {
+        nameEl.textContent = resolvedName;
+        side.dataset.battleName = resolvedName;
+      }
       slot.removeAttribute('aria-hidden');
     }));
   }

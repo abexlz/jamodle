@@ -818,6 +818,10 @@
 
       const iWon = winner === 'me';
       const RUI = global.RaceResultsUI;
+      const myName = this.els?.myName?.textContent
+        || global.MatchEmotes?.buildLocalPlayerSummary?.()?.name
+        || global.FirebaseSocial?.getPublicName?.(global.ProfileService?.loadProfile?.())
+        || rt('me');
 
       this.renderMain(RUI.renderResultsPanel({
         resultLine: iWon ? rt('win') : rt('loss'),
@@ -828,7 +832,7 @@
         players: [
           {
             uid: 'me',
-            name: rt('me'),
+            name: myName,
             score: this.myScore || 0,
           },
           {

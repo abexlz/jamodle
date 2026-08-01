@@ -326,6 +326,10 @@
   color: #C8B8F0 !important;
 }
 
+.race-results-duel-score-sep {
+  color: rgba(200, 184, 240, 0.55) !important;
+}
+
 .race-results-duel-side--winner .race-results-duel-name {
   color: #5FD68A !important;
 }
@@ -334,22 +338,36 @@
   color: rgba(255, 255, 255, 0.9) !important;
 }
 
-.race-results-duel-side--winner .race-results-duel-score {
+.race-results-stats--victory .race-results-duel-score {
   color: #5FD68A !important;
+}
+
+.race-results-stats--victory .race-results-duel-score-sep {
+  color: rgba(95, 214, 138, 0.75) !important;
 }
 
 .race-results-duel-side--loser .race-results-duel-name {
   color: rgba(255, 180, 180, 0.95) !important;
 }
 
-.race-results-duel-side--loser .race-results-duel-score {
-  color: rgba(255, 180, 180, 0.95) !important;
+.race-results-stats--defeat .race-results-duel-side--loser .race-results-duel-name,
+.race-results-stats--defeat .race-results-duel-side--loser .race-results-duel-stat {
+  color: #ffc0df !important;
 }
 
-.race-results-stats--defeat .race-results-duel-side--loser .race-results-duel-name,
-.race-results-stats--defeat .race-results-duel-side--loser .race-results-duel-stat,
-.race-results-stats--defeat .race-results-duel-side--loser .race-results-duel-score {
+.race-results-stats--defeat .race-results-duel-score {
   color: #ffc0df !important;
+}
+
+.race-results-stats--defeat .race-results-duel-score-sep {
+  color: rgba(255, 192, 223, 0.7) !important;
+}
+
+.race-results-duel--scores .race-results-duel-side--winner,
+.race-results-duel--scores .race-results-duel-side--loser {
+  transform: none !important;
+  opacity: 1 !important;
+  filter: none !important;
 }
 
 .race-results-answer {

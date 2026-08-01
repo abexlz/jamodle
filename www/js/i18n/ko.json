@@ -1243,7 +1243,7 @@
       },
       "match-1": {
         "title": "한글놀이",
-        "desc": "한글놀이 {{count}}판 승리"
+        "desc": "한글놀이 {{count}}판 풀기"
       },
       "play-2": {
         "title": "꾸준히 학습",
@@ -1251,15 +1251,15 @@
       },
       "weekly-match-8": {
         "title": "한글놀이",
-        "desc": "이번 주 한글놀이 {{count}}판 승리"
+        "desc": "이번 주 한글놀이 {{count}}판 풀기"
       },
       "weekly-match-3": {
         "title": "한글놀이",
-        "desc": "이번 주 한글놀이 {{count}}판 승리"
+        "desc": "이번 주 한글놀이 {{count}}판 풀기"
       },
       "weekly-jamodle-5": {
         "title": "한글놀이",
-        "desc": "이번 주 한글놀이 {{count}}판 승리"
+        "desc": "이번 주 한글놀이 {{count}}판 풀기"
       },
       "weekly-related-3": {
         "title": "연관단어",

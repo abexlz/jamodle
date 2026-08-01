@@ -1257,7 +1257,7 @@
         },
         "match-1": {
           "title": "Hangul-dle",
-          "desc": "Win {{count}} Hangul-dle round"
+          "desc": "Solve {{count}} Hangul-dle"
         },
         "play-2": {
           "title": "Keep learning",
@@ -1265,15 +1265,15 @@
         },
         "weekly-match-8": {
           "title": "Hangul-dle",
-          "desc": "Win {{count}} Hangul-dle rounds this week"
+          "desc": "Solve {{count}} Hangul-dle this week"
         },
         "weekly-match-3": {
           "title": "Hangul-dle",
-          "desc": "Win {{count}} Hangul-dle rounds this week"
+          "desc": "Solve {{count}} Hangul-dle this week"
         },
         "weekly-jamodle-5": {
           "title": "Hangul-dle",
-          "desc": "Win {{count}} Hangul-dle rounds this week"
+          "desc": "Solve {{count}} Hangul-dle this week"
         },
         "weekly-related-3": {
           "title": "Related Words",
@@ -2733,7 +2733,7 @@
         },
         "match-1": {
           "title": "한글놀이",
-          "desc": "한글놀이 {{count}}판 승리"
+          "desc": "한글놀이 {{count}}판 풀기"
         },
         "play-2": {
           "title": "꾸준히 학습",
@@ -2741,15 +2741,15 @@
         },
         "weekly-match-8": {
           "title": "한글놀이",
-          "desc": "이번 주 한글놀이 {{count}}판 승리"
+          "desc": "이번 주 한글놀이 {{count}}판 풀기"
         },
         "weekly-match-3": {
           "title": "한글놀이",
-          "desc": "이번 주 한글놀이 {{count}}판 승리"
+          "desc": "이번 주 한글놀이 {{count}}판 풀기"
         },
         "weekly-jamodle-5": {
           "title": "한글놀이",
-          "desc": "이번 주 한글놀이 {{count}}판 승리"
+          "desc": "이번 주 한글놀이 {{count}}판 풀기"
         },
         "weekly-related-3": {
           "title": "연관단어",

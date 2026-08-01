@@ -1243,7 +1243,7 @@
       },
       "match-1": {
         "title": "Hangul-dle",
-        "desc": "Win {{count}} Hangul-dle round"
+        "desc": "Solve {{count}} Hangul-dle"
       },
       "play-2": {
         "title": "Keep learning",
@@ -1251,15 +1251,15 @@
       },
       "weekly-match-8": {
         "title": "Hangul-dle",
-        "desc": "Win {{count}} Hangul-dle rounds this week"
+        "desc": "Solve {{count}} Hangul-dle this week"
       },
       "weekly-match-3": {
         "title": "Hangul-dle",
-        "desc": "Win {{count}} Hangul-dle rounds this week"
+        "desc": "Solve {{count}} Hangul-dle this week"
       },
       "weekly-jamodle-5": {
         "title": "Hangul-dle",
-        "desc": "Win {{count}} Hangul-dle rounds this week"
+        "desc": "Solve {{count}} Hangul-dle this week"
       },
       "weekly-related-3": {
         "title": "Related Words",

@@ -979,6 +979,14 @@
       const opp = RS().getOpponent(data, this.myUid);
       const myProgress = isP1 ? p1 : p2;
       const oppProgress = isP1 ? p2 : p1;
+      const myName = (isP1 ? data.player1Name : data.player2Name)
+        || this.els?.myName?.textContent
+        || global.MatchEmotes?.buildLocalPlayerSummary?.()?.name
+        || rt('me');
+      const oppName = opp?.name
+        || (isP1 ? data.player2Name : data.player1Name)
+        || this.els?.oppName?.textContent
+        || rt('opponent');
       const RUI = global.RaceResultsUI;
       const resultKind = data.winnerUid === this.myUid ? 'win' : data.winnerUid ? 'loss' : 'draw';
 
@@ -993,12 +1001,12 @@
         players: [
           {
             uid: this.myUid,
-            name: rt('me'),
+            name: myName,
             score: myProgress.guessCount || 0,
           },
           {
             uid: opp?.uid,
-            name: opp?.name || rt('opponent'),
+            name: oppName,
             score: oppProgress.guessCount || 0,
           },
         ],

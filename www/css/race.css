@@ -2344,47 +2344,90 @@ html.reduce-motion .race-turn-swap {
   color: var(--text-soft);
 }
 
-/* Big in-game-style score under battle cards (Word Chain 1v1) */
+/* Word Chain 1v1 — equal cards, names under, big scoreline with colon */
+.race-results-duel--scores {
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 10px clamp(18px, 5vw, 32px);
+}
+
+.race-results-duel--scores .race-results-duel-side {
+  flex: 1 1 0;
+  max-width: 168px;
+  transform: none;
+}
+
+.race-results-duel--scores .race-results-duel-side--winner,
+.race-results-duel--scores .race-results-duel-side--loser {
+  transform: none;
+  opacity: 1;
+  filter: none;
+}
+
+.race-results-duel--scores .race-results-duel-card-wrap {
+  width: clamp(104px, 30vw, 132px);
+}
+
+.race-results-duel--scores .race-results-duel-name {
+  font-size: clamp(14px, 3.8vw, 17px);
+  text-shadow: none;
+}
+
+.race-results-duel-scoreline {
+  flex: 1 0 100%;
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: clamp(10px, 3vw, 16px);
+  margin: 4px 0 0;
+  order: 3;
+}
+
 .race-results-duel-score {
-  margin: 2px 0 0;
+  margin: 0;
   font-family: 'Jua', sans-serif;
-  font-size: clamp(40px, 12vw, 56px);
+  font-size: clamp(44px, 13vw, 60px);
   font-weight: 700;
   line-height: 1;
   letter-spacing: -0.02em;
   color: #6B5B95;
   font-variant-numeric: tabular-nums;
+  min-width: 1.2em;
+  text-align: center;
 }
 
-.race-results-duel-side--winner .race-results-duel-score {
-  color: var(--correct-text, #3A7A58);
-  text-shadow: 0 0 18px rgba(95, 214, 138, 0.45);
-  font-size: clamp(46px, 13.5vw, 64px);
+.race-results-duel-score-sep {
+  font-family: 'Jua', sans-serif;
+  font-size: clamp(36px, 11vw, 50px);
+  font-weight: 700;
+  line-height: 1;
+  color: rgba(107, 91, 149, 0.55);
 }
 
-.race-results-stats--victory .race-results-duel-side--winner .race-results-duel-score {
+.race-results-stats--victory .race-results-duel-score {
   color: #5FD68A;
-  text-shadow: 0 0 20px rgba(95, 214, 138, 0.6);
+  text-shadow: 0 0 18px rgba(95, 214, 138, 0.45);
 }
 
-.race-results-stats--defeat .race-results-duel-side--winner .race-results-duel-score {
-  color: #9ef0c0;
-  text-shadow: 0 0 16px rgba(95, 214, 138, 0.45);
+.race-results-stats--victory .race-results-duel-score-sep {
+  color: rgba(95, 214, 138, 0.7);
 }
 
-.race-results-duel-side--loser .race-results-duel-score {
-  color: #9A4060;
-  opacity: 0.88;
-  font-size: clamp(34px, 10vw, 48px);
-}
-
-.race-results-stats--defeat .race-results-duel-side--loser .race-results-duel-score {
+.race-results-stats--defeat .race-results-duel-score {
   color: #ffc0df;
-  opacity: 0.9;
+  text-shadow: 0 0 14px rgba(255, 128, 184, 0.35);
+}
+
+.race-results-stats--defeat .race-results-duel-score-sep {
+  color: rgba(255, 192, 223, 0.65);
 }
 
 [data-theme="dark"] .race-results-duel-score {
   color: #C8B8F0;
+}
+
+[data-theme="dark"] .race-results-duel-score-sep {
+  color: rgba(200, 184, 240, 0.55);
 }
 
 /* Winner side — bright, glowing */
