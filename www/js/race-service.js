@@ -2023,10 +2023,11 @@
     }
   }
 
-  async function tryAdvanceRound(matchId, data) {
+  async function tryAdvanceRound(matchId, data, options = {}) {
     if (!data || data.status !== 'round_break') return;
     if (!isKoreanTurnSeries(data)) return;
-    if (roundBreakRemainingMs(data) > 0) return;
+    const force = options?.force === true;
+    if (!force && roundBreakRemainingMs(data) > 0) return;
     if (inWriteCooldown()) return;
 
     const now = Date.now();

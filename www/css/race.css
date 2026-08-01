@@ -266,6 +266,7 @@
     0 12px 36px rgba(0, 40, 50, 0.18),
     0 0 0 1px rgba(255, 255, 255, 0.65) inset;
   animation: raceRoundRevealIn 0.35s ease both;
+  pointer-events: auto;
 }
 
 [data-theme="dark"] .race-round-reveal-card {
@@ -318,6 +319,23 @@
 .race-round-reveal-meaning:empty,
 .race-round-reveal-meaning[hidden] {
   display: none;
+}
+
+.race-round-reveal-actions {
+  margin-top: 18px;
+}
+
+.race-round-reveal-next {
+  min-width: min(100%, 200px);
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: 18px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.race-round-reveal-next:disabled {
+  opacity: 0.65;
+  cursor: wait;
 }
 
 @keyframes raceRoundRevealIn {

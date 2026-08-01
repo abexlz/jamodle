@@ -1077,6 +1077,8 @@
     "roundWin": "라운드 승리! 🎉",
     "roundLoss": "라운드 패배",
     "roundPlayerWins": "{{name}} 승리",
+    "roundEnded": "라운드 종료",
+    "nextRound": "다음 라운드",
     "nextRoundSoon": "다음 단어가 곧 시작됩니다…",
     "coinFlipTitle": "동전 던지기",
     "coinFlipStarts": "{{name}} 선공",

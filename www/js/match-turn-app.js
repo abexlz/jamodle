@@ -508,8 +508,6 @@
     handleRoundBreak(data) {
       const breakKey = `${data.roundNumber || 1}:${data.nextRoundNumber || ''}:${data.roundWinnerUid || ''}`;
       if (this._roundBreakShownKey === breakKey) {
-        RS().tryAdvanceRound(this.matchId, data);
-        this.scheduleRoundBreakAdvance(data);
         return;
       }
       this._roundBreakShownKey = breakKey;
@@ -521,13 +519,15 @@
       // Keep the board under a floating cutscene — do not insert answer UI into layout.
 
       this.showRoundRevealOverlay(data);
-      RS().tryAdvanceRound(this.matchId, data);
-      this.scheduleRoundBreakAdvance(data);
     }
 
     showRoundRevealOverlay(data) {
       const el = this.els.roundReveal;
       if (!el) return;
+      if (this._roundBreakTimer) {
+        clearTimeout(this._roundBreakTimer);
+        this._roundBreakTimer = null;
+      }
       const winnerUid = data.roundWinnerUid || null;
       const myStoredName = data.player1Uid === this.myUid
         ? data.player1Name
@@ -543,6 +543,7 @@
             : rt('opponent');
       const word = data.sharedState?.solvedWord || data.lastRoundTarget || data.target || '';
       const line = rt('roundPlayerWins', { name: winnerName }) || `${winnerName} wins`;
+      const nextLabel = rt('nextRound') || 'Next round';
 
       el.innerHTML = `
         <div class="race-round-reveal-card" role="status">
@@ -551,11 +552,34 @@
           <p class="race-round-reveal-label">${escapeHtml(rt('answerLabel'))}</p>
           <p class="race-round-reveal-word">${escapeHtml(word)}</p>
           <p class="race-round-reveal-meaning" id="round-reveal-meaning" hidden></p>
+          <div class="race-round-reveal-actions">
+            <button type="button" class="race-btn race-btn--primary race-round-reveal-next app-pressable" id="race-round-next">
+              ${escapeHtml(nextLabel)}
+            </button>
+          </div>
         </div>
       `;
       el.classList.remove('hidden');
       void this.fillRoundRevealMeaning(word);
       this.speakRoundRevealAnswer(word);
+      el.querySelector('#race-round-next')?.addEventListener('click', () => {
+        this.onNextRoundClick();
+      });
+    }
+
+    onNextRoundClick() {
+      const live = this.matchData;
+      if (!live || live.status !== 'round_break') return;
+      const btn = this.els.roundReveal?.querySelector('#race-round-next');
+      if (btn) {
+        btn.disabled = true;
+        btn.setAttribute('aria-busy', 'true');
+      }
+      if (this._roundBreakTimer) {
+        clearTimeout(this._roundBreakTimer);
+        this._roundBreakTimer = null;
+      }
+      void RS().tryAdvanceRound(this.matchId, live, { force: true });
     }
 
     speakRoundRevealAnswer(word) {
@@ -592,19 +616,6 @@
         meaningEl.textContent = meaning;
         meaningEl.hidden = false;
       } catch { /* offline */ }
-    }
-
-    scheduleRoundBreakAdvance(data) {
-      if (this._roundBreakTimer) clearTimeout(this._roundBreakTimer);
-      const remaining = RS().roundBreakRemainingMs(data);
-      const delay = remaining > 0 ? remaining + 80 : 80;
-      this._roundBreakTimer = setTimeout(() => {
-        this._roundBreakTimer = null;
-        const live = this.matchData;
-        if (!live || live.status !== 'round_break') return;
-        RS().tryAdvanceRound(this.matchId, live);
-        this.scheduleRoundBreakAdvance(live);
-      }, delay);
     }
 
     startGame(data, anchorTimerNow = false) {
