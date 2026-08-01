@@ -1387,42 +1387,110 @@
       return clueEl?.dataset.word || '';
     }
 
-    async resolveClueMeaning(word) {
+    getMeaningContext() {
+      const chainId = this.puzzle?.chainId
+        || this.fixedChainId
+        || this.progress?.chainId
+        || '';
+      const chain = RW()?.getChain?.(chainId)
+        || global.RelatedWordsChains?.getChain?.(chainId)
+        || null;
+      const chainWords = Array.isArray(chain?.words) ? chain.words : [];
+      const neighborMeanings = chainWords
+        .map((w) => global.MatchWordMeanings?.[w] || global.LearningWords?.getWordMeaning?.(w) || '')
+        .filter(Boolean);
+      const titled = this.puzzle?.chainTitleKey ? t(this.puzzle.chainTitleKey) : '';
+      const chainTitle = (titled && titled !== this.puzzle?.chainTitleKey) ? titled : '';
+      const chainLabel = chain
+        ? (global.RelatedWordsChains?.chainLabel?.(chain) || chain.label || '')
+        : '';
+      return {
+        chainId,
+        chainWords,
+        chainLabel,
+        chainTitle,
+        neighborMeanings,
+      };
+    }
+
+    trailMeaningCacheKey(word) {
+      const chainId = this.puzzle?.chainId || this.fixedChainId || this.progress?.chainId || '';
+      return `${chainId}:${String(word || '').trim()}`;
+    }
+
+    collectMeaningCandidates(word, lookupResult) {
       const q = String(word || '').trim();
-      if (!q) return '';
+      const candidates = [];
+      const seen = new Set();
+      const push = (value) => {
+        const meaning = typeof value === 'string'
+          ? value.trim()
+          : String(value?.meaning || value?.englishWord || value?.definition || '').trim();
+        if (!meaning) return;
+        const key = meaning.toLowerCase();
+        if (seen.has(key)) return;
+        seen.add(key);
+        if (typeof value === 'string') {
+          candidates.push({ meaning });
+          return;
+        }
+        candidates.push({
+          meaning,
+          englishWord: value.englishWord || '',
+          definition: value.definition || '',
+          rawDefinitionKo: value.rawDefinitionKo || '',
+        });
+      };
 
       const DS = global.DictionaryService;
-      if (DS?.resolveEnglishMeaning) {
-        const direct = await DS.resolveEnglishMeaning(q);
-        if (direct) return direct;
-
-        if (DS.lookupWord) {
-          try {
-            const result = await DS.lookupWord(q);
-            const entryMeaning = DS.formatEntryMeaning?.(result?.entry);
-            if (entryMeaning) return entryMeaning;
-            for (const candidate of result?.candidates || []) {
-              if (candidate?.word !== q) continue;
-              const candidateMeaning = DS.formatEntryMeaning?.(candidate);
-              if (candidateMeaning) return candidateMeaning;
-            }
-          } catch { /* offline or API error */ }
+      if (lookupResult) {
+        if (lookupResult.entry?.word === q) push(lookupResult.entry);
+        for (const item of lookupResult.candidates || []) {
+          if (!item || String(item.word || '') !== q) continue;
+          push(item);
         }
       }
 
-      const glossary = global.MatchWordMeanings?.[q]
-        || global.LearningWords?.getWordMeaning?.(q);
-      if (glossary) return glossary;
+      push(global.MatchWordMeanings?.[q] || global.LearningWords?.getWordMeaning?.(q) || '');
 
       const entry = global.LearningWords?.findWordEntry?.(q);
       if (entry) {
         const normalized = global.LearningWords?.getNormalizedWord?.(q)
           || global.LearningWordModel?.normalizeLearningWord?.(entry);
-        const curated = global.LearningWordModel?.getDisplayMeaning?.(normalized);
-        if (curated) return curated;
+        push(global.LearningWordModel?.getDisplayMeaning?.(normalized) || '');
       }
 
-      return '';
+      if (!candidates.length && DS?.formatEntryMeaning && lookupResult?.entry) {
+        push(DS.formatEntryMeaning(lookupResult.entry));
+      }
+
+      return candidates;
+    }
+
+    async resolveClueMeaning(word) {
+      const q = String(word || '').trim();
+      if (!q) return '';
+
+      const context = this.getMeaningContext();
+      const WCM = global.WordChainContextMeanings;
+      const curated = WCM?.pickCuratedSense?.(q, context);
+      if (curated) return curated;
+
+      let lookupResult = null;
+      const DS = global.DictionaryService;
+      if (DS?.lookupWord) {
+        try {
+          lookupResult = await DS.lookupWord(q);
+        } catch { /* offline or API error */ }
+      } else if (DS?.resolveEnglishMeaning) {
+        const direct = await DS.resolveEnglishMeaning(q);
+        if (direct) return direct;
+      }
+
+      const candidates = this.collectMeaningCandidates(q, lookupResult);
+      const picked = WCM?.pickBestCandidate?.(candidates, context);
+      if (picked) return picked;
+      return candidates[0]?.meaning || '';
     }
 
     async loadClueDefinition(word) {
@@ -1431,7 +1499,8 @@
         return;
       }
 
-      const cached = this._trailMeaningCache?.get(word);
+      const cacheKey = this.trailMeaningCacheKey(word);
+      const cached = this._trailMeaningCache?.get(cacheKey);
       if (cached) {
         this.updateTrailDefinition(word, cached);
         return;
@@ -1444,7 +1513,7 @@
       if (this.getCurrentClueWord() !== word) return;
 
       if (meaning) {
-        this._trailMeaningCache?.set(word, meaning);
+        this._trailMeaningCache?.set(cacheKey, meaning);
       }
       this.updateTrailDefinition(word, meaning);
     }
