@@ -258,7 +258,7 @@
   }
 
   function getBotFallbackMs() {
-    return global.BotProfileService?.BOT_FALLBACK_MS ?? 25_000;
+    return global.BotProfileService?.BOT_FALLBACK_MS ?? 10_000;
   }
 
   function redirectToBotMatch(game, options = {}) {

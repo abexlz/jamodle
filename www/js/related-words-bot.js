@@ -240,7 +240,7 @@
       this.root.innerHTML = `
         <header class="race-header">
           <a class="race-back" href="index.html">${escapeHtml(rt('backProfile'))}</a>
-          <h1>${escapeHtml(rt('title'))} · BOT</h1>
+          <h1>${escapeHtml(rt('title'))}</h1>
           <a class="race-settings-link" href="settings.html" aria-label="Settings">⚙️</a>
         </header>
         <div id="race-battle-hud" class="rw-race-battle-hud hidden" aria-live="polite">
