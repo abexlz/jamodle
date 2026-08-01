@@ -998,7 +998,21 @@
   }
 
   .jamo-tile.dragging { opacity: .45; transform: scale(.92); pointer-events: none; }
-  .jamo-tile.hidden-in-bank { opacity: 0; pointer-events: none; }
+  .jamo-tile.hidden-in-bank {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    width: 0 !important;
+    height: 0 !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
   .jamo-tile.selected {
     outline: 5px solid #FFD743;
     outline-offset: 2px;

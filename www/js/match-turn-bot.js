@@ -408,6 +408,17 @@
       const key = placementKey({ syl, zone, subIndex });
       this.placements = this.placements.filter((p) => placementKey(p) !== key);
       this.placements.push({ syl, zone, subIndex: subIndex ?? 0, char });
+      // Ensure the matching dock tile disappears even if the caller skipped useTile.
+      if (char) {
+        const already = [...this.onBoard].some((id) => {
+          const entry = this.bank.find((b) => b.id === id);
+          return entry?.char === char;
+        });
+        if (!already) {
+          const dockTile = this.visibleBank().find((b) => b.char === char);
+          if (dockTile) this.useTile(dockTile.id);
+        }
+      }
       this.selected = null;
     }
 

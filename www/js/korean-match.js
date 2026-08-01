@@ -712,7 +712,12 @@
         tile.el.classList.remove('dragging');
         tile.el.style.removeProperty('visibility');
         tile.el.style.removeProperty('pointer-events');
-        if (tile.inBank) tile.showInBank();
+        if (tile.inBank && !tile.zoneRef) {
+          tile.showInBank();
+        } else if (tile.zoneRef || !tile.inBank) {
+          // Placed elsewhere — collapse any leftover dock presence.
+          tile.el.classList.remove('hidden-in-bank');
+        }
       }
       if (this.ghost) {
         this.ghost.removeEventListener('lostpointercapture', this._onLostCapture);
@@ -2388,6 +2393,8 @@
         tile.syllableIndex = zone.syllableIndex;
       }
       zone.placedTileId = tile.id;
+      // Guarantee the dock no longer shows this tile (moved node + collapsed slot).
+      tileEl.classList.remove('hidden-in-bank');
       this.pulseLiveAction('move');
       this.notifyTurnLiveChange();
     }
@@ -3117,10 +3124,6 @@
      * Clear active-turn placements while restoring cumulative shared greens.
      * Used on turn boundaries so correct letters survive turn swaps.
      */
-    /**
-     * Clear active-turn placements while restoring cumulative shared greens.
-     * Used on turn boundaries so correct letters survive turn swaps.
-     */
     prepareForNewTurn(locked, turnHistory, myUid) {
       if (!this.turnBased) return;
       this.mergeDock?.reset();
@@ -3134,22 +3137,26 @@
         block.getAllZones().forEach((zone) => {
           zone.el.querySelectorAll('.opp-reveal-tile').forEach((el) => el.remove());
           if (zone.locked) {
-            zone.el.classList.remove(
-              'turn-neutral', 'revealing', 'revealing-wrong',
-              'watch-wrong', 'watch-reveal-pending', 'incorrect'
-            );
-            zone.el.classList.add('correct', 'watch-correct', 'locked', 'filled');
             const tile = zone.placedTileId ? this.tileMap[zone.placedTileId] : null;
             if (tile) {
-              tile.locked = true;
-              tile.el?.classList.remove('turn-neutral-tile', 'revealing', 'revealing-wrong');
-              tile.el?.classList.add('locked', 'revealed', 'correct-flip');
+              this.mountLockedTileInZone(zone, tile);
+            } else {
+              zone.el.classList.remove(
+                'turn-neutral', 'revealing', 'revealing-wrong',
+                'watch-wrong', 'watch-reveal-pending', 'incorrect'
+              );
+              zone.el.classList.add('correct', 'locked', 'filled');
             }
             return;
           }
           const tile = zone.placedTileId ? this.tileMap[zone.placedTileId] : null;
           if (tile && !tile.locked) {
             this.returnTileToBank(tile);
+          } else if (tile?.locked) {
+            // Zone flag was lost but tile is still a permanent green — remount.
+            zone.locked = true;
+            this.mountLockedTileInZone(zone, tile);
+            return;
           } else {
             zone.clear();
           }
@@ -3233,6 +3240,38 @@
       tile.setLocked();
       tile.el.classList.add('correct-flip');
       zone.el.classList.add('correct', 'filled');
+      zone.el.classList.remove('watch-correct', 'watch-wrong', 'turn-neutral', 'incorrect');
+    }
+
+    /** Keep a locked green tile mounted and visible inside its zone. */
+    mountLockedTileInZone(zone, tile) {
+      if (!zone || !tile?.el) return;
+      tile.locked = true;
+      tile.inBank = false;
+      tile.mergeDockRef = null;
+      tile.mergeDockSlot = null;
+      tile.zoneRef = zone;
+      zone.placedTileId = tile.id;
+      zone.locked = true;
+      if (tile.el.parentElement !== zone.el) {
+        zone.el.appendChild(tile.el);
+      }
+      zone.el.classList.remove(
+        'turn-neutral', 'revealing', 'revealing-wrong',
+        'watch-wrong', 'watch-reveal-pending', 'incorrect', 'watch-correct'
+      );
+      zone.el.classList.add('correct', 'locked', 'filled');
+      tile.el.classList.remove(
+        'hidden-in-bank', 'dragging', 'revealing', 'revealing-wrong',
+        'turn-neutral-tile', 'opp-reveal-tile'
+      );
+      tile.el.classList.add('in-zone', 'locked', 'revealed', 'correct-flip');
+      tile.el.style.removeProperty('visibility');
+      tile.el.style.removeProperty('opacity');
+      tile.el.style.removeProperty('transform');
+      tile.el.style.removeProperty('pointer-events');
+      tile.setChar(tile.char);
+      tile.setLocked();
     }
 
     placeLockedPlacement(placement) {
@@ -3245,24 +3284,44 @@
       if (!zone) return false;
 
       const existing = zone.placedTileId ? this.tileMap[zone.placedTileId] : null;
-      if (zone.locked && existing?.char === placement.char) {
-        this.markPlacementLocked(zone, existing);
-        return true;
-      }
-      if (existing?.char === placement.char && !zone.locked) {
-        this.markPlacementLocked(zone, existing);
+      if (existing?.char === placement.char) {
+        this.mountLockedTileInZone(zone, existing);
         return true;
       }
       if (existing) {
-        if (existing.locked) return false;
-        this.returnTileToBank(existing);
+        if (existing.locked) {
+          // Wrong locked occupant — replace with the shared correct char.
+          existing.locked = false;
+          this.returnTileToBank(existing);
+        } else {
+          this.returnTileToBank(existing);
+        }
         zone.clear();
       }
 
-      const tile = this.findBankTileForAutofill(placement);
-      if (!tile) return false;
-      this.attachTileToZone(tile, zone);
-      this.markPlacementLocked(zone, tile);
+      let tile = this.findBankTileForAutofill(placement);
+      if (!tile && placement.tileId) {
+        const byId = this.tileMap[placement.tileId];
+        if (byId && byId.char === placement.char && !byId.zoneRef) tile = byId;
+      }
+      if (!tile) {
+        // Reclaim an orphaned matching tile (detached during turn swap).
+        tile = Object.values(this.tileMap).find((t) => (
+          t
+          && t.char === placement.char
+          && !t.zoneRef
+          && !t.mergeDockRef
+          && (t.locked || !t.inBank || !t.el?.isConnected)
+        )) || null;
+      }
+      if (!tile) {
+        tile = this.createBasicTile({
+          char: placement.char,
+          syllableIndex: placement.syl,
+          zoneType: placement.zone,
+        });
+      }
+      this.mountLockedTileInZone(zone, tile);
       return true;
     }
 
@@ -3592,19 +3651,9 @@
     persistWatchCorrectReveals(toReveal) {
       (toReveal || []).forEach(({ zone, placement }) => {
         zone.el.querySelectorAll('.opp-reveal-tile').forEach((el) => el.remove());
-        zone.el.classList.remove('turn-neutral', 'watch-reveal-pending', 'revealing', 'incorrect', 'watch-wrong');
+        zone.el.classList.remove('turn-neutral', 'watch-reveal-pending', 'revealing', 'incorrect', 'watch-wrong', 'watch-correct');
         if (!placement?.char) return;
-        if (!this.placeLockedPlacement(placement)) {
-          // Ensure a permanent green lock even if the matching dock tile was missing.
-          const tile = this.createBasicTile({
-            char: placement.char,
-            syllableIndex: placement.syl,
-            zoneType: placement.zone,
-          });
-          tile.setInBank(this.els.bank);
-          this.attachTileToZone(tile, zone);
-          this.markPlacementLocked(zone, tile);
-        }
+        this.placeLockedPlacement(placement);
       });
     }
 
@@ -4028,7 +4077,7 @@
       if (!bank) return;
 
       Object.values(this.tileMap).forEach((tile) => {
-        if (tile.locked) return;
+        if (tile.locked || tile.zoneRef) return;
         if (liveIds.has(tile.id)) {
           if (!tile.inBank) {
             tile.mergeDockRef = null;
@@ -4044,17 +4093,39 @@
 
       entries.forEach((entry) => {
         const tile = this.tileMap[entry.id];
-        if (tile?.el && tile.inBank && !tile.locked) bank.appendChild(tile.el);
+        if (tile?.el && tile.inBank && !tile.locked && !tile.zoneRef) bank.appendChild(tile.el);
       });
+
+      // Fallback when live.bank is stale: hide dock tiles consumed by board/merge chars.
+      const used = {};
+      (this._watchLivePlacements || []).forEach((p) => {
+        if (p?.char) used[p.char] = (used[p.char] || 0) + 1;
+      });
+      const merge = this._watchLiveMerge || {};
+      (merge.slots || []).forEach((c) => { if (c) used[c] = (used[c] || 0) + 1; });
+      if (merge.result) used[merge.result] = (used[merge.result] || 0) + 1;
+      Object.values(this.tileMap).forEach((tile) => {
+        if (!tile?.inBank || tile.locked || tile.zoneRef) return;
+        if (used[tile.char] > 0 && !tile.el.classList.contains('hidden-in-bank')) {
+          tile.hideInBank();
+          used[tile.char] -= 1;
+        }
+      });
+
       this.syncDockTileSize();
     }
 
     detachWatchZoneTile(zone) {
+      if (!zone) return;
       const tile = zone.placedTileId ? this.tileMap[zone.placedTileId] : null;
+      // Never tear down permanent greens while mirroring live opponent state.
+      if (zone.locked || tile?.locked) {
+        if (tile) this.mountLockedTileInZone(zone, tile);
+        return;
+      }
       zone.placedTileId = null;
       if (!tile) return;
       if (tile.zoneRef === zone) tile.zoneRef = null;
-      if (tile.locked) return;
       // Always return real tiles to the dock — never orphan them outside the bank.
       if (this.els.bank) {
         tile.setInBank(this.els.bank);
@@ -4235,7 +4306,11 @@
 
       this.blocks.forEach((block) => {
         block.getAllZones().forEach((zone) => {
-          if (zone.locked) return;
+          if (zone.locked) {
+            const lockedTile = zone.placedTileId ? this.tileMap[zone.placedTileId] : null;
+            if (lockedTile) this.mountLockedTileInZone(zone, lockedTile);
+            return;
+          }
           this.detachWatchZoneTile(zone);
           zone.clear();
           zone.el.classList.remove('turn-neutral', 'incorrect', 'correct', 'filled');
@@ -4959,11 +5034,24 @@
     restoreVisibleTiles() {
       Object.values(this.tileMap || {}).forEach((tile) => {
         if (!tile?.el) return;
+        // Locked greens must stay mounted and visible in their slots.
+        if (tile.locked) {
+          tile.el.style.removeProperty('visibility');
+          tile.el.style.removeProperty('opacity');
+          tile.el.style.removeProperty('transform');
+          tile.el.style.removeProperty('pointer-events');
+          tile.el.classList.remove('hidden-in-bank', 'dragging', 'revealing', 'revealing-wrong');
+          if (tile.zoneRef) this.mountLockedTileInZone(tile.zoneRef, tile);
+          return;
+        }
         tile.el.style.removeProperty('visibility');
         tile.el.style.removeProperty('transform');
         tile.el.style.removeProperty('pointer-events');
-        tile.el.classList.remove('hidden-in-bank', 'dragging', 'revealing', 'revealing-wrong');
-        if (tile.inBank) tile.showInBank();
+        tile.el.classList.remove('dragging', 'revealing', 'revealing-wrong');
+        if (tile.inBank) {
+          // In watch mode, dock visibility is owned by live sync — don't force-show.
+          if (!this.watchMode) tile.showInBank();
+        }
       });
     }
 
