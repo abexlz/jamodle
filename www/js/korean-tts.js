@@ -164,7 +164,7 @@
 
   async function fetchServerAudio(text) {
     const gender = preferredVoiceGender();
-    const key = `v4:${gender}:${text.trim()}`;
+    const key = `v5:${gender}:${text.trim()}`;
     if (audioCache.has(key)) return audioCache.get(key);
 
     const url = `${getApiBase()}/api/tts/speak?text=${encodeURIComponent(text.trim())}`
