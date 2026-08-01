@@ -104,6 +104,12 @@
   animation: wheel-pop 0.5s ease;
 }
 
+.wheel-reveal-icon .coin-icon {
+  width: 56px;
+  height: 56px;
+  vertical-align: 0;
+}
+
 @keyframes wheel-pop {
   0% { transform: scale(0.4); opacity: 0; }
   70% { transform: scale(1.12); }

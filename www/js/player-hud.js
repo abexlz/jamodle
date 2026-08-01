@@ -35,7 +35,7 @@
         <a class="menu-hud-coins player-hud-compact" href="index.html?tab=shop"
           role="group" aria-label="${escapeHtml(t('shop.hudLabel'))}">
           <span class="menu-hud-coins-value" aria-label="${escapeHtml(t('shop.coins'))}">${summary.coins}</span>
-          <span class="menu-hud-coins-coin" aria-hidden="true">🪙</span>
+          <span class="menu-hud-coins-coin" aria-hidden="true">${global.CoinIcon?.html?.('coin-icon coin-icon--hud') || '🪙'}</span>
           <span class="menu-hud-coins-plus" aria-hidden="true">+</span>
         </a>
       `;
@@ -47,7 +47,7 @@
       <div class="player-hud-full">
         <div class="player-hud-row">
           <span class="player-hud-level-badge">${escapeHtml(t('profile.levelShort', { level: summary.level }))}</span>
-          <span class="player-hud-coins player-hud-coins--lg">🪙 ${summary.coins}</span>
+          <span class="player-hud-coins player-hud-coins--lg">${global.CoinIcon?.html?.('coin-icon coin-icon--md') || '🪙'} ${summary.coins}</span>
         </div>
         ${global.ProfileUI?.renderXpProgressBar?.({
           xpInLevel: summary.xpInLevel,

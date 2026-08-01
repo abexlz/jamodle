@@ -49,7 +49,7 @@
         <div class="daily-gift-cell state-${day.state}${isMilestone ? ' is-milestone' : ''}"
           data-day="${day.day}" aria-label="${escapeHtml(t('dailyGift.dayLabel', { day: day.day }))}">
           <span class="daily-gift-cell-day">${day.day}</span>
-          <span class="daily-gift-cell-icon" aria-hidden="true">${day.icon}</span>
+          <span class="daily-gift-cell-icon" aria-hidden="true">${global.CoinIcon?.resolve?.(day.icon, 'coin-icon coin-icon--md') || escapeHtml(day.icon)}</span>
           ${day.state === 'claimed' ? '<span class="daily-gift-cell-check" aria-hidden="true">✓</span>' : ''}
         </div>
       `;
@@ -70,7 +70,7 @@
           ${buildTrackCells(days)}
         </div>
         <div class="daily-gift-today-reward">
-          <span class="daily-gift-today-icon" aria-hidden="true">${snapshot.reward?.icon || '🎁'}</span>
+          <span class="daily-gift-today-icon" aria-hidden="true">${global.CoinIcon?.resolve?.(snapshot.reward?.icon || '🎁', 'coin-icon coin-icon--lg') || escapeHtml(snapshot.reward?.icon || '🎁')}</span>
           <span class="daily-gift-today-text">${escapeHtml(rewardLabel(snapshot.reward))}</span>
         </div>
         <button type="button" class="daily-gift-claim-btn" id="daily-gift-claim-btn"
@@ -86,7 +86,7 @@
     return `
       <div class="daily-gift-modal">
         <div class="daily-gift-reveal">
-          <span class="daily-gift-reveal-icon" aria-hidden="true">${reward?.icon || '🎁'}</span>
+          <span class="daily-gift-reveal-icon" aria-hidden="true">${global.CoinIcon?.resolve?.(reward?.icon || '🎁', 'coin-icon coin-icon--lg') || escapeHtml(reward?.icon || '🎁')}</span>
           <h2 class="daily-gift-reveal-title">${escapeHtml(t('dailyGift.revealedTitle'))}</h2>
           <p class="daily-gift-reveal-day">${escapeHtml(t('dailyGift.dayComplete', { day: result.claimDay }))}</p>
           <p class="daily-gift-reveal-gift">${escapeHtml(rewardLabel(reward))}</p>

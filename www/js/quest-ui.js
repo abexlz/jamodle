@@ -44,7 +44,7 @@
     } else if (claimed) {
       statusHtml = `<span class="quest-done-label">${escapeHtml(t('quests.complete'))}</span>`;
     } else {
-      statusHtml = `<span class="quest-reward-compact">+${def.xp} XP · 🪙 ${def.coins}</span>`;
+      statusHtml = `<span class="quest-reward-compact">+${def.xp} XP · ${global.CoinIcon?.html?.('coin-icon coin-icon--sm') || '🪙'} ${def.coins}</span>`;
     }
 
     const displayPct = claimed ? 100 : pct;
@@ -195,7 +195,7 @@
         toast.setAttribute('role', 'status');
         toast.innerHTML = `
           <span class="quest-toast-icon">${r.icon || '🎯'}</span>
-          <span class="quest-toast-text">${escapeHtml(t('quests.rewardToast', { xp: r.xp, coins: r.coins }))}</span>
+          <span class="quest-toast-text">${global.CoinIcon?.format?.(t('quests.rewardToast', { xp: r.xp, coins: r.coins }), 'coin-icon coin-icon--sm') || escapeHtml(t('quests.rewardToast', { xp: r.xp, coins: r.coins }))}</span>
         `;
         document.body.appendChild(toast);
         requestAnimationFrame(() => toast.classList.add('visible'));

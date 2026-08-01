@@ -888,7 +888,7 @@
       if (tokens > 0) {
         parts.push(`<button type="button" class="rw-extra-btn rw-extra-btn--token" data-action="token">${escapeHtml(t('relatedWords.extraGuessUseToken', { count: tokens }))}</button>`);
       }
-      parts.push(`<button type="button" class="rw-extra-btn rw-extra-btn--coins" data-action="coins"${coins < price ? ' disabled' : ''}>${escapeHtml(t('relatedWords.extraGuessBuyCoins', { count: price }))}</button>`);
+      parts.push(`<button type="button" class="rw-extra-btn rw-extra-btn--coins" data-action="coins"${coins < price ? ' disabled' : ''}>${global.CoinIcon?.format?.(t('relatedWords.extraGuessBuyCoins', { count: price }), 'coin-icon coin-icon--sm') || escapeHtml(t('relatedWords.extraGuessBuyCoins', { count: price }))}</button>`);
       parts.push(`<button type="button" class="rw-extra-btn rw-extra-btn--ad" data-action="ad">${escapeHtml(t('relatedWords.extraGuessWatchAd'))}</button>`);
 
       this.els.extraGuessTitle.textContent = t('relatedWords.extraGuessTitle');
@@ -1024,7 +1024,7 @@
         btn.innerHTML = `
           <span class="rw-hint-btn__icon" aria-hidden="true">💡</span>
           <span class="rw-hint-btn__label">${escapeHtml(t('relatedWords.hintLabel'))}</span>
-          <span class="rw-hint-btn__cost">${escapeHtml(t('relatedWords.hintCost', { count: HINT_COST }))}</span>`;
+          <span class="rw-hint-btn__cost">${global.CoinIcon?.format?.(t('relatedWords.hintCost', { count: HINT_COST }), 'coin-icon coin-icon--sm') || escapeHtml(t('relatedWords.hintCost', { count: HINT_COST }))}</span>`;
         btn.setAttribute('aria-label', t('relatedWords.hintAria', { count: HINT_COST }));
         btn.title = t('relatedWords.hintAria', { count: HINT_COST });
       }

@@ -265,7 +265,7 @@
         <p class="daily-cal-progress-text">${escapeHtml(t('dailyCalendar.unlockPastHint', { date: dateLabel }))}</p>
         <div class="daily-cal-unlock-row">
           <button type="button" class="daily-cal-unlock-btn coins no-press" data-cal-action="coins">
-            ${escapeHtml(t('dailyCalendar.payCoins', { count: cost }))}
+            ${global.CoinIcon?.format?.(t('dailyCalendar.payCoins', { count: cost }), 'coin-icon coin-icon--sm') || escapeHtml(t('dailyCalendar.payCoins', { count: cost }))}
           </button>
           <button type="button" class="daily-cal-unlock-btn ad no-press" data-cal-action="ad">
             ${escapeHtml(t('dailyCalendar.watchAd'))}

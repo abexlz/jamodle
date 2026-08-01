@@ -629,3 +629,34 @@ button.ghost,
   box-shadow: var(--app-btn-shadow-active) !important;
   filter: brightness(0.96);
 }
+
+/* Shared currency coin icon (assets/coin.png) */
+.coin-icon {
+  display: inline-block;
+  width: 1.15em;
+  height: 1.15em;
+  vertical-align: -0.2em;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.coin-icon--sm {
+  width: 1em;
+  height: 1em;
+}
+
+.coin-icon--md {
+  width: 1.35em;
+  height: 1.35em;
+}
+
+.coin-icon--lg {
+  width: 1.6em;
+  height: 1.6em;
+}
+
+.coin-icon--hud {
+  width: 100%;
+  height: 100%;
+  vertical-align: 0;
+}

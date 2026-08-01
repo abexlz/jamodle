@@ -43,11 +43,15 @@
       const tx = cx + r * 0.58 * Math.cos(mid);
       const ty = cy + r * 0.58 * Math.sin(mid);
       const rot = i * slice + slice / 2;
+      const iconMarkup = prize.icon === '🪙'
+        ? `<image href="assets/coin.png" x="${tx - 11}" y="${ty - 11}" width="22" height="22"
+            transform="rotate(${rot}, ${tx}, ${ty})" preserveAspectRatio="xMidYMid meet"/>`
+        : `<text x="${tx}" y="${ty}" text-anchor="middle" dominant-baseline="middle"
+            font-size="22" transform="rotate(${rot}, ${tx}, ${ty})">${prize.icon}</text>`;
       return `
         <path d="M${cx},${cy} L${x1},${y1} A${r},${r} 0 ${large},1 ${x2},${y2} Z"
           fill="${prize.color}" stroke="#fff" stroke-width="2.5"/>
-        <text x="${tx}" y="${ty}" text-anchor="middle" dominant-baseline="middle"
-          font-size="22" transform="rotate(${rot}, ${tx}, ${ty})">${prize.icon}</text>
+        ${iconMarkup}
       `;
     }).join('');
 
@@ -108,7 +112,7 @@
     const prize = result.prize;
     panel.innerHTML = `
       <div class="wheel-reveal">
-        <span class="wheel-reveal-icon" aria-hidden="true">${prize.icon}</span>
+        <span class="wheel-reveal-icon" aria-hidden="true">${global.CoinIcon?.resolve?.(prize.icon, 'coin-icon coin-icon--lg') || escapeHtml(prize.icon)}</span>
         <h2 class="wheel-reveal-title">${escapeHtml(t('wheel.wonTitle'))}</h2>
         <p class="wheel-reveal-prize">${escapeHtml(prizeLabel(prize))}</p>
         <button type="button" class="wheel-done-btn" id="wheel-done-btn">${escapeHtml(t('wheel.continue'))}</button>

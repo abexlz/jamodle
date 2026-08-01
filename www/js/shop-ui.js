@@ -31,7 +31,7 @@
         action = `
           <button type="button" class="shop-buy-btn shop-buy-btn--compact" data-buy-title="${escapeHtml(title.id)}"
             ${inv.coins >= title.price ? '' : 'disabled'}>
-            🪙 ${title.price}
+            ${global.CoinIcon?.html?.('coin-icon coin-icon--sm') || '🪙'} ${title.price}
           </button>`;
       }
 
@@ -74,7 +74,7 @@
         action = `
           <button type="button" class="shop-buy-btn shop-buy-btn--compact" data-buy-frame="${escapeHtml(frame.id)}"
             ${inv.coins >= frame.price ? '' : 'disabled'}>
-            🪙 ${frame.price}
+            ${global.CoinIcon?.html?.('coin-icon coin-icon--sm') || '🪙'} ${frame.price}
           </button>`;
       }
 
@@ -104,7 +104,7 @@
 
       return `
         <article class="shop-item-card shop-item-card--row" title="${escapeHtml(desc)}">
-          <span class="shop-item-icon" aria-hidden="true">${item.icon}</span>
+          <span class="shop-item-icon" aria-hidden="true">${global.CoinIcon?.resolve?.(item.icon, 'coin-icon coin-icon--md') || escapeHtml(item.icon)}</span>
           <div class="shop-item-main">
             <span class="shop-item-name">${escapeHtml(name)}</span>
             <span class="shop-item-qty">${escapeHtml(t('shop.quantity', { count }))}</span>
@@ -112,7 +112,7 @@
           <button type="button" class="shop-buy-btn shop-buy-btn--compact" data-buy-item="${escapeHtml(item.key)}"
             ${inv.coins >= item.price ? '' : 'disabled'}
             aria-label="${escapeHtml(t('shop.buy'))} ${escapeHtml(name)}">
-            🪙 ${item.price}
+            ${global.CoinIcon?.html?.('coin-icon coin-icon--sm') || '🪙'} ${item.price}
           </button>
         </article>
       `;
@@ -131,7 +131,7 @@
       <section class="shop-section" id="shop-section" aria-labelledby="shop-section-heading">
         <div class="shop-section-header">
           <h2 class="shop-section-title" id="shop-section-heading">🛒 ${escapeHtml(t('shop.title'))}</h2>
-          <p class="shop-section-balance">${escapeHtml(t('shop.balance'))}: <strong>🪙 ${inv.coins}</strong></p>
+          <p class="shop-section-balance">${escapeHtml(t('shop.balance'))}: <strong>${global.CoinIcon?.html?.('coin-icon coin-icon--sm') || '🪙'} ${inv.coins}</strong></p>
         </div>
 
         <div class="shop-scope-bar">
@@ -258,7 +258,8 @@
     toast.id = 'level-coin-toast';
     toast.className = 'level-coin-toast';
     toast.setAttribute('role', 'status');
-    toast.textContent = t('shop.levelUpCoins', { coins: coinsGranted });
+    toast.innerHTML = global.CoinIcon?.format?.(t('shop.levelUpCoins', { coins: coinsGranted }), 'coin-icon coin-icon--sm')
+      || escapeHtml(t('shop.levelUpCoins', { coins: coinsGranted }));
     document.body.appendChild(toast);
     requestAnimationFrame(() => toast.classList.add('visible'));
     global.PlayerHud?.refresh?.();

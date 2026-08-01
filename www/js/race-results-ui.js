@@ -140,7 +140,7 @@
     if (rewards.xp > 0) parts.push(`<span class="race-results-reward race-results-reward--xp">+${rewards.xp} XP</span>`);
     if (rewards.coins > 0) {
       parts.push(`<span class="race-results-reward-sep" aria-hidden="true">|</span>`);
-      parts.push(`<span class="race-results-reward race-results-reward--coins">🪙 ${rewards.coins} coins</span>`);
+      parts.push(`<span class="race-results-reward race-results-reward--coins">${global.CoinIcon?.html?.('coin-icon coin-icon--sm') || '🪙'} ${rewards.coins} coins</span>`);
     }
     if (!parts.length) return '';
     return `<div class="race-results-rewards-pill">${parts.join('')}</div>`;

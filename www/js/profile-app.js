@@ -220,7 +220,7 @@
     return `
       <div class="profile-panel-block profile-panel-summary">
         <p class="profile-level-line">${t('profile.levelLine', { level: summary.level, title: summary.displayTitle || summary.levelTitle })}</p>
-        <p class="profile-coins-line">🪙 ${summary.coins} ${escapeHtml(t('shop.coins'))}</p>
+        <p class="profile-coins-line">${global.CoinIcon?.html?.('coin-icon coin-icon--md') || '🪙'} ${summary.coins} ${escapeHtml(t('shop.coins'))}</p>
         <p class="profile-streak-line">${summary.currentStreak > 0
           ? t('profile.streakLine', { days: summary.currentStreak })
           : t('profile.streakStart')}</p>
