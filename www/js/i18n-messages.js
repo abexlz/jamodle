@@ -223,8 +223,8 @@
           "body": "Drag each jamo from the dock into the matching slot."
         },
         "placeGam": {
-          "title": "Add a final consonant — 감",
-          "body": "Korean syllables can end with a 받침. Place ㄱ, ㅏ, and ㅁ to make 감."
+          "title": "Add a final consonant — 산",
+          "body": "Korean syllables can end with a 받침. Place ㅅ, ㅏ, and ㄴ to make 산."
         },
         "rotateVowel": {
           "title": "Rotate a vowel — 코",
@@ -1681,8 +1681,8 @@
           "body": "도크에서 자모를 끌어 알맞은 칸에 놓아 보세요."
         },
         "placeGam": {
-          "title": "받침 넣기 — 감",
-          "body": "한글 음절 끝에는 받침이 올 수 있어요. ㄱ, ㅏ, ㅁ을 놓아 감을 만들어 보세요."
+          "title": "받침 넣기 — 산",
+          "body": "한글 음절 끝에는 받침이 올 수 있어요. ㅅ, ㅏ, ㄴ을 놓아 산을 만들어 보세요."
         },
         "rotateVowel": {
           "title": "모음 돌리기 — 코",

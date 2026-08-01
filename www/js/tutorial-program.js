@@ -21,15 +21,15 @@
     {
       id: 'place-gam',
       type: 'guided-place',
-      word: '감',
+      word: '산',
       wordLength: 1,
       titleKey: 'tutorial.steps.placeGam.title',
       bodyKey: 'tutorial.steps.placeGam.body',
       hideMerge: true,
       placements: [
-        { char: 'ㄱ', zoneType: 'cho', syllableIndex: 0 },
+        { char: 'ㅅ', zoneType: 'cho', syllableIndex: 0 },
         { char: 'ㅏ', zoneType: 'jungV', syllableIndex: 0 },
-        { char: 'ㅁ', zoneType: 'jong', syllableIndex: 0 },
+        { char: 'ㄴ', zoneType: 'jong', syllableIndex: 0 },
       ],
     },
     {
