@@ -576,19 +576,24 @@
     const el = root?.querySelector?.('.race-results-answer-meaning');
     if (!el || !word) return;
     const ttsOptions = { autoplay: options.autoplay !== false, autoplayRepeats: options.autoplayRepeats };
+
+    const gloss = global.MatchWordMeanings?.[word]
+      || global.LearningWords?.getWordMeaning?.(word)
+      || '';
+    if (gloss) {
+      el.textContent = gloss;
+      global.AnswerTTS?.setupResultsAnswer?.(root, word, ttsOptions);
+    }
+
     const dictText = await global.DictionaryService?.resolveEnglishMeaning?.(word);
     if (dictText) {
       el.textContent = dictText;
       global.AnswerTTS?.setupResultsAnswer?.(root, word, ttsOptions);
       return;
     }
-    const gloss = global.MatchWordMeanings?.[word]
-      || global.LearningWords?.getWordMeaning?.(word);
-    if (gloss) {
-      el.textContent = gloss;
-      global.AnswerTTS?.setupResultsAnswer?.(root, word, ttsOptions);
-      return;
-    }
+
+    if (gloss) return;
+
     const entry = global.LearningWords?.findWordEntry?.(word);
     if (entry) {
       const normalized = global.LearningWords?.getNormalizedWord?.(word)

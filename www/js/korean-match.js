@@ -1242,13 +1242,9 @@
       const q = String(word || '').trim();
       if (!q) return '';
 
-      const prefetched = this.multiDictionaryEntries?.[q]
-        || (q === this.discoveredWord ? this.discoveredDictionaryEntry : null);
-      const dictMeaning = await global.DictionaryService?.resolveEnglishMeaning?.(q, prefetched);
-      if (dictMeaning) return dictMeaning;
-
       const glossary = global.MatchWordMeanings?.[q]
-        || global.LearningWords?.getWordMeaning?.(q);
+        || global.LearningWords?.getWordMeaning?.(q)
+        || '';
       if (glossary) return glossary;
 
       const entry = global.LearningWords?.findWordEntry?.(q);
@@ -1258,13 +1254,26 @@
         const curated = global.LearningWordModel?.getDisplayMeaning?.(normalized);
         if (curated) return curated;
       }
+
+      const prefetched = this.multiDictionaryEntries?.[q]
+        || (q === this.discoveredWord ? this.discoveredDictionaryEntry : null);
+      const dictMeaning = await global.DictionaryService?.resolveEnglishMeaning?.(q, prefetched);
+      if (dictMeaning) return dictMeaning;
+
       return '';
     }
 
     prefetchMeaning(word) {
       const q = String(word || '').trim();
+      if (!q) return;
       this._meaningWord = q;
-      this._meaningPromise = this.resolveWordMeaning(q);
+      this._meaningPromise = this.resolveWordMeaning(q).then((text) => {
+        // Don't lock in an empty miss — allow a later resolve (e.g. after dict warms up).
+        if (!text && this._meaningWord === q) {
+          this._meaningPromise = null;
+        }
+        return text;
+      });
       global.DictionaryService?.prefetchWord?.(q);
     }
 
@@ -1272,9 +1281,24 @@
       const q = String(word || '').trim();
       if (!q) return '';
       if (this._meaningWord === q && this._meaningPromise) {
-        return this._meaningPromise;
+        const cached = await this._meaningPromise;
+        if (cached) return cached;
       }
-      return this.resolveWordMeaning(q);
+      const fresh = this.resolveWordMeaning(q);
+      this._meaningWord = q;
+      this._meaningPromise = fresh.then((text) => {
+        if (!text && this._meaningWord === q) this._meaningPromise = null;
+        return text;
+      });
+      return fresh;
+    }
+
+    getSyncMeaning(word) {
+      const q = String(word || '').trim();
+      if (!q) return '';
+      return global.MatchWordMeanings?.[q]
+        || global.LearningWords?.getWordMeaning?.(q)
+        || '';
     }
 
     updateMeaningDisplay() {
@@ -4924,7 +4948,7 @@
         .map((w) => {
           const dictEntry = this.multiDictionaryEntries?.[w]
             || (w === this.discoveredWord ? this.discoveredDictionaryEntry : null);
-          return formatDict(dictEntry);
+          return formatDict(dictEntry) || this.getSyncMeaning(w);
         })
         .filter(Boolean)
         .join(' · ');
@@ -4956,11 +4980,14 @@
       meaningEl.textContent = syncText;
       meaningEl.hidden = !syncText;
       meaningEl.classList.toggle('hidden', !syncText);
-      if (syncText) return;
-      const fallbackWord = meaningWords[0] || this.getResolvedWord();
-      if (!fallbackWord) return;
+
       const fillAsync = async () => {
-        const text = await this.getMeaningForWord(fallbackWord);
+        const parts = [];
+        for (const w of meaningWords) {
+          const text = await this.getMeaningForWord(w);
+          if (text) parts.push(text);
+        }
+        const text = parts.join(' · ');
         if (!text || !meaningEl.isConnected) return;
         meaningEl.textContent = text;
         meaningEl.hidden = false;
