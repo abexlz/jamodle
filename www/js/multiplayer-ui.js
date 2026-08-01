@@ -5,6 +5,7 @@
   'use strict';
 
   const BATTLE_GAME_KEY = 'jamodeul-battle-game';
+  let matchmakingCountdownTimer = null;
 
   function readStoredBattleGame() {
     try {
@@ -241,11 +242,15 @@
 
   function resetMatchmakingOverlay(overlay) {
     if (!overlay) return;
+    stopMatchmakingCountdown();
     overlay.dataset.selectedLength = '';
     const pickedEl = overlay.querySelector('[data-matchmaking-picked]');
     if (pickedEl) pickedEl.textContent = '';
     const etaEl = overlay.querySelector('[data-matchmaking-eta]');
-    if (etaEl) etaEl.textContent = '';
+    if (etaEl) {
+      etaEl.textContent = '';
+      etaEl.removeAttribute('aria-label');
+    }
     const noteEl = overlay.querySelector('[data-matchmaking-note]');
     if (noteEl) {
       const isWordChain = overlay.dataset.selectedGame === 'word-chain';
@@ -259,6 +264,39 @@
 
   function getBotFallbackMs() {
     return global.BotProfileService?.BOT_FALLBACK_MS ?? 10_000;
+  }
+
+  function stopMatchmakingCountdown() {
+    if (matchmakingCountdownTimer) {
+      clearInterval(matchmakingCountdownTimer);
+      matchmakingCountdownTimer = null;
+    }
+  }
+
+  function startMatchmakingCountdown(overlay) {
+    stopMatchmakingCountdown();
+    const etaEl = overlay?.querySelector('[data-matchmaking-eta]');
+    if (!etaEl) return;
+
+    const totalMs = getBotFallbackMs();
+    const endsAt = Date.now() + totalMs;
+
+    const render = () => {
+      const remainingMs = endsAt - Date.now();
+      const seconds = Math.max(1, Math.ceil(remainingMs / 1000));
+      etaEl.textContent = String(seconds);
+      etaEl.setAttribute(
+        'aria-label',
+        t('menu.battle.matchmakingCountdown', { seconds }) || `${seconds}`
+      );
+      return remainingMs;
+    };
+
+    render();
+    matchmakingCountdownTimer = setInterval(() => {
+      const remainingMs = render();
+      if (remainingMs <= 0) stopMatchmakingCountdown();
+    }, 250);
   }
 
   function redirectToBotMatch(game, options = {}) {
@@ -302,6 +340,7 @@
   }
 
   async function cancelMatchmakingSearch(options = {}) {
+    stopMatchmakingCountdown();
     try {
       await global.MatchQueueService?.leaveQueue?.();
     } catch (_) { /* ignore */ }
@@ -318,11 +357,7 @@
   }
 
   function setMatchmakingEta(overlay) {
-    const etaEl = overlay.querySelector('[data-matchmaking-eta]');
-    if (!etaEl) return;
-    const seconds = Math.ceil(getBotFallbackMs() / 1000);
-    etaEl.textContent = t('menu.battle.matchmakingExpectedWait', { seconds })
-      || `Expected wait: ~${seconds} sec`;
+    startMatchmakingCountdown(overlay);
   }
 
   function matchPageUrlForResult(result) {
@@ -353,11 +388,13 @@
         game,
         wordLength,
         onMatched: (result) => {
+          stopMatchmakingCountdown();
           setMatchmakingStatus(overlay, 'menu.battle.matchmakingFound');
           const url = matchPageUrlForResult(result);
           if (url) global.location.href = url;
         },
         onBotFallback: (ctx) => {
+          stopMatchmakingCountdown();
           setMatchmakingStatus(overlay, 'menu.battle.matchmakingFound');
           const botGame = botGameKeyFromQueue(ctx.game);
           redirectToBotMatch(
@@ -366,12 +403,14 @@
           );
         },
         onError: () => {
+          stopMatchmakingCountdown();
           alert(t('menu.battle.matchmakingFailed'));
           resetMatchmakingOverlay(overlay);
         },
       });
     } catch (err) {
       console.error('[Multiplayer] matchmaking failed', err);
+      stopMatchmakingCountdown();
       alert(t('menu.battle.matchmakingFailed'));
       resetMatchmakingOverlay(overlay);
     }

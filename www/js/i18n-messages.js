@@ -52,6 +52,7 @@
         "matchmakingLogin": "Sign in to play random matches.",
         "matchmakingFound": "Opponent found!",
         "matchmakingExpectedWait": "Expected wait: ~{{seconds}} sec",
+        "matchmakingCountdown": "{{seconds}}",
         "matchmakingWordChainNote": "Searching for a Word Chain opponent."
       },
       "modes": {
@@ -1512,6 +1513,7 @@
         "matchmakingLogin": "랜덤 매치를 하려면 로그인하세요.",
         "matchmakingFound": "상대를 찾았습니다!",
         "matchmakingExpectedWait": "예상 대기: 약 {{seconds}}초",
+        "matchmakingCountdown": "{{seconds}}",
         "matchmakingWordChainNote": "연관 단어 대결 상대를 찾는 중입니다."
       },
       "modes": {

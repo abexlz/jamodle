@@ -48,6 +48,7 @@
       "matchmakingLogin": "Sign in to play random matches.",
       "matchmakingFound": "Opponent found!",
       "matchmakingExpectedWait": "Expected wait: ~{{seconds}} sec",
+      "matchmakingCountdown": "{{seconds}}",
       "matchmakingWordChainNote": "Searching for a Word Chain opponent."
     },
     "modes": {
