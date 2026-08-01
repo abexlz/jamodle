@@ -480,9 +480,9 @@ body.home-menu-active.home-tab-learn .section-header {
 /* Compact header on short phones */
 @media (max-height: 760px) {
   body.home-menu-active {
-    --menu-header-gap: 10px;
-    --menu-content-top: 2px;
-    --menu-profile-size: clamp(72px, 19vw, 88px);
+    --menu-header-gap: 6px;
+    --menu-content-top: 0px;
+    --menu-profile-size: clamp(40px, 10.5vw, 46px);
   }
 
   body.home-menu-active .menu-brand-line2 {
@@ -490,7 +490,7 @@ body.home-menu-active.home-tab-learn .section-header {
   }
 
   body.home-menu-active .menu-brand {
-    margin-top: 6px !important;
+    margin-top: 2px !important;
     gap: 6px !important;
   }
 
@@ -503,8 +503,8 @@ body.home-menu-active.home-tab-learn .section-header {
 
 @media (max-height: 680px) {
   body.home-menu-active {
-    --menu-header-gap: 6px;
-    --menu-profile-size: clamp(64px, 17vw, 80px);
+    --menu-header-gap: 4px;
+    --menu-profile-size: clamp(38px, 10vw, 44px);
     --home-nav-section-h: clamp(64px, 10.5dvh, 80px);
   }
 

@@ -88,16 +88,17 @@
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
     --menu-bar-h: 58px;
-    --menu-header-gap: 28px;
-    --menu-content-top: 12px;
-    --menu-header-fade-h: 72px;
-    --menu-profile-size: clamp(92px, 26vw, 112px);
-    --menu-profile-overhang: calc(var(--menu-profile-size) * 0.42);
-    --menu-profile-drop: 14%;
-    --menu-bar-teal-top: #12a3b8;
-    --menu-bar-teal-mid: #0e92a6;
-    --menu-bar-teal-low: #0a7f92;
-    --menu-bg-teal: #0097B2;
+    --menu-header-gap: 10px;
+    --menu-content-top: 2px;
+    --menu-header-fade-h: 48px;
+    --menu-profile-size: clamp(42px, 11vw, 48px);
+    --menu-profile-overhang: 0px;
+    --menu-profile-drop: 0%;
+    --menu-bar-teal-top: #2eb8c8;
+    --menu-bar-teal-mid: #1aa8ba;
+    --menu-bar-teal-low: #0e96a8;
+    --menu-bg-teal: #1aa8ba;
+    --menu-bar-edge: rgba(90, 160, 172, 0.42);
   }
   [data-theme="dark"]{
     --bg: #1A1D28;
@@ -246,7 +247,7 @@
     display: grid;
     grid-template-columns: minmax(88px, 1fr) auto minmax(88px, 1fr);
     grid-template-rows: 1fr;
-    align-items: end;
+    align-items: center;
     width: 100%;
     max-width: none;
     margin: 0;
@@ -267,30 +268,30 @@
     grid-column: 1;
     grid-row: 1;
     justify-self: start;
-    align-self: end;
+    align-self: center;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     gap: clamp(6px, 2vw, 10px);
     pointer-events: auto;
     z-index: 30;
     padding-left: 2px;
-    margin-bottom: 4px;
+    margin-bottom: 0;
   }
 
   .menu-top-bar .menu-profile-nav,
   .menu-top-bar .menu-hud-profile {
     grid-column: 2;
     grid-row: 1;
-    align-self: end;
+    align-self: center;
     margin: 0;
-    transform: translateY(var(--menu-profile-drop, 14%));
+    transform: none;
     pointer-events: auto;
     z-index: 35;
   }
 
   .menu-top-bar .menu-profile-nav:active,
   .menu-top-bar .menu-hud-profile:active {
-    transform: translateY(var(--menu-profile-drop, 14%)) scale(0.94);
+    transform: scale(0.94);
   }
 
   .menu-top-bar .player-hud-slot,
@@ -298,8 +299,8 @@
     grid-column: 3;
     grid-row: 1;
     justify-self: end;
-    align-self: end;
-    margin-bottom: 6px;
+    align-self: center;
+    margin-bottom: 0;
     pointer-events: auto;
   }
 
@@ -311,11 +312,9 @@
     top: calc(var(--menu-bar-h) + var(--safe-top) + var(--menu-profile-overhang) * 0.35);
     height: var(--menu-header-fade-h);
     background: linear-gradient(180deg,
-      var(--menu-bar-teal-low) 0%,
-      #0e8da2 24%,
-      #119faf 48%,
-      rgba(0, 151, 178, 0.72) 68%,
-      rgba(0, 151, 178, 0) 100%);
+      rgba(30, 168, 186, 0.55) 0%,
+      rgba(90, 180, 190, 0.28) 40%,
+      rgba(126, 184, 200, 0) 100%);
     z-index: 18;
     pointer-events: none;
   }
@@ -328,19 +327,18 @@
   }
 
   [data-theme="dark"] {
-    --menu-bar-teal-top: #0e92a6;
-    --menu-bar-teal-mid: #0a7f92;
-    --menu-bar-teal-low: #086878;
+    --menu-bar-teal-top: #1aa8ba;
+    --menu-bar-teal-mid: #0e96a8;
+    --menu-bar-teal-low: #0a7f92;
     --menu-bg-teal: #0d5a68;
+    --menu-bar-edge: rgba(70, 140, 155, 0.4);
   }
 
   [data-theme="dark"] .menu-header::before {
     background: linear-gradient(180deg,
-      var(--menu-bar-teal-low) 0%,
-      #153544 18%,
-      #0e8da2 42%,
-      rgba(0, 151, 178, 0.55) 68%,
-      rgba(0, 151, 178, 0) 100%);
+      rgba(14, 150, 168, 0.5) 0%,
+      rgba(70, 140, 155, 0.22) 42%,
+      rgba(13, 90, 104, 0) 100%);
   }
 
   .menu-profile-nav {
@@ -374,7 +372,7 @@
     align-items: center;
     gap: clamp(4px, 1.2vw, 8px);
     width: 100%;
-    margin: clamp(16px, 4.5vw, 22px) 0 0;
+    margin: clamp(4px, 1.2vw, 8px) 0 0;
     padding: 0 4px;
     flex-wrap: nowrap;
     position: relative;
@@ -383,7 +381,7 @@
 
   .menu-brand--jamodeul {
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
   }
 
   .menu-brand-line1 {
@@ -1686,7 +1684,7 @@
 <link rel="stylesheet" href="css/cosmetic-themes.css">
 <link rel="stylesheet" href="css/shop.css">
 <link rel="stylesheet" href="css/profile.css">
-<link rel="stylesheet" href="css/menu-hud.css?v=2">
+<link rel="stylesheet" href="css/menu-hud.css?v=3">
 <link rel="stylesheet" href="css/quests.css?v=20260711w">
 <link rel="stylesheet" href="css/wheel.css">
 <link rel="stylesheet" href="css/multiplayer.css?v=27">
@@ -1694,8 +1692,8 @@
 <link rel="stylesheet" href="css/app-wordle-ui.css?v=22">
 <link rel="stylesheet" href="css/daily-calendar.css?v=10" id="daily-cal-styles">
 <link rel="stylesheet" href="css/menu-typography.css?v=1">
-<link rel="stylesheet" href="css/menu-responsive.css?v=8">
-<link rel="stylesheet" href="css/game-layout.css?v=12">
+<link rel="stylesheet" href="css/menu-responsive.css?v=9">
+<link rel="stylesheet" href="css/game-layout.css?v=13">
 <link rel="stylesheet" href="css/app-fonts.css?v=3">
 </head>
 <body>

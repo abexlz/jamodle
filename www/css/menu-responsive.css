@@ -73,20 +73,18 @@ html[data-theme="dark"] .menu-top-bar,
 html.high-contrast .menu-top-bar,
 html.large-text .menu-top-bar {
   background: linear-gradient(180deg,
-    #12a3b8 0%,
-    #0e92a6 55%,
-    #0a7f92 100%) !important;
-  border-bottom-color: rgba(123, 207, 255, 0.38) !important;
+    #2eb8c8 0%,
+    #1aa8ba 55%,
+    #0e96a8 100%) !important;
+  border-bottom-color: rgba(90, 160, 172, 0.42) !important;
 }
 
 html[data-theme="dark"] .menu-header::before,
 html.high-contrast .menu-header::before {
   background: linear-gradient(180deg,
-    #0a7f92 0%,
-    #0e8da2 24%,
-    #119faf 48%,
-    rgba(0, 151, 178, 0.72) 68%,
-    rgba(0, 151, 178, 0) 100%) !important;
+    rgba(30, 168, 186, 0.45) 0%,
+    rgba(90, 180, 190, 0.22) 42%,
+    rgba(126, 184, 200, 0) 100%) !important;
 }
 
 html.large-text body.home-menu-active {
@@ -133,8 +131,8 @@ html.large-text body.home-menu-active {
     --menu-fluid-h: clamp(0.84, 0.12rem + 0.9dvh, 0.98);
     --app-btn-min-h: clamp(46px, 12.5vw, 64px);
     --app-btn-max-h: clamp(54px, 14.5vw, 72px);
-    --menu-header-gap: 18px;
-    --menu-profile-size: clamp(80px, 21vw, 96px);
+    --menu-header-gap: 8px;
+    --menu-profile-size: clamp(40px, 10.5vw, 46px);
   }
 }
 
