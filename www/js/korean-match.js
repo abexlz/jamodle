@@ -219,6 +219,8 @@
     }
 
     setInBank(bankContainer) {
+      // Locked greens must never be pulled back into the dock.
+      if (this.locked) return;
       this.inBank = true;
       this.zoneRef = null;
       if (this.el.parentElement !== bankContainer) bankContainer.appendChild(this.el);
@@ -2459,18 +2461,7 @@
       tile.el.style.removeProperty('opacity');
       tile.el.style.removeProperty('pointer-events');
 
-      if (this.isMergeConsumedTile(tile)) {
-        if (this.els.bank) {
-          if (tile.el.parentElement !== this.els.bank) this.els.bank.appendChild(tile.el);
-          tile.inBank = true;
-          tile.mergeDockRef = null;
-          tile.mergeDockSlot = null;
-          tile.el.classList.add('hidden-in-bank', 'merge-consumed');
-          tile.el.classList.remove('in-zone', 'selected', 'dragging');
-        }
-        return;
-      }
-
+      // Locked / placed tiles win over merge-consumed parking — never hide a green.
       if (tile.locked && tile.zoneRef) {
         this.mountLockedTileInZone(tile.zoneRef, tile);
         return;
@@ -2489,6 +2480,25 @@
         tile.zoneRef.el.classList.add('filled');
         return;
       }
+      if (tile.locked) {
+        // Locked but missing zoneRef — keep out of the dock until remounted.
+        tile.inBank = false;
+        tile.el.classList.remove('hidden-in-bank', 'merge-consumed');
+        return;
+      }
+
+      if (this.isMergeConsumedTile(tile)) {
+        if (this.els.bank) {
+          if (tile.el.parentElement !== this.els.bank) this.els.bank.appendChild(tile.el);
+          tile.inBank = true;
+          tile.mergeDockRef = null;
+          tile.mergeDockSlot = null;
+          tile.el.classList.add('hidden-in-bank', 'merge-consumed');
+          tile.el.classList.remove('in-zone', 'selected', 'dragging');
+        }
+        return;
+      }
+
       if (tile.mergeDockRef) {
         tile.inBank = false;
         tile.el.classList.remove('hidden-in-bank', 'merge-consumed', 'in-zone');
@@ -2503,6 +2513,11 @@
     recoverAllTileMounts({ showDock = true } = {}) {
       Object.values(this.tileMap || {}).forEach((tile) => {
         if (!tile) return;
+        if (tile.locked) {
+          if (tile.zoneRef) this.mountLockedTileInZone(tile.zoneRef, tile);
+          else this.ensureTileMounted(tile);
+          return;
+        }
         if (this.isMergeConsumedTile(tile)) {
           if (this.els.bank && !tile.zoneRef && !tile.mergeDockRef) {
             if (tile.el && tile.el.parentElement !== this.els.bank) {
@@ -2511,11 +2526,6 @@
             tile.inBank = true;
             tile.el?.classList.add('hidden-in-bank', 'merge-consumed');
           }
-          return;
-        }
-        if (tile.locked) {
-          if (tile.zoneRef) this.mountLockedTileInZone(tile.zoneRef, tile);
-          else this.ensureTileMounted(tile);
           return;
         }
         if (tile.zoneRef || tile.mergeDockRef) {
@@ -3441,6 +3451,8 @@
             if (tile) {
               this.mountLockedTileInZone(zone, tile);
             } else {
+              // Zone is marked green but the tile was orphaned — leave styling;
+              // restoreTurnLockedPlacements will remount from shared locks.
               zone.el.classList.remove(
                 'turn-neutral', 'revealing', 'revealing-wrong',
                 'watch-wrong', 'watch-reveal-pending', 'incorrect'
@@ -3485,6 +3497,7 @@
       this.restoreVisibleTiles();
       // Wrong/unlocked tiles must be visibly back in the dock on turn swap.
       this.recoverAllTileMounts({ showDock: !this.watchMode });
+      this.hideDockDupesForLockedGreens();
       if (!this.watchMode) this.reconcileTileInventory();
       this.updateCheckButton();
     }
@@ -3512,20 +3525,33 @@
       const sub = placement.subIndex ?? 0;
       if (placement.tileId) {
         const byId = this.tileMap[placement.tileId];
-        if (byId && byId.inBank && !byId.locked && byId.char === placement.char) return byId;
+        // Prefer the exact live tile even if it was parked/hidden during watch.
+        if (byId && !byId.locked && byId.char === placement.char && !byId.zoneRef) {
+          return byId;
+        }
       }
       const block = this.blocks[placement.syl];
       const zone = block?.getAllZones().find((z) => (
         z.zoneType === placement.zone && (z.subIndex ?? 0) === sub
       ));
       const freeBank = () => Object.values(this.tileMap).filter((tile) => (
-        tile.inBank && !tile.locked && !tile.zoneRef && !tile.mergeDockRef
-        && (!tile.el || tile.el.parentElement === this.els.bank || !tile.el.isConnected)
+        !tile.locked
+        && !tile.zoneRef
+        && (
+          tile.inBank
+          || tile.mergeDockRef
+          || !tile.el?.isConnected
+          || tile.el.parentElement === this.els.bank
+        )
       ));
-      const candidates = freeBank().filter((tile) => tile.char === placement.char);
+      const preferPlayable = (list) => {
+        const fresh = list.filter((tile) => !this.isMergeConsumedTile(tile));
+        return fresh.length ? fresh : list;
+      };
+      let candidates = preferPlayable(freeBank().filter((tile) => tile.char === placement.char));
       if (!candidates.length) {
         // Accept a rotatable free tile that can become the needed char.
-        const rotatable = freeBank().find((tile) => {
+        const rotatable = preferPlayable(freeBank()).find((tile) => {
           if (!HC.canRotateJamo?.(tile.char)) return false;
           let cur = tile.char;
           for (let i = 0; i < 6; i += 1) {
@@ -3573,9 +3599,15 @@
       tile.inBank = false;
       tile.mergeDockRef = null;
       tile.mergeDockSlot = null;
+      tile.isMergeConsumed = false;
       tile.zoneRef = zone;
       zone.placedTileId = tile.id;
       zone.locked = true;
+      this._removedTileIds = (this._removedTileIds || []).filter((id) => id !== tile.id);
+      // Drop ghosts / stray siblings so only this locked tile remains.
+      zone.el.querySelectorAll('.jamo-tile, .opp-reveal-tile').forEach((el) => {
+        if (el !== tile.el) el.remove();
+      });
       if (tile.el.parentElement !== zone.el) {
         zone.el.appendChild(tile.el);
       }
@@ -3584,8 +3616,10 @@
         'watch-wrong', 'watch-reveal-pending', 'incorrect', 'watch-correct'
       );
       zone.el.classList.add('correct', 'locked', 'filled');
+      zone.el.style.removeProperty('transform');
+      zone.el.style.removeProperty('opacity');
       tile.el.classList.remove(
-        'hidden-in-bank', 'dragging', 'revealing', 'revealing-wrong',
+        'hidden-in-bank', 'merge-consumed', 'dragging', 'revealing', 'revealing-wrong',
         'turn-neutral-tile', 'opp-reveal-tile'
       );
       tile.el.classList.add('in-zone', 'locked', 'revealed', 'correct-flip');
@@ -3657,6 +3691,18 @@
         });
         this._originalDockCount = (this._originalDockCount || 0) + 1;
       }
+      // Detach from merge dock bookkeeping before locking into a green slot.
+      if (tile.mergeDockRef === 'slot' && this.mergeDock) {
+        const idx = tile.mergeDockSlot;
+        if (idx != null && this.mergeDock.slotTileIds[idx] === tile.id) {
+          this.mergeDock.slotTileIds[idx] = null;
+          this.mergeDock.slotEls[idx]?.classList.remove('filled');
+        }
+      } else if (tile.mergeDockRef === 'result') {
+        this.mergeDock?.clearResultTileRef?.(tile);
+      }
+      tile.mergeDockRef = null;
+      tile.mergeDockSlot = null;
       this.mountLockedTileInZone(zone, tile);
       this.purgeTileFromDock(tile);
       return true;
@@ -4000,11 +4046,40 @@
     }
 
     persistWatchCorrectReveals(toReveal) {
-      (toReveal || []).forEach(({ zone, placement }) => {
+      (toReveal || []).forEach(({ zone, placement, tileEl }) => {
+        if (!placement?.char) {
+          tileEl?.remove?.();
+          zone?.el?.querySelectorAll('.opp-reveal-tile').forEach((el) => el.remove());
+          return;
+        }
+        // Mount the real locked tile first, then drop the ghost — avoids a frame
+        // where the green slot is empty and the dock jamo flashes back.
+        const ok = this.placeLockedPlacement(placement);
         zone.el.querySelectorAll('.opp-reveal-tile').forEach((el) => el.remove());
-        zone.el.classList.remove('turn-neutral', 'watch-reveal-pending', 'revealing', 'incorrect', 'watch-wrong', 'watch-correct');
-        if (!placement?.char) return;
-        this.placeLockedPlacement(placement);
+        zone.el.classList.remove(
+          'turn-neutral', 'watch-reveal-pending', 'revealing',
+          'incorrect', 'watch-wrong', 'watch-correct'
+        );
+        if (ok) {
+          const locked = zone.placedTileId ? this.tileMap[zone.placedTileId] : null;
+          if (locked) this.mountLockedTileInZone(zone, locked);
+          this.purgeTileFromDock(locked);
+        }
+      });
+      // Locked greens must not leave a matching duplicate visible in the dock.
+      this.hideDockDupesForLockedGreens();
+    }
+
+    /** Hide any unlocked dock tile that duplicates a locked green's character/id. */
+    hideDockDupesForLockedGreens() {
+      this.blocks?.forEach((block) => {
+        block.getAllZones().forEach((zone) => {
+          if (!zone.locked) return;
+          const tile = zone.placedTileId ? this.tileMap[zone.placedTileId] : null;
+          if (!tile) return;
+          this.mountLockedTileInZone(zone, tile);
+          this.purgeTileFromDock(tile);
+        });
       });
     }
 
@@ -4437,6 +4512,8 @@
             return;
           }
           if (tile.locked) return;
+          tile.isMergeConsumed = false;
+          tile.el?.classList.remove('merge-consumed');
           if (tile.char !== entry.char) {
             tile.zoneType = HC.zoneTypeForRotatedJamo(entry.char, tile.zoneType);
             tile.setChar(entry.char);
@@ -4663,6 +4740,8 @@
 
     applyTurnLiveState(live) {
       if (!live || !this.turnBased || !this.watchMode) return;
+      // Don't tear down the board while a check reveal is flipping/locking greens.
+      if (this._watchRevealBusy) return;
       const actionSeq = live?.action?.seq ?? 0;
 
       if (live.action?.kind === 'checking' && actionSeq > this._lastOppFlashSeq) {

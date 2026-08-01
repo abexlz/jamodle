@@ -42,8 +42,24 @@
     }
 
     reset() {
-      this.slotTileIds = [null, null];
-      this.resultTileId = null;
+      this.slotTileIds.forEach((id, i) => {
+        if (!id) return;
+        const tile = this.callbacks.getTile?.(id);
+        this.slotTileIds[i] = null;
+        if (tile && !tile.locked) {
+          tile.mergeDockRef = null;
+          tile.mergeDockSlot = null;
+          this.callbacks.returnTileToBank?.(tile);
+        }
+      });
+      if (this.resultTileId) {
+        const tile = this.callbacks.getTile?.(this.resultTileId);
+        this.resultTileId = null;
+        if (tile && !tile.locked) {
+          tile.mergeDockRef = null;
+          this.callbacks.returnTileToBank?.(tile);
+        }
+      }
       this.slotEls.forEach((el) => {
         el.classList.remove('filled', 'drag-over');
         el.innerHTML = '';

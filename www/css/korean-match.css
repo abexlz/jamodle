@@ -1040,15 +1040,36 @@
     max-height: 100% !important;
     pointer-events: none;
   }
-  /* Must win over the merge-slot/result "force visible" rule above. */
+  /* Must win over the merge-slot/result "force visible" rule above — but never
+     hide a tile that has already been locked into a green drop-zone. */
   .merge-slot > .jamo-tile.merge-consumed,
   .merge-result > .jamo-tile.merge-consumed,
-  .jamo-bank > .jamo-tile.merge-consumed,
-  .jamo-tile.merge-consumed {
+  .jamo-bank > .jamo-tile.merge-consumed {
     display: none !important;
     opacity: 0 !important;
     visibility: hidden !important;
     pointer-events: none !important;
+  }
+  .drop-zone > .jamo-tile.merge-consumed,
+  .drop-zone > .jamo-tile.locked,
+  .drop-zone > .jamo-tile.in-zone.locked {
+    display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    position: relative !important;
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border: none !important;
+    box-shadow: none !important;
+    pointer-events: none;
   }
   .jamo-tile.selected {
     outline: 5px solid #FFD743;
