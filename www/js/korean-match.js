@@ -1149,6 +1149,8 @@
         createMergedTile: (opts) => this.createMergedTile(opts),
         createBasicTile: (opts) => this.createBasicTile(opts),
         reviveMergeIngredient: (char, opts) => this.reviveMergeIngredient(char, opts),
+        reviveMergeIngredientById: (id) => this.reviveMergeIngredientById(id),
+        discardParkedMergeIngredient: (id) => this.discardParkedMergeIngredient(id),
         renderTileInSlot: (tile) => tile.el,
         swapTiles: (a, b) => this.swapTiles(a, b),
       });
@@ -3225,10 +3227,49 @@
      * Revive a vowel consumed by a merge (hidden/parked) so unmerge yields exactly
      * 2 tiles instead of creating extras alongside the old ingredients.
      */
-    reviveMergeIngredient(char, { syllableIndex } = {}) {
+    reviveMergeIngredientById(id) {
+      if (!id) return null;
+      const tile = this.tileMap[id];
+      if (!tile || tile.locked || tile.isMerged || tile.zoneRef) return null;
+      return this._finishReviveMergeIngredient(tile);
+    }
+
+    /**
+     * Permanently drop a parked merge ingredient that was not chosen on unmerge
+     * (e.g. leftover after a mismatched canonical split). Prevents 2× dock copies.
+     */
+    discardParkedMergeIngredient(id) {
+      if (!id) return;
+      const tile = this.tileMap[id];
+      if (!tile || tile.locked || tile.zoneRef || tile.mergeDockRef) return;
+      if (!this.isMergeConsumedTile(tile) && !tile.el?.classList.contains('merge-consumed')) {
+        return;
+      }
+      this._removedTileIds = (this._removedTileIds || []).filter((rid) => rid !== id);
+      tile.el?.remove();
+      delete this.tileMap[id];
+      if (typeof this._originalDockCount === 'number' && this._originalDockCount > 0) {
+        this._originalDockCount -= 1;
+      }
+    }
+
+    reviveMergeIngredient(char, { syllableIndex, preferId, excludeIds } = {}) {
       if (!char) return null;
+      const excluded = new Set(excludeIds || []);
+      if (preferId && !excluded.has(preferId)) {
+        const preferred = this.reviveMergeIngredientById(preferId);
+        if (preferred) {
+          if (syllableIndex != null) preferred.syllableIndex = syllableIndex;
+          if (preferred.char !== char) {
+            preferred.zoneType = 'jungV';
+            preferred.setChar(char);
+          }
+          return preferred;
+        }
+      }
       const removed = this._removedTileIds || [];
       const removedIdx = removed.findIndex((id) => {
+        if (excluded.has(id)) return false;
         const t = this.tileMap[id];
         return t && !t.locked && !t.isMerged && t.char === char;
       });
@@ -3246,20 +3287,27 @@
           && t.char === char
           && !t.zoneRef
           && !t.mergeDockRef
+          && !excluded.has(t.id)
           && (t.isMergeConsumed || t.el?.classList.contains('hidden-in-bank')
             || t.el?.classList.contains('merge-consumed'))
         )) || null;
       }
+      if (!tile) return null;
+      if (syllableIndex != null) tile.syllableIndex = syllableIndex;
+      return this._finishReviveMergeIngredient(tile);
+    }
+
+    _finishReviveMergeIngredient(tile) {
       if (!tile) return null;
       this._removedTileIds = (this._removedTileIds || []).filter((id) => id !== tile.id);
       tile.isBasic = true;
       tile.isMerged = false;
       tile.isMergeConsumed = false;
       tile.mergeSources = null;
+      tile.mergeSourceIds = null;
       tile.mergeDockRef = null;
       tile.mergeDockSlot = null;
       tile.zoneType = 'jungV';
-      if (syllableIndex != null) tile.syllableIndex = syllableIndex;
       tile.el?.classList.remove('hidden-in-bank', 'merge-consumed');
       return tile;
     }
@@ -3271,11 +3319,12 @@
       return (this._removedTileIds || []).includes(tile.id);
     }
 
-    createMergedTile({ char, syllableIndex, mergeSources }) {
+    createMergedTile({ char, syllableIndex, mergeSources, mergeSourceIds }) {
       const id = `tile-merged-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
       const tile = new JamoTile({ id, char, zoneType: 'jungV', syllableIndex, subIndex: 0, targetChar: char });
       tile.isMerged = true;
-      tile.mergeSources = mergeSources;
+      tile.mergeSources = Array.isArray(mergeSources) ? mergeSources.slice(0, 2) : null;
+      tile.mergeSourceIds = Array.isArray(mergeSourceIds) ? mergeSourceIds.slice(0, 2) : null;
       this.tileMap[id] = tile;
       // Do not bump _originalDockCount — merge parks 2 basics and adds 1 compound;
       // inventory conservation is handled by park/revive, not by inventing capacity.

@@ -348,6 +348,7 @@
         char: merged,
         syllableIndex,
         mergeSources: chars.slice(),
+        mergeSourceIds: slotIds.slice(),
       });
       this.resultTileId = mergedTile.id;
       mergedTile.mergeDockRef = 'result';
@@ -372,8 +373,20 @@
     unmergeTile(mergedTile) {
       if (!mergedTile?.isMerged) return false;
 
-      // Always split into the canonical 2-jamo pair (ignore stale/longer mergeSources).
-      const pair = HC().getMergePairComponents(mergedTile.char);
+      // Prefer the exact ingredients that were merged (round-trip). Fall back to the
+      // canonical pair only when source ids/chars are unknown (e.g. legacy tiles).
+      const sourceIds = Array.isArray(mergedTile.mergeSourceIds)
+        ? mergedTile.mergeSourceIds.filter(Boolean).slice(0, 2)
+        : [];
+      const sourceChars = Array.isArray(mergedTile.mergeSources)
+        ? mergedTile.mergeSources.filter(Boolean).slice(0, 2)
+        : [];
+      let pair = sourceChars.length === 2 ? sourceChars : null;
+      if (!pair && sourceIds.length === 2) {
+        const fromTiles = sourceIds.map((id) => this.callbacks.getTile?.(id)?.char).filter(Boolean);
+        if (fromTiles.length === 2) pair = fromTiles;
+      }
+      if (!pair) pair = HC().getMergePairComponents(mergedTile.char);
       if (!pair || pair.length !== 2) return false;
 
       const fromResult = mergedTile.mergeDockRef === 'result';
@@ -390,22 +403,51 @@
         return false;
       }
 
+      const usedIds = new Set();
       pair.forEach((char, i) => {
-        // Prefer reviving a merge-consumed ingredient so we never end up with 3 tiles.
-        const revived = this.callbacks.reviveMergeIngredient?.(char, {
-          syllableIndex,
-          excludeMergedId: mergedId,
-        });
-        const basic = revived || this.callbacks.createBasicTile({
-          char,
-          syllableIndex,
-          zoneType: 'jungV',
-        });
+        let basic = null;
+        const preferredId = sourceIds[i];
+        if (preferredId && !usedIds.has(preferredId)) {
+          basic = this.callbacks.reviveMergeIngredientById?.(preferredId)
+            || this.callbacks.reviveMergeIngredient?.(char, {
+              syllableIndex,
+              preferId: preferredId,
+              excludeMergedId: mergedId,
+            });
+          if (basic) usedIds.add(basic.id);
+        }
+        if (!basic) {
+          basic = this.callbacks.reviveMergeIngredient?.(char, {
+            syllableIndex,
+            excludeMergedId: mergedId,
+            excludeIds: [...usedIds],
+          });
+          if (basic) usedIds.add(basic.id);
+        }
+        if (!basic) {
+          basic = this.callbacks.createBasicTile({
+            char,
+            syllableIndex,
+            zoneType: 'jungV',
+          });
+          usedIds.add(basic.id);
+        } else if (basic.char !== char) {
+          basic.zoneType = 'jungV';
+          if (typeof basic.setChar === 'function') basic.setChar(char);
+          else basic.char = char;
+        }
         if (fromResult) {
           this.placeInSlotEmpty(i, basic);
         } else {
           this.callbacks.returnTileToBank?.(basic);
         }
+      });
+
+      // Any leftover parked ingredients from this merge must stay gone — never
+      // reappear beside the revived pair (that was producing 2× each vowel).
+      sourceIds.forEach((id) => {
+        if (!id || usedIds.has(id)) return;
+        this.callbacks.discardParkedMergeIngredient?.(id);
       });
 
       this.updatePreview();
