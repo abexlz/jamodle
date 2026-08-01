@@ -1005,6 +1005,8 @@
         winnerUid: data.winnerUid,
         battleXpMode: data.winnerUid === this.myUid ? 'relatedWords' : '',
         battleMatchId: this.matchId,
+        battleQuestMode: 'relatedWords',
+        battleFriend: !!global.RaceResultsUI?.isFriendBattleMatch?.(data, this.matchId),
         players: [
           {
             uid: this.myUid,

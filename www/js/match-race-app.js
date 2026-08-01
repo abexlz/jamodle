@@ -577,7 +577,7 @@
         battleXpMode: data.winnerUid === this.myUid ? 'koreanMatch' : '',
         battleMatchId: this.matchId,
         battleQuestMode: 'race',
-        battleFriend: true,
+        battleFriend: !!global.RaceResultsUI?.isFriendBattleMatch?.(data, this.matchId),
         players: [
           {
             uid: this.myUid,

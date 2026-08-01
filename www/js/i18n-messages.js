@@ -1080,7 +1080,9 @@
       "firstTo": "First to {{n}}",
       "roundWin": "Round won! 🎉",
       "roundLoss": "Round lost",
+      "roundEnded": "Round over",
       "nextRoundSoon": "Next word starting soon…",
+      "nextRoundIn": "Next word in {{n}}…",
       "coinFlipTitle": "Coin flip",
       "coinFlipStarts": "{{name}} goes first",
       "coinFlipYouStart": "You go first!",
@@ -1214,8 +1216,8 @@
           "desc": "Play {{count}} Jamo Game rounds"
         },
         "friend-battle": {
-          "title": "Friend battle",
-          "desc": "Play one 1v1 Jamo Game or Word Chain battle with a friend"
+          "title": "Friend 1v1 battle",
+          "desc": "Finish 1 friend challenge 1v1 (Jamo Game race/turn OR Word Chain). Win or lose both count — random matchmaking does not."
         },
         "login-streak-3": {
           "title": "Login streak",
@@ -1227,15 +1229,15 @@
         },
         "classic-first-try": {
           "title": "First try!",
-          "desc": "Solve a Jamo Game word on your first try"
+          "desc": "Solve a solo Jamo Game word on your first Check"
         },
         "race-win": {
-          "title": "Jamo Game",
-          "desc": "Win a 1v1 Jamo Game match"
+          "title": "Win a Jamo 1v1",
+          "desc": "Win 1 Jamo Game 1v1 match (fast race OR turn-based). Friend challenge or random match both count."
         },
         "coop-win": {
-          "title": "Jamo Game",
-          "desc": "Win a turn-based Jamo Game match"
+          "title": "Win turn-based 1v1",
+          "desc": "Win 1 turn-based Jamo Game 1v1 series"
         },
         "total-5-wins": {
           "title": "Daily scorer",
@@ -2538,7 +2540,9 @@
       "firstTo": "{{n}}승 선취",
       "roundWin": "라운드 승리! 🎉",
       "roundLoss": "라운드 패배",
+      "roundEnded": "라운드 종료",
       "nextRoundSoon": "다음 단어가 곧 시작됩니다…",
+      "nextRoundIn": "{{n}}초 후 다음 단어…",
       "coinFlipTitle": "동전 던지기",
       "coinFlipStarts": "{{name}} 선공",
       "coinFlipYouStart": "내가 선공!",
@@ -2672,8 +2676,8 @@
           "desc": "자모게임 {{count}}판 플레이"
         },
         "friend-battle": {
-          "title": "친구 대결",
-          "desc": "친구와 1v1 자모게임 또는 단어 체인 1판 (승패 무관)"
+          "title": "친구 1v1 대결",
+          "desc": "친구 도전 1v1 1판 완료 (자모게임 레이스/턴제 또는 단어 체인). 승패 모두 인정 · 랜덤 매칭은 제외"
         },
         "login-streak-3": {
           "title": "연속 출석",
@@ -2685,15 +2689,15 @@
         },
         "classic-first-try": {
           "title": "첫 시도 정답",
-          "desc": "자모게임에서 첫 시도 정답"
+          "desc": "솔로 자모게임에서 첫 번째 확인으로 정답"
         },
         "race-win": {
-          "title": "자모게임",
-          "desc": "1v1 자모게임에서 승리"
+          "title": "자모 1v1 승리",
+          "desc": "자모게임 1v1 1승 (빠른 레이스 또는 턴제). 친구 도전·랜덤 매칭 모두 인정"
         },
         "coop-win": {
-          "title": "자모게임",
-          "desc": "턴제 자모게임에서 승리"
+          "title": "턴제 1v1 승리",
+          "desc": "턴제 자모게임 1v1 시리즈 1승"
         },
         "total-5-wins": {
           "title": "오늘의 정답",

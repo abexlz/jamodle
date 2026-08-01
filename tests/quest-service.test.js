@@ -107,22 +107,61 @@ savedProfile = makeProfile({
 const raceResult = QS.recordActivity('battle', { won: true, jamodlePvpWin: true });
 assert(raceResult.readyToClaim?.some((q) => q.questId === 'race-win'), 'race win counts jamodle pvp wins');
 
+let friendBattleDay = null;
+for (let offset = 0; offset < 500; offset += 1) {
+  const d = new Date(Date.UTC(2026, 0, 1 + offset));
+  const key = d.toISOString().slice(0, 10);
+  if (QS.buildDailyQuestIds(key).includes('friend-battle')) {
+    friendBattleDay = key;
+    break;
+  }
+}
+assert(friendBattleDay, 'found a day with friend-battle quest');
+global.ProfileService.getTodayKey = () => friendBattleDay;
 savedProfile = makeProfile({
   questState: {
-    dailyKey: '2026-07-14',
-    daily: [],
+    dailyKey: friendBattleDay,
+    daily: QS.buildDailyQuestIds(friendBattleDay).map((questId) => ({
+      questId,
+      progress: 0,
+      claimed: false,
+      target: QS.QUEST_DEFS[questId].target,
+    })),
     weeklyKey: '2026-07-07',
     weekly: [{ questId: 'weekly-word-chain-2', progress: 0, claimed: false, target: 2 }],
     weeklyPlayDays: [],
     dailyWheelClaimed: false,
   },
 });
+QS.recordActivity('battle', {
+  won: false,
+  friendBattle: true,
+});
+assert.equal(
+  QS.getQuestSnapshot().daily.find((q) => q.questId === 'friend-battle')?.progress,
+  1,
+  'friend battle play counts from 1v1 meta even on loss',
+);
+
+QS.recordActivity('battle', { won: true, wordChainWin: true });
+assert.equal(
+  QS.getQuestSnapshot().weekly.find((q) => q.questId === 'weekly-word-chain-2')?.progress,
+  1,
+  'word chain win via battle results meta counts',
+);
+
 QS.recordActivity('wordChain', { won: true });
-const wcSnap = QS.getQuestSnapshot();
-assert.equal(wcSnap.weekly.find((q) => q.questId === 'weekly-word-chain-2')?.progress, 1, 'word chain win counts on victory only');
+assert.equal(
+  QS.getQuestSnapshot().weekly.find((q) => q.questId === 'weekly-word-chain-2')?.progress,
+  2,
+  'word chain mode win still counts',
+);
 QS.recordActivity('wordChain', { won: false });
-const wcSnap2 = QS.getQuestSnapshot();
-assert.equal(wcSnap2.weekly.find((q) => q.questId === 'weekly-word-chain-2')?.progress, 1, 'word chain loss does not advance win quest');
+assert.equal(
+  QS.getQuestSnapshot().weekly.find((q) => q.questId === 'weekly-word-chain-2')?.progress,
+  2,
+  'word chain loss does not advance win quest',
+);
 
 assert.equal(QS.countCompleted({
   daily: [{ progress: 1, target: 1, claimed: false }],

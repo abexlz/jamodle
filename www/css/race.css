@@ -171,6 +171,73 @@
   line-height: 1.45;
 }
 
+.race-round-break {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.race-round-break .race-panel-title,
+.race-round-break .race-panel-sub {
+  margin: 0;
+}
+
+.race-round-break-kicker {
+  margin: 0;
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-soft, #6b7280);
+}
+
+.race-round-break-word-card {
+  width: min(100%, 320px);
+  margin: 4px 0 2px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 2px solid rgba(0, 120, 140, 0.28);
+  box-shadow: 0 4px 14px rgba(0, 40, 50, 0.1);
+}
+
+.race-round-break-label {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-soft, #6b7280);
+}
+
+.race-round-break-word {
+  margin: 0;
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: clamp(28px, 8vw, 40px);
+  line-height: 1.15;
+  color: var(--heading, #123);
+}
+
+.race-round-break-meaning {
+  margin: 8px 0 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-soft, #4b5563);
+}
+
+.race-round-break-meaning[hidden] {
+  display: none;
+}
+
+.race-round-break-wait {
+  margin: 6px 0 0;
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--heading, #123);
+}
+
 .race-panel-msg {
   font-size: 15px;
   color: var(--text);

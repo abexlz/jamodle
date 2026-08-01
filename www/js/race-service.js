@@ -21,7 +21,7 @@
   const ACTIVATE_MIN_INTERVAL_MS = 10000;
   const ADVANCE_ROUND_MIN_INTERVAL_MS = 2000;
   const KOREAN_TURN_SERIES_TARGET = 2;
-  const ROUND_BREAK_MS = 3500;
+  const ROUND_BREAK_MS = 3000;
   const TURN_LIVE_LOCK_TTL_MS = 5000;
   const TAB_ID = `tab-${Math.random().toString(36).slice(2, 10)}`;
   const turnLiveTracks = new Map();
@@ -710,6 +710,7 @@
       gameType: isRelatedWordsGame
         ? GAME_TYPES.relatedWords
         : (isMatch ? GAME_TYPES.koreanMatch : GAME_TYPES.wordle),
+      matchSource: 'friend',
       player1Uid: uid,
       player2Uid: opponentUid,
       player1Name: myName,
@@ -791,6 +792,7 @@
       gameType: isRelatedWordsGame
         ? GAME_TYPES.relatedWords
         : (isMatch ? GAME_TYPES.koreanMatch : GAME_TYPES.wordle),
+      matchSource: 'friend',
       player1Uid: uid,
       player2Uid: opponentUid,
       player1Name: myName,

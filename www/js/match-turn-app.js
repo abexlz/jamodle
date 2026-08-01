@@ -177,6 +177,7 @@
       if (this.turnTimer) clearInterval(this.turnTimer);
       if (this._turnSwapTimer) clearTimeout(this._turnSwapTimer);
       if (this._roundBreakTimer) clearTimeout(this._roundBreakTimer);
+      if (this._roundBreakCountdownTimer) clearInterval(this._roundBreakCountdownTimer);
       CF()?.clearCoinFlipTimers?.(this);
       global.KoreanMatchDrag?.end?.();
       this._emotes?.destroy();
@@ -516,18 +517,64 @@
       const line = iWon ? rt('roundWin') : rt('roundLoss');
       const scoreLine = rt('seriesScore', { my: score.myWins, opp: score.oppWins });
       const firstTo = rt('firstTo', { n: data.seriesTarget || RS().KOREAN_TURN_SERIES_TARGET || 2 });
+      const breakMs = Number(data.roundBreakMs) > 0 ? Number(data.roundBreakMs) : (RS().ROUND_BREAK_MS || 3000);
+      const breakSec = Math.max(1, Math.ceil(breakMs / 1000));
 
       this.renderMain(`
-        <div class="race-panel race-round-break">
+        <div class="race-panel race-round-break" role="status" aria-live="polite">
+          <p class="race-round-break-kicker">${escapeHtml(rt('roundEnded'))}</p>
           <p class="race-panel-title">${escapeHtml(line)}</p>
+          <div class="race-round-break-word-card">
+            <p class="race-round-break-label">${escapeHtml(rt('answerLabel'))}</p>
+            <p class="race-round-break-word">${escapeHtml(word || '')}</p>
+            <p class="race-round-break-meaning" id="round-break-meaning" hidden></p>
+          </div>
           <p class="race-panel-sub">${escapeHtml(scoreLine)} · ${escapeHtml(firstTo)}</p>
-          <p class="race-panel-sub">${escapeHtml(rt('answerLabel'))}: <strong>${escapeHtml(word)}</strong></p>
-          <p class="race-panel-sub">${escapeHtml(rt('nextRoundSoon'))}</p>
+          <p class="race-round-break-wait" id="round-break-countdown">${escapeHtml(rt('nextRoundIn', { n: breakSec }))}</p>
         </div>
       `);
 
+      void this.fillRoundBreakMeaning(word);
+      this.startRoundBreakCountdown(breakSec);
+
       RS().tryAdvanceRound(this.matchId, data);
       this.scheduleRoundBreakAdvance(data);
+    }
+
+    async fillRoundBreakMeaning(word) {
+      const el = this.els.main?.querySelector('#round-break-meaning');
+      if (!el || !word) return;
+      try {
+        const meaning = await global.DictionaryService?.resolveEnglishMeaning?.(word)
+          || global.MatchWordMeanings?.[word]
+          || global.LearningWords?.getWordMeaning?.(word)
+          || '';
+        if (!meaning || !el.isConnected) return;
+        el.textContent = meaning;
+        el.hidden = false;
+      } catch { /* offline */ }
+    }
+
+    startRoundBreakCountdown(totalSec) {
+      if (this._roundBreakCountdownTimer) clearInterval(this._roundBreakCountdownTimer);
+      let left = Math.max(1, Number(totalSec) || 3);
+      const el = () => this.els.main?.querySelector('#round-break-countdown');
+      const tick = () => {
+        const node = el();
+        if (node) node.textContent = rt('nextRoundIn', { n: left });
+      };
+      tick();
+      this._roundBreakCountdownTimer = setInterval(() => {
+        left -= 1;
+        if (left <= 0) {
+          clearInterval(this._roundBreakCountdownTimer);
+          this._roundBreakCountdownTimer = null;
+          const node = el();
+          if (node) node.textContent = rt('nextRoundSoon');
+          return;
+        }
+        tick();
+      }, 1000);
     }
 
     scheduleRoundBreakAdvance(data) {
@@ -1204,7 +1251,7 @@
         battleXpMode: data.winnerUid === this.myUid ? 'koreanMatch' : '',
         battleMatchId: this.matchId,
         battleQuestMode: 'turn',
-        battleFriend: true,
+        battleFriend: !!global.RaceResultsUI?.isFriendBattleMatch?.(data, this.matchId),
         players: [
           { uid: this.myUid, name: rt('me'), statHtml: `${shared.guessCount || 0} ${escapeHtml(rt('turns'))}` },
           { uid: opp?.uid, name: opp?.name || rt('opponent'), statHtml: `${shared.guessCount || 0} ${escapeHtml(rt('turns'))}` },

@@ -433,20 +433,39 @@
     if (!panel || panel.dataset.questRecorded === '1') return;
 
     const battleMode = panel.dataset.battleQuestMode || '';
+    const matchId = panel.dataset.battleMatchId || '';
+    const isBot = String(matchId).startsWith('bot-');
     const isFriend = panel.dataset.battleFriend === '1';
     const iWon = panel.classList.contains('race-results--win');
+    const isJamodle = battleMode === 'race' || battleMode === 'turn';
+    const isWordChain = battleMode === 'wordChain';
+    const isRelated = battleMode === 'relatedWords';
+
+    // Practice bots should not fill real 1v1 quests.
+    if (isBot) {
+      panel.dataset.questRecorded = '1';
+      return;
+    }
 
     try {
       global.QuestService?.recordActivity?.('battle', {
         won: iWon,
         friendBattle: isFriend,
         coopWin: iWon && battleMode === 'turn',
-        jamodlePvpWin: iWon && (battleMode === 'race' || battleMode === 'turn'),
+        jamodlePvpWin: iWon && isJamodle,
+        wordChainWin: iWon && isWordChain,
+        relatedWordsChainWin: iWon && isRelated,
       });
     } catch (err) {
       console.warn('[RaceResults] quest progress failed', err);
     }
     panel.dataset.questRecorded = '1';
+  }
+
+  function isFriendBattleMatch(data, matchId) {
+    if (String(matchId || '').startsWith('bot-')) return false;
+    if (data?.matchSource === 'matchmaking') return false;
+    return true;
   }
 
   function tryAwardBattleRewards(panel) {
@@ -614,5 +633,6 @@
     afterResultsMount,
     hydrateResultsBattleCards,
     fillAnswerMeaning,
+    isFriendBattleMatch,
   };
 })(typeof window !== 'undefined' ? window : globalThis);

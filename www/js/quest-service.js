@@ -260,7 +260,7 @@
     relatedWordsChain: ['complete_related_chain', 'any_activity'],
     wordChain: ['any_activity'],
     tutorial: ['any_activity'],
-    battle: [],
+    battle: ['any_activity'],
   };
 
   function getTodayKey() {
@@ -331,6 +331,11 @@
     if (meta?.friendBattle) add('friend_battle_play');
     if (meta?.coopWin) add('coop_win');
     if (meta?.jamodlePvpWin) add('jamodle_pvp_win');
+    if (meta?.wordChainWin) add('word_chain_win');
+    if (meta?.relatedWordsChainWin) add('complete_related_chain');
+    if (won && (mode === 'battle' || meta?.jamodlePvpWin || meta?.wordChainWin || meta?.relatedWordsChainWin)) {
+      add('total_wins_today');
+    }
 
     return events;
   }
