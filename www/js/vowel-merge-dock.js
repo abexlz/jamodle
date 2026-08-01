@@ -296,27 +296,36 @@
 
       const playSound = options.playSound !== false;
 
-      const chars = this.slotTileIds.map((id) => {
+      const slotIds = this.slotTileIds.slice();
+      const chars = slotIds.map((id) => {
         const t = id ? this.callbacks.getTile(id) : null;
         return t ? t.char : null;
       });
       const merged = HC().tryComposeVerticalMedial(chars[0], chars[1]);
       if (!merged) return;
 
-      const syllableIndex = this.callbacks.getTile(this.slotTileIds[0])?.syllableIndex;
-      this.slotTileIds.forEach((id, i) => {
+      const syllableIndex = this.callbacks.getTile(slotIds[0])?.syllableIndex;
+
+      // Consume both source vowels first — detach from slots, then park/hide.
+      slotIds.forEach((id, i) => {
         if (!id) return;
         const t = this.callbacks.getTile(id);
-        this.slotEls[i].classList.remove('filled');
+        this.slotTileIds[i] = null;
+        this.slotEls[i].classList.remove('filled', 'drag-over');
+        // Prefer moving the live tile node out; then scrub any leftover glyphs/clones.
+        if (t?.el && t.el.parentElement === this.slotEls[i]) {
+          t.el.remove();
+        }
         this.slotEls[i].innerHTML = '';
-        // Park (don't destroy) so unmerge can revive the same 2 tiles.
         if (this.callbacks.parkMergeIngredient) {
           this.callbacks.parkMergeIngredient(id);
         } else {
           this.callbacks.removeTile?.(id);
         }
-        this.slotTileIds[i] = null;
-        if (t) t.mergeDockRef = null;
+        if (t) {
+          t.mergeDockRef = null;
+          t.mergeDockSlot = null;
+        }
       });
 
       const mergedTile = this.callbacks.createMergedTile({
@@ -327,13 +336,19 @@
       this.resultTileId = mergedTile.id;
       mergedTile.mergeDockRef = 'result';
       mergedTile.inBank = false;
+      mergedTile.isMergeConsumed = false;
+      mergedTile.el?.classList.remove('merge-consumed', 'hidden-in-bank');
 
       this.resultEl.classList.add('filled');
-      this.resultEl.classList.remove('has-preview');
+      this.resultEl.classList.remove('has-preview', 'drag-over');
       if (this.previewEl) this.previewEl.textContent = '';
-      this.resultEl.querySelectorAll('.jamo-tile').forEach((n) => n.remove());
+      // Only the new compound vowel may remain in the result well.
+      this.resultEl.querySelectorAll('.jamo-tile, .merge-live-glyph').forEach((n) => n.remove());
+      if (this.previewEl && !this.resultEl.contains(this.previewEl)) {
+        this.resultEl.appendChild(this.previewEl);
+      }
       const el = this.callbacks.renderTileInSlot?.(mergedTile) || mergedTile.el;
-      el.classList?.remove('hidden-in-bank', 'dragging');
+      el.classList?.remove('hidden-in-bank', 'merge-consumed', 'dragging', 'selected');
       this.resultEl.appendChild(el);
       if (playSound) global.SoundEffects?.merge?.();
     }

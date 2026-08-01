@@ -1004,7 +1004,9 @@
   body.match-turn-page .jamo-bank--turn > .jamo-tile.hidden-in-bank,
   body.match-turn-page .race-turn-dock-stack .jamo-bank > .jamo-tile.hidden-in-bank,
   body.match-turn-page .race-turn-dock-stack .jamo-bank--turn > .jamo-tile.hidden-in-bank,
-  body.match-race-page.match-turn-page .jamo-bank--turn > .jamo-tile.hidden-in-bank {
+  body.match-race-page.match-turn-page .jamo-bank--turn > .jamo-tile.hidden-in-bank,
+  /* Merge ingredients must stay invisible even if briefly parented under merge UI. */
+  .jamo-tile.merge-consumed {
     display: none !important;
     opacity: 0 !important;
     visibility: hidden !important;
@@ -1037,6 +1039,16 @@
     max-width: 100% !important;
     max-height: 100% !important;
     pointer-events: none;
+  }
+  /* Must win over the merge-slot/result "force visible" rule above. */
+  .merge-slot > .jamo-tile.merge-consumed,
+  .merge-result > .jamo-tile.merge-consumed,
+  .jamo-bank > .jamo-tile.merge-consumed,
+  .jamo-tile.merge-consumed {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
   }
   .jamo-tile.selected {
     outline: 5px solid #FFD743;

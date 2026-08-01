@@ -222,7 +222,12 @@
       this.inBank = true;
       this.zoneRef = null;
       if (this.el.parentElement !== bankContainer) bankContainer.appendChild(this.el);
-      this.el.classList.remove('hidden-in-bank', 'in-zone', 'locked', 'selected', 'revealing', 'revealed', 'revealing-wrong', 'dragging');
+      this.el.classList.remove('in-zone', 'locked', 'selected', 'revealing', 'revealed', 'revealing-wrong', 'dragging');
+      // Keep merge-consumed / hidden stubs invisible — callers that want a
+      // playable dock tile must clear merge-consumed explicitly (unmerge revive).
+      if (!this.isMergeConsumed && !this.el.classList.contains('merge-consumed')) {
+        this.el.classList.remove('hidden-in-bank');
+      }
       this.el.style.removeProperty('--flip-delay');
       this.el.style.removeProperty('visibility');
       this.el.style.removeProperty('pointer-events');
@@ -235,7 +240,7 @@
       this.zoneRef = zone;
       // Instant place — no snap-in arrival animation (origin→destination with no gap).
       this.el.classList.add('in-zone');
-      this.el.classList.remove('hidden-in-bank', 'selected', 'snap-in', 'bounce', 'dragging');
+      this.el.classList.remove('hidden-in-bank', 'merge-consumed', 'selected', 'snap-in', 'bounce', 'dragging');
       this.el.style.removeProperty('transition');
       this.el.style.removeProperty('transform');
       this.el.style.removeProperty('opacity');
@@ -253,7 +258,10 @@
     }
 
     hideInBank() { this.el.classList.add('hidden-in-bank'); }
-    showInBank() { this.el.classList.remove('hidden-in-bank'); }
+    showInBank() {
+      if (this.isMergeConsumed || this.el.classList.contains('merge-consumed')) return;
+      this.el.classList.remove('hidden-in-bank');
+    }
 
     setChar(char) {
       this.char = char;
@@ -2451,13 +2459,25 @@
       tile.el.style.removeProperty('opacity');
       tile.el.style.removeProperty('pointer-events');
 
+      if (this.isMergeConsumedTile(tile)) {
+        if (this.els.bank) {
+          if (tile.el.parentElement !== this.els.bank) this.els.bank.appendChild(tile.el);
+          tile.inBank = true;
+          tile.mergeDockRef = null;
+          tile.mergeDockSlot = null;
+          tile.el.classList.add('hidden-in-bank', 'merge-consumed');
+          tile.el.classList.remove('in-zone', 'selected', 'dragging');
+        }
+        return;
+      }
+
       if (tile.locked && tile.zoneRef) {
         this.mountLockedTileInZone(tile.zoneRef, tile);
         return;
       }
       if (tile.zoneRef?.el) {
         tile.inBank = false;
-        tile.el.classList.remove('hidden-in-bank');
+        tile.el.classList.remove('hidden-in-bank', 'merge-consumed');
         tile.el.classList.add('in-zone');
         if (tile.el.parentElement !== tile.zoneRef.el) {
           tile.zoneRef.el.querySelectorAll('.jamo-tile, .opp-reveal-tile').forEach((el) => {
@@ -2471,7 +2491,7 @@
       }
       if (tile.mergeDockRef) {
         tile.inBank = false;
-        tile.el.classList.remove('hidden-in-bank', 'in-zone');
+        tile.el.classList.remove('hidden-in-bank', 'merge-consumed', 'in-zone');
         return;
       }
       if (!this.els.bank) return;
@@ -2485,8 +2505,11 @@
         if (!tile) return;
         if (this.isMergeConsumedTile(tile)) {
           if (this.els.bank && !tile.zoneRef && !tile.mergeDockRef) {
-            tile.setInBank(this.els.bank);
-            tile.hideInBank();
+            if (tile.el && tile.el.parentElement !== this.els.bank) {
+              this.els.bank.appendChild(tile.el);
+            }
+            tile.inBank = true;
+            tile.el?.classList.add('hidden-in-bank', 'merge-consumed');
           }
           return;
         }
@@ -3166,14 +3189,23 @@
         tile.zoneRef.el?.classList.remove('filled', 'correct', 'incorrect', 'revealing', 'revealing-wrong');
         tile.zoneRef = null;
       }
+      // Detach from merge slots/result before parking so leftovers can't stack on ㅐ.
+      const parent = tile.el?.parentElement;
+      if (parent?.classList?.contains('merge-slot') || parent?.classList?.contains('merge-result')) {
+        tile.el.remove();
+      }
       tile.mergeDockRef = null;
       tile.mergeDockSlot = null;
       tile.inBank = true;
+      tile.isMergeConsumed = true;
       this._removedTileIds = this._removedTileIds || [];
       if (!this._removedTileIds.includes(id)) this._removedTileIds.push(id);
       if (this.els.bank) {
-        tile.setInBank(this.els.bank);
-        tile.hideInBank();
+        if (tile.el && tile.el.parentElement !== this.els.bank) {
+          this.els.bank.appendChild(tile.el);
+        }
+        tile.el?.classList.add('hidden-in-bank', 'merge-consumed');
+        tile.el?.classList.remove('in-zone', 'selected', 'dragging', 'snap-in', 'bounce');
       } else {
         tile.el?.remove();
       }
@@ -3204,25 +3236,28 @@
           && t.char === char
           && !t.zoneRef
           && !t.mergeDockRef
-          && t.el?.classList.contains('hidden-in-bank')
+          && (t.isMergeConsumed || t.el?.classList.contains('hidden-in-bank')
+            || t.el?.classList.contains('merge-consumed'))
         )) || null;
       }
       if (!tile) return null;
       this._removedTileIds = (this._removedTileIds || []).filter((id) => id !== tile.id);
       tile.isBasic = true;
       tile.isMerged = false;
+      tile.isMergeConsumed = false;
       tile.mergeSources = null;
       tile.mergeDockRef = null;
       tile.mergeDockSlot = null;
       tile.zoneType = 'jungV';
       if (syllableIndex != null) tile.syllableIndex = syllableIndex;
-      tile.el?.classList.remove('hidden-in-bank');
+      tile.el?.classList.remove('hidden-in-bank', 'merge-consumed');
       return tile;
     }
 
     /** True when a tile was consumed by a merge and must not reappear in the dock. */
     isMergeConsumedTile(tile) {
       if (!tile?.id) return false;
+      if (tile.isMergeConsumed) return true;
       return (this._removedTileIds || []).includes(tile.id);
     }
 
@@ -4802,8 +4837,11 @@
         // otherwise the dock briefly shows ㅐ + ㅏ + ㅣ (3 vowels).
         if (this.isMergeConsumedTile(tile)) {
           if (this.els.bank && !tile.zoneRef && !tile.mergeDockRef) {
-            tile.setInBank(this.els.bank);
-            tile.hideInBank();
+            if (tile.el && tile.el.parentElement !== this.els.bank) {
+              this.els.bank.appendChild(tile.el);
+            }
+            tile.inBank = true;
+            tile.el?.classList.add('hidden-in-bank', 'merge-consumed');
           }
           return;
         }
@@ -5403,8 +5441,13 @@
           tile.el.style.removeProperty('opacity');
           tile.el.style.removeProperty('transform');
           tile.el.style.removeProperty('pointer-events');
-          tile.el.classList.remove('hidden-in-bank', 'dragging', 'revealing', 'revealing-wrong');
+          tile.el.classList.remove('hidden-in-bank', 'merge-consumed', 'dragging', 'revealing', 'revealing-wrong');
           if (tile.zoneRef) this.mountLockedTileInZone(tile.zoneRef, tile);
+          return;
+        }
+        // Consumed merge ingredients stay parked until unmerge — never force-show.
+        if (this.isMergeConsumedTile(tile)) {
+          this.ensureTileMounted(tile);
           return;
         }
         tile.el.style.removeProperty('visibility');
@@ -5413,7 +5456,7 @@
         tile.el.style.removeProperty('pointer-events');
         tile.el.classList.remove('dragging', 'revealing', 'revealing-wrong');
         if (tile.zoneRef || tile.mergeDockRef) {
-          tile.el.classList.remove('hidden-in-bank');
+          tile.el.classList.remove('hidden-in-bank', 'merge-consumed');
           this.ensureTileMounted(tile);
           return;
         }
