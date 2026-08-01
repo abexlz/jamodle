@@ -128,7 +128,7 @@ h1, h2, h3,
 
 /* ── Menu panels (Wordle-style grouped buttons) ── */
 .featured-continue-card,
-.daily-challenges-grid,
+.daily-challenges-grid:not(.menu-top-panel),
 .learning-modes-list,
 .match-hint-dock,
 .jamo-bank,

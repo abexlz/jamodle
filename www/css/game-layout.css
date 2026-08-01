@@ -317,6 +317,16 @@ body.home-menu-active.home-tab-menu #menu-root > .menu-sections {
 }
 
 body.home-menu-active.home-tab-menu .menu-top-panel,
+body.home-menu-active.home-tab-menu .menu-top-daily-wrap {
+  min-height: 0;
+  overflow: visible;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
 body.home-menu-active.home-tab-menu .menu-mode-panel {
   min-height: 0;
   overflow: hidden;
@@ -340,7 +350,8 @@ body.home-menu-active.home-tab-menu .menu-mode-panel .daily-challenges-grid > * 
   max-height: none !important;
 }
 
-body.home-menu-active.home-tab-menu .menu-top-daily-row.menu-daily-puzzle-bar {
+body.home-menu-active.home-tab-menu .menu-top-daily-row,
+body.home-menu-active.home-tab-menu .menu-top-daily-row .menu-daily-puzzle-bar {
   min-height: 0 !important;
   height: 100%;
 }

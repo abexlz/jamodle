@@ -38,7 +38,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/app-preferences.css">
-<link rel="stylesheet" href="css/app-buttons.css?v=17">
+<link rel="stylesheet" href="css/app-buttons.css?v=18">
 <style>
   :root{
     --bg: #FFF8F5;
@@ -761,15 +761,18 @@
 
   .menu-top-daily-row{
     display: grid;
-    grid-template-columns: auto 1fr auto;
-    gap: 0;
+    grid-template-columns: auto 1fr;
+    gap: 10px;
     width: 100%;
     align-items: stretch;
   }
   .menu-top-daily-row .daily-leaderboard-btn{
-    border-radius: 0;
+    border-radius: 16px;
     aspect-ratio: auto;
     min-height: 0;
+  }
+  .menu-top-daily-row .menu-daily-puzzle-bar{
+    min-width: 0;
   }
   .menu-top-daily-row .menu-top-daily{
     width: 100%;
@@ -1679,7 +1682,7 @@
 
 </style>
 <link rel="stylesheet" href="css/home-nav.css?v=7">
-<link rel="stylesheet" href="css/app-theme.css?v=17">
+<link rel="stylesheet" href="css/app-theme.css?v=18">
 <link rel="stylesheet" href="css/cosmetic-themes.css">
 <link rel="stylesheet" href="css/shop.css">
 <link rel="stylesheet" href="css/profile.css">
@@ -1688,11 +1691,11 @@
 <link rel="stylesheet" href="css/wheel.css">
 <link rel="stylesheet" href="css/multiplayer.css?v=25">
 <link rel="stylesheet" href="css/race.css?v=20260801a">
-<link rel="stylesheet" href="css/app-wordle-ui.css?v=19">
+<link rel="stylesheet" href="css/app-wordle-ui.css?v=20">
 <link rel="stylesheet" href="css/daily-calendar.css?v=10" id="daily-cal-styles">
 <link rel="stylesheet" href="css/menu-typography.css?v=1">
-<link rel="stylesheet" href="css/menu-responsive.css?v=4">
-<link rel="stylesheet" href="css/game-layout.css?v=1">
+<link rel="stylesheet" href="css/menu-responsive.css?v=5">
+<link rel="stylesheet" href="css/game-layout.css?v=10">
 <link rel="stylesheet" href="css/app-fonts.css?v=3">
 </head>
 <body>
@@ -1890,7 +1893,7 @@
 <script src="js/match-daily.js"></script>
 <script src="js/daily-calendar-service.js"></script>
 <script src="js/daily-calendar-modal.js"></script>
-<script src="js/menu-components.js"></script>
+<script src="js/menu-components.js?v=20260801a"></script>
 <script src="js/home-nav.js"></script>
 <script src="js/menu-app.js"></script>
 <script src="js/multiplayer-ui.js?v=20260801e"></script>

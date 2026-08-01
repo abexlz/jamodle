@@ -110,7 +110,7 @@ html.large-text body.home-menu-active {
   --app-btn-max-h: clamp(58px, calc(16vw + 0.45dvh), 88px);
   --app-btn-radius: clamp(14px, 3.6vw, 22px);
 
-  --menu-game-side-w: clamp(54px, 14vw, 66px);
+  --menu-game-side-w: clamp(64px, 17vw, 78px);
   --menu-game-title-size: clamp(20px, 5.4vw, 28px);
   --menu-game-btn-min-h: clamp(60px, 16vw, 80px);
 

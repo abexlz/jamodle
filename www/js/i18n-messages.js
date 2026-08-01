@@ -108,7 +108,7 @@
           "subtitleKo": "오늘의 단어"
         },
         "daily-match": {
-          "title": "Daily Puzzle",
+          "title": "Daily",
           "subtitle": "Build today's word with jamo",
           "subtitleKo": "오늘의 자모 조합"
         }
@@ -1580,7 +1580,7 @@
           "subtitleKo": "오늘의 단어"
         },
         "daily-match": {
-          "title": "일일퍼즐",
+          "title": "일일",
           "subtitle": "오늘의 단어를 자모로 만들어요",
           "subtitleKo": "오늘의 자모 조합"
         }
