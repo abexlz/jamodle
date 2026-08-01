@@ -429,6 +429,7 @@
       }
       const word = game.currentWord?.word || this.step?.word || '';
       game.els.resultsWord.textContent = word;
+      game.updateResultsMeaning?.(word);
       if (game.els.resultsTime) game.els.resultsTime.textContent = formatTutorialTime(game.getElapsedMs?.() || 0);
       if (game.els.resultsGuesses) game.els.resultsGuesses.textContent = '1';
       if (game.els.resultsStreak) game.els.resultsStreak.textContent = '';

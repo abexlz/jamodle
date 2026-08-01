@@ -227,8 +227,8 @@
           "body": "Korean syllables can end with a 받침. Place ㄱ, ㅏ, and ㅁ to make 감."
         },
         "rotateVowel": {
-          "title": "Rotate a vowel",
-          "body": "Select ㅏ and tap Rotate until it becomes ㅗ, then drag it into the slot."
+          "title": "Rotate a vowel — 코",
+          "body": "Select ㅏ and tap Rotate until it becomes ㅗ, then drag it into the slot to make 코 (nose)."
         },
         "rotateConsonant": {
           "title": "Rotate ㄱ and ㄴ",
@@ -1685,8 +1685,8 @@
           "body": "한글 음절 끝에는 받침이 올 수 있어요. ㄱ, ㅏ, ㅁ을 놓아 감을 만들어 보세요."
         },
         "rotateVowel": {
-          "title": "모음 돌리기",
-          "body": "ㅏ를 선택하고 돌리기를 눌러 ㅗ가 될 때까지 돌린 뒤, 칸에 놓으세요."
+          "title": "모음 돌리기 — 코",
+          "body": "ㅏ를 선택하고 돌리기를 눌러 ㅗ가 될 때까지 돌린 뒤, 칸에 놓아 코를 만들어 보세요."
         },
         "rotateConsonant": {
           "title": "ㄱ · ㄴ 돌리기",
