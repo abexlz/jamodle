@@ -102,7 +102,31 @@
     },
   };
 
-  const WRONG_JAMO = 'ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ';
+  const WRONG_CHO = 'ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎ';
+  const WRONG_JONG = 'ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎ';
+  const WRONG_JUNGH = 'ㅗㅛㅜㅠㅡ';
+  const WRONG_JUNGV = 'ㅏㅑㅓㅕㅣ';
+
+  function wrongPoolForZone(zoneType) {
+    if (zoneType === 'cho') return WRONG_CHO;
+    if (zoneType === 'jong') return WRONG_JONG;
+    if (zoneType === 'jungH') return WRONG_JUNGH;
+    if (zoneType === 'jungV') return WRONG_JUNGV;
+    return WRONG_CHO;
+  }
+
+  function pickWrongChar(correct, zoneType) {
+    const pool = [...wrongPoolForZone(zoneType)].filter((c) => c !== correct);
+    const placeable = pool.filter((c) => {
+      if (!zoneType || !HC()?.canPlaceInZone) return true;
+      return HC().canPlaceInZone(c, zoneType);
+    });
+    const options = placeable.length ? placeable : pool;
+    if (options.length) return options[Math.floor(Math.random() * options.length)];
+    if (zoneType === 'jungH') return 'ㅗ';
+    if (zoneType === 'jungV') return 'ㅏ';
+    return 'ㄱ';
+  }
 
   function rt(key, vars) {
     const t = global.I18n?.t;
@@ -210,11 +234,6 @@
     return zones;
   }
 
-  function pickWrongChar(correct) {
-    const options = [...WRONG_JAMO].filter((c) => c !== correct);
-    return options[Math.floor(Math.random() * options.length)] || 'ㄱ';
-  }
-
   function buildPlacements(target, locked, { wrong = false, partial = false } = {}) {
     const lockedKeys = new Set((locked || []).map((p) => placementKey(p)));
     const zones = iterTargetZones(target).filter((z) => !lockedKeys.has(placementKey(z)));
@@ -228,7 +247,7 @@
     }
 
     const placements = activeZones.map((z) => {
-      const char = wrong ? pickWrongChar(z.expected) : z.expected;
+      const char = wrong ? pickWrongChar(z.expected, z.zone) : z.expected;
       const correct = char === z.expected;
       return {
         syl: z.syl,
@@ -243,7 +262,8 @@
 
     if (wrong) {
       const idx = Math.floor(Math.random() * placements.length);
-      placements[idx].char = pickWrongChar(placements[idx].expected || activeZones[idx].expected);
+      const zone = activeZones[idx];
+      placements[idx].char = pickWrongChar(zone.expected, zone.zone);
       placements[idx].correct = false;
     }
 
@@ -414,6 +434,13 @@
     }
 
     pickWrongZone(zones, correctZone) {
+      const sameType = zones.filter((z) => (
+        z.zone === correctZone.zone
+        && placementKey(z) !== placementKey(correctZone)
+      ));
+      if (sameType.length) {
+        return sameType[Math.floor(Math.random() * sameType.length)];
+      }
       const sameSyl = zones.filter((z) => (
         z.syl === correctZone.syl
         && placementKey(z) !== placementKey(correctZone)
@@ -496,7 +523,7 @@
         }, 'select', { selected: { type: 'bank', tileId: tile.id } });
         return;
       }
-      const wrongChar = HC().rotateJamo(tile.char) || pickWrongChar(goalChar);
+      const wrongChar = HC().rotateJamo(tile.char) || tile.char;
       push(randRange(profile.selectMin, profile.selectMax), () => {
         sim.selectBank(tile.id);
       }, 'select', { selected: { type: 'bank', tileId: tile.id } });
@@ -578,8 +605,8 @@
       if (Math.random() < mistakeRate) {
         const correctZone = planned[0];
         const wrongZone = sim.pickWrongZone(allZones, correctZone);
-        const wrongChar = pickWrongChar(correctZone.expected);
-        const wrongTile = sim.findBankTile(wrongChar) || sim.findBankTile(pickWrongChar(wrongChar));
+        const wrongChar = pickWrongChar(correctZone.expected, wrongZone.zone);
+        const wrongTile = sim.findBankTile(wrongChar) || sim.findBankTile(pickWrongChar(wrongChar, wrongZone.zone));
         if (wrongTile) {
           push(randRange(profile.selectMin, profile.selectMax), () => {
             sim.selectBank(wrongTile.id);

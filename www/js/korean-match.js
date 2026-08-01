@@ -2934,9 +2934,14 @@
         return;
       }
       if (tile.zoneRef) {
-        tile.zoneRef.placedTileId = null;
-        tile.zoneRef.clear();
+        const zone = tile.zoneRef;
+        zone.placedTileId = null;
+        zone.el.classList.remove('filled', 'correct', 'incorrect', 'revealing', 'revealing-wrong');
         tile.zoneRef = null;
+        // Detach without zone.clear() so we don't drop the element before re-parenting.
+        if (tile.el?.parentElement === zone.el) {
+          tile.el.remove();
+        }
       }
       tile.setInBank(this.els.bank);
       this.updateCheckButton();
@@ -3123,7 +3128,12 @@
         block.getAllZones().forEach((zone) => {
           zone.el.querySelectorAll('.opp-reveal-tile').forEach((el) => el.remove());
           if (zone.locked) return;
-          zone.clear();
+          const tile = zone.placedTileId ? this.tileMap[zone.placedTileId] : null;
+          if (tile && !tile.locked) {
+            this.returnTileToBank(tile);
+          } else {
+            zone.clear();
+          }
           zone.el.classList.remove(
             'correct', 'incorrect', 'turn-neutral', 'revealing', 'revealing-wrong', 'locked',
             'watch-correct', 'watch-wrong', 'watch-reveal-pending'
@@ -3159,6 +3169,8 @@
       this.turnSubmitting = false;
       this.clearSelection();
       this.restoreTurnLockedPlacements(locked, turnHistory, myUid);
+      this.restoreDockVisibility();
+      this.restoreVisibleTiles();
       this.updateCheckButton();
     }
 
@@ -4027,11 +4039,15 @@
       const tile = zone.placedTileId ? this.tileMap[zone.placedTileId] : null;
       zone.placedTileId = null;
       if (!tile) return;
-      if (tile.zoneRef === zone) {
-        tile.zoneRef = null;
+      if (tile.zoneRef === zone) tile.zoneRef = null;
+      if (tile.locked) return;
+      // Always return real tiles to the dock — never orphan them outside the bank.
+      if (this.els.bank) {
+        tile.setInBank(this.els.bank);
+      } else if (tile.el?.parentElement === zone.el) {
+        tile.el.remove();
         tile.inBank = false;
       }
-      if (tile.el?.parentElement === zone.el) tile.el.remove();
     }
 
     clearLiveSelectionIndicators() {
@@ -4340,7 +4356,12 @@
     /** Restore every un-locked bank tile to visible (used when regaining control). */
     restoreDockVisibility() {
       Object.values(this.tileMap).forEach((tile) => {
-        if (tile.inBank && !tile.locked) tile.showInBank();
+        if (!tile || tile.locked) return;
+        // Recover tiles that were detached from both board and dock.
+        if (!tile.inBank && !tile.zoneRef && !tile.mergeDockRef && this.els.bank) {
+          tile.setInBank(this.els.bank);
+        }
+        if (tile.inBank) tile.showInBank();
       });
     }
 
@@ -4625,11 +4646,13 @@
     returnWrongTilesToBank(entries) {
       (entries || []).forEach(({ zone, tile }) => {
         if (!tile || zone.locked) return;
-        zone.el.classList.remove('incorrect', 'revealing-wrong');
-        zone.clear();
+        zone.el.classList.remove('incorrect', 'revealing-wrong', 'filled');
+        // Return to dock first — zone.clear() would detach the element without restoring it.
         this.returnTileToBank(tile);
       });
       this.syncDockTileSize();
+      this.restoreDockVisibility();
+      this.restoreVisibleTiles();
     }
 
     async checkAnswer() {
