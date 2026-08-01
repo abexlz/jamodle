@@ -998,7 +998,8 @@
   }
 
   .jamo-tile.dragging { opacity: .45; transform: scale(.92); pointer-events: none; }
-  .jamo-tile.hidden-in-bank,
+  /* Only collapse dock stubs — never hide a tile that has been moved into a slot. */
+  .jamo-bank > .jamo-tile.hidden-in-bank,
   body.match-turn-page .jamo-bank > .jamo-tile.hidden-in-bank,
   body.match-turn-page .jamo-bank--turn > .jamo-tile.hidden-in-bank,
   body.match-turn-page .race-turn-dock-stack .jamo-bank > .jamo-tile.hidden-in-bank,
@@ -1021,6 +1022,21 @@
     overflow: hidden !important;
     border: none !important;
     box-shadow: none !important;
+  }
+  .drop-zone > .jamo-tile.hidden-in-bank,
+  .merge-slot > .jamo-tile.hidden-in-bank,
+  .merge-result > .jamo-tile.hidden-in-bank {
+    display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    position: relative !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    pointer-events: none;
   }
   .jamo-tile.selected {
     outline: 5px solid #FFD743;

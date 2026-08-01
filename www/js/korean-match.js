@@ -708,15 +708,24 @@
 
     end() {
       const tile = this.tile;
+      const game = KoreanMatchGame.instance;
       if (tile?.el) {
         tile.el.classList.remove('dragging');
         tile.el.style.removeProperty('visibility');
         tile.el.style.removeProperty('pointer-events');
-        if (tile.inBank && !tile.zoneRef) {
-          tile.showInBank();
-        } else if (tile.zoneRef || !tile.inBank) {
-          // Placed elsewhere — collapse any leftover dock presence.
-          tile.el.classList.remove('hidden-in-bank');
+        tile.el.style.removeProperty('opacity');
+        // Always clear dock-hide; slot tiles must never stay display:none.
+        tile.el.classList.remove('hidden-in-bank');
+        if (tile.zoneRef?.el) {
+          if (tile.el.parentElement !== tile.zoneRef.el) {
+            tile.zoneRef.el.appendChild(tile.el);
+          }
+          tile.el.classList.add('in-zone');
+          tile.inBank = false;
+        } else if (tile.mergeDockRef) {
+          tile.inBank = false;
+        } else if (tile.inBank || !tile.el.isConnected) {
+          game?.returnTileToBank?.(tile);
         }
       }
       if (this.ghost) {
@@ -2400,9 +2409,69 @@
       }
       zone.placedTileId = tile.id;
       this.purgeTileFromDock(tile);
+      this.ensureTileMounted(tile);
       this.syncDockTileSize();
       this.pulseLiveAction('move');
       this.notifyTurnLiveChange();
+    }
+
+    /**
+     * Guarantee a tile is attached to exactly one visible home: zone, merge, or dock.
+     * Prevents "vanished" tiles that are neither in the dock nor in a slot.
+     */
+    ensureTileMounted(tile) {
+      if (!tile?.el) return;
+      tile.el.classList.remove('dragging');
+      tile.el.style.removeProperty('visibility');
+      tile.el.style.removeProperty('opacity');
+      tile.el.style.removeProperty('pointer-events');
+
+      if (tile.locked && tile.zoneRef) {
+        this.mountLockedTileInZone(tile.zoneRef, tile);
+        return;
+      }
+      if (tile.zoneRef?.el) {
+        tile.inBank = false;
+        tile.el.classList.remove('hidden-in-bank');
+        tile.el.classList.add('in-zone');
+        if (tile.el.parentElement !== tile.zoneRef.el) {
+          tile.zoneRef.el.querySelectorAll('.jamo-tile, .opp-reveal-tile').forEach((el) => {
+            if (el !== tile.el) el.remove();
+          });
+          tile.zoneRef.el.appendChild(tile.el);
+        }
+        tile.zoneRef.placedTileId = tile.id;
+        tile.zoneRef.el.classList.add('filled');
+        return;
+      }
+      if (tile.mergeDockRef) {
+        tile.inBank = false;
+        tile.el.classList.remove('hidden-in-bank', 'in-zone');
+        return;
+      }
+      if (!this.els.bank) return;
+      tile.setInBank(this.els.bank);
+      tile.showInBank();
+    }
+
+    /** Remount every inventory tile so nothing is left detached/invisible. */
+    recoverAllTileMounts({ showDock = true } = {}) {
+      Object.values(this.tileMap || {}).forEach((tile) => {
+        if (!tile) return;
+        if (tile.locked) {
+          if (tile.zoneRef) this.mountLockedTileInZone(tile.zoneRef, tile);
+          else this.ensureTileMounted(tile);
+          return;
+        }
+        if (tile.zoneRef || tile.mergeDockRef) {
+          this.ensureTileMounted(tile);
+          return;
+        }
+        if (!this.els.bank) return;
+        tile.setInBank(this.els.bank);
+        if (showDock && !this.watchMode) tile.showInBank();
+      });
+      this.syncDockTileSize();
     }
 
     /**
@@ -2418,7 +2487,6 @@
         if (el === tile.el) {
           // Live node still sitting in the dock after a place — move it to its zone/merge.
           if (tile.zoneRef?.el) tile.zoneRef.el.appendChild(el);
-          else if (tile.mergeDockRef) el.remove();
           return;
         }
         el.remove();
@@ -2456,7 +2524,7 @@
     reconcileTileInventory() {
       if (!this.els.bank || this.watchMode) return;
 
-      // Drop bank DOM nodes that don't belong to inventory or are duplicates.
+      // Drop unknown/duplicate bank DOM nodes only.
       const seenInBank = new Set();
       this.els.bank.querySelectorAll('.jamo-tile').forEach((el) => {
         const id = el.dataset.tileId;
@@ -2470,54 +2538,22 @@
           return;
         }
         seenInBank.add(id);
-        if (tile.zoneRef?.el) {
-          tile.inBank = false;
-          tile.zoneRef.el.appendChild(el);
-          tile.el.classList.add('in-zone');
-          tile.el.classList.remove('hidden-in-bank', 'dragging');
-          return;
-        }
-        if (tile.mergeDockRef || (tile.locked && !tile.inBank)) {
-          tile.inBank = false;
-          if (el.parentElement === this.els.bank) el.remove();
-        }
       });
 
-      Object.values(this.tileMap).forEach((tile) => {
-        if (!tile?.el) return;
-        if (tile.zoneRef) {
-          tile.inBank = false;
-          if (tile.el.parentElement !== tile.zoneRef.el) {
-            tile.zoneRef.el.querySelectorAll('.jamo-tile, .opp-reveal-tile').forEach((el) => {
-              if (el !== tile.el) el.remove();
-            });
-            tile.zoneRef.el.appendChild(tile.el);
-          }
-          tile.el.classList.add('in-zone');
-          tile.el.classList.remove('hidden-in-bank', 'dragging');
-          return;
-        }
-        if (tile.mergeDockRef) {
-          tile.inBank = false;
-          tile.el.classList.remove('hidden-in-bank', 'in-zone');
-          return;
-        }
-        if (tile.locked) return;
-        if (!tile.inBank || tile.el.parentElement !== this.els.bank) {
-          tile.setInBank(this.els.bank);
-        }
-        tile.showInBank();
-      });
+      Object.values(this.tileMap).forEach((tile) => this.ensureTileMounted(tile));
       this.syncDockTileSize();
     }
 
     detachZoneTile(tile) {
       if (!tile?.zoneRef) return;
-      tile.zoneRef.placedTileId = null;
-      tile.zoneRef.clear();
+      const zone = tile.zoneRef;
+      zone.placedTileId = null;
+      zone.el.classList.remove('filled', 'correct', 'incorrect', 'revealing', 'revealing-wrong');
+      if (tile.el?.parentElement === zone.el) tile.el.remove();
       tile.zoneRef = null;
+      tile.el?.classList.remove('in-zone');
+      // Keep the tile reachable — merge handlers re-home it immediately after.
       tile.inBank = false;
-      tile.el.classList.remove('in-zone');
     }
 
     applyTileLocation(tile, loc) {
@@ -2991,7 +3027,10 @@
       if (this.tutorialValidator && !this.tutorialValidator('place', { tile, zone, game: this })) {
         return false;
       }
-      if (tile.zoneRef === zone) return true;
+      if (tile.zoneRef === zone) {
+        this.ensureTileMounted(tile);
+        return true;
+      }
       const sourceZone = fromZone || tile.zoneRef || null;
       if (zone.placedTileId && zone.placedTileId !== tile.id) {
         const existing = this.tileMap[zone.placedTileId];
@@ -3009,7 +3048,11 @@
         }
       }
       if (tile.zoneRef && tile.zoneRef !== zone) {
-        tile.zoneRef.clear();
+        const prev = tile.zoneRef;
+        prev.placedTileId = null;
+        prev.el.classList.remove('filled', 'correct', 'incorrect', 'revealing', 'revealing-wrong');
+        if (tile.el?.parentElement === prev.el) tile.el.remove();
+        tile.zoneRef = null;
       }
       this.attachTileToZone(tile, zone);
       this.bounceTile(tile.el);
@@ -3301,6 +3344,8 @@
       this.restoreTurnLockedPlacements(locked, turnHistory, myUid);
       this.restoreDockVisibility();
       this.restoreVisibleTiles();
+      // Wrong/unlocked tiles must be visibly back in the dock on turn swap.
+      this.recoverAllTileMounts({ showDock: !this.watchMode });
       if (!this.watchMode) this.reconcileTileInventory();
       this.updateCheckButton();
     }
@@ -4190,7 +4235,23 @@
       try {
         (Array.isArray(live?.removed) ? live.removed : []).forEach((id) => {
           const tile = this.tileMap[id];
-          if (tile && !tile.locked) this.removeTile(id);
+          if (!tile || tile.locked) return;
+          // In watch mode the dock is shared inventory — never destroy tiles.
+          // Park them hidden in the dock so they return when the live bank lists them again.
+          if (this.watchMode || this.turnBased) {
+            tile.mergeDockRef = null;
+            tile.mergeDockSlot = null;
+            if (tile.zoneRef) {
+              tile.zoneRef.placedTileId = null;
+              tile.zoneRef = null;
+            }
+            if (this.els.bank) {
+              tile.setInBank(this.els.bank);
+              tile.hideInBank();
+            }
+            return;
+          }
+          this.removeTile(id);
         });
         bankEntries.forEach((entry) => {
           if (!entry?.id || !entry.char) return;
@@ -4221,10 +4282,12 @@
 
     /**
      * Mirror the active player's dock exactly — by tile id, not by char guessing.
+     * If `liveBank` is omitted (undefined), leave the dock alone so tiles don't all vanish.
      */
     syncWatchBankExact(liveBank) {
       if (!this.turnBased || !this.watchMode || !this.sharedSeed) return;
-      const entries = Array.isArray(liveBank) ? liveBank : [];
+      if (!Array.isArray(liveBank)) return;
+      const entries = liveBank;
       const liveIds = new Set(entries.map((e) => e.id));
       const bank = this.els.bank;
       if (!bank) return;
@@ -4332,19 +4395,17 @@
       const nextResult = merge?.result || null;
 
       const releaseWatchTile = (tile, keepIds = []) => {
-        if (!tile) return;
+        if (!tile || tile.locked) return;
         tile.mergeDockRef = null;
         tile.mergeDockSlot = null;
-        if (tile.el?.isConnected && tile.el.parentElement !== this.els.bank) {
-          tile.el.remove();
-        }
-        const keep = keepIds.includes(tile.id)
-          || this.isWatchCharInLiveLayout(tile.char, merge, nextResultId, nextSlotIds);
-        if (!tile.zoneRef && !keep) {
-          tile.inBank = false;
-          if (tile.el?.isConnected) tile.el.remove();
-        } else {
-          tile.inBank = false;
+        if (tile.zoneRef) return;
+        // Never orphan — park back in the dock (visibility is owned by live bank sync).
+        if (this.els.bank) {
+          tile.setInBank(this.els.bank);
+          const keep = keepIds.includes(tile.id)
+            || this.isWatchCharInLiveLayout(tile.char, merge, nextResultId, nextSlotIds);
+          if (keep) tile.showInBank();
+          else tile.hideInBank();
         }
       };
 
@@ -4481,7 +4542,7 @@
       this.renderTurnGuessOnZones(this.blocks, filtered, { neutral: true });
       const merge = live.merge || {};
       this._watchLivePlacements = filtered.placements;
-      this._watchLiveBank = Array.isArray(live.bank) ? live.bank : [];
+      if (Array.isArray(live.bank)) this._watchLiveBank = live.bank;
       this._watchLiveMerge = {
         slots: Array.isArray(merge.slots) ? [...merge.slots] : [null, null],
         slotIds: Array.isArray(merge.slotIds) ? [...merge.slotIds] : [null, null],
@@ -4493,7 +4554,9 @@
       this.applyLiveSelection(live);
 
       if (this.sharedSeed) {
-        this.syncWatchBankExact(live.bank || []);
+        // Only mirror dock when the payload includes an explicit bank list.
+        // Omitting bank (common on reveal stubs) must not hide every dock tile.
+        if (Array.isArray(live.bank)) this.syncWatchBankExact(live.bank);
       } else {
         this.syncDockUsageVisibility();
       }
@@ -4812,6 +4875,7 @@
         this._watchLiveMerge = null;
         this._suspendLiveBroadcast = false;
         this.restoreDockVisibility();
+        this.recoverAllTileMounts({ showDock: true });
       }
       const canPlay = !this.inspectMode
         && (this.rushMode || this.isMyTurn)
@@ -4895,6 +4959,7 @@
       this.syncDockTileSize();
       this.restoreDockVisibility();
       this.restoreVisibleTiles();
+      this.recoverAllTileMounts({ showDock: true });
     }
 
     async checkAnswer() {
@@ -5198,12 +5263,24 @@
           return;
         }
         tile.el.style.removeProperty('visibility');
+        tile.el.style.removeProperty('opacity');
         tile.el.style.removeProperty('transform');
         tile.el.style.removeProperty('pointer-events');
         tile.el.classList.remove('dragging', 'revealing', 'revealing-wrong');
+        if (tile.zoneRef || tile.mergeDockRef) {
+          tile.el.classList.remove('hidden-in-bank');
+          this.ensureTileMounted(tile);
+          return;
+        }
         if (tile.inBank) {
           // In watch mode, dock visibility is owned by live sync — don't force-show.
-          if (!this.watchMode) tile.showInBank();
+          if (!this.watchMode) {
+            this.ensureTileMounted(tile);
+            tile.showInBank();
+          }
+        } else if (!this.watchMode) {
+          // Orphaned unlocked tile — put it back in the dock.
+          this.ensureTileMounted(tile);
         }
       });
     }
