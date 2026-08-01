@@ -14,7 +14,7 @@
     '받침킹', '연결고리', '끝말잇기왕', '연상달인', '자모요정', '한글챔피언',
   ];
 
-  const SPEED_POOL = ['slow', 'medium', 'medium'];
+  const SPEED_POOL = ['slow', 'slow', 'medium'];
 
   const BOT_PROFILE_KEY = 'jamodeul-bot-opponent-profile';
   const LOCAL_BOT_UIDS = new Set(['bot']);
@@ -48,9 +48,10 @@
     };
   }
 
+  /** Matchmaking bots stay weak — ~30% win rate, slow–medium pace. */
   function randomBotDifficulty() {
     return {
-      winrate: 40 + Math.floor(Math.random() * 21),
+      winrate: 28 + Math.floor(Math.random() * 5),
       speed: pickRandom(SPEED_POOL),
     };
   }

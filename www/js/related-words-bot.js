@@ -741,6 +741,7 @@
     /**
      * Plan the bot's round. Win rate → wrong-guess rate + occasional stumble.
      * Speed preset → overall pacing. Letter gaps stay irregular either way.
+     * Low win rates may stall without finishing so humans can take the round.
      */
     scheduleBotRound() {
       if (this.matchOver) return;
@@ -752,18 +753,19 @@
       const profile = this.speedProfile();
       const wr = this.winRate;
 
-      const wrongChance = lerp(0.52, 0.07, wr);
-      const stumbleChance = lerp(0.32, 0.06, wr);
-      const makesWrongAttempt = Math.random() < wrongChance;
+      const wrongChance = lerp(0.72, 0.08, wr);
+      const secondWrongChance = lerp(0.55, 0.04, wr);
+      const stumbleChance = lerp(0.48, 0.06, wr);
+      // Weaker bots sometimes never finish the round (human wins by default).
+      const stallChance = lerp(0.42, 0, wr);
 
       let t = randRange(profile.readMin, profile.readMax);
 
-      if (makesWrongAttempt) {
+      const runWrongAttempt = () => {
         this.botWrongCount = Math.min(3, this.botWrongCount + 1);
         this.updateEnemyHudLives();
         const wrongChars = this.buildWrongAttempt(link, answerChars);
-        // Sometimes bail out of a bad guess part-way through.
-        const partialWrong = Math.random() < 0.45;
+        const partialWrong = Math.random() < 0.55;
         const wrongToType = partialWrong
           ? wrongChars.slice(0, Math.max(1, Math.floor(randRange(1, wrongChars.length))))
           : wrongChars;
@@ -772,10 +774,22 @@
         t += profile.wrongHold;
         this.botDelay(() => this.pushBotSlots([], roundId), t);
         t += randRange(profile.rethinkMin, profile.rethinkMax);
+      };
+
+      if (Math.random() < wrongChance) {
+        runWrongAttempt();
+        if (Math.random() < secondWrongChance) {
+          runWrongAttempt();
+        }
       }
 
       if (Math.random() < stumbleChance) {
         t += randRange(profile.longPauseMin, profile.longPauseMax);
+      }
+
+      if (Math.random() < stallChance) {
+        // Idle after mistakes / pause — do not submit a correct answer this round.
+        return;
       }
 
       t = this.scheduleBotTyping(answerChars, roundId, t, profile);
