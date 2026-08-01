@@ -113,6 +113,7 @@
       this.solveReady = false;
       this.clearTutorialFocus();
       this.coach.stopFinger();
+      global.AnswerTTS?.cancel?.();
       this.game.els.results?.classList.add('hidden');
 
       const params = new URLSearchParams(location.search);
@@ -396,14 +397,17 @@
         usedHint: false,
       });
 
+      const solvedWord = this.game.currentWord?.word || step.word || '';
+      this.speakTutorialWord(solvedWord);
+
       if (step.type === 'free-solve') {
         this.game.checkedComplete = true;
         this.game.stopTimer();
         if (!global.UserPreferences?.get?.()?.reduceMotion) {
           this.game.spawnConfetti();
         }
-        if (this.game.currentWord?.word) {
-          await this.game.revealHintWord(this.game.currentWord.word);
+        if (solvedWord) {
+          await this.game.revealHintWord(solvedWord);
         }
       } else {
         await this.game.celebrateTutorialSuccess();
@@ -423,7 +427,8 @@
         title.textContent = t(isLast ? 'tutorial.allDone' : 'tutorial.stepDone');
         title.dataset.i18n = isLast ? 'tutorial.allDone' : 'tutorial.stepDone';
       }
-      game.els.resultsWord.textContent = game.currentWord?.word || '';
+      const word = game.currentWord?.word || this.step?.word || '';
+      game.els.resultsWord.textContent = word;
       if (game.els.resultsTime) game.els.resultsTime.textContent = formatTutorialTime(game.getElapsedMs?.() || 0);
       if (game.els.resultsGuesses) game.els.resultsGuesses.textContent = '1';
       if (game.els.resultsStreak) game.els.resultsStreak.textContent = '';
@@ -440,6 +445,24 @@
       }
       game.els.results?.classList.remove('hidden');
       global.I18n?.applyToDocument?.(game.els.results);
+      global.AnswerTTS?.attachPopup?.({
+        word,
+        wordEl: game.els.resultsWord,
+        autoplay: false,
+        root: game.els.results,
+      });
+    }
+
+    speakTutorialWord(word) {
+      const text = String(word || '').trim();
+      if (!text) return;
+      global.AnswerTTS?.noteUserGesture?.();
+      global.AnswerTTS?.primeSpeech?.();
+      if (global.AnswerTTS?.playWord) {
+        global.AnswerTTS.playWord(text, { repeats: 2 });
+        return;
+      }
+      global.UserPreferences?.speakKorean?.(text);
     }
 
     onResultsContinue() {
