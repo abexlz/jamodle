@@ -1658,10 +1658,17 @@
     }
 
     getLocalWordFallback(word) {
+      const q = String(word || '').trim();
+      if (!q) return false;
       if (this.multiFindMode) {
-        return !!this.multiPuzzle?.validWords?.includes(word);
+        return !!this.multiPuzzle?.validWords?.includes(q);
       }
-      return word === (this.currentWord?.word || '');
+      if (q === (this.currentWord?.word || '')) return true;
+      if (global.MatchWordMeanings?.[q]) return true;
+      if (global.LearningWords?.findWordEntry?.(q)) return true;
+      const pool = global.MATCH_WORDS;
+      if (Array.isArray(pool) && pool.includes(q)) return true;
+      return false;
     }
 
     matchesDictionaryEntry(result, word) {
@@ -1678,9 +1685,12 @@
       return word;
     }
 
-    /** Dictionary alternate answers when every dock tile is on the board (solo + 1v1). */
+    /**
+     * Accept any dictionary word built with every dock tile.
+     * Daily / solo / versus / turn — tutorial and multi-find keep their own rules.
+     */
     shouldUseDictionaryCheck() {
-      if (this.tutorialMode || this.isDaily || this.multiFindMode) return false;
+      if (this.tutorialMode || this.multiFindMode) return false;
       return this.hasAllDockTilesOnBoard();
     }
 
@@ -1688,15 +1698,35 @@
       const trimmed = String(word || '').trim();
       if (!trimmed) return { valid: false, offline: false };
 
+      // Intended answer always counts, even if the dictionary is offline.
+      if (trimmed === (this.currentWord?.word || '')) {
+        return { valid: true, offline: false, entry: null };
+      }
+
       const DS = global.DictionaryService;
-      if (!DS?.validateWord) return { valid: false, offline: true };
+      if (!DS?.validateWord) {
+        return {
+          valid: this.getLocalWordFallback(trimmed),
+          offline: true,
+          entry: null,
+        };
+      }
 
       try {
         const result = await DS.validateWord(trimmed);
         const valid = !!(result?.valid || DS.matchesExactEntry?.(result, trimmed));
+        if (valid) {
+          return { valid: true, offline: false, entry: result.entry || null };
+        }
         const offline = !!(result?.offline || result?.error || result?.code === 'CONFIG');
-        return { valid, offline: offline && !valid, entry: valid ? (result.entry || null) : null };
+        if (offline && this.getLocalWordFallback(trimmed)) {
+          return { valid: true, offline: false, entry: null };
+        }
+        return { valid: false, offline: offline && !valid, entry: null };
       } catch {
+        if (this.getLocalWordFallback(trimmed)) {
+          return { valid: true, offline: false, entry: null };
+        }
         return { valid: false, offline: true };
       }
     }
@@ -4736,11 +4766,8 @@
       const allZonesCorrect = this.blocks.every((block) =>
         block.getAllZones().every((zone) => this.isZoneCorrect(zone))
       );
-      const wordComplete = dictionaryWin || (
-        this.turnBased
-          ? allZonesCorrect
-          : (!fullBoardSubmit && allZonesCorrect)
-      );
+      // Dictionary alternate (e.g. 자극 tiles → 전기) OR exact target placement.
+      const wordComplete = dictionaryWin || allZonesCorrect;
 
       if (wordComplete) {
         global.SoundEffects?.win?.();
