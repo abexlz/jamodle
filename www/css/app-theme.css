@@ -68,8 +68,8 @@ html[data-theme="dark"] {
 }
 
 body {
-  background-color: #a8c8dc !important;
-  background-image: url('../assets/bg-phone-pavilion.jpg') !important;
+  background-color: #6b9fc4 !important;
+  background-image: url('../assets/bg-phone-hanok.jpg') !important;
   background-size: cover !important;
   background-position: center top !important;
   background-repeat: no-repeat !important;
@@ -79,8 +79,8 @@ body {
 
 @media (min-width: 600px) {
   body {
-    background-color: #a8c8dc !important;
-    background-image: url('../assets/bg-landscape-pavilion.jpg') !important;
+    background-color: #6b9fc4 !important;
+    background-image: url('../assets/bg-landscape-hanok.jpg') !important;
     background-position: center center !important;
   }
 }

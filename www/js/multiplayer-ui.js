@@ -59,9 +59,8 @@
     let overlay = document.getElementById('battle-mode-overlay');
     if (overlay) return overlay;
 
-    const multiplayerLabel = escapeHtml(t('menu.battle.multiplayer') || 'Random Match');
-    const customLabel = escapeHtml(t('menu.battle.custom') || 'Custom');
-    const customSub = escapeHtml(t('menu.battle.customSub') || '(face your friends!)');
+    const randomIcon = `<svg class="battle-mode-card__svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M17.65 6.35A7.95 7.95 0 0 0 12 4a8 8 0 1 0 7.75 10h-2.1A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35Z"/></svg>`;
+    const customIcon = `<svg class="battle-mode-card__svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3Zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3Zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13Zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5Z"/></svg>`;
 
     overlay = document.createElement('div');
     overlay.id = 'battle-mode-overlay';
@@ -76,15 +75,18 @@
             data-i18n-aria="common.close" aria-label="Close">✕</button>
         </div>
         <div class="battle-mode-actions">
-          <button type="button" class="daily-challenge-card daily-challenge-bar accent-yellow battle-mode-action-btn" data-battle-action="multiplayer">
-            <span class="daily-challenge-content">
-              <span class="mode-name app-btn-title">${multiplayerLabel}</span>
+          <button type="button" class="battle-mode-card battle-mode-card--primary" data-battle-action="multiplayer">
+            <span class="battle-mode-card__icon" aria-hidden="true">${randomIcon}</span>
+            <span class="battle-mode-card__copy">
+              <span class="battle-mode-card__title" data-battle-label="multiplayer"></span>
+              <span class="battle-mode-card__sub" data-battle-label="multiplayerSub"></span>
             </span>
           </button>
-          <button type="button" class="daily-challenge-card daily-challenge-bar accent-yellow battle-mode-action-btn battle-mode-action-btn--custom" data-battle-action="custom">
-            <span class="daily-challenge-content">
-              <span class="mode-name app-btn-title">${customLabel}</span>
-              <span class="app-btn-desc">${customSub}</span>
+          <button type="button" class="battle-mode-card battle-mode-card--secondary" data-battle-action="custom">
+            <span class="battle-mode-card__icon" aria-hidden="true">${customIcon}</span>
+            <span class="battle-mode-card__copy">
+              <span class="battle-mode-card__title" data-battle-label="custom"></span>
+              <span class="battle-mode-card__sub" data-battle-label="customSub"></span>
             </span>
           </button>
         </div>
@@ -122,11 +124,26 @@
     return overlay;
   }
 
+  function syncBattleModeLabels(overlay) {
+    if (!overlay) return;
+    const map = {
+      multiplayer: t('menu.battle.multiplayer') || 'Random Match',
+      multiplayerSub: t('menu.battle.multiplayerSub') || 'Jump into a live 1v1',
+      custom: t('menu.battle.custom') || 'Custom',
+      customSub: t('menu.battle.customSub') || 'Challenge a friend',
+    };
+    overlay.querySelectorAll('[data-battle-label]').forEach((el) => {
+      const key = el.getAttribute('data-battle-label');
+      if (key && map[key] != null) el.textContent = map[key];
+    });
+  }
+
   function openBattleModeOverlay(game) {
     const overlay = ensureBattleModeOverlay();
     overlay.dataset.selectedGame = game === 'word-chain' ? 'word-chain' : 'jamodle';
     const titleEl = overlay.querySelector('[data-battle-mode-title]');
     if (titleEl) titleEl.textContent = battleGameLabel(overlay.dataset.selectedGame);
+    syncBattleModeLabels(overlay);
     overlay.classList.remove('hidden');
     syncMultiplayerOpenClass();
     global.I18n?.applyToDocument?.(overlay);

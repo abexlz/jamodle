@@ -10,8 +10,8 @@ html.high-contrast body.home-menu-active,
 html.high-contrast body:has(#menu-screen:not(.hidden)),
 html.large-text body.home-menu-active,
 html.large-text body:has(#menu-screen:not(.hidden)) {
-  background-color: #a8c8dc !important;
-  background-image: url('../assets/bg-phone-pavilion.jpg') !important;
+  background-color: #6b9fc4 !important;
+  background-image: url('../assets/bg-phone-hanok.jpg') !important;
   background-size: cover !important;
   background-position: center top !important;
   background-repeat: no-repeat !important;
@@ -26,8 +26,8 @@ html.large-text body:has(#menu-screen:not(.hidden)) {
   html.high-contrast body:has(#menu-screen:not(.hidden)),
   html.large-text body.home-menu-active,
   html.large-text body:has(#menu-screen:not(.hidden)) {
-    background-color: #a8c8dc !important;
-    background-image: url('../assets/bg-landscape-pavilion.jpg') !important;
+    background-color: #6b9fc4 !important;
+    background-image: url('../assets/bg-landscape-hanok.jpg') !important;
     background-position: center center !important;
   }
 }
