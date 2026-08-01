@@ -74,15 +74,6 @@
     return min + Math.random() * (max - min);
   }
 
-  function formatTime(ms) {
-    if (ms == null || !Number.isFinite(ms)) return '—';
-    const sec = Math.max(0, Math.floor(ms / 1000));
-    const m = Math.floor(sec / 60);
-    const s = sec % 60;
-    if (m > 0) return `${m}:${String(s).padStart(2, '0')}`;
-    return rt('timeSec', { s });
-  }
-
   function parseBotProfileFromParams(params) {
     const name = String(params.get('name') || '').trim();
     if (!name) return null;
@@ -147,8 +138,6 @@
       this._pendingScores = { my: null, opp: null };
       this.matchOver = false;
       this.startMs = null;
-      this._myElapsedMs = null;
-      this._botElapsedMs = null;
       this._botTimers = [];
       this._prevOppWrong = 0;
       this.botWrongCount = 0;
@@ -570,7 +559,6 @@
       this.myScore += RWC()?.relatedWordsRoundPoints?.(link.answer) ?? 1;
       this.myStreak += 1;
       this.botStreak = 0;
-      this._myElapsedMs = Date.now() - this.startMs;
       this._pendingScores.my = { score: this.myScore, streak: this.myStreak };
 
       const nextLink = this.linkIndex + 1;
@@ -638,7 +626,6 @@
       this.botScore += points;
       this.botStreak += 1;
       this.myStreak = 0;
-      this._botElapsedMs = Date.now() - this.startMs;
       this._scoreFlyHold.opp = true;
       this._pendingScores.opp = { score: this.botScore, streak: this.botStreak };
 
@@ -842,12 +829,12 @@
           {
             uid: 'me',
             name: rt('me'),
-            statHtml: `${this.myScore} ${escapeHtml(rt('points'))} · ${escapeHtml(formatTime(this._myElapsedMs))}`,
+            score: this.myScore || 0,
           },
           {
             uid: 'bot',
             name: this.botName(),
-            statHtml: `${this.botScore} ${escapeHtml(rt('points'))} · ${escapeHtml(formatTime(this._botElapsedMs))}`,
+            score: this.botScore || 0,
           },
         ],
         rematchLabel: rt('rematch'),

@@ -2344,6 +2344,49 @@ html.reduce-motion .race-turn-swap {
   color: var(--text-soft);
 }
 
+/* Big in-game-style score under battle cards (Word Chain 1v1) */
+.race-results-duel-score {
+  margin: 2px 0 0;
+  font-family: 'Jua', sans-serif;
+  font-size: clamp(40px, 12vw, 56px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: #6B5B95;
+  font-variant-numeric: tabular-nums;
+}
+
+.race-results-duel-side--winner .race-results-duel-score {
+  color: var(--correct-text, #3A7A58);
+  text-shadow: 0 0 18px rgba(95, 214, 138, 0.45);
+  font-size: clamp(46px, 13.5vw, 64px);
+}
+
+.race-results-stats--victory .race-results-duel-side--winner .race-results-duel-score {
+  color: #5FD68A;
+  text-shadow: 0 0 20px rgba(95, 214, 138, 0.6);
+}
+
+.race-results-stats--defeat .race-results-duel-side--winner .race-results-duel-score {
+  color: #9ef0c0;
+  text-shadow: 0 0 16px rgba(95, 214, 138, 0.45);
+}
+
+.race-results-duel-side--loser .race-results-duel-score {
+  color: #9A4060;
+  opacity: 0.88;
+  font-size: clamp(34px, 10vw, 48px);
+}
+
+.race-results-stats--defeat .race-results-duel-side--loser .race-results-duel-score {
+  color: #ffc0df;
+  opacity: 0.9;
+}
+
+[data-theme="dark"] .race-results-duel-score {
+  color: #C8B8F0;
+}
+
 /* Winner side — bright, glowing */
 .race-results-duel-side--winner {
   transform: scale(1.04);

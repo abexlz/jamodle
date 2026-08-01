@@ -255,16 +255,24 @@
     const crown = role === 'winner'
       ? '<span class="race-results-duel-crown" aria-hidden="true">👑</span>'
       : '';
+    const hasScore = player.score != null && player.score !== '';
+    const scoreNum = hasScore ? Math.max(0, Math.floor(Number(player.score) || 0)) : null;
+    const nameHtml = hasScore
+      ? ''
+      : `<p class="race-results-duel-name">${escapeHtml(player.name || '')}</p>`;
+    const statHtml = hasScore
+      ? `<p class="race-results-duel-score" aria-label="${scoreNum}">${scoreNum}</p>`
+      : `<p class="race-results-duel-stat">${player.statHtml || ''}</p>`;
 
     return `
-      <div class="race-results-duel-side ${roleClass}" data-battle-uid="${escapeHtml(player.uid || '')}">
+      <div class="race-results-duel-side ${roleClass}" data-battle-uid="${escapeHtml(player.uid || '')}" data-battle-name="${escapeHtml(player.name || '')}">
         <div class="race-results-duel-card-wrap">
           ${crown}
           <div class="race-results-duel-side-aura" aria-hidden="true"></div>
           <div class="race-results-duel-card race-opp-battle-card" data-battle-card-slot aria-hidden="true"></div>
         </div>
-        <p class="race-results-duel-name">${escapeHtml(player.name || '')}</p>
-        <p class="race-results-duel-stat">${player.statHtml || ''}</p>
+        ${nameHtml}
+        ${statHtml}
       </div>
     `;
   }
@@ -388,7 +396,9 @@
       const slot = side.querySelector('[data-battle-card-slot]');
       if (!slot) return;
 
-      const fallbackName = side.querySelector('.race-results-duel-name')?.textContent || '?';
+      const fallbackName = side.dataset.battleName
+        || side.querySelector('.race-results-duel-name')?.textContent
+        || '?';
       let summary = null;
       const BPS = global.BotProfileService;
       if (BPS?.isLocalPlayerUid?.(uid)) {

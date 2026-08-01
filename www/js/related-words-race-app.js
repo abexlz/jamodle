@@ -30,15 +30,6 @@
       || rt('modeLabel');
   }
 
-  function formatTime(ms) {
-    if (ms == null || !Number.isFinite(ms)) return '—';
-    const sec = Math.max(0, Math.floor(ms / 1000));
-    const m = Math.floor(sec / 60);
-    const s = sec % 60;
-    if (m > 0) return `${m}:${String(s).padStart(2, '0')}`;
-    return rt('timeSec', { s });
-  }
-
   function escapeHtml(str) {
     return String(str)
       .replace(/&/g, '&amp;')
@@ -975,15 +966,6 @@
 
       const p1 = data.player1Progress || RS().defaultProgress();
       const p2 = data.player2Progress || RS().defaultProgress();
-      const startMs = RS().startedAtMs(data);
-
-      function elapsedFor(progress) {
-        if (progress.elapsedMs != null) return progress.elapsedMs;
-        if (progress.finishedAt && startMs) {
-          return Math.max(0, progress.finishedAt.toMillis() - startMs);
-        }
-        return null;
-      }
 
       let resultLine;
       if (data.winnerUid === this.myUid) {
@@ -1012,12 +994,12 @@
           {
             uid: this.myUid,
             name: rt('me'),
-            statHtml: `${myProgress.guessCount} ${escapeHtml(rt('points'))} · ${escapeHtml(formatTime(elapsedFor(myProgress)))}`,
+            score: myProgress.guessCount || 0,
           },
           {
             uid: opp?.uid,
             name: opp?.name || rt('opponent'),
-            statHtml: `${oppProgress.guessCount} ${escapeHtml(rt('points'))} · ${escapeHtml(formatTime(elapsedFor(oppProgress)))}`,
+            score: oppProgress.guessCount || 0,
           },
         ],
         rematchLabel: rt('rematch'),
