@@ -112,6 +112,21 @@
         ],
       },
     ],
+    굴: [
+      {
+        meaning: 'oyster',
+        keywords: [
+          '문어', '오징어', '낙지', '새우', '게', '랍스터', '전복', '홍합', '성게',
+          '해삼', '멍게', '해산물', '조개', 'oyster', 'seafood', 'shellfish',
+        ],
+      },
+      {
+        meaning: 'cave',
+        keywords: [
+          '산', '동굴', '바위', '계곡', '등산', 'cave', 'mountain', 'rock',
+        ],
+      },
+    ],
     커튼: [
       {
         meaning: 'curtain',

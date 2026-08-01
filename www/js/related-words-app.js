@@ -449,6 +449,7 @@
         this.root.querySelector('.rw-combo-row')?.classList.add('hidden');
         this.els.soloStreak?.closest('.wc-combo-wrap')?.classList.add('hidden');
         this.root.querySelector('.rw-settings-btn')?.classList.add('hidden');
+        global.KoreanTTS?.prime?.();
       } else if (!this.showOppPreview) {
         this.root.classList.add('rw-solo-mode');
       }
@@ -1351,15 +1352,17 @@
     }
 
     shouldShowTrailDefinitions() {
+      // 1v1 always shows the English gloss under the recent clue word.
+      if (this.raceMode) return true;
       return global.UserPreferences?.shouldShowEnglish?.() !== false;
     }
 
     speakClueWord(word) {
       const q = String(word || '').trim();
-      if (!q) return;
-      if (global.UserPreferences?.get?.().pronunciation === false) return;
+      if (!q) return Promise.resolve(false);
+      if (global.UserPreferences?.get?.().pronunciation === false) return Promise.resolve(false);
       global.KoreanTTS?.prime?.();
-      global.KoreanTTS?.speak?.(q, wordChainSpeakOpts());
+      return Promise.resolve(global.KoreanTTS?.speak?.(q, wordChainSpeakOpts()) ?? false);
     }
 
     bindTrailSpeak() {
@@ -3131,7 +3134,10 @@
       const sharedRace = this.raceMode && this.sharedRace;
 
       global.SoundEffects?.win?.();
-      this.speakCorrectWord();
+      // 1v1 pronounces the new clue via renderTrail; solo speaks the solved word here.
+      if (!this.raceMode) {
+        this.speakCorrectWord();
+      }
 
       if (sharedRace && this.onRoundWin) {
         const points = global.RelatedWordsChains?.relatedWordsRoundPoints?.(this.puzzle.answer) ?? 1;
@@ -3410,10 +3416,12 @@
 
     speakCorrectWord() {
       const word = this.puzzle?.answer;
-      if (!word) return;
+      if (!word) return Promise.resolve(false);
+      if (global.UserPreferences?.get?.().pronunciation === false) return Promise.resolve(false);
       global.KoreanTTS?.prime?.();
-      global.KoreanTTS?.speak?.(word, wordChainSpeakOpts());
       global.DictionaryService?.prefetchWord?.(word);
+      // In 1v1, trail render will pronounce the next clue — speak the solved word here.
+      return Promise.resolve(global.KoreanTTS?.speak?.(word, wordChainSpeakOpts()) ?? false);
     }
 
     getChainLabel(chain) {
