@@ -1787,7 +1787,7 @@
     overlay.innerHTML = `
       <div class="multiplayer-modal">
         <div class="multiplayer-modal-header">
-          <h2 class="multiplayer-modal-title" data-i18n="multiplayer.title">Jamo Game Battle</h2>
+          <h2 class="multiplayer-modal-title" data-i18n="multiplayer.title">HANGUL-DLE BATTLE</h2>
           <button type="button" class="multiplayer-close-btn" data-social-action="multiplayer-close"
             data-i18n-aria="common.close" aria-label="Close">✕</button>
         </div>

@@ -363,7 +363,7 @@
       "points": "pts"
     },
     "multiplayer": {
-      "title": "Jamo Game Battle",
+      "title": "HANGUL-DLE BATTLE",
       "subtitle": "Pick a user to verse!",
       "pickUserTitle": "Pick a user to verse!",
       "pickUserDesc": "User first, then mode and letters.",
@@ -1060,8 +1060,8 @@
       "yawn": "Bored"
     },
     "matchTurn": {
-      "pageTitle": "Jamo Game Battle — Jamodeul",
-      "title": "Jamo Game Battle",
+      "pageTitle": "HANGUL-DLE BATTLE — Jamodeul",
+      "title": "HANGUL-DLE BATTLE",
       "backHome": "← Home",
       "loading": "Loading…",
       "startingSoon": "Starting soon…",
