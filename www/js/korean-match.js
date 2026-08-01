@@ -1034,10 +1034,6 @@
           <p class="section-label" data-i18n="match.buildLabel">${t('match.buildLabel')}</p>
           <div id="watch-reveal-banner" class="watch-reveal-banner hidden" aria-live="polite"></div>
           <div class="syllable-blocks-row" id="match-blocks"></div>
-          ${this.turnBased ? `<div id="turn-answer-banner" class="turn-answer-banner hidden" aria-live="polite">
-            <p class="turn-answer-word" id="turn-answer-word"></p>
-            <p class="turn-answer-meaning hidden" id="turn-answer-meaning"></p>
-          </div>` : ''}
         </section>
         <div class="game-feedback empty" id="match-feedback" role="status">&nbsp;</div>
         ${bankSectionHtml}
@@ -1074,9 +1070,6 @@
         oppStat: this.root.querySelector('#match-opp-stat'),
         blocks: this.root.querySelector('#match-blocks'),
         watchRevealBanner: this.root.querySelector('#watch-reveal-banner'),
-        turnAnswerBanner: this.root.querySelector('#turn-answer-banner'),
-        turnAnswerWord: this.root.querySelector('#turn-answer-word'),
-        turnAnswerMeaning: this.root.querySelector('#turn-answer-meaning'),
         bank: this.root.querySelector('#match-bank'),
         feedback: this.root.querySelector('#match-feedback'),
         reset: this.root.querySelector('#match-reset'),
@@ -1543,7 +1536,6 @@
       }
       if (!this.isDaily && this.els.streak) this.updateStreakDisplay();
 
-      this.hideTurnAnswerBanner();
       this.prefetchMeaning(word);
 
       this.renderHint(wordData);
@@ -3590,41 +3582,6 @@
       });
     }
 
-    hideTurnAnswerBanner() {
-      global.AnswerTTS?.cancel?.();
-      this.els.turnAnswerBanner?.classList.add('hidden');
-      if (this.els.turnAnswerWord) this.els.turnAnswerWord.textContent = '';
-      if (this.els.turnAnswerMeaning) {
-        this.els.turnAnswerMeaning.textContent = '';
-        this.els.turnAnswerMeaning.classList.add('hidden');
-      }
-    }
-
-    async showTurnAnswerBanner(word) {
-      const banner = this.els.turnAnswerBanner;
-      if (!banner) return;
-      const wordEl = this.els.turnAnswerWord;
-      const meaningEl = this.els.turnAnswerMeaning;
-      if (wordEl) wordEl.textContent = word;
-      if (meaningEl) {
-        meaningEl.textContent = '';
-        meaningEl.classList.add('hidden');
-      }
-      banner.classList.remove('hidden');
-      global.AnswerTTS?.attachPopup?.({
-        word,
-        wordEl,
-        autoplay: !this.versus,
-        autoplayRepeats: 2,
-        root: banner,
-      });
-      const meaning = await this.getMeaningForWord(word);
-      if (meaningEl && meaning) {
-        meaningEl.textContent = meaning;
-        meaningEl.classList.remove('hidden');
-      }
-    }
-
     async flipRevealWatchZone(zone, tileEl, index) {
       await delay(index * FLIP_STAGGER);
       global.SoundEffects?.correct?.();
@@ -4790,7 +4747,6 @@
         }
         if (this.turnBased && this.onTurnSubmit) {
           this.turnSubmitting = true;
-          void this.showTurnAnswerBanner(resolvedWord);
           this.freezeOwnTurnResult();
           this.checking = false;
           const submission = this.serializeTurnSubmission();

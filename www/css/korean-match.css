@@ -2492,43 +2492,7 @@
   }
 
   .turn-answer-banner {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    margin: 12px 0 0;
-    padding: 14px 16px;
-    border-radius: 14px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(248, 244, 255, 0.94) 100%);
-    border: 2px solid rgba(147, 120, 220, 0.5);
-    box-shadow: 0 4px 14px rgba(45, 38, 64, 0.1);
-    text-align: center;
-  }
-
-  .turn-answer-word {
-    margin: 0;
-    font-family: 'Jua', sans-serif;
-    font-size: 24px;
-    line-height: 1.2;
-    color: #2a7a5a;
-  }
-
-  .turn-answer-meaning {
-    margin: 0;
-    width: 100%;
-    padding: 8px 10px;
-    font-size: 16px;
-    font-weight: 600;
-    line-height: 1.45;
-    color: #2d2640;
-    background: rgba(255, 255, 255, 0.85);
-    border-radius: 10px;
-    border: 1px solid rgba(147, 120, 220, 0.35);
-  }
-
-  .turn-answer-meaning.hidden,
-  .turn-answer-meaning:empty {
-    display: none;
+    display: none !important;
   }
 
   .drop-zone > .jamo-tile.opp-reveal-tile {

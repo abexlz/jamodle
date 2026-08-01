@@ -95,6 +95,7 @@
       this._emotes = null;
       this._lastRoundKey = null;
       this._roundBreakTimer = null;
+      this._roundBreakShownKey = null;
     }
 
     async init() {
@@ -174,7 +175,7 @@
       if (this.turnTimer) clearInterval(this.turnTimer);
       if (this._turnSwapTimer) clearTimeout(this._turnSwapTimer);
       if (this._roundBreakTimer) clearTimeout(this._roundBreakTimer);
-      if (this._roundBreakCountdownTimer) clearInterval(this._roundBreakCountdownTimer);
+      this.hideRoundRevealOverlay();
       CF()?.clearCoinFlipTimers?.(this);
       global.KoreanMatchDrag?.end?.();
       this._emotes?.destroy();
@@ -201,6 +202,7 @@
         <div id="race-turn-urgency" class="race-turn-urgency hidden" aria-hidden="true"></div>
         <div id="race-turn-swap" class="race-turn-swap hidden" aria-live="assertive"></div>
         <div id="race-main" class="race-main"></div>
+        <div id="race-round-reveal" class="race-round-reveal hidden" aria-live="polite"></div>
         <div id="race-coin-flip" class="race-coin-flip hidden" aria-live="polite"></div>
         <div id="race-countdown" class="race-countdown hidden" aria-live="assertive"></div>
       `;
@@ -210,6 +212,7 @@
         turnUrgency: this.root.querySelector('#race-turn-urgency'),
         turnSwap: this.root.querySelector('#race-turn-swap'),
         main: this.root.querySelector('#race-main'),
+        roundReveal: this.root.querySelector('#race-round-reveal'),
         coinFlip: this.root.querySelector('#race-coin-flip'),
         countdown: this.root.querySelector('#race-countdown'),
       };
@@ -464,6 +467,8 @@
     }
 
     resetForNewRound(data) {
+      this.hideRoundRevealOverlay();
+      this._roundBreakShownKey = null;
       this.stopTurnLiveWatch();
       if (this.turnTimer) clearInterval(this.turnTimer);
       if (this._turnSwapTimer) clearTimeout(this._turnSwapTimer);
@@ -487,79 +492,64 @@
     }
 
     handleRoundBreak(data) {
+      const breakKey = `${data.roundNumber || 1}:${data.nextRoundNumber || ''}:${data.roundWinnerUid || ''}`;
+      if (this._roundBreakShownKey === breakKey) {
+        RS().tryAdvanceRound(this.matchId, data);
+        this.scheduleRoundBreakAdvance(data);
+        return;
+      }
+      this._roundBreakShownKey = breakKey;
+
       if (this.turnTimer) clearInterval(this.turnTimer);
       this.game?.setMyTurn(false);
       this.hideTurnUrgencyOverlay();
       this.els.turnBar?.classList.add('hidden');
-      this.game?.destroy();
-      this.game = null;
-      this.gameStarted = false;
+      // Keep the board under a floating cutscene — do not insert answer UI into layout.
 
-      const opp = RS().getOpponent(data, this.myUid);
-      const iWon = data.roundWinnerUid === this.myUid;
-      const score = RS().getSeriesScoreForPlayer(data, this.myUid, opp?.uid);
-      const word = data.sharedState?.solvedWord || data.lastRoundTarget || data.target;
-      const line = iWon ? rt('roundWin') : rt('roundLoss');
-      const scoreLine = rt('seriesScore', { my: score.myWins, opp: score.oppWins });
-      const firstTo = rt('firstTo', { n: data.seriesTarget || RS().KOREAN_TURN_SERIES_TARGET || 2 });
-      const breakMs = Number(data.roundBreakMs) > 0 ? Number(data.roundBreakMs) : (RS().ROUND_BREAK_MS || 3000);
-      const breakSec = Math.max(1, Math.ceil(breakMs / 1000));
-
-      this.renderMain(`
-        <div class="race-panel race-round-break" role="status" aria-live="polite">
-          <p class="race-round-break-kicker">${escapeHtml(rt('roundEnded'))}</p>
-          <p class="race-panel-title">${escapeHtml(line)}</p>
-          <div class="race-round-break-word-card">
-            <p class="race-round-break-label">${escapeHtml(rt('answerLabel'))}</p>
-            <p class="race-round-break-word">${escapeHtml(word || '')}</p>
-            <p class="race-round-break-meaning" id="round-break-meaning" hidden></p>
-          </div>
-          <p class="race-panel-sub">${escapeHtml(scoreLine)} · ${escapeHtml(firstTo)}</p>
-          <p class="race-round-break-wait" id="round-break-countdown">${escapeHtml(rt('nextRoundIn', { n: breakSec }))}</p>
-        </div>
-      `);
-
-      void this.fillRoundBreakMeaning(word);
-      this.startRoundBreakCountdown(breakSec);
-
+      this.showRoundRevealOverlay(data);
       RS().tryAdvanceRound(this.matchId, data);
       this.scheduleRoundBreakAdvance(data);
     }
 
-    async fillRoundBreakMeaning(word) {
-      const el = this.els.main?.querySelector('#round-break-meaning');
-      if (!el || !word) return;
+    showRoundRevealOverlay(data) {
+      const el = this.els.roundReveal;
+      if (!el) return;
+      const iWon = data.roundWinnerUid === this.myUid;
+      const word = data.sharedState?.solvedWord || data.lastRoundTarget || data.target || '';
+      const line = iWon ? rt('roundWin') : rt('roundLoss');
+
+      el.innerHTML = `
+        <div class="race-round-reveal-card" role="status">
+          <p class="race-round-reveal-kicker">${escapeHtml(rt('roundEnded'))}</p>
+          <p class="race-round-reveal-title">${escapeHtml(line)}</p>
+          <p class="race-round-reveal-label">${escapeHtml(rt('answerLabel'))}</p>
+          <p class="race-round-reveal-word">${escapeHtml(word)}</p>
+          <p class="race-round-reveal-meaning" id="round-reveal-meaning" hidden></p>
+        </div>
+      `;
+      el.classList.remove('hidden');
+      void this.fillRoundRevealMeaning(word);
+    }
+
+    hideRoundRevealOverlay() {
+      const el = this.els.roundReveal;
+      if (!el) return;
+      el.classList.add('hidden');
+      el.innerHTML = '';
+    }
+
+    async fillRoundRevealMeaning(word) {
+      const meaningEl = this.els.roundReveal?.querySelector('#round-reveal-meaning');
+      if (!meaningEl || !word) return;
       try {
         const meaning = await global.DictionaryService?.resolveEnglishMeaning?.(word)
           || global.MatchWordMeanings?.[word]
           || global.LearningWords?.getWordMeaning?.(word)
           || '';
-        if (!meaning || !el.isConnected) return;
-        el.textContent = meaning;
-        el.hidden = false;
+        if (!meaning || !meaningEl.isConnected) return;
+        meaningEl.textContent = meaning;
+        meaningEl.hidden = false;
       } catch { /* offline */ }
-    }
-
-    startRoundBreakCountdown(totalSec) {
-      if (this._roundBreakCountdownTimer) clearInterval(this._roundBreakCountdownTimer);
-      let left = Math.max(1, Number(totalSec) || 3);
-      const el = () => this.els.main?.querySelector('#round-break-countdown');
-      const tick = () => {
-        const node = el();
-        if (node) node.textContent = rt('nextRoundIn', { n: left });
-      };
-      tick();
-      this._roundBreakCountdownTimer = setInterval(() => {
-        left -= 1;
-        if (left <= 0) {
-          clearInterval(this._roundBreakCountdownTimer);
-          this._roundBreakCountdownTimer = null;
-          const node = el();
-          if (node) node.textContent = rt('nextRoundSoon');
-          return;
-        }
-        tick();
-      }, 1000);
     }
 
     scheduleRoundBreakAdvance(data) {

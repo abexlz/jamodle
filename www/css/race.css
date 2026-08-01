@@ -238,6 +238,97 @@
   color: var(--heading, #123);
 }
 
+/* Floating round-end cutscene — overlays the board without reshaping layout */
+.race-round-reveal {
+  position: fixed;
+  inset: 0;
+  z-index: 192;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  pointer-events: none;
+  background: transparent;
+}
+
+.race-round-reveal.hidden {
+  display: none;
+}
+
+.race-round-reveal-card {
+  width: min(92vw, 340px);
+  padding: 22px 20px 20px;
+  border-radius: 22px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.94);
+  border: 2px solid rgba(0, 120, 140, 0.28);
+  box-shadow:
+    0 12px 36px rgba(0, 40, 50, 0.18),
+    0 0 0 1px rgba(255, 255, 255, 0.65) inset;
+  animation: raceRoundRevealIn 0.35s ease both;
+}
+
+[data-theme="dark"] .race-round-reveal-card {
+  background: rgba(28, 32, 42, 0.94);
+  border-color: rgba(123, 207, 255, 0.35);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+}
+
+.race-round-reveal-kicker {
+  margin: 0 0 8px;
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-soft, #6b7280);
+}
+
+.race-round-reveal-title {
+  margin: 0 0 14px;
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: 1.15rem;
+  color: var(--heading, #123);
+}
+
+.race-round-reveal-label {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-soft, #6b7280);
+}
+
+.race-round-reveal-word {
+  margin: 0;
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: clamp(32px, 9vw, 44px);
+  line-height: 1.15;
+  color: var(--correct-text, #3A7A58);
+}
+
+.race-round-reveal-meaning {
+  margin: 12px 0 0;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--text, #334);
+}
+
+.race-round-reveal-meaning:empty,
+.race-round-reveal-meaning[hidden] {
+  display: none;
+}
+
+@keyframes raceRoundRevealIn {
+  from { transform: translateY(10px) scale(0.94); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+html.reduce-motion .race-round-reveal-card {
+  animation: none;
+}
+
 .race-panel-msg {
   font-size: 15px;
   color: var(--text);

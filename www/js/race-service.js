@@ -5,6 +5,7 @@
   'use strict';
 
   const MAX_GUESSES = 6;
+  const TURN_DURATION_SHORT_MS = 40000;
   const TURN_DURATION_MS = 60000;
   const TURN_DURATION_NORMAL_MS = 90000;
   const INSPECT_DURATION_MS = 15000;
@@ -456,6 +457,7 @@
 
   function turnDurationForLength(wordLength) {
     const len = normalizeWordLength(wordLength);
+    if (len <= 2) return TURN_DURATION_SHORT_MS;
     if (len >= 4) return TURN_DURATION_NORMAL_MS;
     return TURN_DURATION_MS;
   }
@@ -2114,6 +2116,7 @@
 
   global.RaceService = {
     MAX_GUESSES,
+    TURN_DURATION_SHORT_MS,
     TURN_DURATION_MS,
     TURN_DURATION_NORMAL_MS,
     INSPECT_DURATION_MS,
