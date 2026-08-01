@@ -361,16 +361,37 @@
   }
 
   function matchPageUrlForResult(result) {
-    const gameType = result.game === 'word-chain' ? 'related-words' : 'korean-match';
-    return global.RaceService?.getMatchPageUrl?.(result.matchId, { gameType });
+    if (result?.game === 'word-chain') {
+      return global.RaceService?.getMatchPageUrl?.(result.matchId, {
+        gameType: 'related-words',
+        playMode: 'race',
+      });
+    }
+    return global.RaceService?.getMatchPageUrl?.(result.matchId, {
+      gameType: 'korean-match',
+      playMode: result?.playMode || 'turn',
+    });
   }
 
   function botGameKeyFromQueue(game) {
     return game === 'word-chain' ? 'word-chain' : 'jamodle';
   }
 
+  function fallbackWordChainToBot(overlay, reason) {
+    console.warn('[Multiplayer] Word Chain matchmaking falling back to bot', reason || '');
+    stopMatchmakingCountdown();
+    setMatchmakingStatus(overlay, 'menu.battle.matchmakingFound');
+    redirectToBotMatch('word-chain');
+  }
+
   async function runMatchmakingQueue(overlay, { game, wordLength } = {}) {
+    const isWordChain = game === 'word-chain';
+
     if (!global.MatchQueueService?.joinQueue) {
+      if (isWordChain) {
+        fallbackWordChainToBot(overlay, 'missing-queue-service');
+        return;
+      }
       alert(t('menu.battle.matchmakingFailed'));
       resetMatchmakingOverlay(overlay);
       return;
@@ -391,7 +412,13 @@
           stopMatchmakingCountdown();
           setMatchmakingStatus(overlay, 'menu.battle.matchmakingFound');
           const url = matchPageUrlForResult(result);
-          if (url) global.location.href = url;
+          if (url) {
+            global.location.href = url;
+            return;
+          }
+          if (isWordChain) {
+            fallbackWordChainToBot(overlay, 'missing-match-url');
+          }
         },
         onBotFallback: (ctx) => {
           stopMatchmakingCountdown();
@@ -402,7 +429,11 @@
             ctx.game === 'word-chain' ? {} : { wordLength: ctx.wordLength }
           );
         },
-        onError: () => {
+        onError: (err) => {
+          if (isWordChain) {
+            fallbackWordChainToBot(overlay, err);
+            return;
+          }
           stopMatchmakingCountdown();
           alert(t('menu.battle.matchmakingFailed'));
           resetMatchmakingOverlay(overlay);
@@ -410,6 +441,10 @@
       });
     } catch (err) {
       console.error('[Multiplayer] matchmaking failed', err);
+      if (isWordChain) {
+        fallbackWordChainToBot(overlay, err);
+        return;
+      }
       stopMatchmakingCountdown();
       alert(t('menu.battle.matchmakingFailed'));
       resetMatchmakingOverlay(overlay);

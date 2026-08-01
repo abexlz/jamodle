@@ -655,7 +655,7 @@
 
   function buildWordChainMatchmakingMatchData(player1Uid, player2Uid, player1Name, player2Name, matchId) {
     const chainId = pickRelatedWordsChain(matchId || `${player1Uid}-${player2Uid}`);
-    const raceTarget = getRelatedWordsLinkCount({ chainId });
+    const raceTarget = Math.max(1, Math.trunc(Number(getRelatedWordsLinkCount({ chainId })) || RELATED_WORDS_RACE_TARGET));
     return {
       gameType: GAME_TYPES.relatedWords,
       playMode: PLAY_MODES.race,
