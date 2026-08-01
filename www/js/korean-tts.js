@@ -212,12 +212,26 @@
     } catch (_) { /* ignore */ }
   }
 
-  function playAudioUrl(url, volume) {
+  function clampPlaybackRate(value) {
+    if (!Number.isFinite(value) || value <= 0) return 1;
+    return Math.max(0.5, Math.min(2, value));
+  }
+
+  function resolveSpeakRate(options = {}) {
+    if (Number.isFinite(options.rate)) return options.rate;
+    const playbackRate = clampPlaybackRate(options.playbackRate);
+    return DEFAULT_RATE * playbackRate;
+  }
+
+  function playAudioUrl(url, volume, playbackRate = 1) {
     return new Promise((resolve) => {
       const audio = new Audio(url);
       activeAudio = audio;
       audio.preload = 'auto';
       audio.volume = volume;
+      try {
+        audio.playbackRate = clampPlaybackRate(playbackRate);
+      } catch (_) { /* ignore */ }
 
       const done = (ok) => {
         if (activeAudio === audio) activeAudio = null;
@@ -237,11 +251,12 @@
   function speakWithWebSpeech(text, options = {}) {
     if (!global.speechSynthesis) return Promise.resolve(false);
 
-    const rate = Number.isFinite(options.rate) ? options.rate : DEFAULT_RATE;
+    const rate = resolveSpeakRate(options);
     const volume = Number.isFinite(options.volume) ? options.volume : speakVolume();
+    const playbackRate = clampPlaybackRate(options.playbackRate);
     const syllableGapMs = Number.isFinite(options.syllableGapMs)
       ? options.syllableGapMs
-      : SYLLABLE_GAP_MS;
+      : Math.round(SYLLABLE_GAP_MS / playbackRate);
 
     const syllables = [...String(text || '').trim()].filter((ch) => {
       const cp = ch.codePointAt(0);
@@ -286,18 +301,19 @@
   async function speakOnce(text, options = {}) {
     const volume = Number.isFinite(options.volume) ? options.volume : speakVolume();
     const preferServer = options.preferServer !== false;
+    const playbackRate = clampPlaybackRate(options.playbackRate);
 
     if (preferServer) {
       try {
         const audioUrl = await fetchServerAudio(text, options);
-        const ok = await playAudioUrl(audioUrl, volume);
+        const ok = await playAudioUrl(audioUrl, volume, playbackRate);
         if (ok) return true;
       } catch (_) {
         /* fall through to browser voice */
       }
     }
 
-    return speakWithWebSpeech(text, { ...options, volume });
+    return speakWithWebSpeech(text, { ...options, volume, playbackRate });
   }
 
   async function speak(text, options = {}) {

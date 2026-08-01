@@ -26,6 +26,14 @@
   const REVEAL_VANISH_MS = 320;
   const REVEAL_FORM_MS = 520;
   const REVEAL_FORM_HOLD_MS = 140;
+  const HINT_COST = 30;
+  /** Word Chain pronunciations play 50% faster than the global Korean TTS default. */
+  const WORD_CHAIN_TTS_RATE = 1.5;
+  const wordChainSpeakOpts = (extra = {}) => ({
+    repeats: 1,
+    playbackRate: WORD_CHAIN_TTS_RATE,
+    ...extra,
+  });
 
   const TRAIL_SPEAKER_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">'
     + '<path fill="currentColor" d="M3 10v4h4l5 5V5L7 10H3zm13.5 2c0-1.77-1.02-3.29-2.5-4.03v8.06c1.48-.74 2.5-2.26 2.5-4.03zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>'
@@ -217,6 +225,8 @@
       this.awaitingExtraGuess = false;
       this._extraGuessTimer = null;
       this._extraGuessRaf = null;
+      this.hintUsedThisRound = false;
+      this._hintBusy = false;
 
       if (this.raceMode) {
         this.progress = {
@@ -325,6 +335,9 @@
 
             <section class="rw-dock-area">
               <div class="rw-dock" id="rw-dock"></div>
+              <div class="rw-hint-row" id="rw-hint-row" hidden>
+                <button type="button" class="rw-hint-btn" id="rw-hint-btn"></button>
+              </div>
               <div class="rw-reveal-skip hidden" id="rw-reveal-skip" aria-live="polite">
                 <button type="button" class="race-btn race-btn--ghost rw-reveal-btn hidden" id="rw-reveal-btn" data-i18n="relatedWordsRace.revealAnswer">${t('relatedWordsRace.revealAnswer')}</button>
                 <p class="rw-reveal-status hidden" id="rw-reveal-status"></p>
@@ -378,6 +391,8 @@
         revealBtn: this.root.querySelector('#rw-reveal-btn'),
         revealStatus: this.root.querySelector('#rw-reveal-status'),
         dock: this.root.querySelector('#rw-dock'),
+        hintRow: this.root.querySelector('#rw-hint-row'),
+        hintBtn: this.root.querySelector('#rw-hint-btn'),
         feedback: this.root.querySelector('#rw-feedback'),
         extraGuess: this.root.querySelector('#rw-extra-guess'),
         extraGuessTitle: this.root.querySelector('#rw-extra-guess-title'),
@@ -417,6 +432,7 @@
         else if (action === 'ad') this.onExtraGuessWatchAd();
       });
       this.els.extraGuessGiveUp?.addEventListener('click', () => this.onExtraGuessGiveUp());
+      this.els.hintBtn?.addEventListener('click', () => this.onHintBtnClick());
 
       this.els.pauseBtn?.addEventListener('click', (e) => {
         e.preventDefault();
@@ -581,10 +597,12 @@
       this._prevGuessCount = 0;
       this._prevOppWrong = 0;
       this._oppStunLocalEndsAt = 0;
+      this.hintUsedThisRound = false;
+      this._hintBusy = false;
       this.resetRevealRoundState();
       this.slots = this.puzzle.answerSyllables.map(() => null);
       if (!skipDockRender) {
-        this.dock = this.puzzle.dockTiles.map((tile) => ({ ...tile, used: false, slotIndex: null }));
+        this.dock = this.puzzle.dockTiles.map((tile) => ({ ...tile, used: false, slotIndex: null, hintLocked: false }));
       }
       this.oppSlotChars = this.slots.map(() => '');
       this.els.overlay.classList.add('hidden');
@@ -608,6 +626,7 @@
       if (!skipDockRender) {
         this.renderDock();
       }
+      this.renderHintDock();
       if (this.isSoloMode()) {
         this.updateSoloStreakDisplay();
       }
@@ -957,6 +976,142 @@
       this.grantExtraGuess();
     }
 
+    getPlayerCoins() {
+      return Math.max(0, Number(global.ShopService?.getCoins?.() ?? global.ProfileService?.loadProfile?.()?.coins) || 0);
+    }
+
+    canAffordHint() {
+      return this.getPlayerCoins() >= HINT_COST;
+    }
+
+    isHintAvailable() {
+      if (!this.isSoloMode() || !this.enabled) return false;
+      if (this.gameOver || this.checking || this.roundLocked || this.awaitingExtraGuess) return false;
+      if (this.isStunned?.()) return false;
+      if (this.hintUsedThisRound) return false;
+      const first = this.puzzle?.answerSyllables?.[0];
+      if (!first) return false;
+      const slot0 = this.slots?.[0];
+      return !(slot0 && slot0.char === first && slot0.hintLocked);
+    }
+
+    renderHintDock() {
+      const row = this.els.hintRow;
+      const btn = this.els.hintBtn;
+      if (!row || !btn) return;
+
+      if (!this.isSoloMode()) {
+        row.hidden = true;
+        return;
+      }
+
+      row.hidden = false;
+      const available = this.isHintAvailable();
+      const useAd = !this.canAffordHint();
+      btn.disabled = !available || this._hintBusy;
+      btn.classList.toggle('rw-hint-btn--ad', useAd);
+      btn.classList.toggle('rw-hint-btn--hint', !useAd);
+      btn.dataset.mode = useAd ? 'ad' : 'hint';
+
+      if (useAd) {
+        btn.innerHTML = `
+          <span class="rw-hint-btn__icon" aria-hidden="true">📺</span>
+          <span class="rw-hint-btn__label">${escapeHtml(t('relatedWords.hintAdLabel'))}</span>`;
+        btn.setAttribute('aria-label', t('relatedWords.hintAdAria'));
+        btn.title = t('relatedWords.hintAdAria');
+      } else {
+        btn.innerHTML = `
+          <span class="rw-hint-btn__icon" aria-hidden="true">💡</span>
+          <span class="rw-hint-btn__label">${escapeHtml(t('relatedWords.hintLabel'))}</span>
+          <span class="rw-hint-btn__cost">${escapeHtml(t('relatedWords.hintCost', { count: HINT_COST }))}</span>`;
+        btn.setAttribute('aria-label', t('relatedWords.hintAria', { count: HINT_COST }));
+        btn.title = t('relatedWords.hintAria', { count: HINT_COST });
+      }
+    }
+
+    onHintBtnClick() {
+      if (!this.isHintAvailable() || this._hintBusy) return;
+      global.KoreanTTS?.prime?.();
+      if (this.canAffordHint()) {
+        this.spendHintCoins();
+      } else {
+        this.watchHintAd();
+      }
+    }
+
+    spendHintCoins() {
+      const profile = global.ProfileService?.loadProfile?.();
+      if (!profile || (profile.coins || 0) < HINT_COST) {
+        this.showFeedback(t('relatedWords.hintInsufficient'), 'error');
+        this.renderHintDock();
+        return;
+      }
+      profile.coins -= HINT_COST;
+      global.ProfileService?.saveProfile?.(profile);
+      global.PlayerHud?.refresh?.();
+      this.applyFirstCharHint();
+    }
+
+    watchHintAd() {
+      if (!global.confirm(t('relatedWords.hintAdConfirm'))) return;
+      this.applyFirstCharHint();
+    }
+
+    applyFirstCharHint() {
+      if (!this.isHintAvailable()) {
+        this.renderHintDock();
+        return;
+      }
+
+      const firstChar = this.puzzle.answerSyllables[0];
+      const SLOT = 0;
+      this._hintBusy = true;
+      this.touchRevealActivity?.();
+
+      // Free slot 0 if occupied by a non-matching tile.
+      const occupying = this.slots[SLOT];
+      if (occupying && occupying.char !== firstChar) {
+        occupying.used = false;
+        occupying.slotIndex = null;
+        occupying.hintLocked = false;
+        this.slots[SLOT] = null;
+      }
+
+      let tile = this.slots[SLOT];
+      if (!tile || tile.char !== firstChar) {
+        // Prefer an unused dock tile with the answer's first syllable.
+        tile = this.dock.find((item) => !item.used && item.char === firstChar);
+        if (!tile) {
+          // Or reclaim one already placed elsewhere.
+          tile = this.dock.find((item) => item.used && item.char === firstChar && item.slotIndex != null);
+          if (tile && tile.slotIndex !== SLOT) {
+            this.slots[tile.slotIndex] = null;
+          }
+        }
+        if (!tile) {
+          this._hintBusy = false;
+          this.showFeedback(t('relatedWords.hintUnavailable'), 'error');
+          this.renderHintDock();
+          return;
+        }
+        this.slots[SLOT] = tile;
+        tile.used = true;
+        tile.slotIndex = SLOT;
+      }
+
+      tile.hintLocked = true;
+      this.hintUsedThisRound = true;
+      this._hintBusy = false;
+      global.SoundEffects?.place?.();
+      this.renderSlots();
+      this.renderDock();
+      this.renderHintDock();
+
+      if (this.allSlotsFilled()) {
+        this.checkAnswer();
+      }
+    }
+
     async onExtraGuessGiveUp() {
       this.hideExtraGuessPrompt();
       this.resetSoloStreak();
@@ -1206,7 +1361,7 @@
         const word = btn.dataset.word;
         if (!word) return;
         global.KoreanTTS?.prime?.();
-        global.KoreanTTS?.speak?.(word, { repeats: 1 });
+        global.KoreanTTS?.speak?.(word, wordChainSpeakOpts());
       });
     }
 
@@ -1763,7 +1918,8 @@
           const char = tile && !isFlying ? tile.char : '';
           const disabled = this.roundLocked ? ' disabled' : '';
           const pendingCls = isFlying ? ' rw-slot-pending' : '';
-          return `<button type="button" class="rw-slot flip-tile${filled ? ' filled' : ''}${pendingCls}" data-slot-index="${index}"${disabled} aria-label="${t('relatedWords.slotAria', { n: index + 1 })}">
+          const hintedCls = tile?.hintLocked ? ' rw-slot--hinted' : '';
+          return `<button type="button" class="rw-slot flip-tile${filled ? ' filled' : ''}${pendingCls}${hintedCls}" data-slot-index="${index}"${disabled} aria-label="${t('relatedWords.slotAria', { n: index + 1 })}">
             <span class="rw-slot-face rw-slot-front">${char}</span>
             <span class="rw-slot-face rw-slot-back" aria-hidden="true"></span>
           </button>`;
@@ -1810,7 +1966,8 @@
           const filled = tile !== null && !isFlying;
           const char = tile && !isFlying ? tile.char : '';
           const pendingCls = isFlying ? ' rw-slot-pending' : '';
-          return `<button type="button" class="rw-slot flip-tile${filled ? ' filled' : ''}${pendingCls}" data-slot-index="${index}" aria-label="${t('relatedWords.slotAria', { n: index + 1 })}">
+          const hintedCls = tile?.hintLocked ? ' rw-slot--hinted' : '';
+          return `<button type="button" class="rw-slot flip-tile${filled ? ' filled' : ''}${pendingCls}${hintedCls}" data-slot-index="${index}" aria-label="${t('relatedWords.slotAria', { n: index + 1 })}">
             <span class="rw-slot-face rw-slot-front">${char}</span>
             <span class="rw-slot-face rw-slot-back" aria-hidden="true"></span>
           </button>`;
@@ -2407,6 +2564,7 @@
           <span class="rw-dock-face rw-dock-back" aria-hidden="true"></span>
         </button>`;
       }).join('');
+      this.renderHintDock();
     }
 
     clearSlotsGreenHint(selector = '.rw-slot.flip-tile') {
@@ -2749,7 +2907,7 @@
     clearSlot(slotIndex) {
       if (!this.enabled || this.roundLocked || this.isStunned() || this.awaitingExtraGuess) return;
       const tile = this.slots[slotIndex];
-      if (!tile) return;
+      if (!tile || tile.hintLocked) return;
       tile.used = false;
       tile.slotIndex = null;
       this.slots[slotIndex] = null;
@@ -2758,6 +2916,7 @@
       // Instant return to dock — no drop animation.
       this.renderSlots();
       this.renderDock();
+      this.renderHintDock();
     }
 
     allSlotsFilled() {
@@ -3048,7 +3207,7 @@
       global.XpService.awardAndCelebrate({
         mode: 'relatedWords',
         wordId: `${this.puzzle.chainId}:${this.puzzle.linkIndex}`,
-        usedHint: false,
+        usedHint: !!this.hintUsedThisRound,
         won: true,
       });
     }
@@ -3057,10 +3216,14 @@
       this.dock.forEach((tile) => {
         tile.used = false;
         tile.slotIndex = null;
+        tile.hintLocked = false;
       });
       this.slots = this.puzzle.answerSyllables.map(() => null);
+      this.hintUsedThisRound = false;
+      this._hintBusy = false;
       this.renderSlots();
       this.renderDock();
+      this.renderHintDock();
     }
 
     hideFeedback() {
@@ -3119,7 +3282,7 @@
       const word = this.puzzle?.answer;
       if (!word) return;
       global.KoreanTTS?.prime?.();
-      global.KoreanTTS?.speak?.(word, { repeats: 1 });
+      global.KoreanTTS?.speak?.(word, wordChainSpeakOpts());
       global.DictionaryService?.prefetchWord?.(word);
     }
 
