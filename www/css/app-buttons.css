@@ -1046,8 +1046,9 @@ button.ghost:disabled,
   min-width: 0;
   width: 100%;
   min-height: clamp(58px, 15vw, 68px) !important;
+  padding: 0 !important;
   overflow: hidden;
-  border-radius: 16px;
+  border-radius: 16px !important;
   border: 2px solid #e6b82e !important;
   background-color: #ffd739 !important;
   background-image: var(--app-btn-gloss-overlay), repeating-linear-gradient(
@@ -1058,51 +1059,45 @@ button.ghost:disabled,
     #ffe566 20px
   ) !important;
   box-shadow: var(--app-btn-gloss-inset), 0 6px 0 #c4a82d, var(--app-btn-gloss-ambient) !important;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
-#menu-screen .menu-top-daily-row .menu-daily-puzzle-trigger {
-  grid-column: 1;
-  width: 100% !important;
-  min-width: 0;
-  min-height: 0 !important;
-  padding: 0 !important;
-  border: none !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  background-image: none !important;
-  box-shadow: none !important;
-}
-
-#menu-screen .menu-top-daily-row .menu-daily-puzzle-trigger:active,
-#menu-screen .menu-top-daily-row .menu-daily-puzzle-trigger.is-pressed {
-  box-shadow: none !important;
+#menu-screen .menu-top-daily-row .menu-daily-puzzle-bar:active,
+#menu-screen .menu-top-daily-row .menu-daily-puzzle-bar.is-pressed {
+  transform: translateY(2px);
+  box-shadow: var(--app-btn-gloss-inset), 0 3px 0 #c4a82d, var(--app-btn-gloss-ambient) !important;
   filter: brightness(0.96);
+}
+
+#menu-screen .menu-top-daily-row .menu-daily-puzzle-main {
+  grid-column: 1;
+  display: flex !important;
+  align-items: center;
+  justify-content: flex-start;
+  min-width: 0;
+  height: 100%;
+  padding: 10px 12px 10px 16px;
 }
 
 #menu-screen .menu-top-daily-row .menu-daily-calendar {
   grid-column: 2;
-}
-
-#menu-screen .menu-daily-puzzle-bar .menu-daily-puzzle-main,
-#menu-screen .menu-top-daily-row .menu-daily-puzzle-main {
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-  min-width: 0;
-  height: 100%;
-  padding: 10px 14px;
+  pointer-events: none;
 }
 
 #menu-screen .menu-daily-puzzle-bar .mode-name,
 #menu-screen .menu-top-daily-row .menu-daily-puzzle-main .mode-name {
-  width: auto;
-  text-align: center;
+  width: 100%;
+  max-width: 100%;
+  text-align: left;
   text-transform: uppercase;
-  font-size: clamp(24px, 6.2vw, 30px) !important;
+  font-size: clamp(18px, 5vw, 26px) !important;
   line-height: 1.1;
   color: #ffffff !important;
   text-shadow: 0 2px 0 rgba(120, 80, 0, 0.45) !important;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 #menu-screen .menu-daily-calendar {
@@ -1183,10 +1178,10 @@ button.ghost:disabled,
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px;
+  padding: 0;
   box-sizing: border-box;
   flex-shrink: 0;
-  overflow: hidden;
+  overflow: visible;
 }
 
 #menu-screen .menu-battle-game-bar.menu-jamo-game-btn .menu-battle-icon-slot {
@@ -1200,10 +1195,10 @@ button.ghost:disabled,
 }
 
 #menu-screen .menu-battle-icon-slot .menu-mode-icon-img {
-  width: clamp(48px, 13vw, 60px) !important;
-  height: clamp(48px, 13vw, 60px) !important;
-  max-width: 100%;
-  max-height: 100%;
+  width: min(56px, 92%) !important;
+  height: min(56px, 92%) !important;
+  max-width: 92%;
+  max-height: 92%;
   margin: 0;
   display: block !important;
   object-fit: contain;
@@ -1353,9 +1348,10 @@ button.ghost:disabled,
 }
 
 #menu-screen .menu-top-daily-row .menu-daily-puzzle-bar:active,
-#menu-screen .menu-top-daily-row .menu-daily-puzzle-bar.is-pressed,
-#menu-screen .menu-top-daily-row.is-complete .menu-daily-puzzle-bar:active {
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 2px 0 #c4a82d, 0 4px 8px rgba(0, 40, 50, 0.1) !important;
+#menu-screen .menu-top-daily-row .menu-daily-puzzle-bar.is-pressed {
+  transform: translateY(2px);
+  box-shadow: var(--app-btn-gloss-inset), 0 3px 0 #c4a82d, var(--app-btn-gloss-ambient) !important;
+  filter: brightness(0.96);
 }
 
 #menu-screen .menu-top-daily-row.is-complete .menu-daily-puzzle-main .mode-name::after {
@@ -1476,7 +1472,7 @@ button.ghost:disabled,
 #menu-screen .menu-word-chain-bar.menu-single-player-game-btn,
 #menu-screen .menu-battle-game-bar.menu-battle-game-btn {
   display: grid !important;
-  grid-template-columns: var(--menu-game-side-w, clamp(64px, 17vw, 78px)) minmax(0, 1fr) !important;
+  grid-template-columns: var(--menu-game-side-w, clamp(54px, 14vw, 66px)) minmax(0, 1fr) !important;
   flex-direction: unset !important;
   align-items: stretch !important;
   justify-content: stretch !important;

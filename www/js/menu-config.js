@@ -110,7 +110,7 @@
       {
         id: 'daily-match',
         icon: '🎯',
-        title: 'Daily',
+        title: 'Daily Puzzle',
         subtitleKo: '오늘의 자모 조합',
         accent: ACCENTS.peach,
         action: 'daily-match',

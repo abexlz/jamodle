@@ -250,15 +250,13 @@
               <rect x="16" y="5" width="5" height="16" rx="1.5" fill="currentColor"/>
             </svg>
           </a>
-          <div class="menu-daily-puzzle-bar">
-            <button type="button" class="menu-top-daily menu-daily-puzzle-trigger menu-btn-primary daily-challenge-card daily-challenge-bar word-game-bar accent-${daily.accent}" id="menu-${escapeHtml(daily.id)}" data-menu-action="daily-match">
-              <span class="daily-challenge-content menu-daily-puzzle-main">
-                <span class="mode-name app-btn-title">${escapeHtml(dailyTitle)}</span>
-                <span id="daily-match-status" hidden>${escapeHtml(dailyProgress)}</span>
-              </span>
-            </button>
+          <button type="button" class="menu-top-daily menu-daily-puzzle-bar menu-daily-puzzle-trigger menu-btn-primary daily-challenge-card word-game-bar accent-${daily.accent}" id="menu-${escapeHtml(daily.id)}" data-menu-action="daily-match">
+            <span class="daily-challenge-content menu-daily-puzzle-main">
+              <span class="mode-name app-btn-title">${escapeHtml(dailyTitle)}</span>
+              <span id="daily-match-status" hidden>${escapeHtml(dailyProgress)}</span>
+            </span>
             ${renderDailyCalendarBadge()}
-          </div>
+          </button>
         </div>
       </div>
     `;
