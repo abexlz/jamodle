@@ -15,8 +15,8 @@ assert.strictEqual(tts.normalizeGender('other'), 'female');
 assert.strictEqual(tts.normalizeGender(), 'female');
 
 assert.strictEqual(tts.SPEAK_RATE, 0.9 * 0.8);
-assert.strictEqual(tts.SYLLABLE_SEPARATOR, ', , ');
-assert.strictEqual(tts.buildSyllableSsml('고양이'), '고, , 양, , 이');
+assert.strictEqual(tts.SYLLABLE_SEPARATOR, ', ');
+assert.strictEqual(tts.buildSyllableSsml('고양이'), '고, 양, 이');
 assert.ok(!tts.buildSyllableSsml('고양이').includes('<'));
 assert.strictEqual(tts.PROSODY.female.rate, tts.SPEAK_RATE);
 assert.strictEqual(tts.PROSODY.male.rate, tts.SPEAK_RATE);

@@ -9,9 +9,9 @@
   const DEFAULT_RATE = 0.82 * 0.8;
   /**
    * Pause between Hangul syllables on the Web Speech fallback.
-   * Doubled from the prior 200ms gap.
+   * Half of the previous 400ms gap.
    */
-  const SYLLABLE_GAP_MS = 200 * 2;
+  const SYLLABLE_GAP_MS = 200;
   const VOICE_WAIT_MS = 1200;
   const CACHE_MAX = 80;
 
@@ -164,7 +164,7 @@
 
   async function fetchServerAudio(text) {
     const gender = preferredVoiceGender();
-    const key = `v5:${gender}:${text.trim()}`;
+    const key = `v6:${gender}:${text.trim()}`;
     if (audioCache.has(key)) return audioCache.get(key);
 
     const url = `${getApiBase()}/api/tts/speak?text=${encodeURIComponent(text.trim())}`
