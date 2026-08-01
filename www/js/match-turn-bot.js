@@ -6,13 +6,11 @@
   'use strict';
 
   const RS = () => global.RaceService;
-  const RC = () => global.RaceCountdown;
   const CF = () => global.RaceCoinFlip;
   const HUD = () => global.RaceBattleHudUI;
   const HC = () => global.HangulCompose;
   const MY_UID = 'player';
   const BOT_UID = 'bot';
-  const COUNTDOWN_SEC = 3;
 
   const SPEED_PROFILES = {
     slow: {
@@ -793,14 +791,7 @@
 
       this.renderMain(`<div class="race-panel race-countdown-panel"><p class="race-panel-title">${escapeHtml(rt('startingSoon'))}</p></div>`);
       this.beginRoundSequence(this.matchData, () => {
-        const raceStartMs = Date.now() + (RC()?.countdownTotalMs?.(COUNTDOWN_SEC) ?? 4000);
-        RC()?.runCountdown?.(this, {
-          el: this.els.countdown,
-          raceStartMs,
-          countdownSec: COUNTDOWN_SEC,
-          onDone: () => this.startGame(true),
-          goLabel: rt('go'),
-        });
+        this.startGame(true);
       });
     }
 
@@ -1055,14 +1046,7 @@
       CF()?.clearCoinFlipTimers?.(this);
 
       this.beginRoundSequence(data, () => {
-        const raceStartMs = Date.now() + (RC()?.countdownTotalMs?.(COUNTDOWN_SEC) ?? 4000);
-        RC()?.runCountdown?.(this, {
-          el: this.els.countdown,
-          raceStartMs,
-          countdownSec: COUNTDOWN_SEC,
-          onDone: () => this.startGame(true),
-          goLabel: rt('go'),
-        });
+        this.startGame(true);
       });
     }
 

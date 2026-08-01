@@ -3481,8 +3481,9 @@
     }
 
     buildWatchRevealFromLive(live) {
+      const allCorrect = live?.action?.dictionaryWin === true;
       const placements = (live?.placements || []).map((p) => {
-        const correct = this.isWatchPlacementCorrect(p);
+        const correct = allCorrect || this.isWatchPlacementCorrect(p);
         return { ...p, correct };
       });
       const correctCount = placements.filter((p) => p.correct).length;
@@ -4683,16 +4684,8 @@
       if (!this.canSubmitTurn() || !this.hasAnyPlacement() || this.checking || this.checkedComplete || this.turnSubmitting) return;
       if (this.turnBased && this.inspectMode) return;
 
-      if (this.turnBased && this.onTurnLiveChange) {
-        this._liveActionSeq += 1;
-        this._pendingLiveAction = { seq: this._liveActionSeq, kind: 'checking' };
-        try {
-          this.onTurnLiveChange(this.serializeTurnLiveState());
-        } catch (err) {
-          console.warn('[KoreanMatch] live checking broadcast', err);
-        }
-        this._pendingLiveAction = null;
-      }
+      // Suspend placement live updates during check; broadcast "checking" only once
+      // flips are ready so both players start the reveal together.
       if (this.turnBased) this.suspendLiveBroadcast();
       this.checking = true;
       this.guessCount++;
@@ -4750,6 +4743,21 @@
             }
           });
         });
+      }
+
+      if (this.turnBased && this.onTurnLiveChange && (toReveal.length || toWrong.length || dictionaryWin)) {
+        this._liveActionSeq += 1;
+        this._pendingLiveAction = {
+          seq: this._liveActionSeq,
+          kind: 'checking',
+          dictionaryWin: !!dictionaryWin,
+        };
+        try {
+          this.onTurnLiveChange(this.serializeTurnLiveState());
+        } catch (err) {
+          console.warn('[KoreanMatch] live checking broadcast', err);
+        }
+        this._pendingLiveAction = null;
       }
 
       if (toReveal.length || toWrong.length) {

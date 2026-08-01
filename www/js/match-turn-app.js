@@ -5,11 +5,8 @@
   'use strict';
 
   const RS = () => global.RaceService;
-  const RC = () => global.RaceCountdown;
   const CF = () => global.RaceCoinFlip;
   const HUD = () => global.RaceBattleHudUI;
-  const COUNTDOWN_SEC = 3;
-  const countdownTotalMs = () => RC()?.countdownTotalMs?.(COUNTDOWN_SEC) ?? (COUNTDOWN_SEC + 1) * 1000;
   // Grace (server-anchored) after a turn expires before the *waiting* player is
   // allowed to force-advance it. Normal turns are advanced by the active player;
   // this only rescues a frozen/disconnected active player.
@@ -438,23 +435,11 @@
       }
       this._lastRoundKey = roundKey;
 
-      const firstTurnStart = (data.turnNumber || 1) === 1
-        && (data.sharedState?.guessCount || 0) === 0
-        && (data.turnHistory?.length || 0) === 0;
-
       if (!this._activeSeenAtMs) this._activeSeenAtMs = Date.now();
-      const raceStartMs = RC().resolveRaceStartMs(this, data, {
-        countdownSec: COUNTDOWN_SEC,
-        getStartedAtMs: (d) => RS().startedAtMs(d),
-      });
 
       const startAfterCoinFlip = () => {
-        if (!this.gameStarted && firstTurnStart && Date.now() < raceStartMs) {
-          this.renderMain(`<div class="race-panel race-countdown-panel"><p class="race-panel-title">${escapeHtml(rt('startingSoon'))}</p></div>`);
-          this.showCountdown(raceStartMs, () => this.startGame(data, true));
-          return;
-        }
-        if (!this.gameStarted) this.startGame(data, firstTurnStart);
+        // Skip 3-2-1 after the coin flip — start the round immediately.
+        if (!this.gameStarted) this.startGame(data, true);
         else this.syncTurnState(data);
       };
 
@@ -588,16 +573,6 @@
         RS().tryAdvanceRound(this.matchId, live);
         this.scheduleRoundBreakAdvance(live);
       }, delay);
-    }
-
-    showCountdown(raceStartMs, onDone) {
-      RC()?.runCountdown?.(this, {
-        el: this.els.countdown,
-        raceStartMs,
-        countdownSec: COUNTDOWN_SEC,
-        onDone,
-        goLabel: rt('go'),
-      });
     }
 
     startGame(data, anchorTimerNow = false) {
