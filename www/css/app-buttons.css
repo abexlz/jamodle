@@ -1352,12 +1352,13 @@ button.ghost:disabled,
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 2px 0 #c4a82d, 0 4px 8px rgba(0, 40, 50, 0.1) !important;
 }
 
-#menu-screen .menu-top-daily-row.menu-daily-puzzle-bar:active,
-#menu-screen .menu-top-daily-row.menu-daily-puzzle-bar.is-pressed {
+#menu-screen .menu-top-daily-row .menu-daily-puzzle-bar:active,
+#menu-screen .menu-top-daily-row .menu-daily-puzzle-bar.is-pressed,
+#menu-screen .menu-top-daily-row.is-complete .menu-daily-puzzle-bar:active {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 2px 0 #c4a82d, 0 4px 8px rgba(0, 40, 50, 0.1) !important;
 }
 
-#menu-screen .menu-top-daily-row.menu-daily-puzzle-bar.is-complete .menu-daily-puzzle-main .mode-name::after {
+#menu-screen .menu-top-daily-row.is-complete .menu-daily-puzzle-main .mode-name::after {
   content: ' ✓';
 }
 
