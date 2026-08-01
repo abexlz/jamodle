@@ -171,6 +171,7 @@
       this.raceMode = this.versus && Number(this.options.raceTarget) > 0;
       this.raceTarget = this.raceMode ? Number(this.options.raceTarget) : 0;
       this.fixedChainId = this.options.chainId || null;
+      this._puzzleOpts = this.raceMode ? { race: true } : undefined;
       this.useThemeRotation = this.options.useThemeRotation === true;
       this.globalLinkIndex = 0;
       this.onProgress = typeof this.options.onProgress === 'function' ? this.options.onProgress : null;
@@ -490,11 +491,11 @@
       if (this.useThemeRotation) {
         const resolved = global.RelatedWordsChains?.resolveRoundPuzzle?.(linkIndex);
         if (!resolved) return [];
-        const chain = RW().getChain(resolved.chainId);
+        const chain = RW().getChain(resolved.chainId, this._puzzleOpts);
         if (!chain?.words) return [];
         return chain.words.slice(Math.max(0, resolved.linkIndex - 3), resolved.linkIndex);
       }
-      const chain = RW().getChain(chainId || this.puzzle?.chainId);
+      const chain = RW().getChain(chainId || this.puzzle?.chainId, this._puzzleOpts);
       if (!chain?.words) return [];
       return chain.words.slice(Math.max(0, linkIndex - 3), linkIndex);
     }
@@ -545,7 +546,7 @@
       }
       const skipTrail = opts.skipTrail === true;
       const skipDockRender = opts.skipDockRender === true;
-      this.puzzle = RW().getPuzzle(chainId, linkIndex);
+      this.puzzle = RW().getPuzzle(chainId, linkIndex, this._puzzleOpts);
       if (!this.puzzle) {
         if (this.raceMode) {
           this.setSharedWordsDone(linkIndex);
@@ -1148,8 +1149,8 @@
         linkIndex = linkIndexOrOpts;
         opts = maybeOpts;
       }
-      const nextPuzzle = RW().getPuzzle(chainId, linkIndex);
-      const linkCount = RW().getPuzzleCount(chainId);
+      const nextPuzzle = RW().getPuzzle(chainId, linkIndex, this._puzzleOpts);
+      const linkCount = RW().getPuzzleCount(chainId, this._puzzleOpts);
       const pastRaceTarget = this.raceMode && linkIndex >= this.raceTarget;
       const pastChainEnd = this.raceMode && linkIndex >= linkCount;
       if (!nextPuzzle || pastChainEnd || pastRaceTarget) {
@@ -1266,12 +1267,12 @@
     isRaceObjectiveComplete(linkIndex = this.sharedWordsDone) {
       if (!this.raceMode || !this.fixedChainId) return false;
       const idx = Math.max(0, Number(linkIndex) || 0);
-      const linkCount = RW().getPuzzleCount(this.fixedChainId);
+      const linkCount = RW().getPuzzleCount(this.fixedChainId, this._puzzleOpts);
       return idx >= this.raceTarget || idx >= linkCount;
     }
 
     renderChainMeta() {
-      const chain = RW()?.getChain?.(this.puzzle.chainId);
+      const chain = RW()?.getChain?.(this.puzzle.chainId, this._puzzleOpts);
       const titled = this.puzzle.chainTitleKey ? t(this.puzzle.chainTitleKey) : '';
       const label = (titled && titled !== this.puzzle.chainTitleKey)
         ? titled
@@ -1414,7 +1415,10 @@
         || this.fixedChainId
         || this.progress?.chainId
         || '';
-      const chain = RW()?.getChain?.(chainId)
+      const chain = RW()?.getChain?.(chainId, this._puzzleOpts)
+        || (this.raceMode
+          ? global.RelatedWordsChains?.getRaceChain?.(chainId)
+          : null)
         || global.RelatedWordsChains?.getChain?.(chainId)
         || null;
       const chainWords = Array.isArray(chain?.words) ? chain.words : [];

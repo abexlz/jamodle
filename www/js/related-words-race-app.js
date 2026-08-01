@@ -22,7 +22,8 @@
   }
 
   function chainLabel(data) {
-    const chain = global.RelatedWordsChains?.getChain?.(data?.chainId);
+    const chain = global.RelatedWordsChains?.getRaceChain?.(data?.chainId)
+      || global.RelatedWordsChains?.getChain?.(data?.chainId);
     if (!chain) return rt('modeLabel');
     return global.RelatedWordsChains?.chainLabel?.(chain)
       || (chain.titleKey && global.I18n?.t(chain.titleKey))

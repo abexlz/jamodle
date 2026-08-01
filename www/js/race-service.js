@@ -341,7 +341,8 @@
   function getRelatedWordsLinkCount(data) {
     const chainId = data?.chainId;
     if (chainId) {
-      const fromChain = global.RelatedWordsChains?.getLinkCount?.(chainId);
+      const fromChain = global.RelatedWordsChains?.getRaceLinkCount?.(chainId)
+        ?? global.RelatedWordsChains?.getLinkCount?.(chainId);
       if (Number.isFinite(fromChain) && fromChain > 0) return fromChain;
     }
     const raceTarget = Number(data?.raceTarget);
@@ -371,8 +372,13 @@
   }
 
   function pickRelatedWordsChain(seed) {
-    const chains = global.RelatedWordsChains?.getAllChains?.() || [];
-    const minWords = global.RelatedWordsChains?.RACE_CHAIN_WORDS || 10;
+    if (global.RelatedWordsChains?.pickRaceChain) {
+      return global.RelatedWordsChains.pickRaceChain(seed);
+    }
+    const chains = global.RelatedWordsChains?.getAllRaceChains?.()
+      || global.RelatedWordsChains?.getAllChains?.()
+      || [];
+    const minWords = Math.min(10, global.RelatedWordsChains?.RACE_CHAIN_WORDS || 10);
     const eligible = chains.filter((c) => (c.words?.length || 0) >= minWords);
     const pool = eligible.length ? eligible : chains;
     if (!pool.length) return 'rw-food-cooking';
@@ -385,8 +391,13 @@
   }
 
   function pickRandomRelatedWordsChain(excludeId) {
-    const chains = global.RelatedWordsChains?.getAllChains?.() || [];
-    const minWords = global.RelatedWordsChains?.RACE_CHAIN_WORDS || 10;
+    if (global.RelatedWordsChains?.pickRandomRaceChain) {
+      return global.RelatedWordsChains.pickRandomRaceChain(excludeId);
+    }
+    const chains = global.RelatedWordsChains?.getAllRaceChains?.()
+      || global.RelatedWordsChains?.getAllChains?.()
+      || [];
+    const minWords = Math.min(10, global.RelatedWordsChains?.RACE_CHAIN_WORDS || 10);
     let pool = chains.filter((c) => (c.words?.length || 0) >= minWords);
     if (!pool.length) pool = chains;
     if (excludeId && pool.length > 1) {
@@ -697,7 +708,8 @@
 
     const ref = matchesRef().doc();
     const relatedChainId = isRelatedWordsGame
-      ? (opts.chainId && global.RelatedWordsChains?.getChain?.(opts.chainId)
+      ? (opts.chainId && (global.RelatedWordsChains?.getRaceChain?.(opts.chainId)
+          || global.RelatedWordsChains?.getChain?.(opts.chainId))
         ? opts.chainId
         : pickRelatedWordsChain(ref.id))
       : null;
@@ -779,7 +791,8 @@
 
     const ref = forcedMatchId ? matchesRef().doc(forcedMatchId) : matchesRef().doc();
     const relatedChainId = isRelatedWordsGame
-      ? (opts.chainId && global.RelatedWordsChains?.getChain?.(opts.chainId)
+      ? (opts.chainId && (global.RelatedWordsChains?.getRaceChain?.(opts.chainId)
+          || global.RelatedWordsChains?.getChain?.(opts.chainId))
         ? opts.chainId
         : pickRelatedWordsChain(ref.id))
       : null;
@@ -1146,7 +1159,8 @@
   }
 
   function verifyRelatedWordsAnswer(chainId, linkIndex, answer) {
-    const link = global.RelatedWordsChains?.getLink?.(chainId, linkIndex);
+    const link = global.RelatedWordsChains?.getRaceLink?.(chainId, linkIndex)
+      || global.RelatedWordsChains?.getLink?.(chainId, linkIndex);
     if (!link?.answer) return false;
     return String(answer || '').trim() === link.answer;
   }

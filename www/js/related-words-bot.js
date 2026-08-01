@@ -114,13 +114,19 @@
       this.winRate = Number.isFinite(wr) ? Math.min(100, Math.max(0, wr)) / 100 : 0.5;
       const speedParam = String(params.get('speed') || 'medium').toLowerCase();
       this.speed = SPEED_PROFILES[speedParam] ? speedParam : 'medium';
+      this.chainId = params.get('chain')
+        || RWC()?.pickRandomRaceChain?.()
+        || RWC()?.pickRaceChain?.(`bot-${Date.now()}`)
+        || RWC()?.pickRandomChain?.(`bot-${Date.now()}`)
+        || RWC()?.getAllRaceChains?.()[0]?.id
+        || RWC()?.getAllChains?.()[0]?.id;
+      const chainLen = RWC()?.getRaceLinkCount?.(this.chainId)
+        || RWC()?.getLinkCount?.(this.chainId)
+        || 0;
       const target = Number(params.get('target'));
       this.raceTarget = Number.isFinite(target) && target > 0
         ? target
-        : (RS()?.RELATED_WORDS_RACE_TARGET || 25);
-      this.chainId = params.get('chain')
-        || RWC()?.pickRandomChain?.(`bot-${Date.now()}`)
-        || RWC()?.getAllChains?.()[0]?.id;
+        : (chainLen || RS()?.RELATED_WORDS_RACE_TARGET || 25);
 
       this.game = null;
       this.els = null;
@@ -526,7 +532,9 @@
     }
 
     chainLinkCount() {
-      return global.RelatedWordsChains?.getLinkCount?.(this.chainId) ?? this.raceTarget;
+      return global.RelatedWordsChains?.getRaceLinkCount?.(this.chainId)
+        ?? global.RelatedWordsChains?.getLinkCount?.(this.chainId)
+        ?? this.raceTarget;
     }
 
     isObjectiveComplete(linkIndex = this.linkIndex) {
@@ -543,7 +551,9 @@
 
     /** Current link within the selected chain. */
     currentLink() {
-      return RWC()?.getLink?.(this.chainId, this.linkIndex) || null;
+      return RWC()?.getRaceLink?.(this.chainId, this.linkIndex)
+        || RWC()?.getLink?.(this.chainId, this.linkIndex)
+        || null;
     }
 
     /* ── Player round win (called by the game engine) ── */

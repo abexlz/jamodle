@@ -773,6 +773,23 @@
     return [...word];
   }
 
+  /** Word Chain 1v1 excludes exact 4-syllable answers (solo keeps full chains). */
+  function isRaceExcludedWord(word) {
+    return splitSyllables(String(word || '').trim()).length === 4;
+  }
+
+  function normalizeRaceChain(chain) {
+    const words = (chain.words || [])
+      .filter(Boolean)
+      .filter((w) => !isRaceExcludedWord(w));
+    if (!words.length) return null;
+    return { ...chain, words };
+  }
+
+  const NORMALIZED_RACE_CHAINS = NORMALIZED_CHAINS
+    .map(normalizeRaceChain)
+    .filter(Boolean);
+
   /** 1v1 score for a correct answer: 1–3 pts by syllable length (4+ capped at 3). */
   function relatedWordsRoundPoints(word) {
     const n = splitSyllables(String(word || '').trim()).length;
@@ -943,13 +960,23 @@
     return NORMALIZED_CHAINS.find((c) => c.id === chainId) || NORMALIZED_CHAINS[0];
   }
 
+  function getRaceChain(chainId) {
+    return NORMALIZED_RACE_CHAINS.find((c) => c.id === chainId)
+      || NORMALIZED_RACE_CHAINS[0]
+      || getChain(chainId);
+  }
+
   function getLinkCount(chainId) {
     const chain = getChain(chainId);
     return chain.words.length;
   }
 
-  function getLink(chainId, linkIndex) {
-    const chain = getChain(chainId);
+  function getRaceLinkCount(chainId) {
+    const chain = getRaceChain(chainId);
+    return chain.words.length;
+  }
+
+  function buildLinkFromChain(chain, linkIndex, linkCountFn) {
     const maxLink = chain.words.length - 1;
     if (linkIndex < 0 || linkIndex > maxLink) return null;
     const answer = chain.words[linkIndex];
@@ -958,7 +985,7 @@
       chainId: chain.id,
       chainTitleKey: chain.titleKey,
       linkIndex,
-      linkCount: getLinkCount(chain.id),
+      linkCount: linkCountFn(chain.id),
       clue,
       answer,
       answerSyllables: splitSyllables(answer),
@@ -969,14 +996,37 @@
     };
   }
 
+  function getLink(chainId, linkIndex) {
+    return buildLinkFromChain(getChain(chainId), linkIndex, getLinkCount);
+  }
+
+  function getRaceLink(chainId, linkIndex) {
+    return buildLinkFromChain(getRaceChain(chainId), linkIndex, getRaceLinkCount);
+  }
+
   function isLinkInRange(chainId, linkIndex) {
     const chain = getChain(chainId);
     const idx = Number(linkIndex);
     return Number.isFinite(idx) && idx >= 0 && idx < chain.words.length;
   }
 
+  function isRaceLinkInRange(chainId, linkIndex) {
+    const chain = getRaceChain(chainId);
+    const idx = Number(linkIndex);
+    return Number.isFinite(idx) && idx >= 0 && idx < chain.words.length;
+  }
+
   function getAllChains() {
     return NORMALIZED_CHAINS;
+  }
+
+  function getAllRaceChains() {
+    return NORMALIZED_RACE_CHAINS;
+  }
+
+  function pickRaceEligibleChains(minWords = RACE_CHAIN_WORDS) {
+    const eligible = NORMALIZED_RACE_CHAINS.filter((c) => (c.words?.length || 0) >= minWords);
+    return eligible.length ? eligible : NORMALIZED_RACE_CHAINS;
   }
 
   function resolveRoundPuzzle(globalLinkIndex) {
@@ -1019,6 +1069,25 @@
     return chains[Math.floor(Math.random() * chains.length)].id;
   }
 
+  function pickRaceChain(seed) {
+    const pool = pickRaceEligibleChains(Math.min(10, RACE_CHAIN_WORDS));
+    if (!pool.length) return 'rw-food-cooking';
+    if (seed != null && String(seed).length) {
+      return pool[hashSeed(String(seed)) % pool.length].id;
+    }
+    return pool[Math.floor(Math.random() * pool.length)].id;
+  }
+
+  function pickRandomRaceChain(excludeId) {
+    let pool = pickRaceEligibleChains(Math.min(10, RACE_CHAIN_WORDS));
+    if (excludeId && pool.length > 1) {
+      const without = pool.filter((c) => c.id !== excludeId);
+      if (without.length) pool = without;
+    }
+    if (!pool.length) return 'rw-food-cooking';
+    return pool[Math.floor(Math.random() * pool.length)].id;
+  }
+
   global.RelatedWordsChains = {
     CHAINS: NORMALIZED_CHAINS,
     CHAIN_LENGTH,
@@ -1026,13 +1095,21 @@
     DOCK_SIZE,
     chainLabel,
     getChain,
+    getRaceChain,
     getLink,
+    getRaceLink,
     getLinkCount,
+    getRaceLinkCount,
     isLinkInRange,
+    isRaceLinkInRange,
     getAllChains,
+    getAllRaceChains,
     resolveRoundPuzzle,
     pickChain,
     pickRandomChain,
+    pickRaceChain,
+    pickRandomRaceChain,
+    isRaceExcludedWord,
     splitSyllables,
     relatedWordsRoundPoints,
   };
