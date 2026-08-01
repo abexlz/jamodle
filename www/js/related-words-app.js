@@ -607,8 +607,7 @@
       this.oppSlotChars = this.slots.map(() => '');
       this.els.overlay.classList.add('hidden');
       this.hideExtraGuessPrompt();
-      this.els.feedback.classList.add('hidden');
-      this.els.feedback.classList.remove('success', 'chain-complete');
+      this.hideFeedback();
       if (!opts.chainSwap) {
         this.els.board.classList.remove('rw-fade-out', 'rw-fade-in', 'rw-round-locked', 'rw-fade-in-active');
       } else {
@@ -3093,7 +3092,7 @@
       if (sharedRace && this.onRoundWin) {
         const points = global.RelatedWordsChains?.relatedWordsRoundPoints?.(this.puzzle.answer) ?? 1;
         await this.flashSlotsGreen('.rw-slot.flip-tile', { fast: this.raceMode });
-        this.showFeedback(t('relatedWords.correct'), 'success');
+        await this.showCorrectAnswerFeedback();
         this.onScoreFlyPrepare?.({ side: 'my', points });
 
         let roundResult = { applied: false };
@@ -3144,7 +3143,7 @@
 
       if (this.raceMode) {
         await this.flashSlotsGreen('.rw-slot.flip-tile', { fast: this.raceMode });
-        this.showFeedback(t('relatedWords.correct'), 'success');
+        await this.showCorrectAnswerFeedback();
         const points = global.RelatedWordsChains?.relatedWordsRoundPoints?.(this.puzzle.answer) ?? 1;
         let slotFlipPromise = null;
         await this.playScoreFly({
@@ -3298,12 +3297,32 @@
     hideFeedback() {
       if (!this.els.feedback) return;
       this.els.feedback.textContent = '';
+      this.els.feedback.innerHTML = '';
       this.els.feedback.className = 'rw-feedback hidden';
     }
 
     showFeedback(message, type) {
       this.els.feedback.textContent = message;
       this.els.feedback.className = `rw-feedback ${type}`;
+      this.els.feedback.classList.remove('hidden');
+    }
+
+    async showCorrectAnswerFeedback() {
+      const answer = String(this.puzzle?.answer || '').trim();
+      if (!answer || !this.els.feedback) {
+        this.showFeedback(t('relatedWords.correct'), 'success');
+        return;
+      }
+
+      let meaning = '';
+      try {
+        meaning = await this.resolveClueMeaning(answer);
+      } catch { /* offline / API miss */ }
+
+      this.els.feedback.className = 'rw-feedback success rw-feedback--answer';
+      this.els.feedback.innerHTML = `
+        <span class="rw-feedback-ko">${escapeHtml(answer)}</span>
+        ${meaning ? `<span class="rw-feedback-en">${escapeHtml(meaning)}</span>` : ''}`;
       this.els.feedback.classList.remove('hidden');
     }
 

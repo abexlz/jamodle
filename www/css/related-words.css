@@ -47,6 +47,37 @@
   animation: rw-feedback-pop 0.35s cubic-bezier(0.34, 1.4, 0.64, 1);
 }
 
+.rw-feedback.success.rw-feedback--answer {
+  --rw-answer-size: clamp(28px, 8vw, 40px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  color: #111;
+  font-size: var(--rw-answer-size);
+  line-height: 1.15;
+  min-height: calc(var(--rw-answer-size) * 1.6);
+}
+
+.rw-feedback--answer .rw-feedback-ko {
+  display: block;
+  font-family: 'Jua', sans-serif;
+  font-size: 1em;
+  font-weight: 400;
+  color: #111;
+  line-height: 1.1;
+}
+
+.rw-feedback--answer .rw-feedback-en {
+  display: block;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 0.5em;
+  font-weight: 600;
+  color: #111;
+  line-height: 1.2;
+}
+
 .rw-feedback.chain-complete {
   color: var(--heading);
   font-family: 'Jua', sans-serif;

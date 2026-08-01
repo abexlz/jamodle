@@ -1103,6 +1103,17 @@ html.reduce-motion .rw-reveal-letter {
   font-size: 15px;
 }
 
+.rw-race-mode .rw-feedback.success.rw-feedback--answer {
+  --rw-answer-size: clamp(26px, 7vw, 36px);
+  margin-top: 6px;
+  color: #111;
+}
+
+.rw-race-mode .rw-feedback--answer .rw-feedback-ko,
+.rw-race-mode .rw-feedback--answer .rw-feedback-en {
+  color: #111;
+}
+
 .rw-score-fly-badge {
   position: fixed;
   z-index: 14000;
