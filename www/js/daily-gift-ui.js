@@ -18,13 +18,19 @@
       .replace(/"/g, '&quot;');
   }
 
+  const GIFT_STYLES_HREF = 'css/daily-gift.css?v=2';
+
   function ensureStyles() {
-    if (document.getElementById('daily-gift-styles')) return;
-    const link = document.createElement('link');
-    link.id = 'daily-gift-styles';
-    link.rel = 'stylesheet';
-    link.href = 'css/daily-gift.css';
-    document.head.appendChild(link);
+    let link = document.getElementById('daily-gift-styles');
+    if (!link) {
+      link = document.createElement('link');
+      link.id = 'daily-gift-styles';
+      link.rel = 'stylesheet';
+      document.head.appendChild(link);
+    }
+    if (link.getAttribute('href') !== GIFT_STYLES_HREF) {
+      link.href = GIFT_STYLES_HREF;
+    }
   }
 
   function shouldShowOnPage() {
@@ -42,14 +48,23 @@
     return `${reward.icon} +${reward.amount}`;
   }
 
+  function rewardAmountText(reward) {
+    if (!reward) return '';
+    if (reward.type === 'coins' || reward.type === 'xp') return `+${reward.amount}`;
+    return `×${reward.amount}`;
+  }
+
   function buildTrackCells(days) {
     return days.map((day) => {
       const isMilestone = day.day === 7 || day.day === 14 || day.day === 21 || day.day === 30;
+      const rewardClass = day.type ? ` reward-${day.type}` : '';
       return `
-        <div class="daily-gift-cell state-${day.state}${isMilestone ? ' is-milestone' : ''}"
-          data-day="${day.day}" aria-label="${escapeHtml(t('dailyGift.dayLabel', { day: day.day }))}">
+        <div class="daily-gift-cell state-${day.state}${isMilestone ? ' is-milestone' : ''}${rewardClass}"
+          data-day="${day.day}" role="listitem"
+          aria-label="${escapeHtml(t('dailyGift.dayLabel', { day: day.day }))}">
           <span class="daily-gift-cell-day">${day.day}</span>
           <span class="daily-gift-cell-icon" aria-hidden="true">${global.CoinIcon?.resolve?.(day.icon, 'coin-icon coin-icon--md') || escapeHtml(day.icon)}</span>
+          <span class="daily-gift-cell-amt" aria-hidden="true">${escapeHtml(rewardAmountText(day))}</span>
           ${day.state === 'claimed' ? '<span class="daily-gift-cell-check" aria-hidden="true">✓</span>' : ''}
         </div>
       `;
