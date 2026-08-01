@@ -1372,9 +1372,12 @@
     showRoundRevealOverlay(data) {
       const el = this.els.roundReveal;
       if (!el) return;
-      const iWon = data.roundWinnerUid === MY_UID;
+      const winnerUid = data.roundWinnerUid || null;
+      const winnerName = winnerUid === MY_UID
+        ? (data.player1Name || rt('me'))
+        : (data.player2Name || this.botName());
       const word = data.sharedState?.solvedWord || data.lastRoundTarget || data.target || '';
-      const line = iWon ? rt('roundWin') : rt('roundLoss');
+      const line = rt('roundPlayerWins', { name: winnerName }) || `${winnerName} wins`;
 
       el.innerHTML = `
         <div class="race-round-reveal-card" role="status">

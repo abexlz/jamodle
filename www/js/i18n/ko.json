@@ -1076,6 +1076,7 @@
     "firstTo": "{{n}}승 선취",
     "roundWin": "라운드 승리! 🎉",
     "roundLoss": "라운드 패배",
+    "roundPlayerWins": "{{name}} 승리",
     "nextRoundSoon": "다음 단어가 곧 시작됩니다…",
     "coinFlipTitle": "동전 던지기",
     "coinFlipStarts": "{{name}} 선공",

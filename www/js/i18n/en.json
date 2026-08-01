@@ -1076,6 +1076,7 @@
     "firstTo": "First to {{n}}",
     "roundWin": "Round won! 🎉",
     "roundLoss": "Round lost",
+    "roundPlayerWins": "{{name}} wins",
     "nextRoundSoon": "Next word starting soon…",
     "coinFlipTitle": "Coin flip",
     "coinFlipStarts": "{{name}} goes first",
