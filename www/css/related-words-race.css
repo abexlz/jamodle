@@ -1003,6 +1003,23 @@ html.reduce-motion .rw-reveal-letter {
 
 .rw-race-mode .rw-dock-area {
   margin-top: 6px;
+  flex: 0 0 auto;
+}
+
+.rw-race-mode .rw-dock {
+  max-width: min(270px, 78vw);
+  gap: clamp(6px, 1.8vw, 10px);
+}
+
+.rw-race-mode .rw-dock-tile.flip-tile {
+  width: clamp(48px, 14vw, 64px);
+  height: clamp(48px, 14vw, 64px);
+  border-radius: 12px;
+}
+
+.rw-race-mode .rw-dock-face {
+  font-size: clamp(24px, 7vw, 34px);
+  border-radius: 12px;
 }
 
 .rw-race-mode .rw-dock-label {
@@ -1010,8 +1027,64 @@ html.reduce-motion .rw-reveal-letter {
   font-size: 14px;
 }
 
-.rw-race-mode .rw-dock-face {
-  font-size: clamp(33px, 9.9vw, 42px);
+@media (max-height: 760px) {
+  .rw-race-battle-hud {
+    min-height: clamp(120px, 32vw, 150px);
+    padding: clamp(18px, 4.5vw, 28px) clamp(16px, 4vw, 24px) clamp(14px, 3.5vw, 22px);
+    margin-bottom: 4px;
+  }
+
+  .rw-race-mode .rw-trail-track {
+    height: clamp(56px, 15vw, 72px);
+  }
+
+  .rw-race-mode .rw-dock-tile.flip-tile {
+    width: clamp(42px, 12vw, 54px);
+    height: clamp(42px, 12vw, 54px);
+  }
+
+  .rw-race-mode .rw-dock-face {
+    font-size: clamp(20px, 6vw, 28px);
+  }
+
+  .rw-vs-slots.rw-slots--3 .rw-slot.flip-tile,
+  .rw-vs-slots.rw-slots--3 .rw-opp-slot.flip-tile {
+    width: clamp(44px, 12vw, 56px);
+    height: clamp(44px, 12vw, 56px);
+    max-width: clamp(44px, 12vw, 56px);
+  }
+}
+
+@media (max-height: 680px) {
+  .rw-race-battle-hud {
+    min-height: 108px;
+    padding: 12px 14px 10px;
+    margin-bottom: 2px;
+  }
+
+  .rw-race-mode .rw-divider {
+    margin-bottom: 8px;
+  }
+
+  .rw-race-mode .rw-dock-area {
+    margin-top: 2px;
+  }
+
+  .rw-race-mode .rw-dock {
+    gap: 5px;
+    max-width: 220px;
+  }
+
+  .rw-race-mode .rw-dock-tile.flip-tile {
+    width: clamp(38px, 11vw, 48px);
+    height: clamp(38px, 11vw, 48px);
+    border-radius: 10px;
+  }
+
+  .rw-race-mode .rw-dock-face {
+    font-size: clamp(18px, 5.5vw, 24px);
+    border-radius: 10px;
+  }
 }
 
 .rw-board.rw-round-locked .rw-vs-panel--you,

@@ -243,6 +243,34 @@ body.rw-race-page #rw-race-game {
   flex: 1 1 0;
   min-height: 0;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+body.rw-race-page #rw-race-game.rw-race-mode {
+  min-height: 0;
+}
+
+body.rw-race-page .rw-race-mode .rw-stage,
+body.rw-race-page .rw-race-mode .rw-play-cluster,
+body.rw-race-page .rw-race-mode .rw-board {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+body.rw-race-page .rw-race-mode .rw-clue-area,
+body.rw-race-page .rw-race-mode .rw-answer-area,
+body.rw-race-page .rw-race-mode .rw-divider {
+  flex-shrink: 0;
+}
+
+body.rw-race-page .rw-race-mode .rw-dock-area {
+  flex: 0 0 auto;
+  margin-top: auto;
+  min-height: 0;
 }
 
 /* ── Home menu: fit without #menu-root scroll ── */
