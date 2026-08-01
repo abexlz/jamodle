@@ -80,7 +80,57 @@
     const definition = String(entry.definition || '').trim();
     if (gloss && !isHanziGloss(gloss)) return gloss;
     if (definition && !isHanziGloss(definition)) return definition;
-    return gloss || definition;
+    return '';
+  }
+
+  function meaningFromLookupResult(result, word) {
+    const q = String(word || '').trim();
+    const direct = formatEntryMeaning(result?.entry);
+    if (direct) return direct;
+
+    const candidates = Array.isArray(result?.candidates) ? result.candidates : [];
+    for (const item of candidates) {
+      if (!item || String(item.word || '') !== q) continue;
+      const exact = formatEntryMeaning(item);
+      if (exact) return exact;
+    }
+    for (const item of candidates) {
+      const any = formatEntryMeaning(item);
+      if (any) return any;
+    }
+    return '';
+  }
+
+  /**
+   * English gloss for any dictionary headword — uses cache, then live API.
+   * @param {string} word
+   * @param {object|null} [prefetchedEntry] validation/search entry already in hand
+   */
+  async function resolveEnglishMeaning(word, prefetchedEntry = null) {
+    const q = String(word || '').trim();
+    if (!q) return '';
+
+    if (prefetchedEntry) {
+      const direct = formatEntryMeaning(prefetchedEntry);
+      if (direct) return direct;
+    }
+
+    const cached = readCache(q);
+    if (cached) {
+      const fromCache = meaningFromLookupResult(cached, q);
+      if (fromCache) return fromCache;
+    }
+
+    if (!isOnline()) return '';
+
+    try {
+      const forceRefresh = !!(cached && !meaningFromLookupResult(cached, q));
+      const result = await lookupWord(q, { forceRefresh });
+      const live = meaningFromLookupResult(result, q);
+      if (live) return live;
+    } catch { /* offline or API error */ }
+
+    return '';
   }
 
   function matchesExactEntry(data, word) {
@@ -134,12 +184,12 @@
   /**
    * @returns {Promise<{found:boolean, entry?:object, error?:string, offline?:boolean, cached?:boolean}>}
    */
-  async function lookupWord(word) {
+  async function lookupWord(word, options = {}) {
     const q = String(word || '').trim();
     if (!q) return { found: false, error: 'No word provided' };
 
     const cached = readCache(q);
-    if (cached) {
+    if (cached && !options.forceRefresh) {
       return { ...cached, cached: true, offline: !isOnline() };
     }
 
@@ -240,39 +290,6 @@
   /** Prefetch dictionary data in background (non-blocking) */
   function prefetchWord(word) {
     lookupWord(word).catch(() => {});
-  }
-
-  /**
-   * English gloss for any dictionary headword — uses cache, then live API.
-   * @param {string} word
-   * @param {object|null} [prefetchedEntry] validation/search entry already in hand
-   */
-  async function resolveEnglishMeaning(word, prefetchedEntry = null) {
-    const q = String(word || '').trim();
-    if (!q) return '';
-
-    if (prefetchedEntry) {
-      const direct = formatEntryMeaning(prefetchedEntry);
-      if (direct) return direct;
-    }
-
-    const cached = readCache(q);
-    if (cached?.entry) {
-      const fromCache = formatEntryMeaning(cached.entry);
-      if (fromCache) return fromCache;
-    }
-
-    if (!isOnline()) return '';
-
-    try {
-      const result = await lookupWord(q);
-      if (result?.entry) {
-        const live = formatEntryMeaning(result.entry);
-        if (live) return live;
-      }
-    } catch { /* offline or API error */ }
-
-    return '';
   }
 
   global.DictionaryService = {

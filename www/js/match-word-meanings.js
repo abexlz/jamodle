@@ -51,6 +51,7 @@
     '나': 'I / me',
     '과': 'and / with',
     '화살': 'Arrow',
+    '자극': 'stimulus',
     '쥐': 'mouse',
     '벌': 'bee',
     '실': 'thread',

@@ -5,6 +5,7 @@ const {
   pickBestMatch,
   pickExactEntry,
   hasExactDictionaryMatch,
+  mergeSearchEntry,
 } = require('../lib/korean-dictionary');
 
 let passed = 0;
@@ -68,6 +69,15 @@ const chineseOnly = normalizeSearchItem(chineseOnlyItem);
 assert(chineseOnly.definition === '', 'no Chinese fallback in definition');
 assert(chineseOnly.englishWord === '', 'no Chinese fallback in englishWord');
 assert(chineseOnly.rawDefinitionKo.includes('학교'), 'Korean definition kept separately');
+
+const merged = mergeSearchEntry(
+  { word: '자극', englishWord: 'stimulus', definition: 'A stimulus.' },
+  { word: '자극', englishWord: '', definition: '', entryId: '24765' },
+  '자극',
+);
+assert(merged.englishWord === 'stimulus', 'merge keeps search englishWord');
+assert(merged.definition === 'A stimulus.', 'merge keeps search definition');
+assert(merged.entryId === '24765', 'merge keeps view entryId');
 
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed > 0 ? 1 : 0);
