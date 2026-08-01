@@ -1645,9 +1645,8 @@
 
     /** True when every jamo tile has left the dock (bank). */
     hasAllDockTilesOnBoard() {
-      const tiles = Object.values(this.tileMap);
-      if (!tiles.length) return false;
-      return tiles.every((tile) => !tile.inBank);
+      const stats = this.countTileInventory();
+      return stats.total > 0 && stats.dock === 0;
     }
 
     hasAllMultiTilesPlaced() {
@@ -1911,6 +1910,7 @@
     renderBank() {
       this.els.bank.innerHTML = '';
       this._removedTileIds = [];
+      this.tileMap = {};
       let tileCounter = 0;
       const rng = this.sharedSeed ? createSeededRng(this.sharedSeed) : null;
       const defs = rng
@@ -1922,6 +1922,7 @@
         if (this.shuffleRotations) this.applyRandomTileRotation(tile, rng);
         this.els.bank.appendChild(tile.el);
       });
+      this._originalDockCount = defs.length;
       this.syncDockTileSize();
     }
 
@@ -2058,6 +2059,7 @@
         this.tileMap[tile.id] = tile;
         this.els.bank.appendChild(tile.el);
       });
+      this._originalDockCount = (tileDefs || []).length;
       this.syncDockTileSize();
     }
 
@@ -2386,6 +2388,10 @@
       this.mergeDock?.clearMergeSlotRef?.(tile);
       tile.mergeDockRef = null;
       tile.mergeDockSlot = null;
+      // Clear leftover ghost/reveal nodes so the slot shows only this tile.
+      zone.el.querySelectorAll('.jamo-tile, .opp-reveal-tile').forEach((el) => {
+        if (el !== tileEl) el.remove();
+      });
       zone.setPlaced(tileEl, tile.id);
       tile.setInZone(zone);
       if (zone.zoneType === 'cho' || zone.zoneType === 'jong') {
@@ -2393,10 +2399,116 @@
         tile.syllableIndex = zone.syllableIndex;
       }
       zone.placedTileId = tile.id;
-      // Guarantee the dock no longer shows this tile (moved node + collapsed slot).
-      tileEl.classList.remove('hidden-in-bank');
+      this.purgeTileFromDock(tile);
+      this.syncDockTileSize();
       this.pulseLiveAction('move');
       this.notifyTurnLiveChange();
+    }
+
+    /**
+     * Ensure a placed tile is gone from the dock DOM and not counted as remaining.
+     * Removes duplicate nodes with the same id; never orphans the live tile element.
+     */
+    purgeTileFromDock(tile) {
+      if (!tile?.el || !this.els.bank) return;
+      tile.inBank = false;
+      this.els.bank.querySelectorAll('.jamo-tile').forEach((el) => {
+        const id = el.dataset.tileId;
+        if (!id || id !== tile.id) return;
+        if (el === tile.el) {
+          // Live node still sitting in the dock after a place — move it to its zone/merge.
+          if (tile.zoneRef?.el) tile.zoneRef.el.appendChild(el);
+          else if (tile.mergeDockRef) el.remove();
+          return;
+        }
+        el.remove();
+      });
+    }
+
+    /** Dock visible + board/merge occupied should match the live inventory size. */
+    countTileInventory() {
+      const tiles = Object.values(this.tileMap || {}).filter((t) => t && !t._watchEphemeral);
+      let dock = 0;
+      let placed = 0;
+      tiles.forEach((tile) => {
+        if (tile.zoneRef || tile.mergeDockRef || (tile.locked && !tile.inBank)) {
+          placed += 1;
+          return;
+        }
+        const inDockVisible = tile.inBank
+          && tile.el?.parentElement === this.els.bank
+          && !tile.el.classList.contains('hidden-in-bank');
+        if (inDockVisible) dock += 1;
+        else placed += 1;
+      });
+      return {
+        dock,
+        placed,
+        total: tiles.length,
+        original: this._originalDockCount ?? tiles.length,
+      };
+    }
+
+    /**
+     * Repair dock/board double-visibility and drop stray duplicate DOM nodes.
+     * Keeps dock_visible + occupied === inventory size.
+     */
+    reconcileTileInventory() {
+      if (!this.els.bank || this.watchMode) return;
+
+      // Drop bank DOM nodes that don't belong to inventory or are duplicates.
+      const seenInBank = new Set();
+      this.els.bank.querySelectorAll('.jamo-tile').forEach((el) => {
+        const id = el.dataset.tileId;
+        const tile = id ? this.tileMap[id] : null;
+        if (!tile) {
+          el.remove();
+          return;
+        }
+        if (seenInBank.has(id)) {
+          el.remove();
+          return;
+        }
+        seenInBank.add(id);
+        if (tile.zoneRef?.el) {
+          tile.inBank = false;
+          tile.zoneRef.el.appendChild(el);
+          tile.el.classList.add('in-zone');
+          tile.el.classList.remove('hidden-in-bank', 'dragging');
+          return;
+        }
+        if (tile.mergeDockRef || (tile.locked && !tile.inBank)) {
+          tile.inBank = false;
+          if (el.parentElement === this.els.bank) el.remove();
+        }
+      });
+
+      Object.values(this.tileMap).forEach((tile) => {
+        if (!tile?.el) return;
+        if (tile.zoneRef) {
+          tile.inBank = false;
+          if (tile.el.parentElement !== tile.zoneRef.el) {
+            tile.zoneRef.el.querySelectorAll('.jamo-tile, .opp-reveal-tile').forEach((el) => {
+              if (el !== tile.el) el.remove();
+            });
+            tile.zoneRef.el.appendChild(tile.el);
+          }
+          tile.el.classList.add('in-zone');
+          tile.el.classList.remove('hidden-in-bank', 'dragging');
+          return;
+        }
+        if (tile.mergeDockRef) {
+          tile.inBank = false;
+          tile.el.classList.remove('hidden-in-bank', 'in-zone');
+          return;
+        }
+        if (tile.locked) return;
+        if (!tile.inBank || tile.el.parentElement !== this.els.bank) {
+          tile.setInBank(this.els.bank);
+        }
+        tile.showInBank();
+      });
+      this.syncDockTileSize();
     }
 
     detachZoneTile(tile) {
@@ -2903,6 +3015,7 @@
       this.bounceTile(tile.el);
       global.SoundEffects?.place?.();
       this.updateCheckButton();
+      if (!this.watchMode) this.reconcileTileInventory();
       this.onTutorialEvent?.('place', { tile, zone, game: this });
       return true;
     }
@@ -2953,6 +3066,7 @@
       tile.setInBank(this.els.bank);
       this.updateCheckButton();
       this.syncDockTileSize();
+      if (!this.watchMode) this.reconcileTileInventory();
       this.pulseLiveAction('move');
       this.notifyTurnLiveChange();
       if (this.tutorialMode) this.onTutorialEvent?.('change', { game: this });
@@ -2972,6 +3086,7 @@
       tile.isMerged = true;
       tile.mergeSources = mergeSources;
       this.tileMap[id] = tile;
+      this._originalDockCount = (this._originalDockCount || 0) + 1;
       return tile;
     }
 
@@ -2980,6 +3095,9 @@
       if (!tile) return;
       tile.el?.remove();
       delete this.tileMap[id];
+      if (typeof this._originalDockCount === 'number' && this._originalDockCount > 0) {
+        this._originalDockCount -= 1;
+      }
       if (this.turnBased && !this.watchMode) {
         this._removedTileIds = this._removedTileIds || [];
         if (!this._removedTileIds.includes(id)) {
@@ -3183,6 +3301,7 @@
       this.restoreTurnLockedPlacements(locked, turnHistory, myUid);
       this.restoreDockVisibility();
       this.restoreVisibleTiles();
+      if (!this.watchMode) this.reconcileTileInventory();
       this.updateCheckButton();
     }
 
@@ -3215,9 +3334,29 @@
       const zone = block?.getAllZones().find((z) => (
         z.zoneType === placement.zone && (z.subIndex ?? 0) === sub
       ));
-      const candidates = Object.values(this.tileMap).filter((tile) => (
-        tile.inBank && !tile.locked && tile.char === placement.char
+      const freeBank = () => Object.values(this.tileMap).filter((tile) => (
+        tile.inBank && !tile.locked && !tile.zoneRef && !tile.mergeDockRef
+        && (!tile.el || tile.el.parentElement === this.els.bank || !tile.el.isConnected)
       ));
+      const candidates = freeBank().filter((tile) => tile.char === placement.char);
+      if (!candidates.length) {
+        // Accept a rotatable free tile that can become the needed char.
+        const rotatable = freeBank().find((tile) => {
+          if (!HC.canRotateJamo?.(tile.char)) return false;
+          let cur = tile.char;
+          for (let i = 0; i < 6; i += 1) {
+            cur = HC.rotateJamo(cur);
+            if (!cur || cur === tile.char) break;
+            if (cur === placement.char) return true;
+          }
+          return false;
+        });
+        if (rotatable) {
+          rotatable.zoneType = HC.zoneTypeForRotatedJamo(placement.char, rotatable.zoneType);
+          rotatable.setChar(placement.char);
+          return rotatable;
+        }
+      }
       if (!candidates.length) return null;
       const exact = candidates.find((tile) => (
         tile.syllableIndex === placement.syl
@@ -3315,13 +3454,27 @@
         )) || null;
       }
       if (!tile) {
+        // Last resort: reuse any free dock tile (keeps inventory size stable).
+        tile = Object.values(this.tileMap).find((t) => (
+          t.inBank && !t.locked && !t.zoneRef && !t.mergeDockRef
+          && t.el?.parentElement === this.els.bank
+        )) || null;
+        if (tile) {
+          tile.zoneType = placement.zone;
+          tile.syllableIndex = placement.syl;
+          tile.setChar(placement.char);
+        }
+      }
+      if (!tile) {
         tile = this.createBasicTile({
           char: placement.char,
           syllableIndex: placement.syl,
           zoneType: placement.zone,
         });
+        this._originalDockCount = (this._originalDockCount || 0) + 1;
       }
       this.mountLockedTileInZone(zone, tile);
+      this.purgeTileFromDock(tile);
       return true;
     }
 

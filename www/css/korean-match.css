@@ -998,15 +998,24 @@
   }
 
   .jamo-tile.dragging { opacity: .45; transform: scale(.92); pointer-events: none; }
-  .jamo-tile.hidden-in-bank {
+  .jamo-tile.hidden-in-bank,
+  body.match-turn-page .jamo-bank > .jamo-tile.hidden-in-bank,
+  body.match-turn-page .jamo-bank--turn > .jamo-tile.hidden-in-bank,
+  body.match-turn-page .race-turn-dock-stack .jamo-bank > .jamo-tile.hidden-in-bank,
+  body.match-turn-page .race-turn-dock-stack .jamo-bank--turn > .jamo-tile.hidden-in-bank,
+  body.match-race-page.match-turn-page .jamo-bank--turn > .jamo-tile.hidden-in-bank {
+    display: none !important;
     opacity: 0 !important;
     visibility: hidden !important;
     pointer-events: none !important;
     position: absolute !important;
+    flex: 0 0 0 !important;
     width: 0 !important;
     height: 0 !important;
     min-width: 0 !important;
+    max-width: 0 !important;
     min-height: 0 !important;
+    max-height: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
     overflow: hidden !important;
@@ -3128,8 +3137,8 @@
     box-shadow: none !important;
   }
 
-  body.match-turn-page .race-turn-dock-stack .jamo-bank > .jamo-tile:not(.in-zone),
-  body.match-turn-page .race-turn-dock-stack .jamo-bank--turn > .jamo-tile:not(.in-zone) {
+  body.match-turn-page .race-turn-dock-stack .jamo-bank > .jamo-tile:not(.in-zone):not(.hidden-in-bank),
+  body.match-turn-page .race-turn-dock-stack .jamo-bank--turn > .jamo-tile:not(.in-zone):not(.hidden-in-bank) {
     --dock-tile-local: var(--turn-dock-tile-size, var(--dock-tile-size, var(--tile-size, 44px)));
     flex: 0 0 var(--dock-tile-local) !important;
     width: var(--dock-tile-local) !important;

@@ -28,7 +28,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/app-preferences.css">
 <link rel="stylesheet" href="css/app-buttons.css?v=10">
-<link rel="stylesheet" href="css/korean-match.css?v=20260801c">
+<link rel="stylesheet" href="css/korean-match.css?v=20260801d">
 <link rel="stylesheet" href="css/answer-tts.css">
 <link rel="stylesheet" href="css/match-emotes.css">
 <link rel="stylesheet" href="css/profile.css">
@@ -84,7 +84,7 @@
     overflow-y: visible !important;
   }
 
-  body.match-race-page.match-turn-page .jamo-bank--turn > .jamo-tile:not(.in-zone) {
+  body.match-race-page.match-turn-page .jamo-bank--turn > .jamo-tile:not(.in-zone):not(.hidden-in-bank) {
     --dock-tile-local: var(--turn-dock-tile-size, var(--dock-tile-size, 44px));
     flex: 0 0 var(--dock-tile-local) !important;
     width: var(--dock-tile-local) !important;
@@ -95,6 +95,23 @@
     max-height: var(--dock-tile-local) !important;
     aspect-ratio: 1 / 1 !important;
     border-radius: 10px !important;
+  }
+
+  body.match-race-page.match-turn-page .jamo-bank--turn > .jamo-tile.hidden-in-bank {
+    display: none !important;
+    flex: 0 0 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
   }
 
   body.match-race-page.match-turn-page .race-app {
@@ -212,7 +229,7 @@
 <script src="js/profile-ui.js"></script>
 <script src="js/rw-score-odometer.js"></script>
 <script src="js/match-emotes.js?v=20260707y"></script>
-<script src="js/korean-match.js?v=20260801i"></script>
+<script src="js/korean-match.js?v=20260801j"></script>
 <script src="js/match-turn-app.js?v=20260801d"></script>
 <script src="js/match-turn-bot.js?v=20260801g"></script>
 <script>
