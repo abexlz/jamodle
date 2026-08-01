@@ -322,33 +322,28 @@
 
       const syllableIndex = this.callbacks.getTile(slotIds[0])?.syllableIndex;
 
-      // Consume both source vowels first — detach from slots, then park/hide.
+      // Hard-consume both source vowels — delete them from inventory/DOM so only
+      // the new compound vowel remains (unmerge will mint fresh basics later).
       slotIds.forEach((id, i) => {
         if (!id) return;
-        const t = this.callbacks.getTile(id);
         this.slotTileIds[i] = null;
         this.slotEls[i].classList.remove('filled', 'drag-over');
-        // Prefer moving the live tile node out; then scrub any leftover glyphs/clones.
-        if (t?.el && t.el.parentElement === this.slotEls[i]) {
-          t.el.remove();
-        }
         this.slotEls[i].innerHTML = '';
-        if (this.callbacks.parkMergeIngredient) {
-          this.callbacks.parkMergeIngredient(id);
-        } else {
-          this.callbacks.removeTile?.(id);
-        }
-        if (t) {
-          t.mergeDockRef = null;
-          t.mergeDockSlot = null;
-        }
+        this.callbacks.consumeMergeIngredient?.(id);
+      });
+
+      // Scrub every leftover glyph/tile from the whole merge machine before mounting ㅐ.
+      this.root?.querySelectorAll('.jamo-tile, .merge-live-glyph').forEach((n) => n.remove());
+      this.slotEls.forEach((el) => {
+        el.classList.remove('filled', 'drag-over');
+        el.innerHTML = '';
       });
 
       const mergedTile = this.callbacks.createMergedTile({
         char: merged,
         syllableIndex,
         mergeSources: chars.slice(),
-        mergeSourceIds: slotIds.slice(),
+        mergeSourceIds: null,
       });
       this.resultTileId = mergedTile.id;
       mergedTile.mergeDockRef = 'result';
@@ -358,41 +353,39 @@
 
       this.resultEl.classList.add('filled');
       this.resultEl.classList.remove('has-preview', 'drag-over');
-      if (this.previewEl) this.previewEl.textContent = '';
-      // Only the new compound vowel may remain in the result well.
-      this.resultEl.querySelectorAll('.jamo-tile, .merge-live-glyph').forEach((n) => n.remove());
-      if (this.previewEl && !this.resultEl.contains(this.previewEl)) {
-        this.resultEl.appendChild(this.previewEl);
+      if (!this.previewEl || !this.resultEl.contains(this.previewEl)) {
+        const preview = document.createElement('span');
+        preview.className = 'merge-preview-glyphs';
+        preview.setAttribute('aria-hidden', 'true');
+        this.resultEl.appendChild(preview);
+        this.previewEl = preview;
       }
+      this.previewEl.textContent = '';
       const el = this.callbacks.renderTileInSlot?.(mergedTile) || mergedTile.el;
       el.classList?.remove('hidden-in-bank', 'merge-consumed', 'dragging', 'selected');
+      // Ensure result contains only preview + the one compound tile.
+      this.resultEl.querySelectorAll('.jamo-tile, .merge-live-glyph').forEach((n) => {
+        if (n !== el) n.remove();
+      });
       this.resultEl.appendChild(el);
       if (playSound) global.SoundEffects?.merge?.();
-      this.callbacks.concealConsumedMergeIngredients?.();
+      this.callbacks.purgeAllParkedMergeIngredients?.();
     }
 
     unmergeTile(mergedTile) {
       if (!mergedTile?.isMerged) return false;
 
-      // Prefer the exact ingredients that were merged (round-trip). Fall back to the
-      // canonical pair only when source ids/chars are unknown (e.g. legacy tiles).
-      const sourceIds = Array.isArray(mergedTile.mergeSourceIds)
-        ? mergedTile.mergeSourceIds.filter(Boolean).slice(0, 2)
-        : [];
+      // Round-trip to the chars that were merged when known; else canonical pair.
       const sourceChars = Array.isArray(mergedTile.mergeSources)
         ? mergedTile.mergeSources.filter(Boolean).slice(0, 2)
         : [];
-      let pair = sourceChars.length === 2 ? sourceChars : null;
-      if (!pair && sourceIds.length === 2) {
-        const fromTiles = sourceIds.map((id) => this.callbacks.getTile?.(id)?.char).filter(Boolean);
-        if (fromTiles.length === 2) pair = fromTiles;
-      }
-      if (!pair) pair = HC().getMergePairComponents(mergedTile.char);
+      const pair = sourceChars.length === 2
+        ? sourceChars
+        : HC().getMergePairComponents(mergedTile.char);
       if (!pair || pair.length !== 2) return false;
 
       const fromResult = mergedTile.mergeDockRef === 'result';
       const syllableIndex = mergedTile.syllableIndex;
-      const mergedId = mergedTile.id;
 
       if (fromResult) {
         if (!this.canSplit()) return false;
@@ -404,51 +397,18 @@
         return false;
       }
 
-      const usedIds = new Set();
+      // Sources were hard-deleted on merge — always mint exactly one fresh tile each.
       pair.forEach((char, i) => {
-        let basic = null;
-        const preferredId = sourceIds[i];
-        if (preferredId && !usedIds.has(preferredId)) {
-          basic = this.callbacks.reviveMergeIngredientById?.(preferredId)
-            || this.callbacks.reviveMergeIngredient?.(char, {
-              syllableIndex,
-              preferId: preferredId,
-              excludeMergedId: mergedId,
-            });
-          if (basic) usedIds.add(basic.id);
-        }
-        if (!basic) {
-          basic = this.callbacks.reviveMergeIngredient?.(char, {
-            syllableIndex,
-            excludeMergedId: mergedId,
-            excludeIds: [...usedIds],
-          });
-          if (basic) usedIds.add(basic.id);
-        }
-        if (!basic) {
-          basic = this.callbacks.createBasicTile({
-            char,
-            syllableIndex,
-            zoneType: 'jungV',
-          });
-          usedIds.add(basic.id);
-        } else if (basic.char !== char) {
-          basic.zoneType = 'jungV';
-          if (typeof basic.setChar === 'function') basic.setChar(char);
-          else basic.char = char;
-        }
+        const basic = this.callbacks.createBasicTile({
+          char,
+          syllableIndex,
+          zoneType: 'jungV',
+        });
         if (fromResult) {
           this.placeInSlotEmpty(i, basic);
         } else {
           this.callbacks.returnTileToBank?.(basic);
         }
-      });
-
-      // Any leftover parked ingredients from this merge must stay gone — never
-      // reappear beside the revived pair (that was producing 2× each vowel).
-      sourceIds.forEach((id) => {
-        if (!id || usedIds.has(id)) return;
-        this.callbacks.discardParkedMergeIngredient?.(id);
       });
 
       this.updatePreview();

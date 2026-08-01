@@ -1146,12 +1146,14 @@
         detachZoneTile: (tile) => this.detachZoneTile(tile),
         removeTile: (id) => this.removeTile(id),
         parkMergeIngredient: (id) => this.parkMergeIngredient(id),
+        consumeMergeIngredient: (id) => this.consumeMergeIngredient(id),
         createMergedTile: (opts) => this.createMergedTile(opts),
         createBasicTile: (opts) => this.createBasicTile(opts),
         reviveMergeIngredient: (char, opts) => this.reviveMergeIngredient(char, opts),
         reviveMergeIngredientById: (id) => this.reviveMergeIngredientById(id),
         discardParkedMergeIngredient: (id) => this.discardParkedMergeIngredient(id),
         concealConsumedMergeIngredients: () => this.concealConsumedMergeIngredients(),
+        purgeAllParkedMergeIngredients: () => this.purgeAllParkedMergeIngredients(),
         renderTileInSlot: (tile) => tile.el,
         swapTiles: (a, b) => this.swapTiles(a, b),
       });
@@ -2721,7 +2723,7 @@
         }
         const ingredientIds = [...(this.mergeDock?.slotTileIds || [null, null])];
         this.mergeDock.tryCompose();
-        this.concealConsumedMergeIngredients();
+        this.purgeAllParkedMergeIngredients();
         this.updateRotationDockLabel();
         this.updateCheckButton();
         this.syncDockTileSize();
@@ -3189,8 +3191,27 @@
     }
 
     /**
-     * Park a vowel consumed by a merge (keep in tileMap, fully detach from UI) so
-     * unmerge can revive the exact same tiles — never leave them visible beside ㅐ.
+     * Permanently destroy a merge-slot ingredient so only the compound vowel remains.
+     * Scrubs every DOM node with this tile id (dock duplicates included).
+     */
+    consumeMergeIngredient(id) {
+      if (!id) return;
+      const root = this.root || document;
+      root.querySelectorAll?.('.jamo-tile').forEach((el) => {
+        if (el.dataset?.tileId === id) el.remove();
+      });
+      const tile = this.tileMap[id];
+      if (tile?.el?.isConnected) tile.el.remove();
+      if (this.selectedTile?.id === id) {
+        this.selectedTile.setSelected?.(false);
+        this.selectedTile = null;
+      }
+      this.removeTile(id);
+    }
+
+    /**
+     * Park a vowel for live/watch sync (keep in tileMap, detach from UI).
+     * Local compose uses consumeMergeIngredient instead (hard delete).
      */
     parkMergeIngredient(id) {
       const tile = this.tileMap[id];
@@ -3202,7 +3223,6 @@
       }
       tile.mergeDockRef = null;
       tile.mergeDockSlot = null;
-      // Not a dock-visible tile while consumed — stay out of the bank DOM entirely.
       tile.inBank = false;
       tile.isMergeConsumed = true;
       this._removedTileIds = this._removedTileIds || [];
@@ -3216,6 +3236,20 @@
       }
     }
 
+    /**
+     * Drop every parked/consumed merge stub from inventory + DOM.
+     * Used after a hard merge so leftovers cannot sit beside the new compound.
+     */
+    purgeAllParkedMergeIngredients() {
+      Object.values(this.tileMap || {}).forEach((tile) => {
+        if (!tile || tile.locked || tile.zoneRef || tile.mergeDockRef) return;
+        if (this.isMergeConsumedTile(tile) || tile.el?.classList.contains('merge-consumed')) {
+          this.discardParkedMergeIngredient(tile.id);
+        }
+      });
+      this.concealConsumedMergeIngredients();
+    }
+
     /** Force every consumed merge ingredient out of the visible UI. */
     concealConsumedMergeIngredients() {
       Object.values(this.tileMap || {}).forEach((tile) => {
@@ -3226,14 +3260,16 @@
         tile.el?.classList.remove('in-zone', 'selected', 'dragging');
         if (tile.el?.isConnected) tile.el.remove();
       });
-      // Scrub any leftover ingredient nodes still sitting in merge UI.
+      // Slots must never keep leftover source vowels after a merge.
       this.mergeDock?.slotEls?.forEach((slotEl) => {
         if (!slotEl) return;
-        slotEl.querySelectorAll('.jamo-tile.merge-consumed, .jamo-tile.hidden-in-bank').forEach((el) => {
-          el.remove();
-        });
+        slotEl.querySelectorAll('.jamo-tile, .merge-live-glyph').forEach((el) => el.remove());
+        slotEl.classList.remove('filled', 'drag-over');
       });
-      this.mergeDock?.resultEl?.querySelectorAll('.jamo-tile.merge-consumed').forEach((el) => {
+      // Result well: keep only the active compound tile.
+      const keepId = this.mergeDock?.resultTileId;
+      this.mergeDock?.resultEl?.querySelectorAll('.jamo-tile, .merge-live-glyph').forEach((el) => {
+        if (keepId && el.dataset?.tileId === keepId) return;
         el.remove();
       });
       this.syncDockTileSize();
@@ -3342,8 +3378,8 @@
       tile.mergeSources = Array.isArray(mergeSources) ? mergeSources.slice(0, 2) : null;
       tile.mergeSourceIds = Array.isArray(mergeSourceIds) ? mergeSourceIds.slice(0, 2) : null;
       this.tileMap[id] = tile;
-      // Do not bump _originalDockCount — merge parks 2 basics and adds 1 compound;
-      // inventory conservation is handled by park/revive, not by inventing capacity.
+      // 2 basics were removed; add 1 compound back into the inventory budget.
+      this._originalDockCount = (this._originalDockCount || 0) + 1;
       return tile;
     }
 
