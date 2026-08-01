@@ -74,6 +74,7 @@ module.exports = async function handler(req, res) {
 
   const text = (req.query?.text || req.query?.q || '').trim();
   const gender = tts.normalizeGender(req.query?.voice || req.query?.gender);
+  const pace = tts.normalizeSyllablePace?.(req.query?.pace || req.query?.syllablePace) || 'normal';
   if (!text) {
     return sendJson(res, 400, { error: 'Missing required query parameter: text' });
   }
@@ -86,7 +87,7 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const audio = await tts.synthesize(text, { gender });
+    const audio = await tts.synthesize(text, { gender, pace });
     return sendAudio(res, 200, audio);
   } catch (err) {
     const code = err.code || 'UNKNOWN';

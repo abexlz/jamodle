@@ -358,6 +358,56 @@
     return placements;
   }
 
+  /**
+   * Progressive bot turns: place at most `maxCorrect` newly-correct jamo (1–2).
+   * Never fills every remaining zone in one go when more than that remain.
+   */
+  function buildProgressiveCorrectPlacements(target, locked, bank = [], maxCorrect = 2) {
+    const lockedKeys = new Set((locked || []).map((p) => placementKey(p)));
+    const zones = iterTargetZones(target).filter((z) => !lockedKeys.has(placementKey(z)));
+    if (!zones.length) return [];
+
+    const cap = Math.max(1, Math.min(2, Number(maxCorrect) || 2));
+    const shuffled = zones.slice().sort(() => Math.random() - 0.5);
+    const n = Math.min(cap, shuffled.length);
+    const activeZones = shuffled.slice(0, n);
+
+    const counts = bankCharCounts(bank);
+    const placements = [];
+    activeZones.forEach((z) => {
+      const char = takeBankCharForGoal(counts, z.expected, z.zone);
+      if (!char) return;
+      placements.push({
+        syl: z.syl,
+        zone: z.zone,
+        subIndex: z.subIndex,
+        char,
+        correct: char === z.expected,
+        locked: false,
+        tileId: null,
+      });
+    });
+    return placements;
+  }
+
+  /** Keep at most `maxCorrect` newly-correct placements; drop excess greens. */
+  function limitNewCorrectPlacements(placements, locked, maxCorrect) {
+    const lockedKeys = new Set((locked || []).map((p) => placementKey(p)));
+    const raw = Number(maxCorrect);
+    const cap = Number.isFinite(raw) ? Math.max(0, Math.min(2, raw)) : 2;
+    let correctNew = 0;
+    const out = [];
+    (placements || []).forEach((p) => {
+      const isNewCorrect = p?.correct && !lockedKeys.has(placementKey(p));
+      if (isNewCorrect) {
+        if (correctNew >= cap) return;
+        correctNew += 1;
+      }
+      out.push(p);
+    });
+    return out;
+  }
+
   function computeSyllableMask(placements, target) {
     const syllableTotal = [...target].filter((c) => HC().isHangulSyllable(c)).length;
     const bySyl = new Map();
@@ -710,25 +760,40 @@
       return { script, payload: finalizePayload([], target, false), totalMs: t };
     }
 
-    const wrongChance = lerp(0.5, 0.1, winRate);
-    const solveChance = lerp(0.15, 0.7, winRate);
     const stumbleChance = lerp(0.3, 0.06, winRate);
-    const makesWrongFinal = Math.random() < wrongChance;
-    // Never allow a full solve on the bot's 1st or 2nd turn.
-    const triesSolve = !blockEarlySolve && !makesWrongFinal && Math.random() < solveChance;
+    // Progressive: only 1–2 newly-correct jamo blocks per turn (never dump the whole answer).
+    // Higher winRate slightly prefers 2 over 1.
+    const preferTwo = Math.random() < lerp(0.35, 0.7, winRate);
+    let maxCorrectThisTurn = preferTwo ? 2 : 1;
+    // Never leave only enough greens to finish the word on turn 1–2.
+    if (blockEarlySolve && zones.length <= maxCorrectThisTurn) {
+      maxCorrectThisTurn = Math.max(0, zones.length - 1);
+    }
+    // Still never place more than 2 new correct jamo, even when many remain.
+    maxCorrectThisTurn = Math.min(2, maxCorrectThisTurn, zones.length);
 
     let finalPlacements;
     let won = false;
     const dockBank = planningBank;
-    if (triesSolve) {
-      finalPlacements = buildPlacements(target, locked, { wrong: false, partial: false }, dockBank);
-      won = isWinningSubmission(finalPlacements, locked, target);
-      if (!won) finalPlacements = buildPlacements(target, locked, { wrong: false, partial: true }, dockBank);
-    } else if (makesWrongFinal) {
-      finalPlacements = buildPlacements(target, locked, { wrong: true, partial: false }, dockBank);
+    if (maxCorrectThisTurn <= 0) {
+      // Early turns with almost everything locked: place a wrong tile so we don't solve.
+      finalPlacements = buildPlacements(target, locked, { wrong: true, partial: true }, dockBank);
     } else {
-      finalPlacements = buildPlacements(target, locked, { wrong: false, partial: true }, dockBank);
+      finalPlacements = buildProgressiveCorrectPlacements(
+        target, locked, dockBank, maxCorrectThisTurn
+      );
+      // Soften with an occasional dock-only miss mixed in (does not add extra greens).
+      if (finalPlacements.length && Math.random() < lerp(0.35, 0.08, winRate)) {
+        const wrongExtra = buildPlacements(target, locked, { wrong: true, partial: true }, dockBank)
+          .filter((p) => !p.correct)
+          .slice(0, 1);
+        const used = new Set(finalPlacements.map((p) => placementKey(p)));
+        wrongExtra.forEach((p) => {
+          if (!used.has(placementKey(p))) finalPlacements.push(p);
+        });
+      }
     }
+    finalPlacements = limitNewCorrectPlacements(finalPlacements, locked, Math.max(0, maxCorrectThisTurn));
 
     const finalMap = new Map(finalPlacements.map((p) => [placementKey(p), p]));
     const bySyl = new Map();
@@ -916,9 +981,21 @@
           tileId: p.tileId || null,
         };
       });
+    // Cap live sim output to 1–2 new correct jamo (script may have placed more via mistakes).
+    checkedPlacements = limitNewCorrectPlacements(
+      checkedPlacements,
+      locked,
+      Math.max(0, maxCorrectThisTurn)
+    );
+    // Drop excess from the live sim so the reveal matches the submitted payload.
+    {
+      const keepKeys = new Set(checkedPlacements.map((p) => placementKey(p)));
+      sim.placements = sim.placements.filter((p) => keepKeys.has(placementKey(p)));
+    }
+
     won = isWinningSubmission(checkedPlacements, locked, target);
 
-    // Hard block: bot must not solve on its 1st or 2nd turn (even if greens + placement fill the word).
+    // Hard block: bot must not solve on its 1st or 2nd turn.
     if (blockEarlySolve && won) {
       won = false;
       const lockedKeySet = new Set((locked || []).map((p) => placementKey(p)));
@@ -930,6 +1007,22 @@
         sim.placements = sim.placements.filter((p) => placementKey(p) !== dropKey);
         if (drop.tileId) sim.onBoard.delete(drop.tileId);
       }
+    }
+
+    // Never allow solving the entire remaining answer in one turn when >2 zones were open
+    // at plan time (progressive-only rule).
+    if (won && zones.length > 2) {
+      won = false;
+      const lockedKeySet = new Set((locked || []).map((p) => placementKey(p)));
+      const droppable = checkedPlacements.filter((p) => !lockedKeySet.has(placementKey(p)));
+      while (droppable.length > 2 && isWinningSubmission(checkedPlacements, locked, target)) {
+        const drop = droppable.pop();
+        const dropKey = placementKey(drop);
+        checkedPlacements = checkedPlacements.filter((p) => placementKey(p) !== dropKey);
+        sim.placements = sim.placements.filter((p) => placementKey(p) !== dropKey);
+        if (drop.tileId) sim.onBoard.delete(drop.tileId);
+      }
+      won = isWinningSubmission(checkedPlacements, locked, target);
     }
 
     push(0, () => {

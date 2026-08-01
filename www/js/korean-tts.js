@@ -162,13 +162,15 @@
     }
   }
 
-  async function fetchServerAudio(text) {
+  async function fetchServerAudio(text, options = {}) {
     const gender = preferredVoiceGender();
-    const key = `v6:${gender}:${text.trim()}`;
+    const pace = options.syllablePace === 'fast' ? 'fast' : 'normal';
+    const key = `v7:${gender}:${pace}:${text.trim()}`;
     if (audioCache.has(key)) return audioCache.get(key);
 
     const url = `${getApiBase()}/api/tts/speak?text=${encodeURIComponent(text.trim())}`
-      + `&voice=${encodeURIComponent(gender)}`;
+      + `&voice=${encodeURIComponent(gender)}`
+      + `&pace=${encodeURIComponent(pace)}`;
     const res = await fetch(url, {
       headers: {
         Accept: 'audio/mpeg',
@@ -283,7 +285,7 @@
 
     if (preferServer) {
       try {
-        const audioUrl = await fetchServerAudio(text);
+        const audioUrl = await fetchServerAudio(text, options);
         const ok = await playAudioUrl(audioUrl, volume);
         if (ok) return true;
       } catch (_) {
@@ -298,6 +300,9 @@
     const word = normalizeWord(text);
     const repeats = Math.max(1, Number(options.repeats) || 1);
     const gapMs = Number.isFinite(options.gapMs) ? options.gapMs : REPEAT_GAP_MS;
+    const baseSyllableGap = Number.isFinite(options.syllableGapMs)
+      ? options.syllableGapMs
+      : SYLLABLE_GAP_MS;
 
     if (!word || !pronunciationEnabled()) return false;
 
@@ -307,7 +312,15 @@
 
     for (let i = 0; i < repeats; i += 1) {
       if (session !== activeSession) return false;
-      const ok = await speakOnce(word, options);
+      // Second+ pass: half the syllable pause for a snappier re-read.
+      const passOptions = i === 0
+        ? { ...options, syllablePace: options.syllablePace || 'normal', syllableGapMs: baseSyllableGap }
+        : {
+          ...options,
+          syllablePace: 'fast',
+          syllableGapMs: Math.max(0, baseSyllableGap / 2),
+        };
+      const ok = await speakOnce(word, passOptions);
       if (!ok) return false;
       if (i < repeats - 1) {
         await new Promise((r) => setTimeout(r, gapMs));
