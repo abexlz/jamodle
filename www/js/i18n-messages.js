@@ -1204,20 +1204,20 @@
       "rewardToast": "Quest complete! +{{xp}} XP · 🪙 {{coins}}",
       "defs": {
         "daily-play": {
-          "title": "Daily Jamo Game",
-          "desc": "Play today's Daily Jamo Game once (win or lose)"
+          "title": "Daily Hangul-dle",
+          "desc": "Play today's Daily Hangul-dle once (win or lose)"
         },
         "daily-related-chain": {
           "title": "Related Words",
           "desc": "Solve one Related Words link"
         },
         "classic-play-3": {
-          "title": "Jamo Game",
-          "desc": "Play {{count}} Jamo Game rounds"
+          "title": "Hangul-dle",
+          "desc": "Play {{count}} Hangul-dle rounds"
         },
         "friend-battle": {
           "title": "Friend 1v1 battle",
-          "desc": "Finish 1 friend challenge 1v1 (Jamo Game race/turn OR Word Chain). Win or lose both count — random matchmaking does not."
+          "desc": "Finish 1 friend challenge 1v1 (Hangul-dle race/turn OR Word Chain). Win or lose both count — random matchmaking does not."
         },
         "login-streak-3": {
           "title": "Login streak",
@@ -1225,43 +1225,43 @@
         },
         "daily-under-3": {
           "title": "Daily sharp solve",
-          "desc": "Solve today's Daily Jamo Game in 3 tries or fewer"
+          "desc": "Solve today's Daily Hangul-dle in 3 tries or fewer"
         },
         "classic-first-try": {
           "title": "First try!",
-          "desc": "Solve a solo Jamo Game word on your first Check"
+          "desc": "Solve a solo Hangul-dle word on your first Check"
         },
         "race-win": {
-          "title": "Win a Jamo 1v1",
-          "desc": "Win 1 Jamo Game 1v1 match (fast race OR turn-based). Friend challenge or random match both count."
+          "title": "Win a Hangul-dle 1v1",
+          "desc": "Win 1 Hangul-dle 1v1 match (fast race OR turn-based). Friend challenge or random match both count."
         },
         "coop-win": {
           "title": "Win turn-based 1v1",
-          "desc": "Win 1 turn-based Jamo Game 1v1 series"
+          "desc": "Win 1 turn-based Hangul-dle 1v1 series"
         },
         "total-5-wins": {
           "title": "Daily scorer",
           "desc": "Get {{count}} correct answers today"
         },
         "match-1": {
-          "title": "Jamo Game",
-          "desc": "Win {{count}} Jamo Game round"
+          "title": "Hangul-dle",
+          "desc": "Win {{count}} Hangul-dle round"
         },
         "play-2": {
           "title": "Keep learning",
           "desc": "Finish {{count}} activities today"
         },
         "weekly-match-8": {
-          "title": "Jamo Game",
-          "desc": "Win {{count}} Jamo Game rounds this week"
+          "title": "Hangul-dle",
+          "desc": "Win {{count}} Hangul-dle rounds this week"
         },
         "weekly-match-3": {
-          "title": "Jamo Game",
-          "desc": "Win {{count}} Jamo Game rounds this week"
+          "title": "Hangul-dle",
+          "desc": "Win {{count}} Hangul-dle rounds this week"
         },
         "weekly-jamodle-5": {
-          "title": "Jamo Game",
-          "desc": "Win {{count}} Jamo Game rounds this week"
+          "title": "Hangul-dle",
+          "desc": "Win {{count}} Hangul-dle rounds this week"
         },
         "weekly-related-3": {
           "title": "Related Words",
@@ -2664,20 +2664,20 @@
       "rewardToast": "퀘스트 완료! +{{xp}} XP · 🪙 {{coins}}",
       "defs": {
         "daily-play": {
-          "title": "데일리 자모게임",
-          "desc": "데일리 자모게임 1번 플레이 (승패 무관)"
+          "title": "데일리 한글놀이",
+          "desc": "데일리 한글놀이 1번 플레이 (승패 무관)"
         },
         "daily-related-chain": {
           "title": "연관단어",
           "desc": "연관단어 링크 1개 풀기"
         },
         "classic-play-3": {
-          "title": "자모게임",
-          "desc": "자모게임 {{count}}판 플레이"
+          "title": "한글놀이",
+          "desc": "한글놀이 {{count}}판 플레이"
         },
         "friend-battle": {
           "title": "친구 1v1 대결",
-          "desc": "친구 도전 1v1 1판 완료 (자모게임 레이스/턴제 또는 단어 체인). 승패 모두 인정 · 랜덤 매칭은 제외"
+          "desc": "친구 도전 1v1 1판 완료 (한글놀이 레이스/턴제 또는 단어 체인). 승패 모두 인정 · 랜덤 매칭은 제외"
         },
         "login-streak-3": {
           "title": "연속 출석",
@@ -2685,43 +2685,43 @@
         },
         "daily-under-3": {
           "title": "데일리 날카로운 정답",
-          "desc": "데일리 자모게임 3번 시도 이내 정답"
+          "desc": "데일리 한글놀이 3번 시도 이내 정답"
         },
         "classic-first-try": {
           "title": "첫 시도 정답",
-          "desc": "솔로 자모게임에서 첫 번째 확인으로 정답"
+          "desc": "솔로 한글놀이에서 첫 번째 확인으로 정답"
         },
         "race-win": {
-          "title": "자모 1v1 승리",
-          "desc": "자모게임 1v1 1승 (빠른 레이스 또는 턴제). 친구 도전·랜덤 매칭 모두 인정"
+          "title": "한글놀이 1v1 승리",
+          "desc": "한글놀이 1v1 1승 (빠른 레이스 또는 턴제). 친구 도전·랜덤 매칭 모두 인정"
         },
         "coop-win": {
           "title": "턴제 1v1 승리",
-          "desc": "턴제 자모게임 1v1 시리즈 1승"
+          "desc": "턴제 한글놀이 1v1 시리즈 1승"
         },
         "total-5-wins": {
           "title": "오늘의 정답",
           "desc": "오늘 하루 총 {{count}}번 정답"
         },
         "match-1": {
-          "title": "자모게임",
-          "desc": "자모게임 {{count}}판 승리"
+          "title": "한글놀이",
+          "desc": "한글놀이 {{count}}판 승리"
         },
         "play-2": {
           "title": "꾸준히 학습",
           "desc": "오늘 활동 {{count}}번 완료"
         },
         "weekly-match-8": {
-          "title": "자모게임",
-          "desc": "이번 주 자모게임 {{count}}판 승리"
+          "title": "한글놀이",
+          "desc": "이번 주 한글놀이 {{count}}판 승리"
         },
         "weekly-match-3": {
-          "title": "자모게임",
-          "desc": "이번 주 자모게임 {{count}}판 승리"
+          "title": "한글놀이",
+          "desc": "이번 주 한글놀이 {{count}}판 승리"
         },
         "weekly-jamodle-5": {
-          "title": "자모게임",
-          "desc": "이번 주 자모게임 {{count}}판 승리"
+          "title": "한글놀이",
+          "desc": "이번 주 한글놀이 {{count}}판 승리"
         },
         "weekly-related-3": {
           "title": "연관단어",

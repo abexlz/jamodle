@@ -594,7 +594,7 @@
       "devMode": "Dev mode",
       "devModeHint": "Unlocks Tutorial on the menu and all profile cosmetics for testing.",
       "devFontPack": "English font",
-        "devFontPackHint": "English always uses Junegull. Jua toggle only affects the Korean font stack for comparison.",
+      "devFontPackHint": "English always uses Junegull. Jua toggle only affects the Korean font stack for comparison.",
       "devFontPackJunegull": "Junegull",
       "devFontPackJua": "Jua (previous)",
       "replayTutorial": "Replay tutorial",
@@ -763,14 +763,38 @@
       "title": "Badges",
       "locked": "Locked",
       "earnedOn": "Earned {{date}}",
-      "first-step": { "name": "First Step", "desc": "Complete your first learning activity" },
-      "first-word": { "name": "First Word", "desc": "Complete your first Hangul Builder word" },
-      "match-maker": { "name": "Match Maker", "desc": "Complete 10 Korean Match words" },
-      "vowel-pro": { "name": "Vowel Pro", "desc": "Complete Vowel Practice" },
-      "week-warrior": { "name": "Week Warrior", "desc": "Reach a 7-day learning streak" },
-      "two-week-learner": { "name": "Two Week Learner", "desc": "Reach a 14-day learning streak" },
-      "hangul-hero": { "name": "Hangul Hero", "desc": "Reach Level 10" },
-      "word-collector": { "name": "Word Collector", "desc": "Learn 50 unique words" }
+      "first-step": {
+        "name": "First Step",
+        "desc": "Complete your first learning activity"
+      },
+      "first-word": {
+        "name": "First Word",
+        "desc": "Complete your first Hangul Builder word"
+      },
+      "match-maker": {
+        "name": "Match Maker",
+        "desc": "Complete 10 Korean Match words"
+      },
+      "vowel-pro": {
+        "name": "Vowel Pro",
+        "desc": "Complete Vowel Practice"
+      },
+      "week-warrior": {
+        "name": "Week Warrior",
+        "desc": "Reach a 7-day learning streak"
+      },
+      "two-week-learner": {
+        "name": "Two Week Learner",
+        "desc": "Reach a 14-day learning streak"
+      },
+      "hangul-hero": {
+        "name": "Hangul Hero",
+        "desc": "Reach Level 10"
+      },
+      "word-collector": {
+        "name": "Word Collector",
+        "desc": "Learn 50 unique words"
+      }
     },
     "avatars": {
       "title": "Profile icons",
@@ -1173,20 +1197,20 @@
     "rewardToast": "Quest complete! +{{xp}} XP · 🪙 {{coins}}",
     "defs": {
       "daily-play": {
-        "title": "Daily Jamo Game",
-        "desc": "Play today's Daily Jamo Game once (win or lose)"
+        "title": "Daily Hangul-dle",
+        "desc": "Play today's Daily Hangul-dle once (win or lose)"
       },
       "daily-related-chain": {
         "title": "Related Words",
         "desc": "Solve one Related Words link"
       },
       "classic-play-3": {
-        "title": "Jamo Game",
-        "desc": "Play {{count}} Jamo Game rounds"
+        "title": "Hangul-dle",
+        "desc": "Play {{count}} Hangul-dle rounds"
       },
       "friend-battle": {
         "title": "Friend battle",
-        "desc": "Play one 1v1 Jamo Game or Word Chain battle with a friend"
+        "desc": "Play one 1v1 Hangul-dle or Word Chain battle with a friend"
       },
       "login-streak-3": {
         "title": "Login streak",
@@ -1194,43 +1218,43 @@
       },
       "daily-under-3": {
         "title": "Daily sharp solve",
-        "desc": "Solve today's Daily Jamo Game in 3 tries or fewer"
+        "desc": "Solve today's Daily Hangul-dle in 3 tries or fewer"
       },
       "classic-first-try": {
         "title": "First try!",
-        "desc": "Solve a Jamo Game word on your first try"
+        "desc": "Solve a Hangul-dle word on your first try"
       },
       "race-win": {
-        "title": "Jamo Game",
-        "desc": "Win a 1v1 Jamo Game match"
+        "title": "Hangul-dle",
+        "desc": "Win a 1v1 Hangul-dle match"
       },
       "coop-win": {
-        "title": "Jamo Game",
-        "desc": "Win a turn-based Jamo Game match"
+        "title": "Hangul-dle",
+        "desc": "Win a turn-based Hangul-dle match"
       },
       "total-5-wins": {
         "title": "Daily scorer",
         "desc": "Get {{count}} correct answers today"
       },
       "match-1": {
-        "title": "Jamo Game",
-        "desc": "Win {{count}} Jamo Game round"
+        "title": "Hangul-dle",
+        "desc": "Win {{count}} Hangul-dle round"
       },
       "play-2": {
         "title": "Keep learning",
         "desc": "Finish {{count}} activities today"
       },
       "weekly-match-8": {
-        "title": "Jamo Game",
-        "desc": "Win {{count}} Jamo Game rounds this week"
+        "title": "Hangul-dle",
+        "desc": "Win {{count}} Hangul-dle rounds this week"
       },
       "weekly-match-3": {
-        "title": "Jamo Game",
-        "desc": "Win {{count}} Jamo Game rounds this week"
+        "title": "Hangul-dle",
+        "desc": "Win {{count}} Hangul-dle rounds this week"
       },
       "weekly-jamodle-5": {
-        "title": "Jamo Game",
-        "desc": "Win {{count}} Jamo Game rounds this week"
+        "title": "Hangul-dle",
+        "desc": "Win {{count}} Hangul-dle rounds this week"
       },
       "weekly-related-3": {
         "title": "Related Words",

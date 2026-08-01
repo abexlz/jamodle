@@ -763,14 +763,38 @@
       "title": "배지",
       "locked": "잠김",
       "earnedOn": "{{date}} 획득",
-      "first-step": { "name": "첫 걸음", "desc": "첫 학습 활동을 완료했어요" },
-      "first-word": { "name": "첫 단어", "desc": "한글 만들기 첫 단어를 완성했어요" },
-      "match-maker": { "name": "Match Maker", "desc": "Korean Match 10개 완료" },
-      "vowel-pro": { "name": "모음 프로", "desc": "모음 연습을 완료했어요" },
-      "week-warrior": { "name": "Week Warrior", "desc": "7일 streak 달성" },
-      "two-week-learner": { "name": "Two Week Learner", "desc": "14일 streak 달성" },
-      "hangul-hero": { "name": "Hangul Hero", "desc": "레벨 10 달성" },
-      "word-collector": { "name": "Word Collector", "desc": "50개의 서로 다른 단어 학습" }
+      "first-step": {
+        "name": "첫 걸음",
+        "desc": "첫 학습 활동을 완료했어요"
+      },
+      "first-word": {
+        "name": "첫 단어",
+        "desc": "한글 만들기 첫 단어를 완성했어요"
+      },
+      "match-maker": {
+        "name": "Match Maker",
+        "desc": "Korean Match 10개 완료"
+      },
+      "vowel-pro": {
+        "name": "모음 프로",
+        "desc": "모음 연습을 완료했어요"
+      },
+      "week-warrior": {
+        "name": "Week Warrior",
+        "desc": "7일 streak 달성"
+      },
+      "two-week-learner": {
+        "name": "Two Week Learner",
+        "desc": "14일 streak 달성"
+      },
+      "hangul-hero": {
+        "name": "Hangul Hero",
+        "desc": "레벨 10 달성"
+      },
+      "word-collector": {
+        "name": "Word Collector",
+        "desc": "50개의 서로 다른 단어 학습"
+      }
     },
     "avatars": {
       "title": "프로필 아이콘",
@@ -1173,20 +1197,20 @@
     "rewardToast": "퀘스트 완료! +{{xp}} XP · 🪙 {{coins}}",
     "defs": {
       "daily-play": {
-        "title": "데일리 자모게임",
-        "desc": "데일리 자모게임 1번 플레이 (승패 무관)"
+        "title": "데일리 한글놀이",
+        "desc": "데일리 한글놀이 1번 플레이 (승패 무관)"
       },
       "daily-related-chain": {
         "title": "연관단어",
         "desc": "연관단어 링크 1개 풀기"
       },
       "classic-play-3": {
-        "title": "자모게임",
-        "desc": "자모게임 {{count}}판 플레이"
+        "title": "한글놀이",
+        "desc": "한글놀이 {{count}}판 플레이"
       },
       "friend-battle": {
         "title": "친구 대결",
-        "desc": "친구와 1v1 자모게임 또는 단어 체인 1판 (승패 무관)"
+        "desc": "친구와 1v1 한글놀이 또는 단어 체인 1판 (승패 무관)"
       },
       "login-streak-3": {
         "title": "연속 출석",
@@ -1194,43 +1218,43 @@
       },
       "daily-under-3": {
         "title": "데일리 날카로운 정답",
-        "desc": "데일리 자모게임 3번 시도 이내 정답"
+        "desc": "데일리 한글놀이 3번 시도 이내 정답"
       },
       "classic-first-try": {
         "title": "첫 시도 정답",
-        "desc": "자모게임에서 첫 시도 정답"
+        "desc": "한글놀이에서 첫 시도 정답"
       },
       "race-win": {
-        "title": "자모게임",
-        "desc": "1v1 자모게임에서 승리"
+        "title": "한글놀이",
+        "desc": "1v1 한글놀이에서 승리"
       },
       "coop-win": {
-        "title": "자모게임",
-        "desc": "턴제 자모게임에서 승리"
+        "title": "한글놀이",
+        "desc": "턴제 한글놀이에서 승리"
       },
       "total-5-wins": {
         "title": "오늘의 정답",
         "desc": "오늘 하루 총 {{count}}번 정답"
       },
       "match-1": {
-        "title": "자모게임",
-        "desc": "자모게임 {{count}}판 승리"
+        "title": "한글놀이",
+        "desc": "한글놀이 {{count}}판 승리"
       },
       "play-2": {
         "title": "꾸준히 학습",
         "desc": "오늘 활동 {{count}}번 완료"
       },
       "weekly-match-8": {
-        "title": "자모게임",
-        "desc": "이번 주 자모게임 {{count}}판 승리"
+        "title": "한글놀이",
+        "desc": "이번 주 한글놀이 {{count}}판 승리"
       },
       "weekly-match-3": {
-        "title": "자모게임",
-        "desc": "이번 주 자모게임 {{count}}판 승리"
+        "title": "한글놀이",
+        "desc": "이번 주 한글놀이 {{count}}판 승리"
       },
       "weekly-jamodle-5": {
-        "title": "자모게임",
-        "desc": "이번 주 자모게임 {{count}}판 승리"
+        "title": "한글놀이",
+        "desc": "이번 주 한글놀이 {{count}}판 승리"
       },
       "weekly-related-3": {
         "title": "연관단어",
