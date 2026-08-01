@@ -1006,7 +1006,10 @@
   body.match-turn-page .race-turn-dock-stack .jamo-bank--turn > .jamo-tile.hidden-in-bank,
   body.match-race-page.match-turn-page .jamo-bank--turn > .jamo-tile.hidden-in-bank,
   /* Merge ingredients must stay invisible even if briefly parented under merge UI. */
-  .jamo-tile.merge-consumed {
+  .jamo-tile.merge-consumed,
+  .jamo-bank > .jamo-tile.merge-consumed,
+  body.match-turn-page .jamo-bank > .jamo-tile.merge-consumed,
+  body.match-turn-page .race-turn-dock-stack .jamo-bank > .jamo-tile.merge-consumed {
     display: none !important;
     opacity: 0 !important;
     visibility: hidden !important;
@@ -1025,9 +1028,11 @@
     border: none !important;
     box-shadow: none !important;
   }
-  .drop-zone > .jamo-tile.hidden-in-bank,
-  .merge-slot > .jamo-tile.hidden-in-bank,
-  .merge-result > .jamo-tile.hidden-in-bank {
+  /* Force-show hidden bank stubs only when they are real placements — never
+     consumed merge ingredients still tagged hidden-in-bank. */
+  .drop-zone > .jamo-tile.hidden-in-bank:not(.merge-consumed),
+  .merge-slot > .jamo-tile.hidden-in-bank:not(.merge-consumed),
+  .merge-result > .jamo-tile.hidden-in-bank:not(.merge-consumed) {
     display: flex !important;
     opacity: 1 !important;
     visibility: visible !important;
@@ -1049,6 +1054,12 @@
     opacity: 0 !important;
     visibility: hidden !important;
     pointer-events: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
   }
   .drop-zone > .jamo-tile.merge-consumed,
   .drop-zone > .jamo-tile.locked,

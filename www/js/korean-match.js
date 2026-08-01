@@ -1151,6 +1151,7 @@
         reviveMergeIngredient: (char, opts) => this.reviveMergeIngredient(char, opts),
         reviveMergeIngredientById: (id) => this.reviveMergeIngredientById(id),
         discardParkedMergeIngredient: (id) => this.discardParkedMergeIngredient(id),
+        concealConsumedMergeIngredients: () => this.concealConsumedMergeIngredients(),
         renderTileInSlot: (tile) => tile.el,
         swapTiles: (a, b) => this.swapTiles(a, b),
       });
@@ -2490,14 +2491,12 @@
       }
 
       if (this.isMergeConsumedTile(tile)) {
-        if (this.els.bank) {
-          if (tile.el.parentElement !== this.els.bank) this.els.bank.appendChild(tile.el);
-          tile.inBank = true;
-          tile.mergeDockRef = null;
-          tile.mergeDockSlot = null;
-          tile.el.classList.add('hidden-in-bank', 'merge-consumed');
-          tile.el.classList.remove('in-zone', 'selected', 'dragging');
-        }
+        tile.inBank = false;
+        tile.mergeDockRef = null;
+        tile.mergeDockSlot = null;
+        tile.el?.classList.add('hidden-in-bank', 'merge-consumed');
+        tile.el?.classList.remove('in-zone', 'selected', 'dragging');
+        if (tile.el?.isConnected) tile.el.remove();
         return;
       }
 
@@ -2521,12 +2520,10 @@
           return;
         }
         if (this.isMergeConsumedTile(tile)) {
-          if (this.els.bank && !tile.zoneRef && !tile.mergeDockRef) {
-            if (tile.el && tile.el.parentElement !== this.els.bank) {
-              this.els.bank.appendChild(tile.el);
-            }
-            tile.inBank = true;
+          if (!tile.zoneRef && !tile.mergeDockRef) {
+            tile.inBank = false;
             tile.el?.classList.add('hidden-in-bank', 'merge-consumed');
+            if (tile.el?.isConnected) tile.el.remove();
           }
           return;
         }
@@ -2724,8 +2721,10 @@
         }
         const ingredientIds = [...(this.mergeDock?.slotTileIds || [null, null])];
         this.mergeDock.tryCompose();
+        this.concealConsumedMergeIngredients();
         this.updateRotationDockLabel();
         this.updateCheckButton();
+        this.syncDockTileSize();
         this.onTutorialEvent?.('merge', { game: this });
         this.pulseLiveAction('merge', { ingredientIds });
         this.notifyTurnLiveChange();
@@ -3190,8 +3189,8 @@
     }
 
     /**
-     * Park a vowel consumed by a merge (keep in tileMap, hide in dock) so unmerge
-     * can revive the exact same tiles — never mint extras beside leftovers.
+     * Park a vowel consumed by a merge (keep in tileMap, fully detach from UI) so
+     * unmerge can revive the exact same tiles — never leave them visible beside ㅐ.
      */
     parkMergeIngredient(id) {
       const tile = this.tileMap[id];
@@ -3201,26 +3200,43 @@
         tile.zoneRef.el?.classList.remove('filled', 'correct', 'incorrect', 'revealing', 'revealing-wrong');
         tile.zoneRef = null;
       }
-      // Detach from merge slots/result before parking so leftovers can't stack on ㅐ.
-      const parent = tile.el?.parentElement;
-      if (parent?.classList?.contains('merge-slot') || parent?.classList?.contains('merge-result')) {
-        tile.el.remove();
-      }
       tile.mergeDockRef = null;
       tile.mergeDockSlot = null;
-      tile.inBank = true;
+      // Not a dock-visible tile while consumed — stay out of the bank DOM entirely.
+      tile.inBank = false;
       tile.isMergeConsumed = true;
       this._removedTileIds = this._removedTileIds || [];
       if (!this._removedTileIds.includes(id)) this._removedTileIds.push(id);
-      if (this.els.bank) {
-        if (tile.el && tile.el.parentElement !== this.els.bank) {
-          this.els.bank.appendChild(tile.el);
-        }
-        tile.el?.classList.add('hidden-in-bank', 'merge-consumed');
-        tile.el?.classList.remove('in-zone', 'selected', 'dragging', 'snap-in', 'bounce');
-      } else {
-        tile.el?.remove();
+      if (tile.el) {
+        tile.el.classList.add('hidden-in-bank', 'merge-consumed');
+        tile.el.classList.remove(
+          'in-zone', 'selected', 'dragging', 'snap-in', 'bounce', 'revealed', 'correct-flip'
+        );
+        tile.el.remove();
       }
+    }
+
+    /** Force every consumed merge ingredient out of the visible UI. */
+    concealConsumedMergeIngredients() {
+      Object.values(this.tileMap || {}).forEach((tile) => {
+        if (!tile || !this.isMergeConsumedTile(tile)) return;
+        if (tile.locked || tile.zoneRef || tile.mergeDockRef) return;
+        tile.inBank = false;
+        tile.el?.classList.add('hidden-in-bank', 'merge-consumed');
+        tile.el?.classList.remove('in-zone', 'selected', 'dragging');
+        if (tile.el?.isConnected) tile.el.remove();
+      });
+      // Scrub any leftover ingredient nodes still sitting in merge UI.
+      this.mergeDock?.slotEls?.forEach((slotEl) => {
+        if (!slotEl) return;
+        slotEl.querySelectorAll('.jamo-tile.merge-consumed, .jamo-tile.hidden-in-bank').forEach((el) => {
+          el.remove();
+        });
+      });
+      this.mergeDock?.resultEl?.querySelectorAll('.jamo-tile.merge-consumed').forEach((el) => {
+        el.remove();
+      });
+      this.syncDockTileSize();
     }
 
     /**
@@ -4964,12 +4980,10 @@
         // Merge ingredients stay consumed until an unmerge revives them —
         // otherwise the dock briefly shows ㅐ + ㅏ + ㅣ (3 vowels).
         if (this.isMergeConsumedTile(tile)) {
-          if (this.els.bank && !tile.zoneRef && !tile.mergeDockRef) {
-            if (tile.el && tile.el.parentElement !== this.els.bank) {
-              this.els.bank.appendChild(tile.el);
-            }
-            tile.inBank = true;
+          if (!tile.zoneRef && !tile.mergeDockRef) {
+            tile.inBank = false;
             tile.el?.classList.add('hidden-in-bank', 'merge-consumed');
+            if (tile.el?.isConnected) tile.el.remove();
           }
           return;
         }

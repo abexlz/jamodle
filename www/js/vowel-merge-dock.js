@@ -368,6 +368,7 @@
       el.classList?.remove('hidden-in-bank', 'merge-consumed', 'dragging', 'selected');
       this.resultEl.appendChild(el);
       if (playSound) global.SoundEffects?.merge?.();
+      this.callbacks.concealConsumedMergeIngredients?.();
     }
 
     unmergeTile(mergedTile) {
