@@ -309,7 +309,12 @@
         const t = this.callbacks.getTile(id);
         this.slotEls[i].classList.remove('filled');
         this.slotEls[i].innerHTML = '';
-        this.callbacks.removeTile?.(id);
+        // Park (don't destroy) so unmerge can revive the same 2 tiles.
+        if (this.callbacks.parkMergeIngredient) {
+          this.callbacks.parkMergeIngredient(id);
+        } else {
+          this.callbacks.removeTile?.(id);
+        }
         this.slotTileIds[i] = null;
         if (t) t.mergeDockRef = null;
       });

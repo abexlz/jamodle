@@ -451,5 +451,18 @@ assertEqual(
   'orient tile updates zone type for vertical target'
 );
 
+// ── 불행 / 발행 tile inventories (ㅐ → exactly ㅏ+ㅣ, no extra vowels) ──
+(() => {
+  const badTiles = HC.buildTilesFromWord(HC.decomposeWordForMatch('불행'));
+  const vowelBad = badTiles.filter((t) => t.zoneType === 'jungH' || t.zoneType === 'jungV').map((t) => t.char);
+  assertDeepEqual(vowelBad, ['ㅜ', 'ㅏ', 'ㅣ'], '불행 vowels are exactly ㅜ + ㅐ(ㅏ+ㅣ)');
+  assertEqual(badTiles.length, 7, '불행 has 7 jamo tiles total');
+
+  const pubTiles = HC.buildTilesFromWord(HC.decomposeWordForMatch('발행'));
+  const vowelPub = pubTiles.filter((t) => t.zoneType === 'jungH' || t.zoneType === 'jungV').map((t) => t.char);
+  assertDeepEqual(vowelPub, ['ㅏ', 'ㅏ', 'ㅣ'], '발행 vowels are ㅏ + ㅐ(ㅏ+ㅣ)');
+  assertEqual(HC.getMergePairComponents('ㅐ').join(''), 'ㅏㅣ', 'ㅐ unmerge pair is exactly 2 jamo');
+})();
+
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed > 0 ? 1 : 0);

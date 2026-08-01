@@ -1135,6 +1135,7 @@
         returnTileToBank: (tile) => this.returnTileToBank(tile),
         detachZoneTile: (tile) => this.detachZoneTile(tile),
         removeTile: (id) => this.removeTile(id),
+        parkMergeIngredient: (id) => this.parkMergeIngredient(id),
         createMergedTile: (opts) => this.createMergedTile(opts),
         createBasicTile: (opts) => this.createBasicTile(opts),
         reviveMergeIngredient: (char, opts) => this.reviveMergeIngredient(char, opts),
@@ -1676,8 +1677,13 @@
       if (q === (this.currentWord?.word || '')) return true;
       if (global.MatchWordMeanings?.[q]) return true;
       if (global.LearningWords?.findWordEntry?.(q)) return true;
+      if (global.LearningWords?.getWordMeaning?.(q)) return true;
       const pool = global.MATCH_WORDS;
       if (Array.isArray(pool) && pool.includes(q)) return true;
+      // Same-length words from the match pool that share this spelling.
+      const len = [...q].filter((c) => HC.isHangulSyllable(c)).length;
+      const byLen = global.MatchWords?.getWordsForLength?.(len) || [];
+      if (byLen.includes(q)) return true;
       return false;
     }
 
@@ -1729,10 +1735,24 @@
           return { valid: true, offline: false, entry: result.entry || null };
         }
         const offline = !!(result?.offline || result?.error || result?.code === 'CONFIG');
-        if (offline && this.getLocalWordFallback(trimmed)) {
+        if (offline) {
+          // Prefer a second live dictionary probe, then local word banks.
+          if (typeof DS.isDictionaryWord === 'function') {
+            try {
+              const live = await DS.isDictionaryWord(trimmed, () => this.getLocalWordFallback(trimmed));
+              if (live) return { valid: true, offline: false, entry: null };
+            } catch { /* fall through */ }
+          }
+          if (this.getLocalWordFallback(trimmed)) {
+            return { valid: true, offline: false, entry: null };
+          }
+          return { valid: false, offline: true, entry: null };
+        }
+        // Online explicit reject — still allow local bank alternates (e.g. 발행).
+        if (this.getLocalWordFallback(trimmed)) {
           return { valid: true, offline: false, entry: null };
         }
-        return { valid: false, offline: offline && !valid, entry: null };
+        return { valid: false, offline: false, entry: null };
       } catch {
         if (this.getLocalWordFallback(trimmed)) {
           return { valid: true, offline: false, entry: null };
@@ -3135,6 +3155,31 @@
     }
 
     /**
+     * Park a vowel consumed by a merge (keep in tileMap, hide in dock) so unmerge
+     * can revive the exact same tiles — never mint extras beside leftovers.
+     */
+    parkMergeIngredient(id) {
+      const tile = this.tileMap[id];
+      if (!tile) return;
+      if (tile.zoneRef) {
+        tile.zoneRef.placedTileId = null;
+        tile.zoneRef.el?.classList.remove('filled', 'correct', 'incorrect', 'revealing', 'revealing-wrong');
+        tile.zoneRef = null;
+      }
+      tile.mergeDockRef = null;
+      tile.mergeDockSlot = null;
+      tile.inBank = true;
+      this._removedTileIds = this._removedTileIds || [];
+      if (!this._removedTileIds.includes(id)) this._removedTileIds.push(id);
+      if (this.els.bank) {
+        tile.setInBank(this.els.bank);
+        tile.hideInBank();
+      } else {
+        tile.el?.remove();
+      }
+    }
+
+    /**
      * Revive a vowel consumed by a merge (hidden/parked) so unmerge yields exactly
      * 2 tiles instead of creating extras alongside the old ingredients.
      */
@@ -3187,7 +3232,8 @@
       tile.isMerged = true;
       tile.mergeSources = mergeSources;
       this.tileMap[id] = tile;
-      this._originalDockCount = (this._originalDockCount || 0) + 1;
+      // Do not bump _originalDockCount — merge parks 2 basics and adds 1 compound;
+      // inventory conservation is handled by park/revive, not by inventing capacity.
       return tile;
     }
 
@@ -3694,7 +3740,7 @@
       });
     }
 
-    serializeTurnSubmission() {
+    serializeTurnSubmission({ dictionaryWin = false } = {}) {
       const placements = [];
       let correctCount = 0;
       let totalPlaced = 0;
@@ -3703,7 +3749,8 @@
           const tile = zone.placedTileId ? this.tileMap[zone.placedTileId] : null;
           if (!tile) return;
           totalPlaced += 1;
-          const correct = zone.expected !== null && this.isZoneCorrect(zone);
+          // Dictionary alternate (e.g. 불행 tiles → 발행): treat every placed jamo as correct.
+          const correct = dictionaryWin || (zone.expected !== null && this.isZoneCorrect(zone));
           if (correct) correctCount += 1;
           placements.push({
             syl: si,
@@ -3711,16 +3758,29 @@
             subIndex: zone.subIndex ?? 0,
             char: tile.char,
             correct,
-            locked: !!zone.locked,
+            locked: !!zone.locked || dictionaryWin,
             tileId: tile.id,
           });
         });
       });
-      const syllableCorrect = this.computeSyllableCorrectMask();
+      const syllableCorrect = dictionaryWin
+        ? this.blocks.map(() => true)
+        : this.computeSyllableCorrectMask();
       const syllableCorrectCount = syllableCorrect.filter(Boolean).length;
       const state = this.serializeDailyState(false, false);
+      const locked = dictionaryWin
+        ? placements
+          .filter((p) => p.correct && p.char)
+          .map((p) => ({
+            syl: p.syl,
+            zone: p.zone,
+            subIndex: p.subIndex ?? 0,
+            char: p.char,
+            tileId: p.tileId || null,
+          }))
+        : state.locked;
       return {
-        locked: state.locked,
+        locked,
         placements,
         correctCount,
         totalPlaced,
@@ -5164,7 +5224,7 @@
           this.turnSubmitting = true;
           this.freezeOwnTurnResult();
           this.checking = false;
-          const submission = this.serializeTurnSubmission();
+          const submission = this.serializeTurnSubmission({ dictionaryWin: !!dictionaryWin });
           try {
             await this.onTurnSubmit({
               ...submission,

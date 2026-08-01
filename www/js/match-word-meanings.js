@@ -52,6 +52,8 @@
     '과': 'and / with',
     '화살': 'Arrow',
     '자극': 'stimulus',
+    '불행': 'misfortune',
+    '발행': 'issuance / publication',
     '쥐': 'mouse',
     '벌': 'bee',
     '실': 'thread',
