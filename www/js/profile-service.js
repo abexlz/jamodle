@@ -112,7 +112,7 @@
         : 'default',
       extraGuessTokens: Math.max(0, parseInt(raw.extraGuessTokens, 10) || 0),
       lastDailyGiftDayKey: typeof raw.lastDailyGiftDayKey === 'string' ? raw.lastDailyGiftDayKey : '',
-      dailyLoginStreakDay: Math.min(30, Math.max(1, parseInt(raw.dailyLoginStreakDay, 10) || 1)),
+      dailyLoginStreakDay: Math.min(999, Math.max(1, parseInt(raw.dailyLoginStreakDay, 10) || 1)),
       questState: normalizeQuestState(raw.questState),
       lastCelebratedLevel: Math.max(1, parseInt(raw.lastCelebratedLevel, 10) || 1),
       completedWordsEver: normalizeStringArray(raw.completedWordsEver),

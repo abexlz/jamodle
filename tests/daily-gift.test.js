@@ -52,7 +52,7 @@ savedProfile = makeProfile({
 const consecutive = DG.claimToday();
 assert.equal(consecutive.ok, true, 'consecutive claim succeeds');
 assert.equal(consecutive.claimDay, 5, 'claims current streak day');
-assert.equal(savedProfile.coins, 15, 'day 5 awards 15 coins');
+assert.equal(savedProfile.coins, 20, 'day 5 awards 20 coins');
 assert.equal(savedProfile.dailyLoginStreakDay, 6, 'streak advances to day 6');
 
 savedProfile = makeProfile({
@@ -66,31 +66,44 @@ assert.equal(broken.claimDay, 1, 'broken streak resets to day 1');
 
 savedProfile = makeProfile({
   lastDailyGiftDayKey: yesterdayKey,
-  dailyLoginStreakDay: 30,
-});
-const finale = DG.claimToday();
-assert.equal(finale.ok, true, 'day 30 claim succeeds');
-assert.equal(finale.claimDay, 30, 'claims day 30');
-assert.equal(finale.cycleComplete, true, 'marks cycle complete');
-assert.equal(savedProfile.coins, 100, 'day 30 awards 100 coins');
-assert.equal(savedProfile.dailyLoginStreakDay, 1, 'cycle restarts at day 1');
-
-savedProfile = makeProfile({
-  lastDailyGiftDayKey: yesterdayKey,
   dailyLoginStreakDay: 7,
 });
 global._hintGranted = 0;
-const hintDay = DG.claimToday();
-assert.equal(hintDay.ok, true, 'hint day claim succeeds');
-assert.equal(hintDay.reward.type, 'hintToken', 'day 7 is hint token');
-assert.equal(global._hintGranted, 1, 'hint token granted');
+const weekFinale = DG.claimToday();
+assert.equal(weekFinale.ok, true, 'day 7 claim succeeds');
+assert.equal(weekFinale.claimDay, 7, 'claims day 7');
+assert.equal(weekFinale.cycleComplete, true, 'marks week complete');
+assert.equal(weekFinale.rewards.length, 3, 'day 7 grants multi rewards');
+assert.equal(savedProfile.coins, 50, 'day 7 awards 50 coins');
+assert.equal(savedProfile.totalXp, 30, 'day 7 awards 30 XP');
+assert.equal(global._hintGranted, 1, 'day 7 grants hint token');
+assert.equal(savedProfile.dailyLoginStreakDay, 8, 'continues into week 2 at day 8');
+
+savedProfile = makeProfile({
+  lastDailyGiftDayKey: yesterdayKey,
+  dailyLoginStreakDay: 8,
+});
+const week2 = DG.claimToday();
+assert.equal(week2.ok, true, 'week 2 day 8 claim succeeds');
+assert.equal(week2.claimDay, 8, 'claims absolute day 8');
+assert.equal(savedProfile.coins, 13, 'week 2 scales day-1 coins (10 * 1.25)');
+assert.equal(savedProfile.dailyLoginStreakDay, 9, 'advances to day 9');
+
+const week2Snap = DG.getTrackSnapshot();
+assert.equal(week2Snap.days.length, 7, 'track shows 7 days');
+assert.equal(week2Snap.weekStart, 8, 'week 2 starts at day 8');
+assert.equal(week2Snap.weekEnd, 14, 'week 2 ends at day 14');
+assert.equal(week2Snap.days[0].day, 8, 'first cell is day 8');
+assert.equal(week2Snap.days[6].isJackpot, true, 'last cell is jackpot');
+assert.equal(week2Snap.days.filter((d) => d.state === 'claimed').length, 1, 'day 8 claimed');
 
 savedProfile = makeProfile({
   lastDailyGiftDayKey: yesterdayKey,
   dailyLoginStreakDay: 3,
 });
 const snap = DG.getTrackSnapshot();
-assert.equal(snap.days.length, 30, 'track has 30 days');
+assert.equal(snap.days.length, 7, 'track has 7 days');
 assert.equal(snap.days.filter((d) => d.state === 'today').length, 1, 'exactly one today cell');
+assert.equal(snap.days[6].rewards.length, 3, 'day 7 jackpot has 3 rewards');
 
 console.log('daily-gift.test.js: all passed');

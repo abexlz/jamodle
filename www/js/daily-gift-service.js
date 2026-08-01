@@ -1,42 +1,28 @@
 /**
- * Daily login rewards — 30-day consecutive login track.
+ * Daily login rewards — rolling 7-day weeks (1–7, 8–14, …).
  */
 (function (global) {
   'use strict';
 
-  const TRACK_LENGTH = 30;
+  const WEEK_LENGTH = 7;
+  const MAX_STREAK_DAY = 999;
 
-  const LOGIN_REWARDS = [
-    { day: 1, type: 'coins', amount: 10, icon: '🪙' },
-    { day: 2, type: 'coins', amount: 10, icon: '🪙' },
-    { day: 3, type: 'coins', amount: 12, icon: '🪙' },
-    { day: 4, type: 'coins', amount: 12, icon: '🪙' },
-    { day: 5, type: 'coins', amount: 15, icon: '🪙' },
-    { day: 6, type: 'coins', amount: 15, icon: '🪙' },
-    { day: 7, type: 'hintToken', amount: 1, icon: '💡' },
-    { day: 8, type: 'coins', amount: 18, icon: '🪙' },
-    { day: 9, type: 'coins', amount: 18, icon: '🪙' },
-    { day: 10, type: 'coins', amount: 20, icon: '🪙' },
-    { day: 11, type: 'coins', amount: 20, icon: '🪙' },
-    { day: 12, type: 'coins', amount: 22, icon: '🪙' },
-    { day: 13, type: 'coins', amount: 22, icon: '🪙' },
-    { day: 14, type: 'xp', amount: 30, icon: '⭐' },
-    { day: 15, type: 'coins', amount: 25, icon: '🪙' },
-    { day: 16, type: 'coins', amount: 25, icon: '🪙' },
-    { day: 17, type: 'coins', amount: 28, icon: '🪙' },
-    { day: 18, type: 'coins', amount: 28, icon: '🪙' },
-    { day: 19, type: 'coins', amount: 30, icon: '🪙' },
-    { day: 20, type: 'coins', amount: 30, icon: '🪙' },
-    { day: 21, type: 'extraGuess', amount: 1, icon: '❤️' },
-    { day: 22, type: 'coins', amount: 32, icon: '🪙' },
-    { day: 23, type: 'coins', amount: 34, icon: '🪙' },
-    { day: 24, type: 'coins', amount: 36, icon: '🪙' },
-    { day: 25, type: 'coins', amount: 38, icon: '🪙' },
-    { day: 26, type: 'coins', amount: 40, icon: '🪙' },
-    { day: 27, type: 'coins', amount: 42, icon: '🪙' },
-    { day: 28, type: 'coins', amount: 44, icon: '🪙' },
-    { day: 29, type: 'coins', amount: 46, icon: '🪙' },
-    { day: 30, type: 'coins', amount: 100, icon: '🎁' },
+  /** Base rewards for each day-in-week. Day 7 is a multi-reward jackpot. */
+  const WEEK_TEMPLATE = [
+    { dayInWeek: 1, rewards: [{ type: 'coins', amount: 10, icon: '🪙' }] },
+    { dayInWeek: 2, rewards: [{ type: 'coins', amount: 12, icon: '🪙' }] },
+    { dayInWeek: 3, rewards: [{ type: 'coins', amount: 15, icon: '🪙' }] },
+    { dayInWeek: 4, rewards: [{ type: 'xp', amount: 20, icon: '⭐' }] },
+    { dayInWeek: 5, rewards: [{ type: 'coins', amount: 20, icon: '🪙' }] },
+    { dayInWeek: 6, rewards: [{ type: 'extraGuess', amount: 1, icon: '❤️' }] },
+    {
+      dayInWeek: 7,
+      rewards: [
+        { type: 'coins', amount: 50, icon: '🪙' },
+        { type: 'hintToken', amount: 1, icon: '💡' },
+        { type: 'xp', amount: 30, icon: '⭐' },
+      ],
+    },
   ];
 
   function getTodayKey() {
@@ -45,14 +31,24 @@
   }
 
   function getYesterdayKey() {
-    const d = new Date();
-    d.setDate(d.getDate() - 1);
+    const today = getTodayKey();
+    const parts = String(today).split('-').map(Number);
+    if (parts.length === 3 && parts.every((n) => Number.isFinite(n))) {
+      const d = new Date(parts[0], parts[1] - 1, parts[2]);
+      d.setDate(d.getDate() - 1);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+    const fallback = new Date();
+    fallback.setDate(fallback.getDate() - 1);
     return new Intl.DateTimeFormat('en-CA', {
       timeZone: 'Asia/Seoul',
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
-    }).format(d);
+    }).format(fallback);
   }
 
   function loadProfile() {
@@ -62,19 +58,49 @@
   function normalizeStreakDay(value) {
     const n = parseInt(value, 10);
     if (!Number.isFinite(n) || n < 1) return 1;
-    if (n > TRACK_LENGTH) return TRACK_LENGTH;
+    if (n > MAX_STREAK_DAY) return MAX_STREAK_DAY;
     return n;
   }
 
-  function getRewardForDay(day) {
-    return LOGIN_REWARDS.find((r) => r.day === day) || LOGIN_REWARDS[0];
+  function getWeekInfo(absoluteDay) {
+    const day = normalizeStreakDay(absoluteDay);
+    const weekIndex = Math.ceil(day / WEEK_LENGTH);
+    const dayInWeek = ((day - 1) % WEEK_LENGTH) + 1;
+    const weekStart = (weekIndex - 1) * WEEK_LENGTH + 1;
+    return {
+      weekIndex,
+      dayInWeek,
+      weekStart,
+      weekEnd: weekStart + WEEK_LENGTH - 1,
+    };
+  }
+
+  function scaleAmount(amount, type, weekIndex) {
+    if (type !== 'coins' && type !== 'xp') return amount;
+    const week = Math.max(1, weekIndex || 1);
+    const bonus = Math.min(week - 1, 4); // +0..+4 weeks of scaling
+    return Math.round(amount * (1 + bonus * 0.25));
+  }
+
+  function getRewardsForDay(absoluteDay) {
+    const { weekIndex, dayInWeek } = getWeekInfo(absoluteDay);
+    const template = WEEK_TEMPLATE.find((r) => r.dayInWeek === dayInWeek) || WEEK_TEMPLATE[0];
+    return template.rewards.map((reward) => ({
+      ...reward,
+      amount: scaleAmount(reward.amount, reward.type, weekIndex),
+    }));
+  }
+
+  function getRewardForDay(absoluteDay) {
+    const rewards = getRewardsForDay(absoluteDay);
+    return rewards[0] || { type: 'coins', amount: 10, icon: '🪙' };
   }
 
   function resolveClaimDay(profile) {
     const today = getTodayKey();
     const yesterday = getYesterdayKey();
     const last = profile.lastDailyGiftDayKey || '';
-    let streakDay = normalizeStreakDay(profile.dailyLoginStreakDay);
+    const streakDay = normalizeStreakDay(profile.dailyLoginStreakDay);
 
     if (last === today) {
       return { claimDay: Math.max(1, streakDay - 1), alreadyClaimed: true };
@@ -91,6 +117,13 @@
     return { claimDay: 1, alreadyClaimed: false, streakBroken: true };
   }
 
+  function dayState(absDay, claimDay, alreadyClaimed, nextDay) {
+    if (absDay < nextDay || (absDay === claimDay && alreadyClaimed)) return 'claimed';
+    if (absDay === claimDay && !alreadyClaimed) return 'today';
+    if (alreadyClaimed && absDay === nextDay) return 'tomorrow';
+    return 'locked';
+  }
+
   function getTrackSnapshot() {
     const profile = loadProfile();
     if (!profile) {
@@ -98,9 +131,14 @@
         canClaimToday: false,
         claimDay: 1,
         nextDay: 1,
-        trackLength: TRACK_LENGTH,
+        trackLength: WEEK_LENGTH,
+        weekIndex: 1,
+        weekStart: 1,
+        weekEnd: WEEK_LENGTH,
         days: [],
         streakBroken: false,
+        rewards: [],
+        reward: null,
       };
     }
 
@@ -108,25 +146,39 @@
     const nextDay = alreadyClaimed
       ? normalizeStreakDay(profile.dailyLoginStreakDay)
       : claimDay;
+    const week = getWeekInfo(claimDay);
+    const rewards = getRewardsForDay(claimDay);
 
-    const days = LOGIN_REWARDS.map((reward) => {
-      let state = 'locked';
-      if (reward.day < nextDay || (reward.day === claimDay && alreadyClaimed)) {
-        state = 'claimed';
-      } else if (reward.day === claimDay && !alreadyClaimed) {
-        state = 'today';
-      }
-      return { ...reward, state };
-    });
+    const days = [];
+    for (let i = 0; i < WEEK_LENGTH; i += 1) {
+      const absDay = week.weekStart + i;
+      const dayRewards = getRewardsForDay(absDay);
+      const primary = dayRewards[0];
+      days.push({
+        day: absDay,
+        dayInWeek: i + 1,
+        weekIndex: week.weekIndex,
+        state: dayState(absDay, claimDay, alreadyClaimed, nextDay),
+        isJackpot: i + 1 === WEEK_LENGTH,
+        rewards: dayRewards,
+        type: primary.type,
+        amount: primary.amount,
+        icon: primary.icon,
+      });
+    }
 
     return {
       canClaimToday: !alreadyClaimed,
       claimDay,
       nextDay,
-      trackLength: TRACK_LENGTH,
+      trackLength: WEEK_LENGTH,
+      weekIndex: week.weekIndex,
+      weekStart: week.weekStart,
+      weekEnd: week.weekEnd,
       days,
       streakBroken: !!streakBroken,
-      reward: getRewardForDay(claimDay),
+      rewards,
+      reward: rewards[0] || null,
     };
   }
 
@@ -157,6 +209,11 @@
     return profile;
   }
 
+  function applyRewards(profile, rewards) {
+    (rewards || []).forEach((reward) => applyReward(profile, reward));
+    return profile;
+  }
+
   function claimToday() {
     const profile = loadProfile();
     if (!profile) return { ok: false, reason: 'no-profile' };
@@ -167,36 +224,46 @@
     }
 
     const { claimDay } = resolveClaimDay(profile);
-    const reward = getRewardForDay(claimDay);
-    applyReward(profile, reward);
+    const rewards = getRewardsForDay(claimDay);
+    applyRewards(profile, rewards);
 
     profile.lastDailyGiftDayKey = today;
-    profile.dailyLoginStreakDay = claimDay >= TRACK_LENGTH ? 1 : claimDay + 1;
+    profile.dailyLoginStreakDay = Math.min(MAX_STREAK_DAY, claimDay + 1);
     global.ProfileService?.saveProfile?.(profile);
 
     global.PlayerHud?.refresh?.();
     const menuRoot = document.getElementById('menu-root');
     if (menuRoot) global.ShopUI?.refreshSection?.(menuRoot);
 
+    const weekComplete = claimDay % WEEK_LENGTH === 0;
+
     return {
       ok: true,
       claimDay,
-      reward,
+      reward: rewards[0] || null,
+      rewards,
       totalCoins: profile.coins,
-      cycleComplete: claimDay >= TRACK_LENGTH,
+      cycleComplete: weekComplete,
+      weekIndex: getWeekInfo(claimDay).weekIndex,
     };
   }
 
   global.DailyGiftService = {
-    TRACK_LENGTH,
-    LOGIN_REWARDS,
+    WEEK_LENGTH,
+    TRACK_LENGTH: WEEK_LENGTH,
+    MAX_STREAK_DAY,
+    WEEK_TEMPLATE,
+    LOGIN_REWARDS: WEEK_TEMPLATE,
     getTodayKey,
     getYesterdayKey,
+    getWeekInfo,
     getRewardForDay,
+    getRewardsForDay,
     getTrackSnapshot,
     canClaimToday,
     claimToday,
     applyReward,
+    applyRewards,
     resolveClaimDay,
   };
 })(typeof window !== 'undefined' ? window : globalThis);

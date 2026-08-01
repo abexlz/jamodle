@@ -1,5 +1,5 @@
 /**
- * Daily login rewards modal — 30-day track with claim button.
+ * Daily login rewards modal — 7-day week track (Angry Birds–style gift UI).
  */
 (function (global) {
   'use strict';
@@ -18,7 +18,7 @@
       .replace(/"/g, '&quot;');
   }
 
-  const GIFT_STYLES_HREF = 'css/daily-gift.css?v=2';
+  const GIFT_STYLES_HREF = 'css/daily-gift.css?v=3';
 
   function ensureStyles() {
     let link = document.getElementById('daily-gift-styles');
@@ -50,43 +50,99 @@
 
   function rewardAmountText(reward) {
     if (!reward) return '';
-    if (reward.type === 'coins' || reward.type === 'xp') return `+${reward.amount}`;
-    return `×${reward.amount}`;
+    if (reward.type === 'coins' || reward.type === 'xp') return String(reward.amount);
+    return String(reward.amount);
   }
 
-  function buildTrackCells(days) {
-    return days.map((day) => {
-      const isMilestone = day.day === 7 || day.day === 14 || day.day === 21 || day.day === 30;
-      const rewardClass = day.type ? ` reward-${day.type}` : '';
+  function resolveIcon(icon, cls) {
+    return global.CoinIcon?.resolve?.(icon, cls) || escapeHtml(icon || '🎁');
+  }
+
+  function dayHeaderLabel(day, snapshot) {
+    if (day.state === 'tomorrow') return t('dailyGift.tomorrow');
+    if (day.state === 'today' && snapshot.canClaimToday) return t('dailyGift.today');
+    return t('dailyGift.dayLabel', { day: day.day });
+  }
+
+  function buildRewardStack(rewards, sizeClass) {
+    const list = rewards && rewards.length ? rewards : [];
+    return list.map((reward) => `
+      <div class="daily-gift-reward-item">
+        <span class="daily-gift-reward-icon" aria-hidden="true">${resolveIcon(reward.icon, `coin-icon ${sizeClass}`)}</span>
+        <span class="daily-gift-reward-amt">${escapeHtml(rewardAmountText(reward))}</span>
+      </div>
+    `).join('');
+  }
+
+  function buildDayCard(day, snapshot) {
+    const header = dayHeaderLabel(day, snapshot);
+    const check = day.state === 'claimed'
+      ? '<span class="daily-gift-cell-check" aria-hidden="true">✓</span>'
+      : '';
+
+    if (day.isJackpot) {
       return `
-        <div class="daily-gift-cell state-${day.state}${isMilestone ? ' is-milestone' : ''}${rewardClass}"
+        <div class="daily-gift-cell daily-gift-cell--jackpot state-${day.state}"
           data-day="${day.day}" role="listitem"
           aria-label="${escapeHtml(t('dailyGift.dayLabel', { day: day.day }))}">
-          <span class="daily-gift-cell-day">${day.day}</span>
-          <span class="daily-gift-cell-icon" aria-hidden="true">${global.CoinIcon?.resolve?.(day.icon, 'coin-icon coin-icon--md') || escapeHtml(day.icon)}</span>
-          <span class="daily-gift-cell-amt" aria-hidden="true">${escapeHtml(rewardAmountText(day))}</span>
-          ${day.state === 'claimed' ? '<span class="daily-gift-cell-check" aria-hidden="true">✓</span>' : ''}
+          <div class="daily-gift-cell-header">${escapeHtml(header)}</div>
+          <div class="daily-gift-jackpot-rewards">
+            ${buildRewardStack(day.rewards, 'coin-icon--md')}
+          </div>
+          ${check}
         </div>
       `;
-    }).join('');
+    }
+
+    const primary = day.rewards?.[0] || day;
+    return `
+      <div class="daily-gift-cell state-${day.state}"
+        data-day="${day.day}" role="listitem"
+        aria-label="${escapeHtml(t('dailyGift.dayLabel', { day: day.day }))}">
+        <div class="daily-gift-cell-header">${escapeHtml(header)}</div>
+        <div class="daily-gift-cell-body">
+          <span class="daily-gift-reward-icon" aria-hidden="true">${resolveIcon(primary.icon, 'coin-icon coin-icon--md')}</span>
+          <span class="daily-gift-reward-amt">${escapeHtml(rewardAmountText(primary))}</span>
+        </div>
+        ${check}
+      </div>
+    `;
+  }
+
+  function buildTrackCells(snapshot) {
+    const regular = snapshot.days.filter((d) => !d.isJackpot).map((d) => buildDayCard(d, snapshot)).join('');
+    const jackpot = snapshot.days.filter((d) => d.isJackpot).map((d) => buildDayCard(d, snapshot)).join('');
+    return `
+      <div class="daily-gift-track-grid">${regular}</div>
+      ${jackpot}
+    `;
+  }
+
+  function buildSubtitle(snapshot) {
+    if (snapshot.streakBroken) return t('dailyGift.streakBroken');
+    if (!snapshot.canClaimToday) return t('dailyGift.returnTomorrow');
+    return t('dailyGift.subtitle', {
+      day: snapshot.claimDay,
+      week: snapshot.weekIndex,
+      start: snapshot.weekStart,
+      end: snapshot.weekEnd,
+    });
   }
 
   function buildTrackModal(snapshot) {
-    const { claimDay, canClaimToday, days, streakBroken } = snapshot;
-    const subtitle = streakBroken
-      ? t('dailyGift.streakBroken')
-      : t('dailyGift.subtitle', { day: claimDay, total: snapshot.trackLength });
-
+    const { canClaimToday } = snapshot;
     return `
       <div class="daily-gift-modal">
-        <h2 class="daily-gift-title">${escapeHtml(t('dailyGift.title'))}</h2>
-        <p class="daily-gift-sub">${escapeHtml(subtitle)}</p>
-        <div class="daily-gift-track" role="list" aria-label="${escapeHtml(t('dailyGift.trackLabel'))}">
-          ${buildTrackCells(days)}
+        <div class="daily-gift-mascot" aria-hidden="true">🎁</div>
+        <button type="button" class="daily-gift-close" aria-label="${escapeHtml(t('dailyGift.closeLabel'))}">
+          <span aria-hidden="true">×</span>
+        </button>
+        <div class="daily-gift-banner">
+          <h2 class="daily-gift-title">${escapeHtml(t('dailyGift.title'))}</h2>
         </div>
-        <div class="daily-gift-today-reward">
-          <span class="daily-gift-today-icon" aria-hidden="true">${global.CoinIcon?.resolve?.(snapshot.reward?.icon || '🎁', 'coin-icon coin-icon--lg') || escapeHtml(snapshot.reward?.icon || '🎁')}</span>
-          <span class="daily-gift-today-text">${escapeHtml(rewardLabel(snapshot.reward))}</span>
+        <p class="daily-gift-sub">${escapeHtml(buildSubtitle(snapshot))}</p>
+        <div class="daily-gift-track" role="list" aria-label="${escapeHtml(t('dailyGift.trackLabel'))}">
+          ${buildTrackCells(snapshot)}
         </div>
         <button type="button" class="daily-gift-claim-btn" id="daily-gift-claim-btn"
           ${canClaimToday ? '' : 'disabled'}>
@@ -97,14 +153,21 @@
   }
 
   function buildRevealModal(result) {
-    const reward = result.reward;
+    const rewards = result.rewards?.length ? result.rewards : (result.reward ? [result.reward] : []);
+    const giftsHtml = rewards.map((reward) => `
+      <p class="daily-gift-reveal-gift">${escapeHtml(rewardLabel(reward))}</p>
+    `).join('');
+
     return `
-      <div class="daily-gift-modal">
+      <div class="daily-gift-modal daily-gift-modal--reveal">
+        <div class="daily-gift-mascot" aria-hidden="true">🎁</div>
         <div class="daily-gift-reveal">
-          <span class="daily-gift-reveal-icon" aria-hidden="true">${global.CoinIcon?.resolve?.(reward?.icon || '🎁', 'coin-icon coin-icon--lg') || escapeHtml(reward?.icon || '🎁')}</span>
+          <div class="daily-gift-reveal-icons" aria-hidden="true">
+            ${rewards.map((r) => `<span class="daily-gift-reveal-icon">${resolveIcon(r.icon, 'coin-icon coin-icon--lg')}</span>`).join('')}
+          </div>
           <h2 class="daily-gift-reveal-title">${escapeHtml(t('dailyGift.revealedTitle'))}</h2>
           <p class="daily-gift-reveal-day">${escapeHtml(t('dailyGift.dayComplete', { day: result.claimDay }))}</p>
-          <p class="daily-gift-reveal-gift">${escapeHtml(rewardLabel(reward))}</p>
+          ${giftsHtml}
           ${result.cycleComplete
             ? `<p class="daily-gift-reveal-cycle">${escapeHtml(t('dailyGift.cycleComplete'))}</p>`
             : ''}
@@ -118,6 +181,13 @@
     overlay.classList.remove('visible');
     document.body.classList.remove('daily-gift-open');
     setTimeout(() => overlay.remove(), 280);
+  }
+
+  function bindOverlayChrome(overlay) {
+    overlay.querySelector('.daily-gift-close')?.addEventListener('click', () => closeOverlay(overlay));
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) closeOverlay(overlay);
+    });
   }
 
   function showPicker() {
@@ -136,6 +206,7 @@
     overlay.className = 'daily-gift-overlay';
     overlay.setAttribute('role', 'dialog');
     overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-label', t('dailyGift.title'));
     overlay.innerHTML = buildTrackModal(snapshot);
 
     document.body.appendChild(overlay);
@@ -143,6 +214,7 @@
     global.I18n?.applyToDocument?.(overlay);
     requestAnimationFrame(() => overlay.classList.add('visible'));
 
+    bindOverlayChrome(overlay);
     overlay.querySelector('#daily-gift-claim-btn')?.addEventListener('click', () => onClaim(overlay));
   }
 
@@ -157,6 +229,7 @@
     overlay.innerHTML = buildRevealModal(result);
     global.I18n?.applyToDocument?.(overlay);
     overlay.querySelector('.daily-gift-done-btn')?.addEventListener('click', () => closeOverlay(overlay));
+    bindOverlayChrome(overlay);
   }
 
   function tryShow() {
