@@ -5,6 +5,13 @@
   'use strict';
 
   const REPEAT_GAP_MS = 220;
+  /** Web Speech rate was 0.82 — slowed to 80% to match server TTS. */
+  const DEFAULT_RATE = 0.82 * 0.8;
+  /**
+   * Pause between Hangul syllables on the Web Speech fallback.
+   * Doubled from the prior 200ms gap.
+   */
+  const SYLLABLE_GAP_MS = 200 * 2;
   const VOICE_WAIT_MS = 1200;
   const CACHE_MAX = 80;
 
@@ -157,7 +164,7 @@
 
   async function fetchServerAudio(text) {
     const gender = preferredVoiceGender();
-    const key = `v2:${gender}:${text.trim()}`;
+    const key = `v4:${gender}:${text.trim()}`;
     if (audioCache.has(key)) return audioCache.get(key);
 
     const url = `${getApiBase()}/api/tts/speak?text=${encodeURIComponent(text.trim())}`
@@ -224,28 +231,50 @@
   function speakWithWebSpeech(text, options = {}) {
     if (!global.speechSynthesis) return Promise.resolve(false);
 
-    const rate = Number.isFinite(options.rate) ? options.rate : 0.82;
+    const rate = Number.isFinite(options.rate) ? options.rate : DEFAULT_RATE;
     const volume = Number.isFinite(options.volume) ? options.volume : speakVolume();
+    const syllableGapMs = Number.isFinite(options.syllableGapMs)
+      ? options.syllableGapMs
+      : SYLLABLE_GAP_MS;
 
-    return waitForVoices().then((voice) => new Promise((resolve) => {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'ko-KR';
-      utterance.rate = rate;
-      utterance.pitch = 1;
-      utterance.volume = volume;
-      if (voice) utterance.voice = voice;
+    const syllables = [...String(text || '').trim()].filter((ch) => {
+      const cp = ch.codePointAt(0);
+      return (cp >= 0xAC00 && cp <= 0xD7A3)
+        || (cp >= 0x1100 && cp <= 0x11FF)
+        || (cp >= 0x3130 && cp <= 0x318F);
+    });
+    const chunks = syllables.length ? syllables : [String(text || '').trim()].filter(Boolean);
+    if (!chunks.length) return Promise.resolve(false);
 
-      const finish = (ok) => resolve(ok);
-      utterance.onend = () => finish(true);
-      utterance.onerror = () => finish(false);
+    return waitForVoices().then(async (voice) => {
+      for (let i = 0; i < chunks.length; i += 1) {
+        const ok = await new Promise((resolve) => {
+          const utterance = new SpeechSynthesisUtterance(chunks[i]);
+          utterance.lang = 'ko-KR';
+          // Emphatic per-syllable delivery (stronger + slightly higher).
+          utterance.rate = rate;
+          utterance.pitch = 1.15;
+          utterance.volume = Math.min(1, volume * 1.15);
+          if (voice) utterance.voice = voice;
 
-      try {
-        global.speechSynthesis.resume?.();
-        global.speechSynthesis.speak(utterance);
-      } catch (_) {
-        finish(false);
+          const finish = (result) => resolve(result);
+          utterance.onend = () => finish(true);
+          utterance.onerror = () => finish(false);
+
+          try {
+            global.speechSynthesis.resume?.();
+            global.speechSynthesis.speak(utterance);
+          } catch (_) {
+            finish(false);
+          }
+        });
+        if (!ok) return false;
+        if (i < chunks.length - 1 && syllableGapMs > 0) {
+          await new Promise((r) => setTimeout(r, syllableGapMs));
+        }
       }
-    }));
+      return true;
+    });
   }
 
   async function speakOnce(text, options = {}) {

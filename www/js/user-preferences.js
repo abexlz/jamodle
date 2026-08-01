@@ -149,7 +149,7 @@
     global.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'ko-KR';
-    u.rate = 0.78;
+    u.rate = 0.78 * 0.8;
     u.volume = Math.max(0, Math.min(1, prefs.volume));
     global.speechSynthesis.speak(u);
   }
