@@ -1177,7 +1177,13 @@
     line-height: 1;
   }
 
-  .jamo-tile.snap-in { animation: snapIn .3s ease; }
+  .jamo-tile.snap-in { animation: none; }
+
+  /* Placement is instantaneous — no transform lag when tiles reparent. */
+  .jamo-tile.in-zone,
+  .jamo-tile.dragging {
+    transition: none;
+  }
 
   /* ── Feedback ── */
   .game-feedback {

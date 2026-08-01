@@ -392,7 +392,7 @@
 
     createSlotTileContent(tile) {
       const el = document.createElement('div');
-      el.className = `tile ${zoneTileClass(tile.zoneType)} snap-in`;
+      el.className = `tile ${zoneTileClass(tile.zoneType)}`;
       el.textContent = tile.char;
       el.dataset.tileId = tile.id;
       el.dataset.zone = tile.zoneType;

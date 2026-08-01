@@ -635,12 +635,15 @@
     }
   }
 
-  function buildHumanBotTurnScript(game, target, locked, winRate, speed) {
+  function buildHumanBotTurnScript(game, target, locked, winRate, speed, options = {}) {
     const profile = SPEED_PROFILES[speed] || SPEED_PROFILES.medium;
     const sim = new BotTurnSimulator(game);
     const script = [];
     let t = 0;
     let actionSeq = 0;
+    // Bot's Nth turn this round (1-based). Never solve on turn 1 or 2.
+    const botTurnIndex = Math.max(1, Number(options.botTurnIndex) || 1);
+    const blockEarlySolve = botTurnIndex <= 2;
 
     const push = (delay, mutate, actionKind, actionDetail = {}) => {
       t += Math.max(delay, profile.stepMin || 800);
@@ -711,7 +714,8 @@
     const solveChance = lerp(0.15, 0.7, winRate);
     const stumbleChance = lerp(0.3, 0.06, winRate);
     const makesWrongFinal = Math.random() < wrongChance;
-    const triesSolve = !makesWrongFinal && Math.random() < solveChance;
+    // Never allow a full solve on the bot's 1st or 2nd turn.
+    const triesSolve = !blockEarlySolve && !makesWrongFinal && Math.random() < solveChance;
 
     let finalPlacements;
     let won = false;
@@ -899,7 +903,7 @@
         || sim.bank.some((b) => b.char === p.char);
     });
     // Prefer live sim placements (already dock-backed) when available.
-    const checkedPlacements = (sim.placements?.length ? sim.placements : dockOnlyPlacements)
+    let checkedPlacements = (sim.placements?.length ? sim.placements : dockOnlyPlacements)
       .map((p) => {
         const expected = allZones.find((z) => placementKey(z) === placementKey(p))?.expected;
         return {
@@ -913,6 +917,20 @@
         };
       });
     won = isWinningSubmission(checkedPlacements, locked, target);
+
+    // Hard block: bot must not solve on its 1st or 2nd turn (even if greens + placement fill the word).
+    if (blockEarlySolve && won) {
+      won = false;
+      const lockedKeySet = new Set((locked || []).map((p) => placementKey(p)));
+      const droppable = checkedPlacements.filter((p) => !lockedKeySet.has(placementKey(p)));
+      if (droppable.length) {
+        const drop = droppable[droppable.length - 1];
+        const dropKey = placementKey(drop);
+        checkedPlacements = checkedPlacements.filter((p) => placementKey(p) !== dropKey);
+        sim.placements = sim.placements.filter((p) => placementKey(p) !== dropKey);
+        if (drop.tileId) sim.onBoard.delete(drop.tileId);
+      }
+    }
 
     push(0, () => {
       sim.placements = checkedPlacements.map((p) => ({
@@ -1753,12 +1771,14 @@
 
       const locked = data.sharedState?.locked || [];
       const target = data.target;
+      const botTurnIndex = (data.turnHistory || []).filter((e) => e.byUid === BOT_UID).length + 1;
       const { script, payload, totalMs } = buildHumanBotTurnScript(
         this.game,
         target,
         locked,
         this.winRate,
-        this.speed
+        this.speed,
+        { botTurnIndex }
       );
 
       script.forEach((step) => {

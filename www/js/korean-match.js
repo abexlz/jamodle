@@ -233,8 +233,12 @@
     setInZone(zone) {
       this.inBank = false;
       this.zoneRef = zone;
-      this.el.classList.add('in-zone', 'snap-in');
-      this.el.classList.remove('hidden-in-bank', 'selected');
+      // Instant place — no snap-in arrival animation (origin→destination with no gap).
+      this.el.classList.add('in-zone');
+      this.el.classList.remove('hidden-in-bank', 'selected', 'snap-in', 'bounce', 'dragging');
+      this.el.style.removeProperty('transition');
+      this.el.style.removeProperty('transform');
+      this.el.style.removeProperty('opacity');
       this.setChar(this.char);
     }
 
@@ -2603,8 +2607,6 @@
         this.updateCheckButton();
         return false;
       }
-      this.bounceTile(tileA.el);
-      this.bounceTile(tileB.el);
       this.updateRotationDockLabel();
       this.mergeDock?.updatePreview?.();
       this.updateCheckButton();
@@ -3063,7 +3065,6 @@
         tile.zoneRef = null;
       }
       this.attachTileToZone(tile, zone);
-      this.bounceTile(tile.el);
       global.SoundEffects?.place?.();
       this.updateCheckButton();
       if (!this.watchMode) this.reconcileTileInventory();
