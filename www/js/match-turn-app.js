@@ -529,6 +529,22 @@
       `;
       el.classList.remove('hidden');
       void this.fillRoundRevealMeaning(word);
+      this.speakRoundRevealAnswer(word);
+    }
+
+    speakRoundRevealAnswer(word) {
+      if (!word) return;
+      try {
+        const wordEl = this.els.roundReveal?.querySelector('.race-round-reveal-word');
+        global.AnswerTTS?.attachPopup?.({
+          word,
+          wordEl,
+          autoplay: false,
+          root: this.els.roundReveal,
+        });
+        global.AnswerTTS?.noteUserGesture?.();
+        global.AnswerTTS?.playWord?.(word, { repeats: 2 });
+      } catch { /* offline / blocked */ }
     }
 
     hideRoundRevealOverlay() {

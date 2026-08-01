@@ -291,8 +291,17 @@
   function finalizePayload(placements, target, won = false) {
     const correctCount = placements.filter((p) => p.correct).length;
     const syllableCorrect = computeSyllableMask(placements, target);
+    const locked = placements
+      .filter((p) => p.correct && p.char)
+      .map((p) => ({
+        syl: p.syl,
+        zone: p.zone,
+        subIndex: p.subIndex ?? 0,
+        char: p.char,
+        tileId: p.tileId || null,
+      }));
     return {
-      locked: [],
+      locked,
       placements,
       correctCount,
       totalPlaced: placements.length,
@@ -1117,6 +1126,22 @@
       `;
       el.classList.remove('hidden');
       void this.fillRoundRevealMeaning(word);
+      this.speakRoundRevealAnswer(word);
+    }
+
+    speakRoundRevealAnswer(word) {
+      if (!word) return;
+      try {
+        const wordEl = this.els.roundReveal?.querySelector('.race-round-reveal-word');
+        global.AnswerTTS?.attachPopup?.({
+          word,
+          wordEl,
+          autoplay: false,
+          root: this.els.roundReveal,
+        });
+        global.AnswerTTS?.noteUserGesture?.();
+        global.AnswerTTS?.playWord?.(word, { repeats: 2 });
+      } catch { /* offline / blocked */ }
     }
 
     hideRoundRevealOverlay() {

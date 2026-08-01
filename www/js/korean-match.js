@@ -3117,6 +3117,10 @@
      * Clear active-turn placements while restoring cumulative shared greens.
      * Used on turn boundaries so correct letters survive turn swaps.
      */
+    /**
+     * Clear active-turn placements while restoring cumulative shared greens.
+     * Used on turn boundaries so correct letters survive turn swaps.
+     */
     prepareForNewTurn(locked, turnHistory, myUid) {
       if (!this.turnBased) return;
       this.mergeDock?.reset();
@@ -3124,10 +3128,25 @@
       this._lastLiveFingerprint = null;
       this._suspendLiveBroadcast = false;
       this.clearWatchRevealVisuals();
+
+      // Keep already-locked greens in place — only clear unlocked slots.
       this.blocks.forEach((block) => {
         block.getAllZones().forEach((zone) => {
           zone.el.querySelectorAll('.opp-reveal-tile').forEach((el) => el.remove());
-          if (zone.locked) return;
+          if (zone.locked) {
+            zone.el.classList.remove(
+              'turn-neutral', 'revealing', 'revealing-wrong',
+              'watch-wrong', 'watch-reveal-pending', 'incorrect'
+            );
+            zone.el.classList.add('correct', 'watch-correct', 'locked', 'filled');
+            const tile = zone.placedTileId ? this.tileMap[zone.placedTileId] : null;
+            if (tile) {
+              tile.locked = true;
+              tile.el?.classList.remove('turn-neutral-tile', 'revealing', 'revealing-wrong');
+              tile.el?.classList.add('locked', 'revealed', 'correct-flip');
+            }
+            return;
+          }
           const tile = zone.placedTileId ? this.tileMap[zone.placedTileId] : null;
           if (tile && !tile.locked) {
             this.returnTileToBank(tile);
@@ -3140,34 +3159,20 @@
           );
         });
       });
+
       Object.values(this.tileMap).forEach((tile) => {
         if (tile.locked) return;
         tile.el?.classList.remove(
           'revealed', 'correct-flip', 'turn-neutral-tile', 'revealing', 'revealing-wrong'
         );
-        if (!tile.inBank) this.returnTileToBank(tile);
+        if (!tile.inBank && !tile.zoneRef) this.returnTileToBank(tile);
       });
-      this.blocks.forEach((block) => {
-        block.getAllZones().forEach((zone) => {
-          if (!zone.locked) return;
-          const tile = zone.placedTileId ? this.tileMap[zone.placedTileId] : null;
-          zone.locked = false;
-          zone.clear();
-          zone.el.classList.remove(
-            'correct', 'incorrect', 'turn-neutral', 'revealing', 'revealing-wrong', 'locked',
-            'watch-correct', 'watch-wrong', 'watch-reveal-pending'
-          );
-          if (tile) {
-            tile.locked = false;
-            tile.el?.classList.remove('revealed', 'correct-flip', 'locked');
-            this.returnTileToBank(tile);
-          }
-        });
-      });
+
       this.checkedComplete = false;
       this.checking = false;
       this.turnSubmitting = false;
       this.clearSelection();
+      // Fill any shared locks that aren't on the board yet (don't rebuild existing greens).
       this.restoreTurnLockedPlacements(locked, turnHistory, myUid);
       this.restoreDockVisibility();
       this.restoreVisibleTiles();
@@ -3587,9 +3592,18 @@
     persistWatchCorrectReveals(toReveal) {
       (toReveal || []).forEach(({ zone, placement }) => {
         zone.el.querySelectorAll('.opp-reveal-tile').forEach((el) => el.remove());
-        zone.el.classList.remove('turn-neutral', 'watch-correct', 'watch-reveal-pending', 'revealing');
-        if (placement?.char) {
-          this.placeLockedPlacement(placement);
+        zone.el.classList.remove('turn-neutral', 'watch-reveal-pending', 'revealing', 'incorrect', 'watch-wrong');
+        if (!placement?.char) return;
+        if (!this.placeLockedPlacement(placement)) {
+          // Ensure a permanent green lock even if the matching dock tile was missing.
+          const tile = this.createBasicTile({
+            char: placement.char,
+            syllableIndex: placement.syl,
+            zoneType: placement.zone,
+          });
+          tile.setInBank(this.els.bank);
+          this.attachTileToZone(tile, zone);
+          this.markPlacementLocked(zone, tile);
         }
       });
     }
