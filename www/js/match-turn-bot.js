@@ -102,30 +102,102 @@
     },
   };
 
-  const WRONG_CHO = 'ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎ';
-  const WRONG_JONG = 'ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎ';
-  const WRONG_JUNGH = 'ㅗㅛㅜㅠㅡ';
-  const WRONG_JUNGV = 'ㅏㅑㅓㅕㅣ';
-
-  function wrongPoolForZone(zoneType) {
-    if (zoneType === 'cho') return WRONG_CHO;
-    if (zoneType === 'jong') return WRONG_JONG;
-    if (zoneType === 'jungH') return WRONG_JUNGH;
-    if (zoneType === 'jungV') return WRONG_JUNGV;
-    return WRONG_CHO;
+  function canPlaceCharInZone(char, zoneType) {
+    if (!zoneType || !char) return false;
+    if (!HC()?.canPlaceInZone) return true;
+    return HC().canPlaceInZone(char, zoneType);
   }
 
-  function pickWrongChar(correct, zoneType) {
-    const pool = [...wrongPoolForZone(zoneType)].filter((c) => c !== correct);
-    const placeable = pool.filter((c) => {
-      if (!zoneType || !HC()?.canPlaceInZone) return true;
-      return HC().canPlaceInZone(c, zoneType);
+  /** True when fromChar can become toChar via the rotation cycle (or already matches). */
+  function canRotateToChar(fromChar, toChar) {
+    if (!fromChar || !toChar) return false;
+    if (fromChar === toChar) return true;
+    if (!HC()?.rotateJamo) return false;
+    let cur = fromChar;
+    for (let i = 0; i < 6; i += 1) {
+      cur = HC().rotateJamo(cur);
+      if (!cur || cur === fromChar) break;
+      if (cur === toChar) return true;
+    }
+    return false;
+  }
+
+  function bankCharCounts(bank) {
+    const counts = {};
+    (bank || []).forEach((entry) => {
+      const char = typeof entry === 'string' ? entry : entry?.char;
+      if (!char) return;
+      counts[char] = (counts[char] || 0) + 1;
     });
-    const options = placeable.length ? placeable : pool;
-    if (options.length) return options[Math.floor(Math.random() * options.length)];
-    if (zoneType === 'jungH') return 'ㅗ';
-    if (zoneType === 'jungV') return 'ㅏ';
-    return 'ㄱ';
+    return counts;
+  }
+
+  function takeBankChar(counts, char) {
+    if (!char || !counts[char]) return null;
+    counts[char] -= 1;
+    return char;
+  }
+
+  /**
+   * Consume one dock tile that already is — or can rotate into — `goalChar`.
+   * Returns the placed char (always `goalChar` on success) so payloads stay consistent.
+   * For vertical merge medials, consumes the two component dock vowels instead.
+   */
+  function takeBankCharForGoal(counts, goalChar, zoneType) {
+    if (!goalChar) return null;
+    if (takeBankChar(counts, goalChar)) return goalChar;
+
+    const rotatable = Object.keys(counts).find((c) => (
+      counts[c] > 0 && canRotateToChar(c, goalChar)
+    ));
+    if (rotatable) {
+      counts[rotatable] -= 1;
+      return goalChar;
+    }
+
+    if (HC()?.isVerticalMergeMedial?.(goalChar)) {
+      const components = (HC().getMedialComponents?.(goalChar) || [])
+        .filter((c) => HC().PLACEABLE_VERTICAL_VOWELS?.has(c));
+      if (components.length === 2) {
+        const [a, b] = components;
+        if (a === b) {
+          if ((counts[a] || 0) < 2) return null;
+          counts[a] -= 2;
+          return goalChar;
+        }
+        if ((counts[a] || 0) > 0 && (counts[b] || 0) > 0) {
+          counts[a] -= 1;
+          counts[b] -= 1;
+          return goalChar;
+        }
+      }
+    }
+
+    if (zoneType && !canPlaceCharInZone(goalChar, zoneType)) return null;
+    return null;
+  }
+
+  /**
+   * Pick a wrong char that actually exists in the provided dock inventory.
+   * Never invents jamo outside the bank.
+   */
+  function pickWrongCharFromBank(correct, zoneType, counts) {
+    const options = Object.keys(counts).filter((c) => (
+      counts[c] > 0
+      && c !== correct
+      && canPlaceCharInZone(c, zoneType)
+    ));
+    if (!options.length) return null;
+    return takeBankChar(counts, options[Math.floor(Math.random() * options.length)]);
+  }
+
+  /** @deprecated kept for any stray callers — always requires bank counts now. */
+  function pickWrongChar(correct, zoneType, bankOrCounts) {
+    const counts = Array.isArray(bankOrCounts)
+      ? bankCharCounts(bankOrCounts)
+      : (bankOrCounts || {});
+    return pickWrongCharFromBank(correct, zoneType, counts)
+      || takeBankCharForGoal(counts, correct, zoneType);
   }
 
   function rt(key, vars) {
@@ -234,7 +306,7 @@
     return zones;
   }
 
-  function buildPlacements(target, locked, { wrong = false, partial = false } = {}) {
+  function buildPlacements(target, locked, { wrong = false, partial = false } = {}, bank = []) {
     const lockedKeys = new Set((locked || []).map((p) => placementKey(p)));
     const zones = iterTargetZones(target).filter((z) => !lockedKeys.has(placementKey(z)));
     if (!zones.length) return [];
@@ -246,25 +318,42 @@
       activeZones = zones.filter((z) => z.syl === syl);
     }
 
-    const placements = activeZones.map((z) => {
-      const char = wrong ? pickWrongChar(z.expected, z.zone) : z.expected;
-      const correct = char === z.expected;
-      return {
+    const counts = bankCharCounts(bank);
+    const placements = [];
+    activeZones.forEach((z) => {
+      let char = null;
+      if (wrong) {
+        char = pickWrongCharFromBank(z.expected, z.zone, counts)
+          || takeBankCharForGoal(counts, z.expected, z.zone);
+      } else {
+        char = takeBankCharForGoal(counts, z.expected, z.zone);
+      }
+      if (!char) return;
+      placements.push({
         syl: z.syl,
         zone: z.zone,
         subIndex: z.subIndex,
         char,
-        correct,
+        correct: char === z.expected,
         locked: false,
         tileId: null,
-      };
+      });
     });
 
-    if (wrong) {
+    // Ensure at least one intentional miss when a full wrong guess was requested.
+    if (wrong && placements.length && placements.every((p) => p.correct)) {
       const idx = Math.floor(Math.random() * placements.length);
-      const zone = activeZones[idx];
-      placements[idx].char = pickWrongChar(zone.expected, zone.zone);
-      placements[idx].correct = false;
+      const zone = activeZones.find((z) => placementKey(z) === placementKey(placements[idx]))
+        || activeZones[idx];
+      // Put the correct char back into the pool, then try a dock-only wrong swap.
+      counts[placements[idx].char] = (counts[placements[idx].char] || 0) + 1;
+      const wrongChar = pickWrongCharFromBank(zone.expected, zone.zone, counts);
+      if (wrongChar) {
+        placements[idx].char = wrongChar;
+        placements[idx].correct = false;
+      } else {
+        takeBankChar(counts, placements[idx].char);
+      }
     }
 
     return placements;
@@ -375,12 +464,31 @@
     }
 
     findBankTile(char) {
-      return this.visibleBank().find((b) => b.char === char)
+      if (!char) return null;
+      const visible = this.visibleBank();
+      return visible.find((b) => b.char === char)
+        || visible.find((b) => canRotateToChar(b.char, char))
         || this.bank.find((b) => (
           b.char === char
           && !this.onBoard.has(b.id)
           && !this.removed.includes(b.id)
-        ));
+        ))
+        || this.bank.find((b) => (
+          canRotateToChar(b.char, char)
+          && !this.onBoard.has(b.id)
+          && !this.removed.includes(b.id)
+        ))
+        || null;
+    }
+
+    /** Pick any unused dock tile that can legally sit in this zone type. */
+    findWrongBankTile(avoidChar, zoneType) {
+      const visible = this.visibleBank();
+      const options = visible.filter((b) => (
+        b.char !== avoidChar && canPlaceCharInZone(b.char, zoneType)
+      ));
+      if (options.length) return options[Math.floor(Math.random() * options.length)];
+      return null;
     }
 
     updateBankChar(tileId, char) {
@@ -401,25 +509,36 @@
     }
 
     useTile(tileId) {
-      this.onBoard.add(tileId);
+      if (tileId) this.onBoard.add(tileId);
     }
 
-    placeZone(syl, zone, subIndex, char) {
+    placeZone(syl, zone, subIndex, char, tileId = null) {
+      if (!char) return false;
+      let usedId = tileId;
+      if (usedId) {
+        this.useTile(usedId);
+      } else {
+        const dockTile = this.findBankTile(char);
+        if (!dockTile) return false;
+        usedId = dockTile.id;
+        this.useTile(usedId);
+      }
+      // Only allow chars that belong to the dock (or a merge result made from dock tiles).
+      const fromDock = this.bank.some((b) => b.id === usedId)
+        || String(usedId).startsWith('bot-merge-');
+      if (!fromDock) return false;
+
       const key = placementKey({ syl, zone, subIndex });
       this.placements = this.placements.filter((p) => placementKey(p) !== key);
-      this.placements.push({ syl, zone, subIndex: subIndex ?? 0, char });
-      // Ensure the matching dock tile disappears even if the caller skipped useTile.
-      if (char) {
-        const already = [...this.onBoard].some((id) => {
-          const entry = this.bank.find((b) => b.id === id);
-          return entry?.char === char;
-        });
-        if (!already) {
-          const dockTile = this.visibleBank().find((b) => b.char === char);
-          if (dockTile) this.useTile(dockTile.id);
-        }
-      }
+      this.placements.push({
+        syl,
+        zone,
+        subIndex: subIndex ?? 0,
+        char,
+        tileId: usedId,
+      });
       this.selected = null;
+      return true;
     }
 
     clearZone(syl, zone, subIndex) {
@@ -509,14 +628,15 @@
 
     let finalPlacements;
     let won = false;
+    const dockBank = sim.bank;
     if (triesSolve) {
-      finalPlacements = buildPlacements(target, locked, { wrong: false, partial: false });
+      finalPlacements = buildPlacements(target, locked, { wrong: false, partial: false }, dockBank);
       won = isWinningSubmission(finalPlacements, locked, target);
-      if (!won) finalPlacements = buildPlacements(target, locked, { wrong: false, partial: true });
+      if (!won) finalPlacements = buildPlacements(target, locked, { wrong: false, partial: true }, dockBank);
     } else if (makesWrongFinal) {
-      finalPlacements = buildPlacements(target, locked, { wrong: true, partial: false });
+      finalPlacements = buildPlacements(target, locked, { wrong: true, partial: false }, dockBank);
     } else {
-      finalPlacements = buildPlacements(target, locked, { wrong: false, partial: true });
+      finalPlacements = buildPlacements(target, locked, { wrong: false, partial: true }, dockBank);
     }
 
     const finalMap = new Map(finalPlacements.map((p) => [placementKey(p), p]));
@@ -562,9 +682,9 @@
     };
 
     const schedulePlaceChar = (zone, char, tileId) => {
+      if (!char || !tileId) return;
       push(randRange(profile.placeMin, profile.placeMax), () => {
-        if (tileId) sim.useTile(tileId);
-        sim.placeZone(zone.syl, zone.zone, zone.subIndex, char);
+        sim.placeZone(zone.syl, zone.zone, zone.subIndex, char, tileId);
       }, 'move');
     };
 
@@ -573,8 +693,9 @@
         .filter((c) => HC().PLACEABLE_VERTICAL_VOWELS?.has(c));
       if (components.length < 2) {
         const tile = sim.findBankTile(goalChar);
-        if (tile) scheduleRotateToChar(tile, goalChar);
-        schedulePlaceChar(zone, goalChar, tile?.id);
+        if (!tile) return;
+        scheduleRotateToChar(tile, goalChar);
+        schedulePlaceChar(zone, goalChar, tile.id);
         return;
       }
 
@@ -582,7 +703,11 @@
       const leftTile = sim.findBankTile(left);
       const rightTile = sim.findBankTile(right);
       if (!leftTile || !rightTile) {
-        schedulePlaceChar(zone, goalChar, null);
+        // Components missing from dock — fall back to a single dock tile if possible.
+        const tile = sim.findBankTile(goalChar);
+        if (!tile) return;
+        scheduleRotateToChar(tile, goalChar);
+        schedulePlaceChar(zone, goalChar, tile.id);
         return;
       }
 
@@ -625,23 +750,21 @@
       if (Math.random() < mistakeRate) {
         const correctZone = planned[0];
         const wrongZone = sim.pickWrongZone(allZones, correctZone);
-        const wrongChar = pickWrongChar(correctZone.expected, wrongZone.zone);
-        const wrongTile = sim.findBankTile(wrongChar) || sim.findBankTile(pickWrongChar(wrongChar, wrongZone.zone));
+        const wrongTile = sim.findWrongBankTile(correctZone.expected, wrongZone.zone);
         if (wrongTile) {
           push(randRange(profile.selectMin, profile.selectMax), () => {
             sim.selectBank(wrongTile.id);
           }, 'select', { selected: { type: 'bank', tileId: wrongTile.id } });
+          push(randRange(profile.placeMin, profile.placeMax), () => {
+            sim.placeZone(wrongZone.syl, wrongZone.zone, wrongZone.subIndex, wrongTile.char, wrongTile.id);
+          }, 'move');
+          t += randRange(profile.mistakeHoldMin, profile.mistakeHoldMax);
+          push(randRange(profile.placeMin, profile.placeMax), () => {
+            sim.clearZone(wrongZone.syl, wrongZone.zone, wrongZone.subIndex);
+            sim.onBoard.delete(wrongTile.id);
+          }, 'move');
+          t += randRange(profile.rethinkMin, profile.rethinkMax);
         }
-        push(randRange(profile.placeMin, profile.placeMax), () => {
-          if (wrongTile) sim.useTile(wrongTile.id);
-          sim.placeZone(wrongZone.syl, wrongZone.zone, wrongZone.subIndex, wrongChar);
-        }, 'move');
-        t += randRange(profile.mistakeHoldMin, profile.mistakeHoldMax);
-        push(randRange(profile.placeMin, profile.placeMax), () => {
-          sim.clearZone(wrongZone.syl, wrongZone.zone, wrongZone.subIndex);
-          if (wrongTile) sim.onBoard.delete(wrongTile.id);
-        }, 'move');
-        t += randRange(profile.rethinkMin, profile.rethinkMax);
       }
 
       planned.forEach((zone) => {
@@ -656,8 +779,9 @@
           scheduleMergeAndPlace(zone, fin.char, sylData);
         } else {
           const tile = sim.findBankTile(fin.char);
-          if (tile) scheduleRotateToChar(tile, fin.char);
-          schedulePlaceChar(zone, fin.char, tile?.id);
+          if (!tile) return;
+          scheduleRotateToChar(tile, fin.char);
+          schedulePlaceChar(zone, fin.char, tile.id);
         }
 
         t += randRange(profile.betweenMin, profile.betweenMax);
@@ -665,12 +789,35 @@
     });
 
     t += randRange(profile.preCheckMin, profile.preCheckMax);
+    // Final submission may only include chars that were actually taken from the dock.
+    const dockOnlyPlacements = finalPlacements.filter((p) => {
+      if (!p?.char) return false;
+      return dockBank.some((b) => b.char === p.char || canRotateToChar(b.char, p.char))
+        || sim.bank.some((b) => b.char === p.char);
+    });
+    // Prefer live sim placements (already dock-backed) when available.
+    const checkedPlacements = (sim.placements?.length ? sim.placements : dockOnlyPlacements)
+      .map((p) => {
+        const expected = allZones.find((z) => placementKey(z) === placementKey(p))?.expected;
+        return {
+          syl: p.syl,
+          zone: p.zone,
+          subIndex: p.subIndex ?? 0,
+          char: p.char,
+          correct: !!expected && p.char === expected,
+          locked: false,
+          tileId: p.tileId || null,
+        };
+      });
+    won = isWinningSubmission(checkedPlacements, locked, target);
+
     push(0, () => {
-      sim.placements = finalPlacements.map((p) => ({
+      sim.placements = checkedPlacements.map((p) => ({
         syl: p.syl,
         zone: p.zone,
         subIndex: p.subIndex ?? 0,
         char: p.char,
+        tileId: p.tileId || null,
       }));
       sim.selected = null;
       sim.merge = { slots: [null, null], slotIds: [null, null], result: null, resultId: null };
@@ -678,7 +825,7 @@
 
     return {
       script,
-      payload: finalizePayload(finalPlacements, target, won),
+      payload: finalizePayload(checkedPlacements, target, won),
       totalMs: t + randRange(profile.postCheckMin, profile.postCheckMax),
     };
   }
