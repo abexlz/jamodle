@@ -173,6 +173,39 @@
   flex-shrink: 0;
 }
 
+/* Topbar chrome — match combo pill / match HUD (teal, not yellow gold) */
+.rw-topbar .pause-btn,
+.rw-topbar .rw-settings-btn.top-nav-btn {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  max-width: 40px;
+  max-height: 40px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.55) !important;
+  background: rgba(0, 70, 85, 0.82) !important;
+  background-image: none !important;
+  color: #fff !important;
+  box-shadow: 0 3px 0 rgba(0, 55, 68, 0.55) !important;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.rw-topbar .pause-btn:active,
+.rw-topbar .pause-btn.is-pressed,
+.rw-topbar .rw-settings-btn.top-nav-btn:active,
+.rw-topbar .rw-settings-btn.top-nav-btn.is-pressed {
+  transform: translateY(2px) scale(0.97);
+  box-shadow: 0 1px 0 rgba(0, 55, 68, 0.55) !important;
+  filter: none;
+}
+
+.rw-topbar .pause-btn-bars span {
+  background: #fff;
+}
+
 .wc-combo-wrap--hud {
   margin: 0;
   min-height: 0;
@@ -278,12 +311,12 @@
   font-size: 15px;
   font-weight: 700;
   line-height: 1.2;
-  color: var(--heading);
+  color: #1a1a1a;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   transition: opacity 0.32s ease, transform 0.32s ease;
-  text-shadow: 0 1px 10px rgba(0, 40, 50, 0.35);
+  text-shadow: none;
 }
 
 .rw-chain-progress {
@@ -291,9 +324,9 @@
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.08em;
-  color: rgba(255, 255, 255, 0.88);
+  color: #1a1a1a;
   text-transform: uppercase;
-  text-shadow: 0 1px 6px rgba(0, 40, 50, 0.25);
+  text-shadow: none;
 }
 
 /* ── Word trail (3 deep, oldest smallest → clue largest) ── */
