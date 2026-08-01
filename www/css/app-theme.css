@@ -12,13 +12,13 @@ html[data-theme="dark"] {
   --text: #ffffff;
   --heading: #ffffff;
   --text-soft: rgba(255, 255, 255, 0.78);
-  --border: rgba(123, 207, 255, 0.55);
-  --border-soft: rgba(123, 207, 255, 0.35);
+  --border: rgba(255, 255, 255, 0.28);
+  --border-soft: rgba(255, 255, 255, 0.18);
   --overlay-scrim: rgba(0, 60, 72, 0.88);
   --shadow: 0 8px 24px rgba(0, 40, 50, 0.35);
   --shadow-sm: 0 4px 12px rgba(0, 40, 50, 0.25);
   --panel-bg: rgba(0, 70, 85, 0.38);
-  --panel-border: rgba(123, 207, 255, 0.5);
+  --panel-border: rgba(255, 255, 255, 0.22);
   --app-btn-fill: #FFCC33;
   --app-btn-fill-hover: #FFD966;
   --app-btn-fill-sky: #99CCFF;
@@ -68,8 +68,8 @@ html[data-theme="dark"] {
 }
 
 body {
-  background-color: #6b9fc4 !important;
-  background-image: url('../assets/bg-phone-hanok.jpg') !important;
+  background-color: #7eb8c8 !important;
+  background-image: url('../assets/bg-phone-seoul.jpg') !important;
   background-size: cover !important;
   background-position: center top !important;
   background-repeat: no-repeat !important;
@@ -79,8 +79,8 @@ body {
 
 @media (min-width: 600px) {
   body {
-    background-color: #6b9fc4 !important;
-    background-image: url('../assets/bg-landscape-hanok.jpg') !important;
+    background-color: #7eb8c8 !important;
+    background-image: url('../assets/bg-landscape-seoul.jpg') !important;
     background-position: center center !important;
   }
 }

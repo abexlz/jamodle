@@ -2,14 +2,12 @@
 
 .menu-mode-panel {
   position: relative;
-  padding: 8px 10px 10px;
-  gap: 2px;
-  background: var(--w-panel-bg, rgba(0, 70, 85, 0.42));
-  border: 2px solid var(--w-panel-border, rgba(123, 207, 255, 0.55));
-  border-radius: 20px;
-  box-shadow:
-    var(--w-panel-shadow, 0 4px 0 rgba(0, 40, 50, 0.35)),
-    0 0 16px rgba(123, 207, 255, 0.18);
+  padding: 16px 16px 18px;
+  gap: 12px;
+  background: var(--w-panel-bg, rgba(0, 70, 85, 0.38));
+  border: 2px solid rgba(255, 255, 255, 0.22);
+  border-radius: 22px;
+  box-shadow: 0 5px 0 rgba(0, 40, 50, 0.28);
 }
 
 .menu-mode-heading-wrap {
@@ -19,7 +17,7 @@
   gap: clamp(2px, 1.2vw, 6px);
   grid-column: 1 / -1;
   margin: 0;
-  padding: 0 2px 2px;
+  padding: 0 2px 6px;
 }
 
 .menu-mode-heading {

@@ -5,9 +5,9 @@
 
 /* ── Shared panel + button tokens (local aliases) ── */
 :root {
-  --w-panel-bg: rgba(0, 70, 85, 0.42);
-  --w-panel-border: rgba(123, 207, 255, 0.55);
-  --w-panel-shadow: 0 4px 0 rgba(0, 40, 50, 0.35);
+  --w-panel-bg: rgba(0, 70, 85, 0.38);
+  --w-panel-border: rgba(255, 255, 255, 0.22);
+  --w-panel-shadow: 0 5px 0 rgba(0, 40, 50, 0.28);
   --w-btn-yellow: #FFCC33;
   --w-btn-yellow-border: #E6B82E;
   --w-btn-sky: #99CCFF;
@@ -1081,8 +1081,8 @@ button.ghost,
 
 /* ── Global page backgrounds (load after page CSS) ── */
 html body {
-  background-color: #6b9fc4 !important;
-  background-image: url('../assets/bg-phone-hanok.jpg') !important;
+  background-color: #7eb8c8 !important;
+  background-image: url('../assets/bg-phone-seoul.jpg') !important;
   background-size: cover !important;
   background-position: center top !important;
   background-repeat: no-repeat !important;
@@ -1091,8 +1091,8 @@ html body {
 
 @media (min-width: 600px) {
   html body {
-    background-color: #6b9fc4 !important;
-    background-image: url('../assets/bg-landscape-hanok.jpg') !important;
+    background-color: #7eb8c8 !important;
+    background-image: url('../assets/bg-landscape-seoul.jpg') !important;
     background-position: center center !important;
   }
 }

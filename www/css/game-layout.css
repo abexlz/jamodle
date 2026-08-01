@@ -306,13 +306,13 @@ body.home-menu-active #menu-screen #menu-root > .menu-sections {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: clamp(3px, 0.7dvh, 8px);
+  gap: clamp(10px, 1.8dvh, 16px);
 }
 
 /* Main home tab: daily + 2 mode panels share height */
 body.home-menu-active.home-tab-menu #menu-root > .menu-sections {
   display: grid;
-  grid-template-rows: minmax(0, 0.82fr) minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 0.78fr) minmax(0, 1fr) minmax(0, 1fr);
   align-content: stretch;
 }
 
@@ -330,8 +330,7 @@ body.home-menu-active.home-tab-menu .menu-top-daily-wrap {
 body.home-menu-active.home-tab-menu .menu-mode-panel {
   min-height: 0;
   overflow: hidden;
-  padding-top: 4px !important;
-  padding-bottom: 6px !important;
+  padding: 14px 16px 16px !important;
 }
 
 body.home-menu-active.home-tab-menu .menu-mode-panel .daily-challenges-grid {
@@ -340,7 +339,7 @@ body.home-menu-active.home-tab-menu .menu-mode-panel .daily-challenges-grid {
   display: grid !important;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr;
-  gap: clamp(4px, 0.8dvh, 8px);
+  gap: clamp(10px, 1.6dvh, 14px);
   align-content: stretch;
 }
 
@@ -357,12 +356,12 @@ body.home-menu-active.home-tab-menu .menu-top-daily-row .menu-daily-puzzle-bar {
 }
 
 body.home-menu-active.home-tab-menu .menu-mode-heading-wrap {
-  padding-bottom: 0;
+  padding-bottom: 4px;
 }
 
 body.home-menu-active.home-tab-menu .menu-mode-heading-badge {
-  min-height: 24px;
-  padding: 2px clamp(10px, 3vw, 16px);
+  min-height: 26px;
+  padding: 3px clamp(12px, 3vw, 18px);
 }
 
 /* Quest / shop / learn tabs */
