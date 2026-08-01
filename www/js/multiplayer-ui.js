@@ -59,7 +59,7 @@
     let overlay = document.getElementById('battle-mode-overlay');
     if (overlay) return overlay;
 
-    const randomIcon = `<svg class="battle-mode-card__svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M17.65 6.35A7.95 7.95 0 0 0 12 4a8 8 0 1 0 7.75 10h-2.1A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35Z"/></svg>`;
+    const randomIcon = `<svg class="battle-mode-card__svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5Zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14Z"/></svg>`;
     const customIcon = `<svg class="battle-mode-card__svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3Zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3Zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13Zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5Z"/></svg>`;
 
     overlay = document.createElement('div');
@@ -129,7 +129,7 @@
     const map = {
       multiplayer: t('menu.battle.multiplayer') || 'Random Match',
       multiplayerSub: t('menu.battle.multiplayerSub') || 'Jump into a live 1v1',
-      custom: t('menu.battle.custom') || 'Custom',
+      custom: t('menu.battle.custom') || 'Friendly Match',
       customSub: t('menu.battle.customSub') || 'Challenge a friend',
     };
     overlay.querySelectorAll('[data-battle-label]').forEach((el) => {

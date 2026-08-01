@@ -171,30 +171,30 @@
   justify-content: center !important;
   padding: 16px !important;
   padding-bottom: 16px !important;
-  backdrop-filter: blur(4px) !important;
-  -webkit-backdrop-filter: blur(4px) !important;
-  background: rgba(12, 40, 68, 0.55) !important;
+  backdrop-filter: blur(3px) !important;
+  -webkit-backdrop-filter: blur(3px) !important;
+  background: rgba(20, 48, 62, 0.62) !important;
 }
 
 .battle-mode-modal {
   width: 100%;
   max-width: 380px;
-  background: rgba(18, 52, 82, 0.88) !important;
+  background: rgba(0, 70, 85, 0.78) !important;
   background-image: none !important;
-  border: 2px solid rgba(170, 220, 255, 0.45) !important;
-  border-radius: 24px !important;
-  box-shadow: 0 10px 0 rgba(8, 28, 48, 0.4), 0 18px 40px rgba(0, 20, 40, 0.35) !important;
+  border: 2px solid rgba(255, 255, 255, 0.22) !important;
+  border-radius: 22px !important;
+  box-shadow: 0 6px 0 rgba(0, 40, 50, 0.35), 0 12px 28px rgba(0, 30, 40, 0.28) !important;
 }
 
 .battle-mode-modal .multiplayer-modal-header {
-  background: rgba(10, 40, 68, 0.55) !important;
+  background: rgba(0, 55, 68, 0.4) !important;
   background-image: none !important;
-  border-bottom: 2px solid rgba(170, 220, 255, 0.35) !important;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.14) !important;
 }
 
 .battle-mode-modal .multiplayer-modal-title {
   color: #ffffff !important;
-  text-shadow: 0 2px 0 rgba(0, 40, 70, 0.35) !important;
+  text-shadow: 0 2px 0 rgba(0, 40, 50, 0.3) !important;
   letter-spacing: 0.02em;
 }
 
@@ -238,10 +238,10 @@
 .battle-mode-card--secondary {
   min-height: 72px;
   padding: 12px 14px;
-  background: linear-gradient(180deg, rgba(120, 200, 230, 0.35) 0%, rgba(70, 150, 190, 0.45) 100%);
-  border: 2px solid rgba(180, 230, 255, 0.55);
-  box-shadow: 0 4px 0 rgba(20, 60, 90, 0.45);
-  color: #f4fbff;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.1) 100%);
+  border: 2px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 4px 0 rgba(0, 40, 50, 0.28);
+  color: #f7fcff;
 }
 
 .battle-mode-card__icon {
