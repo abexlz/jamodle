@@ -382,7 +382,7 @@
   line-height: 1.25;
   color: rgba(255, 255, 255, 0.94);
   text-shadow: 0 1px 8px rgba(0, 40, 50, 0.35);
-  min-height: 0;
+  min-height: 1.25em;
   flex-shrink: 0;
   width: 100%;
   white-space: nowrap;
@@ -391,7 +391,16 @@
 }
 
 .rw-clue-meaning.is-empty {
-  display: none;
+  /* Keep the line reserved so the 9-dock never jumps when gloss appears */
+  visibility: hidden;
+  margin: 4px 0 0;
+  padding: 0 12px 2px;
+}
+
+.rw-clue-meaning.is-disabled {
+  display: none !important;
+  visibility: hidden;
+  min-height: 0;
   margin: 0;
   padding: 0;
 }
@@ -974,8 +983,8 @@
 .rw-dock {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: clamp(8px, 2.5vw, 12px);
-  max-width: 300px;
+  gap: clamp(10px, 2.8vw, 14px);
+  max-width: 340px;
   margin: 0 auto;
   justify-items: center;
   perspective: 900px;
@@ -1053,8 +1062,8 @@
 
 .rw-dock-tile.flip-tile {
   position: relative;
-  width: clamp(64px, 19vw, 80px);
-  height: clamp(64px, 19vw, 80px);
+  width: clamp(72px, 21vw, 92px);
+  height: clamp(72px, 21vw, 92px);
   padding: 0;
   border: none;
   border-radius: 16px;
@@ -1086,7 +1095,7 @@
   backface-visibility: hidden;
   border-radius: 16px;
   font-family: 'Jua', sans-serif;
-  font-size: clamp(30px, 9vw, 38px);
+  font-size: clamp(34px, 10vw, 44px);
 }
 
 .rw-dock-front {

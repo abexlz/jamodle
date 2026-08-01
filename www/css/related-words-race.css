@@ -472,6 +472,21 @@ body.rw-race-page .race-main #rw-race-game {
   height: clamp(68px, 19vw, 84px);
 }
 
+.rw-race-mode .rw-clue-meaning {
+  margin-top: 2px;
+  margin-bottom: 2px;
+  font-size: clamp(15px, 4.8vw, 21px);
+  color: rgba(255, 255, 255, 0.94);
+  text-shadow: 0 1px 8px rgba(0, 40, 50, 0.35);
+  min-height: 1.25em;
+}
+
+.rw-race-mode .rw-clue-meaning.is-empty {
+  visibility: hidden;
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+
 .rw-race-mode .rw-trail-track.rw-trail--race.rw-trail--solo {
   height: clamp(36px, 10vw, 44px);
 }
@@ -1022,19 +1037,19 @@ html.reduce-motion .rw-reveal-letter {
 }
 
 .rw-race-mode .rw-dock {
-  max-width: min(270px, 78vw);
-  gap: clamp(6px, 1.8vw, 10px);
+  max-width: min(340px, 92vw);
+  gap: clamp(10px, 2.6vw, 14px);
 }
 
 .rw-race-mode .rw-dock-tile.flip-tile {
-  width: clamp(48px, 14vw, 64px);
-  height: clamp(48px, 14vw, 64px);
-  border-radius: 12px;
+  width: clamp(68px, 19vw, 88px);
+  height: clamp(68px, 19vw, 88px);
+  border-radius: 14px;
 }
 
 .rw-race-mode .rw-dock-face {
-  font-size: clamp(24px, 7vw, 34px);
-  border-radius: 12px;
+  font-size: clamp(32px, 9vw, 42px);
+  border-radius: 14px;
 }
 
 .rw-race-mode .rw-dock-label {
@@ -1054,12 +1069,12 @@ html.reduce-motion .rw-reveal-letter {
   }
 
   .rw-race-mode .rw-dock-tile.flip-tile {
-    width: clamp(42px, 12vw, 54px);
-    height: clamp(42px, 12vw, 54px);
+    width: clamp(58px, 16vw, 72px);
+    height: clamp(58px, 16vw, 72px);
   }
 
   .rw-race-mode .rw-dock-face {
-    font-size: clamp(20px, 6vw, 28px);
+    font-size: clamp(28px, 8vw, 36px);
   }
 
   .rw-vs-slots .rw-slot.flip-tile,
@@ -1094,19 +1109,19 @@ html.reduce-motion .rw-reveal-letter {
   }
 
   .rw-race-mode .rw-dock {
-    gap: 5px;
-    max-width: 220px;
+    gap: 8px;
+    max-width: min(300px, 88vw);
   }
 
   .rw-race-mode .rw-dock-tile.flip-tile {
-    width: clamp(38px, 11vw, 48px);
-    height: clamp(38px, 11vw, 48px);
-    border-radius: 10px;
+    width: clamp(52px, 15vw, 64px);
+    height: clamp(52px, 15vw, 64px);
+    border-radius: 12px;
   }
 
   .rw-race-mode .rw-dock-face {
-    font-size: clamp(18px, 5.5vw, 24px);
-    border-radius: 10px;
+    font-size: clamp(24px, 7vw, 32px);
+    border-radius: 12px;
   }
 }
 

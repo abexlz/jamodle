@@ -1309,7 +1309,11 @@
       track.classList.remove('advancing', 'active');
       track.classList.toggle('rw-trail--race', this.raceMode);
       track.classList.toggle('rw-trail--solo', this.raceMode && count === 1);
-      this.loadClueDefinition(words[words.length - 1]);
+      const clueWord = words[words.length - 1];
+      this.loadClueDefinition(clueWord);
+      if (this.raceMode) {
+        this.speakClueWord(clueWord);
+      }
     }
 
     createTrailWordElement(word, { slot = 0, isClue = false, isEntering = false } = {}) {
@@ -1341,11 +1345,21 @@
     }
 
     shouldShowTrailSpeaker() {
+      // 1v1 auto-pronounces the clue — no manual speaker button.
+      if (this.raceMode) return false;
       return global.UserPreferences?.get?.().pronunciation !== false;
     }
 
     shouldShowTrailDefinitions() {
       return global.UserPreferences?.shouldShowEnglish?.() !== false;
+    }
+
+    speakClueWord(word) {
+      const q = String(word || '').trim();
+      if (!q) return;
+      if (global.UserPreferences?.get?.().pronunciation === false) return;
+      global.KoreanTTS?.prime?.();
+      global.KoreanTTS?.speak?.(q, wordChainSpeakOpts());
     }
 
     bindTrailSpeak() {
@@ -1359,15 +1373,21 @@
         e.stopPropagation();
         const word = btn.dataset.word;
         if (!word) return;
-        global.KoreanTTS?.prime?.();
-        global.KoreanTTS?.speak?.(word, wordChainSpeakOpts());
+        this.speakClueWord(word);
       });
     }
 
     updateTrailDefinition(word, meaning) {
       const el = this.els.clueMeaning;
       if (!el) return;
-      if (!this.shouldShowTrailDefinitions() || !word) {
+      if (!this.shouldShowTrailDefinitions()) {
+        el.textContent = '';
+        el.classList.add('is-empty', 'is-disabled');
+        el.removeAttribute('data-word');
+        return;
+      }
+      el.classList.remove('is-disabled');
+      if (!word) {
         el.textContent = '';
         el.classList.add('is-empty');
         el.removeAttribute('data-word');
@@ -1466,7 +1486,7 @@
       return candidates;
     }
 
-    async resolveClueMeaning(word) {
+    resolveClueMeaningLocal(word) {
       const q = String(word || '').trim();
       if (!q) return '';
 
@@ -1474,6 +1494,19 @@
       const WCM = global.WordChainContextMeanings;
       const curated = WCM?.pickCuratedSense?.(q, context);
       if (curated) return curated;
+
+      const candidates = this.collectMeaningCandidates(q, null);
+      const picked = WCM?.pickBestCandidate?.(candidates, context);
+      if (picked) return picked;
+      return candidates[0]?.meaning || '';
+    }
+
+    async resolveClueMeaning(word) {
+      const q = String(word || '').trim();
+      if (!q) return '';
+
+      const local = this.resolveClueMeaningLocal(q);
+      if (local) return local;
 
       let lookupResult = null;
       const DS = global.DictionaryService;
@@ -1486,6 +1519,8 @@
         if (direct) return direct;
       }
 
+      const context = this.getMeaningContext();
+      const WCM = global.WordChainContextMeanings;
       const candidates = this.collectMeaningCandidates(q, lookupResult);
       const picked = WCM?.pickBestCandidate?.(candidates, context);
       if (picked) return picked;
@@ -1502,6 +1537,15 @@
       const cached = this._trailMeaningCache?.get(cacheKey);
       if (cached) {
         this.updateTrailDefinition(word, cached);
+        return;
+      }
+
+      // Prefer local glosses immediately so the English line is near-instant.
+      const local = this.resolveClueMeaningLocal(word);
+      if (local) {
+        this._trailMeaningCache?.set(cacheKey, local);
+        this.updateTrailDefinition(word, local);
+        global.DictionaryService?.prefetchWord?.(word);
         return;
       }
 
