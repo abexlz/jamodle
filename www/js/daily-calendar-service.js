@@ -124,12 +124,14 @@
     if (isToday(dateKey)) return true;
     if (isDateCompleted(dateKey)) return true;
     if (isUnlockedPast(dateKey)) return true;
+    if (global.BuffService?.hasDailyUnlockPass?.()) return true;
     return false;
   }
 
   function getPlayCost(dateKey) {
     if (!isPastDate(dateKey)) return 0;
     if (isDateCompleted(dateKey) || isUnlockedPast(dateKey)) return 0;
+    if (global.BuffService?.hasDailyUnlockPass?.()) return 0;
     return PAST_DAY_COST;
   }
 

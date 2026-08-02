@@ -1366,6 +1366,7 @@
     "buy": "구매",
     "owned": "보유함",
     "quantity": "보유: {{count}}개",
+    "activeFor": "활성: {{time}}",
     "applyTheme": "적용",
     "purchaseSuccess": "구매 완료!",
     "insufficientCoins": "코인이 부족해요.",
@@ -1389,7 +1390,19 @@
       "hintToken": "힌트 토큰",
       "hintTokenDesc": "Wordle에서 음절·제거·뜻 힌트에 사용",
       "extraGuess": "추가 시도권",
-      "extraGuessDesc": "기회가 끝날 때 한 번 더 추측"
+      "extraGuessDesc": "기회가 끝날 때 한 번 더 추측",
+      "dailyUnlock7": "7일 데일리 언락",
+      "dailyUnlock7Desc": "7일 동안 지난 데일리 캘린더를 무료로 플레이",
+      "dailyUnlock7Short": "7일",
+      "dailyUnlock7Tag": "패스",
+      "xpBoost2x15": "XP 2배 (15분)",
+      "xpBoost2x15Desc": "15분 동안 획득 XP 2배",
+      "xpBoost2x15Short": "XP ×2",
+      "xpBoost2x15Tag": "15분",
+      "coinBoost2x15": "코인 2배 (15분)",
+      "coinBoost2x15Desc": "15분 동안 코인 보상 2배",
+      "coinBoost2x15Short": "코인 ×2",
+      "coinBoost2x15Tag": "15분"
     },
     "titles": {
       "wordsmith": "단어 장인",

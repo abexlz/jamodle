@@ -4,7 +4,7 @@
 (function (global) {
   'use strict';
 
-  const STYLES_HREF = 'css/chest-reward.css?v=5';
+  const STYLES_HREF = 'css/chest-reward.css?v=6';
   const CHEST_CLOSED = 'assets/chests/chest-closed.png';
   const CHEST_OPEN = 'assets/chests/chest-open.png';
   const COIN_SRC = 'assets/coin.png';
@@ -30,7 +30,16 @@
     { kind: 'xp', amount: 50, tier: 'rare' },
     { kind: 'hint', amount: 1, tier: 'uncommon' },
     { kind: 'heart', amount: 1, tier: 'uncommon' },
+    { kind: 'buff', buffId: 'dailyUnlock7', tier: 'legendary' },
+    { kind: 'buff', buffId: 'xpBoost2x15', tier: 'rare' },
+    { kind: 'buff', buffId: 'coinBoost2x15', tier: 'rare' },
   ];
+
+  const BUFF_ICONS = {
+    dailyUnlock7: 'assets/shop/daily-unlock-7.png',
+    xpBoost2x15: 'assets/shop/xp-boost-2x.png',
+    coinBoost2x15: 'assets/shop/coin-boost-2x.png',
+  };
 
   let activeOverlay = null;
   let opening = false;
@@ -65,7 +74,12 @@
   }
 
   function preloadImages() {
-    [CHEST_CLOSED, CHEST_OPEN, COIN_SRC].forEach((src) => {
+    [
+      CHEST_CLOSED,
+      CHEST_OPEN,
+      COIN_SRC,
+      ...Object.values(BUFF_ICONS),
+    ].forEach((src) => {
       const img = new Image();
       img.src = src;
     });
@@ -93,16 +107,28 @@
 
   function buildReelItems(reward) {
     const coins = Math.max(0, Math.floor(Number(reward.coins) || 0));
+    const bonusItem = typeof reward.bonusItem === 'string' ? reward.bonusItem : null;
     const items = [];
     for (let i = 0; i < REEL_COUNT; i++) {
       if (i === WINNER_INDEX) {
-        items.push({
-          kind: 'coins',
-          amount: coins,
-          tier: winnerTier(coins),
-          xp: Math.max(0, Math.floor(Number(reward.xp) || 0)),
-          winner: true,
-        });
+        if (bonusItem && BUFF_ICONS[bonusItem]) {
+          items.push({
+            kind: 'buff',
+            buffId: bonusItem,
+            tier: 'legendary',
+            coins,
+            xp: Math.max(0, Math.floor(Number(reward.xp) || 0)),
+            winner: true,
+          });
+        } else {
+          items.push({
+            kind: 'coins',
+            amount: coins,
+            tier: winnerTier(coins),
+            xp: Math.max(0, Math.floor(Number(reward.xp) || 0)),
+            winner: true,
+          });
+        }
       } else {
         items.push({ ...pickFiller(coins), winner: false });
       }
@@ -111,6 +137,10 @@
   }
 
   function cardIconHtml(item) {
+    if (item.kind === 'buff') {
+      const src = BUFF_ICONS[item.buffId] || COIN_SRC;
+      return `<img class="chest-reel-buff-img" src="${escapeHtml(src)}" alt="" width="40" height="40" decoding="async" draggable="false">`;
+    }
     if (item.kind === 'coins') {
       return global.CoinIcon?.html?.('coin-icon coin-icon--md') || '🪙';
     }
@@ -121,12 +151,14 @@
   }
 
   function cardLabel(item) {
+    if (item.kind === 'buff') return t(`shop.items.${item.buffId}Short`) || t(`shop.items.${item.buffId}`) || 'BUFF';
     if (item.kind === 'xp') return `+${item.amount}`;
     if (item.kind === 'hint' || item.kind === 'heart') return `×${item.amount}`;
     return String(item.amount);
   }
 
   function cardSub(item) {
+    if (item.kind === 'buff') return t(`shop.items.${item.buffId}Tag`) || 'BUFF';
     if (item.kind === 'xp') return 'XP';
     if (item.kind === 'hint') return t('quests.reelHint') || 'Hint';
     if (item.kind === 'heart') return t('quests.reelHeart') || 'Life';
@@ -184,6 +216,12 @@
             <span>+${escapeHtml(String(reward.coins || 0))}</span>
           </div>
           <div class="chest-reward-xp">+${escapeHtml(String(reward.xp || 0))} XP</div>
+          ${reward.bonusItem ? `
+            <div class="chest-reward-bonus">
+              <img class="chest-reward-bonus-img" src="${escapeHtml(BUFF_ICONS[reward.bonusItem] || COIN_SRC)}" alt="" width="36" height="36" decoding="async" draggable="false">
+              <span>${escapeHtml(t(`shop.items.${reward.bonusItem}`) || reward.bonusItem)}</span>
+            </div>
+          ` : ''}
         </div>
         <button type="button" class="chest-reward-continue" id="chest-reward-continue">
           ${escapeHtml(t('quests.chestContinue'))}

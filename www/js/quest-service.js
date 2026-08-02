@@ -584,6 +584,11 @@
           coins: def.coins,
           icon: def.icon,
         };
+        // Weekly chests often drop a timed buff; medium dailies less often.
+        const dropChance = def.tier === 'weekly' ? 0.45 : 0.22;
+        if (Math.random() < dropChance) {
+          chest.bonusItem = global.BuffService?.pickChestBuffId?.() || 'xpBoost2x15';
+        }
         pending.push(chest);
         results.push({
           questId: entry.questId,
@@ -593,12 +598,13 @@
           chest: true,
           pending: true,
           pendingChestId: chest.id,
+          bonusItem: chest.bonusItem || null,
         });
         return;
       }
 
-      profile.totalXp = (profile.totalXp || 0) + def.xp;
-      profile.coins = (profile.coins || 0) + def.coins;
+      profile.totalXp = (profile.totalXp || 0) + (global.BuffService?.scaleXp?.(def.xp, profile) ?? def.xp);
+      profile.coins = (profile.coins || 0) + (global.BuffService?.scaleCoins?.(def.coins, profile) ?? def.coins);
       results.push({
         questId: entry.questId,
         xp: def.xp,
@@ -637,13 +643,20 @@
     const chest = pending[idx];
     const coinsBefore = profile.coins || 0;
     pending.splice(idx, 1);
-    profile.totalXp = (profile.totalXp || 0) + (chest.xp || 0);
-    profile.coins = coinsBefore + (chest.coins || 0);
+    const xpGain = global.BuffService?.scaleXp?.(chest.xp || 0, profile) ?? (chest.xp || 0);
+    const coinGain = global.BuffService?.scaleCoins?.(chest.coins || 0, profile) ?? (chest.coins || 0);
+    profile.totalXp = (profile.totalXp || 0) + xpGain;
+    profile.coins = coinsBefore + coinGain;
+    if (chest.bonusItem) {
+      global.BuffService?.activate?.(chest.bonusItem, { profile, skipSave: true });
+    }
     global.ProfileService?.saveProfile?.(profile);
     global.PlayerHud?.refresh?.();
 
     return {
       ...chest,
+      xpGranted: xpGain,
+      coinsGranted: coinGain,
       coinsBefore,
     };
   }

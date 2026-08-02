@@ -170,6 +170,7 @@
     }
 
     const prevLevel = global.LevelUtils?.getLevelFromTotalXp(profile.totalXp)?.level || 1;
+    xpEarned = global.BuffService?.scaleXp?.(xpEarned, profile) ?? xpEarned;
     profile.totalXp += xpEarned;
     profile.stats.totalActivities += 1;
     global.ProfileService?.markLearningDay?.(profile, dayKey);

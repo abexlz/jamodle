@@ -29,6 +29,27 @@
   const ITEMS = {
     hintToken: { id: 'hintToken', price: 15, icon: '🪙', useHintTokens: true },
     extraGuess: { id: 'extraGuess', field: 'extraGuessTokens', price: 40, icon: '❤️' },
+    dailyUnlock7: {
+      id: 'dailyUnlock7',
+      price: 250,
+      icon: '📅',
+      iconSrc: 'assets/shop/daily-unlock-7.png',
+      buffId: 'dailyUnlock7',
+    },
+    xpBoost2x15: {
+      id: 'xpBoost2x15',
+      price: 70,
+      icon: '⭐',
+      iconSrc: 'assets/shop/xp-boost-2x.png',
+      buffId: 'xpBoost2x15',
+    },
+    coinBoost2x15: {
+      id: 'coinBoost2x15',
+      price: 90,
+      icon: '🪙',
+      iconSrc: 'assets/shop/coin-boost-2x.png',
+      buffId: 'coinBoost2x15',
+    },
   };
 
   function loadProfile() {
@@ -64,9 +85,20 @@
   function getItemCount(itemId) {
     const item = ITEMS[itemId];
     if (!item) return 0;
+    if (item.buffId) {
+      return global.BuffService?.isActive?.(item.buffId) ? 1 : 0;
+    }
     if (item.useHintTokens) return global.HintTokens?.get?.() ?? 0;
     const p = loadProfile();
     return p ? Math.max(0, parseInt(p[item.field], 10) || 0) : 0;
+  }
+
+  function getItemStatusLabel(itemId) {
+    const item = ITEMS[itemId];
+    if (!item?.buffId) return null;
+    const remaining = global.BuffService?.getRemainingMs?.(item.buffId) || 0;
+    if (remaining <= 0) return null;
+    return global.BuffService?.formatRemaining?.(remaining) || null;
   }
 
   function ownsTheme(themeId) {
@@ -93,14 +125,19 @@
     return getCoins() >= price;
   }
 
-  function grantCoins(amount) {
+  function grantCoins(amount, opts = {}) {
     const n = Math.max(0, parseInt(amount, 10) || 0);
     if (!n) return getCoins();
-    const profile = loadProfile();
+    const profile = opts.profile || loadProfile();
     if (!profile) return 0;
-    profile.coins = (profile.coins || 0) + n;
-    saveProfile(profile);
-    global.PlayerHud?.refresh?.();
+    const scaled = opts.skipBoost
+      ? n
+      : (global.BuffService?.scaleCoins?.(n, profile) ?? n);
+    profile.coins = (profile.coins || 0) + scaled;
+    if (!opts.skipSave) {
+      saveProfile(profile);
+      global.PlayerHud?.refresh?.();
+    }
     return profile.coins;
   }
 
@@ -108,7 +145,8 @@
     const from = Math.max(1, parseInt(prevLevel, 10) || 1);
     const to = Math.max(from, parseInt(newLevel, 10) || from);
     if (to <= from || !profile) return 0;
-    const coins = (to - from) * COINS_PER_LEVEL;
+    const base = (to - from) * COINS_PER_LEVEL;
+    const coins = global.BuffService?.scaleCoins?.(base, profile) ?? base;
     profile.coins = (profile.coins || 0) + coins;
     return coins;
   }
@@ -181,6 +219,21 @@
 
     profile.coins -= item.price;
 
+    if (item.buffId) {
+      const activated = global.BuffService?.activate?.(item.buffId, {
+        profile,
+        skipSave: true,
+      });
+      saveProfile(profile);
+      global.PlayerHud?.refresh?.();
+      return {
+        ok: true,
+        buffId: item.buffId,
+        remainingMs: activated?.remainingMs || 0,
+        coins: profile.coins,
+      };
+    }
+
     if (item.useHintTokens) {
       saveProfile(profile);
       global.HintTokens?.grant?.(1);
@@ -192,6 +245,11 @@
     saveProfile(profile);
     global.PlayerHud?.refresh?.();
     return { ok: true, count: profile[item.field], coins: profile.coins };
+  }
+
+  /** Grant a shop buff without spending coins (chest / gift). */
+  function grantBuffItem(buffId, opts = {}) {
+    return global.BuffService?.activate?.(buffId, opts) || { ok: false, reason: 'no-buff-service' };
   }
 
   function selectTheme(themeId) {
@@ -224,6 +282,7 @@
     getCoins,
     getInventory,
     getItemCount,
+    getItemStatusLabel,
     ownsTheme,
     ownsTitle,
     ownsFrame,
@@ -235,6 +294,7 @@
     buyTitle,
     buyFrame,
     buyItem,
+    grantBuffItem,
     selectTheme,
     spendExtraGuessToken,
   };

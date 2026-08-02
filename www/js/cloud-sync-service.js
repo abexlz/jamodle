@@ -116,6 +116,14 @@
       totalXp: maxInt(left.totalXp, right.totalXp),
       coins: maxInt(left.coins, right.coins),
       extraGuessTokens: maxInt(left.extraGuessTokens, right.extraGuessTokens),
+      activeBuffs: {
+        dailyUnlockUntil: maxInt(
+          left.activeBuffs?.dailyUnlockUntil,
+          right.activeBuffs?.dailyUnlockUntil,
+        ),
+        xp2xUntil: maxInt(left.activeBuffs?.xp2xUntil, right.activeBuffs?.xp2xUntil),
+        coins2xUntil: maxInt(left.activeBuffs?.coins2xUntil, right.activeBuffs?.coins2xUntil),
+      },
       lastDailyGiftDayKey: loginStreak.last,
       dailyLoginStreakDay: loginStreak.day,
       lastCelebratedLevel: maxInt(left.lastCelebratedLevel, right.lastCelebratedLevel),

@@ -192,10 +192,12 @@
     if (!profile || !reward) return profile;
     switch (reward.type) {
       case 'coins':
-        profile.coins = (profile.coins || 0) + reward.amount;
+        profile.coins = (profile.coins || 0)
+          + (global.BuffService?.scaleCoins?.(reward.amount, profile) ?? reward.amount);
         break;
       case 'xp':
-        profile.totalXp = (profile.totalXp || 0) + reward.amount;
+        profile.totalXp = (profile.totalXp || 0)
+          + (global.BuffService?.scaleXp?.(reward.amount, profile) ?? reward.amount);
         break;
       case 'hintToken':
         global.HintTokens?.grant?.(reward.amount);

@@ -340,6 +340,22 @@
   flex-shrink: 0;
 }
 
+.shop-item-icon--img {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+}
+
+.shop-item-icon-img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.18));
+}
+
 .shop-item-icon .coin-icon {
   width: 24px;
   height: 24px;

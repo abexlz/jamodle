@@ -448,6 +448,34 @@
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35), 0 0 10px rgba(0, 0, 0, 0.45);
 }
 
+.chest-reward-bonus {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  font-family: 'Jua', sans-serif;
+  font-size: 0.95rem;
+  color: #fff;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
+}
+
+.chest-reward-bonus-img,
+.chest-reel-buff-img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.chest-reel-buff-img {
+  width: 40px;
+  height: 40px;
+}
+
 .chest-reward-continue {
   margin-top: 6px;
   min-width: 160px;

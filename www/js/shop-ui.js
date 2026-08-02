@@ -93,21 +93,34 @@
     }).join('');
   }
 
+  function itemIconHtml(item) {
+    if (item.iconSrc) {
+      return `<img class="shop-item-icon-img" src="${escapeHtml(item.iconSrc)}" alt="" width="44" height="44" decoding="async" draggable="false">`;
+    }
+    return global.CoinIcon?.resolve?.(item.icon, 'coin-icon coin-icon--md') || escapeHtml(item.icon);
+  }
+
   function renderItemsBlock(inv) {
     const items = Object.entries(SS().ITEMS).map(([key, item]) => ({ key, ...item }));
     return items.map((item) => {
-      const count = item.useHintTokens
-        ? (global.HintTokens?.get?.() ?? 0)
-        : (inv[item.field] || 0);
+      const activeLabel = item.buffId ? SS()?.getItemStatusLabel?.(item.key) : null;
+      const count = item.buffId
+        ? null
+        : (item.useHintTokens
+          ? (global.HintTokens?.get?.() ?? 0)
+          : (inv[item.field] || 0));
       const name = t(`shop.items.${item.key}`);
       const desc = t(`shop.items.${item.key}Desc`);
+      const qty = activeLabel
+        ? t('shop.activeFor', { time: activeLabel })
+        : (count == null ? '' : t('shop.quantity', { count }));
 
       return `
         <article class="shop-item-card shop-item-card--row" title="${escapeHtml(desc)}">
-          <span class="shop-item-icon" aria-hidden="true">${global.CoinIcon?.resolve?.(item.icon, 'coin-icon coin-icon--md') || escapeHtml(item.icon)}</span>
+          <span class="shop-item-icon${item.iconSrc ? ' shop-item-icon--img' : ''}" aria-hidden="true">${itemIconHtml(item)}</span>
           <div class="shop-item-main">
             <span class="shop-item-name">${escapeHtml(name)}</span>
-            <span class="shop-item-qty">${escapeHtml(t('shop.quantity', { count }))}</span>
+            ${qty ? `<span class="shop-item-qty">${escapeHtml(qty)}</span>` : `<span class="shop-item-qty">${escapeHtml(desc)}</span>`}
           </div>
           <button type="button" class="shop-buy-btn shop-buy-btn--compact" data-buy-item="${escapeHtml(item.key)}"
             ${inv.coins >= item.price ? '' : 'disabled'}

@@ -1366,6 +1366,7 @@
     "buy": "Buy",
     "owned": "Owned",
     "quantity": "Owned: {{count}}",
+    "activeFor": "Active: {{time}}",
     "applyTheme": "Apply",
     "purchaseSuccess": "Purchase complete!",
     "insufficientCoins": "Not enough coins.",
@@ -1389,7 +1390,19 @@
       "hintToken": "Hint token",
       "hintTokenDesc": "Spend in Wordle for syllable, elimination, or meaning hints",
       "extraGuess": "Extra-guess token",
-      "extraGuessDesc": "Get one more guess when you'd run out"
+      "extraGuessDesc": "Get one more guess when you'd run out",
+      "dailyUnlock7": "7-day daily unlock",
+      "dailyUnlock7Desc": "Play any past daily calendar day free for 7 days",
+      "dailyUnlock7Short": "7-Day",
+      "dailyUnlock7Tag": "PASS",
+      "xpBoost2x15": "XP 2× (15 min)",
+      "xpBoost2x15Desc": "Double XP from play for 15 minutes",
+      "xpBoost2x15Short": "XP ×2",
+      "xpBoost2x15Tag": "15 MIN",
+      "coinBoost2x15": "Coins 2× (15 min)",
+      "coinBoost2x15Desc": "Double coin rewards for 15 minutes",
+      "coinBoost2x15Short": "Coins ×2",
+      "coinBoost2x15Tag": "15 MIN"
     },
     "titles": {
       "wordsmith": "Word smith",

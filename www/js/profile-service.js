@@ -44,6 +44,11 @@
       purchasedTitleIds: [],
       selectedCosmeticTheme: 'default',
       extraGuessTokens: 0,
+      activeBuffs: {
+        dailyUnlockUntil: 0,
+        xp2xUntil: 0,
+        coins2xUntil: 0,
+      },
       lastDailyGiftDayKey: '',
       dailyLoginStreakDay: 1,
       questState: emptyQuestState(),
@@ -111,6 +116,12 @@
         ? raw.selectedCosmeticTheme
         : 'default',
       extraGuessTokens: Math.max(0, parseInt(raw.extraGuessTokens, 10) || 0),
+      activeBuffs: global.BuffService?.normalizeActiveBuffs?.(raw.activeBuffs)
+        || {
+          dailyUnlockUntil: Math.max(0, parseInt(raw.activeBuffs?.dailyUnlockUntil, 10) || 0),
+          xp2xUntil: Math.max(0, parseInt(raw.activeBuffs?.xp2xUntil, 10) || 0),
+          coins2xUntil: Math.max(0, parseInt(raw.activeBuffs?.coins2xUntil, 10) || 0),
+        },
       lastDailyGiftDayKey: typeof raw.lastDailyGiftDayKey === 'string' ? raw.lastDailyGiftDayKey : '',
       dailyLoginStreakDay: Math.min(999, Math.max(1, parseInt(raw.dailyLoginStreakDay, 10) || 1)),
       questState: normalizeQuestState(raw.questState),
