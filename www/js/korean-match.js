@@ -1186,7 +1186,8 @@
       this.hintsUsedThisRound = false;
 
       this.feedback = new GameFeedback(this.root.querySelector('#match-feedback'));
-      if (this.turnBased) this.feedback.suppressed = true;
+      // Status pill under the board is retired — slots already show correct/wrong.
+      this.feedback.suppressed = true;
 
       this.mergeDock = new global.VowelMergeDock(this.els.mergeDockEl, {
         getTile: (id) => this.tileMap[id],
