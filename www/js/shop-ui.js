@@ -93,6 +93,57 @@
     }).join('');
   }
 
+  function renderCoinEarnBlock() {
+    const MS = global.MonetizationService;
+    const packs = MS?.getCoinPacks?.() || [];
+    const ad = MS?.getAdStatus?.() || { remaining: 0, cooldownMs: 0, rewardCoins: 25, dailyLimit: 5 };
+    const adDisabled = ad.remaining <= 0 || ad.cooldownMs > 0;
+    let adHint = t('shop.adRemaining', { n: ad.remaining, max: ad.dailyLimit });
+    if (ad.remaining <= 0) adHint = t('shop.adDailyLimit');
+    else if (ad.cooldownMs > 0) {
+      adHint = t('shop.adCooldown', { sec: Math.ceil(ad.cooldownMs / 1000) });
+    }
+
+    const packCards = packs.map((pack) => {
+      const badge = pack.badge
+        ? `<span class="shop-pack-badge shop-pack-badge--${escapeHtml(pack.badge)}">${escapeHtml(t(`shop.packBadge.${pack.badge}`))}</span>`
+        : '';
+      return `
+        <article class="shop-item-card shop-pack-card">
+          ${badge}
+          <span class="shop-item-icon" aria-hidden="true">${global.CoinIcon?.html?.('coin-icon coin-icon--md') || '🪙'}</span>
+          <div class="shop-item-main">
+            <span class="shop-item-name">${escapeHtml(t('shop.packCoins', { n: pack.coins }))}</span>
+            <span class="shop-item-qty">${escapeHtml(pack.priceLabel)}</span>
+          </div>
+          <button type="button" class="shop-buy-btn shop-buy-btn--compact shop-buy-btn--cash"
+            data-buy-pack="${escapeHtml(pack.id)}"
+            aria-label="${escapeHtml(t('shop.buyPack', { n: pack.coins, price: pack.priceLabel }))}">
+            ${escapeHtml(pack.priceLabel)}
+          </button>
+        </article>
+      `;
+    }).join('');
+
+    return `
+      <h3 class="shop-subsection-title">${escapeHtml(t('shop.tabGetCoins'))}</h3>
+      <div class="shop-item-grid shop-consumables-list shop-pack-list">${packCards}</div>
+      <article class="shop-item-card shop-item-card--row shop-ad-card">
+        <span class="shop-item-icon" aria-hidden="true">📺</span>
+        <div class="shop-item-main">
+          <span class="shop-item-name">${escapeHtml(t('shop.watchAdTitle', { n: ad.rewardCoins }))}</span>
+          <span class="shop-item-qty">${escapeHtml(adHint)}</span>
+        </div>
+        <button type="button" class="shop-buy-btn shop-buy-btn--compact shop-buy-btn--ad"
+          data-watch-ad-coins
+          ${adDisabled ? 'disabled' : ''}
+          aria-label="${escapeHtml(t('shop.watchAdTitle', { n: ad.rewardCoins }))}">
+          ${escapeHtml(t('shop.watchAdCta'))}
+        </button>
+      </article>
+    `;
+  }
+
   function itemIconHtml(item) {
     if (item.iconSrc) {
       return `<img class="shop-item-icon-img" src="${escapeHtml(item.iconSrc)}" alt="" width="44" height="44" decoding="async" draggable="false">`;
@@ -158,6 +209,7 @@
 
         <div class="shop-scope-panel${scope === 'item' ? '' : ' hidden'}" data-shop-scope-panel="item"
           role="tabpanel" aria-labelledby="shop-scope-item">
+          ${renderCoinEarnBlock()}
           <h3 class="shop-subsection-title" id="shop-scope-item">${escapeHtml(t('shop.tabItems'))}</h3>
           <div class="shop-item-grid shop-consumables-list">${renderItemsBlock(inv)}</div>
         </div>
@@ -254,6 +306,57 @@
           refreshSection(root);
         } else if (result?.reason === 'insufficient') {
           showMessage(section.closest('.menu-sections') || section, t('shop.insufficientCoins'), 'error');
+        }
+      });
+    });
+
+    section.querySelectorAll('[data-buy-pack]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        try {
+          const result = await global.MonetizationService?.purchaseCoinPack?.(btn.dataset.buyPack);
+          const host = section.closest('.menu-sections') || section;
+          if (result?.ok) {
+            showMessage(host, t('shop.packGranted', { n: result.coins }), 'ok');
+            refreshSection(root);
+            global.PlayerHud?.refresh?.();
+          } else if (result?.reason === 'cancelled') {
+            showMessage(host, '', '');
+          } else if (result?.reason === 'iap-unavailable' || result?.reason === 'unsupported-iap') {
+            showMessage(host, t('shop.iapUnavailable'), 'error');
+          } else {
+            showMessage(host, t('shop.iapFailed'), 'error');
+          }
+        } finally {
+          btn.disabled = false;
+        }
+      });
+    });
+
+    section.querySelectorAll('[data-watch-ad-coins]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        try {
+          const result = await global.MonetizationService?.watchAdForCoins?.();
+          const host = section.closest('.menu-sections') || section;
+          if (result?.ok) {
+            showMessage(host, t('shop.adGranted', { n: result.coins }), 'ok');
+            refreshSection(root);
+            global.PlayerHud?.refresh?.();
+          } else if (result?.reason === 'daily-limit') {
+            showMessage(host, t('shop.adDailyLimit'), 'error');
+            refreshSection(root);
+          } else if (result?.reason === 'cooldown') {
+            const sec = Math.ceil((result.status?.cooldownMs || 0) / 1000);
+            showMessage(host, t('shop.adCooldown', { sec }), 'error');
+            refreshSection(root);
+          } else {
+            showMessage(host, t('shop.adFailed'), 'error');
+            refreshSection(root);
+          }
+        } finally {
+          // refreshSection rebinds; if still on same node, re-enable
+          btn.disabled = false;
         }
       });
     });

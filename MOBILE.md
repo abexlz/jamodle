@@ -204,3 +204,9 @@ npx cap sync             # after every HTML change
 npm run open:ios         # Xcode
 npm run open:android     # Android Studio
 ```
+
+---
+
+## Monetization (coins + ads)
+
+See [MONETIZATION.md](./MONETIZATION.md) for AdMob + App Store / Play IAP setup.

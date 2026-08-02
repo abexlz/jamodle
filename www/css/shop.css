@@ -432,6 +432,106 @@
   cursor: default;
 }
 
+.shop-buy-btn--cash {
+  border-color: #7BC4A8;
+  background: linear-gradient(180deg, #E8FFF4 0%, #C8F0DC 100%);
+  color: #1F6B4A;
+  min-width: 64px;
+}
+
+.shop-buy-btn--ad {
+  border-color: #7eb6ff;
+  background: linear-gradient(180deg, #f4f9ff 0%, #e7f1ff 100%);
+  color: #1a4a7a;
+}
+
+.shop-pack-card {
+  position: relative;
+}
+
+.shop-pack-badge {
+  position: absolute;
+  top: -6px;
+  right: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #fff;
+  background: #5B8DEF;
+  box-shadow: 0 2px 0 rgba(40, 70, 140, 0.35);
+}
+
+.shop-pack-badge--best {
+  background: #E8A838;
+  box-shadow: 0 2px 0 rgba(140, 90, 20, 0.35);
+}
+
+.shop-pack-badge--popular {
+  background: #5B8DEF;
+}
+
+.shop-ad-card {
+  margin-top: 8px;
+}
+
+.shop-pack-list {
+  margin-bottom: 4px;
+}
+
+.monetization-ad-preview {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(10, 28, 36, 0.72);
+  backdrop-filter: blur(6px);
+}
+
+.monetization-ad-preview-card {
+  width: min(100%, 320px);
+  padding: 22px 20px 18px;
+  border-radius: 20px;
+  background: linear-gradient(165deg, #1a5f6b 0%, #124652 55%, #0f3d47 100%);
+  color: #fff;
+  text-align: center;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.35);
+}
+
+.monetization-ad-preview-title {
+  margin: 0 0 8px;
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: 20px;
+}
+
+.monetization-ad-preview-body {
+  margin: 0 0 16px;
+  font-size: 13px;
+  line-height: 1.4;
+  opacity: 0.9;
+}
+
+.monetization-ad-preview-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+}
+
+.monetization-ad-preview-bar > span {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #FFE566, #FFD743);
+  transition: width 0.05s linear;
+}
+
 .shop-theme-select {
   display: inline-flex;
   align-items: center;
