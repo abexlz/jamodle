@@ -2784,12 +2784,14 @@
   body.match-page .jamo-bank {
     padding: 10px 6px;
     gap: 3px;
+    /* Floor only — JS locks the full-round min-height so the dock never shrinks mid-play. */
     min-height: calc(var(--dock-tile-size, var(--tile-size)) + 24px);
     max-height: none;
     overflow-y: visible;
     align-self: auto;
     align-content: flex-start;
     align-items: flex-start;
+    flex: 0 0 auto;
   }
 
   body.match-page .bank-row--versus .jamo-bank {

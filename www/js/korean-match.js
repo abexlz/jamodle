@@ -2135,6 +2135,8 @@
         this.els.bank.appendChild(tile.el);
       });
       this._originalDockCount = defs.length;
+      this._dockLayoutCount = defs.length;
+      this.resetDockLayoutSize();
       this.syncDockTileSize();
     }
 
@@ -2150,6 +2152,19 @@
       return cycle[Math.floor(rng() * cycle.length)];
     }
 
+    /** Clear fitted dock height so the next sync can recompute for a new round. */
+    resetDockLayoutSize() {
+      const bank = this.els.bank;
+      if (!bank) return;
+      bank.style.removeProperty('min-height');
+      bank.style.removeProperty('max-height');
+      this._dockFittedMinHeight = 0;
+    }
+
+    /**
+     * Keep dock tiles at the design max size for this viewport and reserve the
+     * full round footprint so the bank does not shrink as letters leave.
+     */
     syncDockTileSize() {
       const bank = this.els.bank;
       if (!bank || (this.versus && !this.turnBased)) return;
@@ -2161,11 +2176,21 @@
       const rootTile = parseFloat(getComputedStyle(this.root).getPropertyValue('--tile-size'));
       const tileSize = Number.isFinite(rootTile) && rootTile > 0 ? rootTile : 46;
 
-      if (!n) {
-        bank.style.removeProperty('--dock-tile-size');
-        bank.style.removeProperty('--turn-dock-tile-size');
-        bank.style.removeProperty('min-height');
-        bank.style.removeProperty('max-height');
+      // Layout against round capacity, never the remaining visible count.
+      const capacity = Math.max(
+        this._dockLayoutCount || 0,
+        this._originalDockCount || 0,
+        Object.keys(this.tileMap || {}).length,
+        n
+      );
+
+      bank.style.setProperty('--dock-tile-size', `${tileSize}px`);
+      bank.style.setProperty('--turn-dock-tile-size', `${tileSize}px`);
+      bank.style.maxHeight = 'none';
+      bank.style.overflowX = 'hidden';
+      bank.style.overflowY = 'visible';
+
+      if (!capacity) {
         bank.classList.remove('jamo-bank--wrap12');
         bank.removeAttribute('data-dock-fitted');
         return;
@@ -2184,17 +2209,14 @@
       innerW = Math.max(innerW, tileSize);
 
       const cols = Math.max(1, Math.floor((innerW + gap) / (tileSize + gap)));
-      const rows = Math.ceil(n / cols);
+      const rows = Math.ceil(capacity / cols);
       bank.classList.toggle('jamo-bank--wrap12', rows > 1);
 
-      bank.style.setProperty('--dock-tile-size', `${tileSize}px`);
-      bank.style.setProperty('--turn-dock-tile-size', `${tileSize}px`);
-
-      const fittedH = rows * tileSize + gap * Math.max(rows - 1, 0) + padY;
-      bank.style.minHeight = `${Math.ceil(fittedH)}px`;
-      bank.style.maxHeight = 'none';
-      bank.style.overflowX = 'hidden';
-      bank.style.overflowY = 'visible';
+      const fittedH = Math.ceil(rows * tileSize + gap * Math.max(rows - 1, 0) + padY);
+      // Never shrink mid-round as tiles leave the dock.
+      const lockedH = Math.max(this._dockFittedMinHeight || 0, fittedH);
+      this._dockFittedMinHeight = lockedH;
+      bank.style.minHeight = `${lockedH}px`;
       bank.dataset.dockFitted = 'true';
     }
 
@@ -2272,6 +2294,8 @@
         this.els.bank.appendChild(tile.el);
       });
       this._originalDockCount = (tileDefs || []).length;
+      this._dockLayoutCount = (tileDefs || []).length;
+      this.resetDockLayoutSize();
       this.syncDockTileSize();
     }
 
