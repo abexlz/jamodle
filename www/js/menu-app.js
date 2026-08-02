@@ -88,6 +88,11 @@
       return;
     }
 
+    // Resume a parked external match (Word Chain / Match / 1v1).
+    if (next === 'menu' && global.HomeNav?.resumeActiveGame?.()) {
+      return;
+    }
+
     // Park an in-progress daily game before showing shop/quests/learn.
     if (next !== 'menu') {
       global.GameShell?.park?.(next);
