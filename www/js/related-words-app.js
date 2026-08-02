@@ -51,6 +51,33 @@
       .replace(/"/g, '&quot;');
   }
 
+  function normalizeRoundState(raw) {
+    if (!raw || typeof raw !== 'object') return null;
+    const chainId = typeof raw.chainId === 'string' ? raw.chainId : null;
+    const linkIndex = parseInt(raw.linkIndex, 10);
+    if (!chainId || !Number.isFinite(linkIndex) || linkIndex < 0) return null;
+    const slotTileIds = Array.isArray(raw.slotTileIds)
+      ? raw.slotTileIds.map((id) => (typeof id === 'string' ? id : null))
+      : null;
+    const dock = Array.isArray(raw.dock)
+      ? raw.dock.map((item) => ({
+        id: typeof item?.id === 'string' ? item.id : null,
+        used: !!item?.used,
+        slotIndex: Number.isFinite(parseInt(item?.slotIndex, 10)) ? parseInt(item.slotIndex, 10) : null,
+        hintLocked: !!item?.hintLocked,
+      })).filter((item) => item.id)
+      : null;
+    return {
+      chainId,
+      linkIndex,
+      guessCount: Math.max(0, parseInt(raw.guessCount, 10) || 0),
+      hintUsedThisRound: !!raw.hintUsedThisRound,
+      slotTileIds,
+      dock,
+      savedAt: Number(raw.savedAt) || Date.now(),
+    };
+  }
+
   function loadProgress() {
     const data = global.AppStorage ? global.AppStorage.get(PROGRESS_KEY, {}) : {};
     const legacyIndex = parseInt(data.puzzleIndex, 10);
@@ -72,6 +99,7 @@
       solvedInChain: Array.isArray(data.solvedInChain) ? [...data.solvedInChain] : [],
       soloStreak,
       bestSoloStreak,
+      roundState: normalizeRoundState(data.roundState),
     };
   }
 
@@ -133,7 +161,19 @@
 
   if (!global.__rwSoloLeftWired) {
     global.__rwSoloLeftWired = true;
-    global.addEventListener('pagehide', () => markSoloLeft());
+    global.addEventListener('pagehide', () => {
+      const game = global.__relatedWordsGameInstance;
+      if (game?.isSoloMode?.() && typeof game.persistSoloProgress === 'function') {
+        try {
+          game.persistSoloProgress();
+          clearSoloLeftMark();
+        } catch {
+          markSoloLeft();
+        }
+        return;
+      }
+      markSoloLeft();
+    });
   }
 
   function ensureChain(progress) {
@@ -616,6 +656,10 @@
         this.els.board.classList.remove('rw-fade-in', 'rw-round-locked', 'rw-fade-in-active');
       }
 
+      if (!this.raceMode && !opts.skipRoundRestore) {
+        this.restoreSoloRoundState();
+      }
+
       if (!skipTrail) {
         const trailIdx = this.useThemeRotation ? this.globalLinkIndex : linkIndex;
         const trailChain = this.useThemeRotation ? null : chainId;
@@ -802,14 +846,96 @@
     }
 
     resetSoloStreak() {
-      this.progress = saveProgress({ soloStreak: 0 });
+      this.progress = saveProgress({ soloStreak: 0, roundState: null });
       this._lastDisplayedStreak = 0;
       this.updateSoloStreakDisplay({ animate: false });
+    }
+
+    serializeSoloRoundState() {
+      if (!this.puzzle || this.gameOver || this.checking) return null;
+      return {
+        chainId: this.puzzle.chainId,
+        linkIndex: this.puzzle.linkIndex,
+        guessCount: Math.max(0, Number(this.guessCount) || 0),
+        hintUsedThisRound: !!this.hintUsedThisRound,
+        slotTileIds: this.slots.map((tile) => (tile?.id || null)),
+        dock: this.dock.map((tile) => ({
+          id: tile.id,
+          used: !!tile.used,
+          slotIndex: tile.slotIndex == null ? null : tile.slotIndex,
+          hintLocked: !!tile.hintLocked,
+        })),
+        savedAt: Date.now(),
+      };
+    }
+
+    clearSoloRoundState() {
+      const base = loadProgress();
+      if (!base.roundState) return;
+      this.progress = saveProgress({ roundState: null });
+    }
+
+    restoreSoloRoundState() {
+      if (!this.isSoloMode() || !this.puzzle) return false;
+      const saved = normalizeRoundState(loadProgress().roundState);
+      if (!saved) return false;
+      if (saved.chainId !== this.puzzle.chainId || saved.linkIndex !== this.puzzle.linkIndex) {
+        return false;
+      }
+
+      const byId = new Map(this.dock.map((tile) => [tile.id, tile]));
+      if (Array.isArray(saved.dock)) {
+        saved.dock.forEach((item) => {
+          const tile = byId.get(item.id);
+          if (!tile) return;
+          tile.used = false;
+          tile.slotIndex = null;
+          tile.hintLocked = !!item.hintLocked;
+        });
+      }
+
+      this.slots = this.puzzle.answerSyllables.map(() => null);
+      const slotIds = Array.isArray(saved.slotTileIds)
+        ? saved.slotTileIds
+        : (Array.isArray(saved.dock)
+          ? saved.dock
+            .filter((item) => item.used && item.slotIndex != null)
+            .reduce((acc, item) => {
+              acc[item.slotIndex] = item.id;
+              return acc;
+            }, [])
+          : []);
+
+      slotIds.forEach((tileId, index) => {
+        if (!tileId || index >= this.slots.length) return;
+        const tile = byId.get(tileId);
+        if (!tile || this.slots[index]) return;
+        this.slots[index] = tile;
+        tile.used = true;
+        tile.slotIndex = index;
+      });
+
+      this.dock.forEach((tile) => {
+        if (!this.slots.includes(tile)) {
+          tile.used = false;
+          tile.slotIndex = null;
+        }
+      });
+
+      this.guessCount = Math.min(MAX_GUESSES, Math.max(0, saved.guessCount || 0));
+      this.hintUsedThisRound = !!saved.hintUsedThisRound;
+      this._prevGuessCount = this.guessCount;
+      this.awaitingExtraGuess = false;
+      this.gameOver = false;
+      this.won = false;
+      this.checking = false;
+      return true;
     }
 
     persistSoloProgress() {
       if (!this.puzzle) return;
       const base = loadProgress();
+      const roundState = this.serializeSoloRoundState();
       this.progress = saveProgress({
         ...base,
         chainId: this.puzzle.chainId,
@@ -818,8 +944,21 @@
         solvedInChain: Array.isArray(this.progress?.solvedInChain)
           ? [...this.progress.solvedInChain]
           : [],
+        roundState,
       });
       markSavedExit();
+    }
+
+    leaveAndSave() {
+      this.persistSoloProgress();
+      clearSoloLeftMark();
+      global.HomeNav?.setActiveGame?.({
+        href: 'related-words.html',
+        type: 'page',
+        at: Date.now(),
+      });
+      global.PauseQuitUI?.close?.();
+      global.location.href = 'index.html';
     }
 
     openPauseMenu() {
@@ -828,6 +967,7 @@
         mode: 'wordChain',
         streak: this.getSoloStreak(),
         warningKey: 'comboWarning',
+        offerSave: true,
         onResume: () => {},
         onQuit: () => {
           this.resetSoloStreak();
@@ -835,14 +975,7 @@
           global.HomeNav?.clearActiveGame?.();
           global.location.href = 'index.html';
         },
-        onSaveProgressAd: () => {
-          if (!global.confirm(t('pauseQuit.saveAdConfirm'))) return;
-          this.persistSoloProgress();
-          clearSoloLeftMark();
-          global.HomeNav?.clearActiveGame?.();
-          global.PauseQuitUI.close();
-          global.location.href = 'index.html';
-        },
+        onSaveProgress: () => this.leaveAndSave(),
       });
     }
 
@@ -860,13 +993,14 @@
         linkIndex: 0,
         solvedInChain: [],
         soloStreak: 0,
+        roundState: null,
       });
       this.gameOver = false;
       this.won = false;
       this.checking = false;
       this.guessCount = 0;
       this.awaitingExtraGuess = false;
-      await this.loadLink(chain.id, 0);
+      await this.loadLink(chain.id, 0, { skipRoundRestore: true });
     }
 
     recallFromDock(tileId) {
@@ -2456,6 +2590,43 @@
         stunnedUntil: this.stunnedUntil || 0,
       });
       this.emitLiveHudUpdate();
+    }
+
+    /** Restore in-progress board from Firebase live payload after soft rejoin. */
+    restoreFromLiveState(live, sharedRoundId) {
+      if (!this.puzzle || !live || !Array.isArray(live.slots)) return false;
+      const roundId = Number(sharedRoundId) || 0;
+      const liveRound = Number(live.roundId);
+      const liveLink = Number(live.linkIndex);
+      const myLink = this.useThemeRotation
+        ? (this.globalLinkIndex ?? -1)
+        : (this.puzzle.linkIndex ?? -1);
+      if (liveRound !== roundId || liveLink !== myLink) return false;
+
+      this.slots = this.puzzle.answerSyllables.map(() => null);
+      this.dock.forEach((tile) => {
+        tile.used = false;
+        tile.slotIndex = null;
+      });
+
+      live.slots.forEach((char, index) => {
+        if (!char || index >= this.slots.length) return;
+        const tile = this.dock.find((item) => !item.used && item.char === String(char));
+        if (!tile) return;
+        this.slots[index] = tile;
+        tile.used = true;
+        tile.slotIndex = index;
+      });
+
+      this.guessCount = Math.min(MAX_GUESSES, Math.max(0, Number(live.wrongCount) || 0));
+      this._prevGuessCount = this.guessCount;
+      if (Number(live.stunnedUntil) > Date.now()) {
+        this.stunnedUntil = Number(live.stunnedUntil);
+      }
+      this.renderSlots({ skipEmit: true });
+      this.renderDock();
+      this.updateLives();
+      return true;
     }
 
     emitSlotsChange() {

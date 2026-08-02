@@ -7,7 +7,7 @@
   const t = (key, vars) => global.I18n?.t(`pauseQuit.${key}`, vars) ?? key;
 
   let overlay = null;
-  let handlers = { onResume: null, onQuit: null, onSaveProgressAd: null };
+  let handlers = { onResume: null, onQuit: null, onSaveProgress: null };
 
   function ensureOverlay() {
     if (overlay) return overlay;
@@ -34,7 +34,7 @@
     return overlay;
   }
 
-  function renderActions(mode) {
+  function renderActions(mode, hasSave) {
     const actions = overlay.querySelector('#pause-quit-actions');
     if (!actions) return;
 
@@ -42,8 +42,8 @@
       `<button type="button" class="pause-quit-btn pause-quit-btn--resume" data-action="resume">${t('resume')}</button>`,
     ];
 
-    if (mode === 'wordChain') {
-      parts.push(`<button type="button" class="pause-quit-btn pause-quit-btn--save" data-action="save">${t('saveProgressAd')}</button>`);
+    if (hasSave) {
+      parts.push(`<button type="button" class="pause-quit-btn pause-quit-btn--save" data-action="save">${t('saveProgress')}</button>`);
     }
 
     parts.push(`<button type="button" class="pause-quit-btn pause-quit-btn--quit" data-action="quit">${t('quit')}</button>`);
@@ -54,7 +54,7 @@
       handlers.onResume?.();
     });
     actions.querySelector('[data-action="save"]')?.addEventListener('click', () => {
-      handlers.onSaveProgressAd?.();
+      handlers.onSaveProgress?.();
     });
     actions.querySelector('[data-action="quit"]')?.addEventListener('click', () => {
       close();
@@ -64,22 +64,36 @@
 
   function show(opts = {}) {
     ensureOverlay();
+    const onSave = typeof opts.onSaveProgress === 'function'
+      ? opts.onSaveProgress
+      : (typeof opts.onSaveProgressAd === 'function' ? opts.onSaveProgressAd : null);
     handlers = {
       onResume: typeof opts.onResume === 'function' ? opts.onResume : null,
       onQuit: typeof opts.onQuit === 'function' ? opts.onQuit : null,
-      onSaveProgressAd: typeof opts.onSaveProgressAd === 'function' ? opts.onSaveProgressAd : null,
+      onSaveProgress: onSave,
     };
 
     const mode = opts.mode === 'wordChain' ? 'wordChain' : 'jamo';
     const streak = Math.max(0, Number(opts.streak) || 0);
+    const hasSave = typeof handlers.onSaveProgress === 'function'
+      || mode === 'wordChain'
+      || opts.offerSave === true;
     const warningKey = typeof opts.warningKey === 'string' && opts.warningKey
       ? opts.warningKey
       : 'streakWarning';
     overlay.querySelector('#pause-quit-title').textContent = t('title');
     const warningEl = overlay.querySelector('#pause-quit-warning');
-    warningEl.textContent = streak > 0 ? t(warningKey, { count: streak }) : '';
-    warningEl.classList.toggle('hidden', streak <= 0);
-    renderActions(mode);
+    if (streak > 0 && hasSave) {
+      warningEl.textContent = t('quitLosesStreak', { count: streak });
+      warningEl.classList.remove('hidden');
+    } else if (streak > 0) {
+      warningEl.textContent = t(warningKey, { count: streak });
+      warningEl.classList.remove('hidden');
+    } else {
+      warningEl.textContent = '';
+      warningEl.classList.add('hidden');
+    }
+    renderActions(mode, hasSave);
     overlay.classList.remove('hidden');
   }
 

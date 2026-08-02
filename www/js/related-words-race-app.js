@@ -55,6 +55,7 @@
       this._resultsRendered = false;
       this._activeSeenAtMs = null;
       this._leftMatch = false;
+      this._softLeave = false;
       this._sharedRoundId = 0;
       this._prevOppScore = 0;
       this._prevMyScore = 0;
@@ -86,6 +87,7 @@
 
       document.title = rt('pageTitle');
       this.renderShell();
+      this.mountHomeNav();
       this.renderMain(`
         <div class="race-panel">
           <p class="race-panel-title">${escapeHtml(rt('loading'))}</p>
@@ -107,7 +109,7 @@
     destroy() {
       global.RaceRematchUI?.teardown?.();
       const data = this.matchData;
-      if (!this._leftMatch && this.matchId && this.myUid && data
+      if (!this._softLeave && !this._leftMatch && this.matchId && this.myUid && data
         && (data.status === 'active' || data.status === 'ready')) {
         this.markRaceLeft();
       }
@@ -224,7 +226,7 @@
     }
 
     leaveMatch() {
-      if (this._leftMatch) return;
+      if (this._leftMatch || this._softLeave) return;
       const data = this.matchData;
       if (!this.matchId || !this.myUid || !data) return;
       if (data.status === 'done' || data.status === 'declined' || data.status === 'abandoned') return;
@@ -234,6 +236,28 @@
         return;
       }
       RS().abandonMatch(this.matchId, this.myUid).catch(() => {});
+    }
+
+    softLeaveForHome() {
+      this._softLeave = true;
+      try {
+        localStorage.removeItem(rwLeftStorageKey(this.matchId, this.myUid));
+      } catch { /* storage blocked */ }
+      // Keep live board in Firebase; park URL so Home can resume.
+      if (this.game?.syncRwLive) {
+        try { this.game.syncRwLive(); } catch { /* ignore */ }
+      }
+    }
+
+    mountHomeNav() {
+      if (!global.HomeNav?.mountGamePage || !this.matchId) return;
+      const href = `related-words-race.html?id=${encodeURIComponent(this.matchId)}`
+        + (new URLSearchParams(global.location.search).get('bot') === '1' ? '&bot=1' : '');
+      global.HomeNav.mountGamePage({
+        href,
+        type: 'page',
+        onLeave: () => this.softLeaveForHome(),
+      });
     }
 
     markRaceLeft() {
@@ -319,28 +343,12 @@
 
       if (!this.wasRaceLeft()) return false;
 
+      // Soft-resume: clear the leave mark and keep the live match/board as-is.
       this._rejoinHandled = true;
-      this._rejoinResetting = true;
       try {
         localStorage.removeItem(rwLeftStorageKey(this.matchId, this.myUid));
       } catch { /* storage blocked */ }
-
-      if (this.game) {
-        this.game.destroy();
-        this.game = null;
-      }
-      this.gameStarted = false;
-      this.countdownDone = false;
-      this._sharedRoundId = 0;
-      this._activeSeenAtMs = null;
-      this._prevOppScore = 0;
-      this._prevMyScore = 0;
-      this._prevOppWrong = 0;
-      this._resultsRendered = false;
-
-      await RS().resetRelatedWordsMatch(this.matchId, this.myUid).catch(() => {});
-      this._rejoinResetting = false;
-      return true;
+      return false;
     }
 
     mountRematchUi() {
@@ -940,6 +948,8 @@
         : (data.player2Progress?.guessCount || 0);
       this.game.setRaceScore(myScore);
       this.game.setSharedWordsDone(Number(shared.linkIndex) || 0);
+      const myLive = isP1 ? data.player1RwLive : data.player2RwLive;
+      this.game.restoreFromLiveState?.(myLive, this._sharedRoundId);
       this.game.setEnabled(true);
       this.syncOpponentLive(data);
       this.renderBattleHud(data);

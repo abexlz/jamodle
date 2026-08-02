@@ -251,10 +251,12 @@
     "title": "Are you sure you want to quit?",
     "streakWarning": "You'll lose your {{count}} streak!",
     "comboWarning": "You'll lose your {{count}} combo!",
+    "quitLosesStreak": "Leave & save keeps your progress. Quit will lose your {{count}} streak.",
     "resume": "Resume",
-    "saveProgressAd": "Leave while saving progress (ad)",
+    "saveProgress": "Leave & save",
+    "saveProgressAd": "Leave & save",
     "quit": "Quit",
-    "saveAdConfirm": "Watch a short ad to save your progress? (Demo — no ad will play.)"
+    "saveAdConfirm": "Save your progress and leave?"
   },
   "relatedWords": {
     "back": "← Home",

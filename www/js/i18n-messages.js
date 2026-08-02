@@ -255,10 +255,12 @@
       "title": "Are you sure you want to quit?",
       "streakWarning": "You'll lose your {{count}} streak!",
       "comboWarning": "You'll lose your {{count}} combo!",
+      "quitLosesStreak": "Leave & save keeps your progress. Quit will lose your {{count}} streak.",
       "resume": "Resume",
-      "saveProgressAd": "Leave while saving progress (ad)",
+      "saveProgress": "Leave & save",
+      "saveProgressAd": "Leave & save",
       "quit": "Quit",
-      "saveAdConfirm": "Watch a short ad to save your progress? (Demo — no ad will play.)"
+      "saveAdConfirm": "Save your progress and leave?"
     },
     "relatedWords": {
       "back": "← Home",
@@ -1731,10 +1733,12 @@
       "title": "정말 나갈까요?",
       "streakWarning": "연속 {{count}}기록이 사라져요!",
       "comboWarning": "콤보 {{count}}이 사라져요!",
+      "quitLosesStreak": "저장하고 나가면 진행이 유지돼요. 나가기를 누르면 {{count}} 콤보가 사라져요.",
       "resume": "계속하기",
-      "saveProgressAd": "진행 저장하고 나가기 (광고)",
+      "saveProgress": "저장하고 나가기",
+      "saveProgressAd": "저장하고 나가기",
       "quit": "나가기",
-      "saveAdConfirm": "짧은 광고를 보고 진행 상황을 저장할까요? (데모 — 광고는 재생되지 않아요.)"
+      "saveAdConfirm": "진행 상황을 저장하고 나갈까요?"
     },
     "relatedWords": {
       "back": "← 홈",

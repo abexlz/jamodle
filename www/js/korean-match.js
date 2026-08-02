@@ -11,6 +11,7 @@
   const MMP = () => global.MatchMultiPuzzle;
   const LS = global.LearningStreak;
   const BEST_STREAK_KEY = 'jamodeul-match-best-streak';
+  const SOLO_SESSION_KEY = 'jamodeul-match-solo-session';
   const FLIP_MS = 420;
   const FLIP_STAGGER = 90;
 
@@ -79,6 +80,48 @@
     } else {
       try { localStorage.setItem(BEST_STREAK_KEY, String(n)); } catch {}
     }
+  }
+
+  function loadSoloSession() {
+    try {
+      const raw = global.AppStorage
+        ? global.AppStorage.get(SOLO_SESSION_KEY, null)
+        : JSON.parse(localStorage.getItem(SOLO_SESSION_KEY) || 'null');
+      if (!raw || typeof raw !== 'object') return null;
+      const word = typeof raw.word === 'string' ? raw.word.trim() : '';
+      if (!word) return null;
+      return {
+        word,
+        wordLength: Number(raw.wordLength) || 0,
+        streak: Math.max(0, parseInt(raw.streak, 10) || 0),
+        guessCount: Math.max(0, parseInt(raw.guessCount, 10) || 0),
+        elapsedMs: Math.max(0, parseInt(raw.elapsedMs, 10) || 0),
+        placements: Array.isArray(raw.placements) ? raw.placements : [],
+        locked: Array.isArray(raw.locked) ? raw.locked : [],
+        orientHintUsed: !!raw.orientHintUsed,
+        disableHintUsed: !!raw.disableHintUsed,
+        meaningRevealed: !!raw.meaningRevealed,
+        savedAt: Number(raw.savedAt) || 0,
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  function saveSoloSession(data) {
+    if (global.AppStorage) {
+      if (data) global.AppStorage.set(SOLO_SESSION_KEY, data);
+      else global.AppStorage.remove?.(SOLO_SESSION_KEY);
+    } else {
+      try {
+        if (data) localStorage.setItem(SOLO_SESSION_KEY, JSON.stringify(data));
+        else localStorage.removeItem(SOLO_SESSION_KEY);
+      } catch { /* ignore */ }
+    }
+  }
+
+  function clearSoloSession() {
+    saveSoloSession(null);
   }
 
   /* ── DropZone ── */
@@ -1221,7 +1264,9 @@
         this.startMultiRound(MMP()?.pickPuzzle?.());
       } else {
         this.refillPool();
-        this.startRound(this.drawWord());
+        if (!this.tryRestoreSoloSession()) {
+          this.startRound(this.drawWord());
+        }
       }
 
       this.updateLearningStreakDisplay();
@@ -1416,18 +1461,135 @@
       return !this.versus && !this.isDaily && !this.tutorialMode && !this.multiFindMode && !this.turnBased;
     }
 
+    serializeSoloSession() {
+      if (!this.isJamoSoloMode() || !this.currentWord?.word || this.checkedComplete) return null;
+      const placements = [];
+      const locked = [];
+      this.blocks.forEach((block, si) => {
+        block.getAllZones().forEach((zone) => {
+          const tile = zone.placedTileId ? this.tileMap[zone.placedTileId] : null;
+          if (!tile) return;
+          const entry = {
+            syl: si,
+            zone: zone.zoneType,
+            subIndex: zone.subIndex ?? 0,
+            char: tile.char,
+            tileId: tile.id,
+          };
+          placements.push(entry);
+          if (zone.locked || tile.locked) locked.push(entry);
+        });
+      });
+      return {
+        word: this.currentWord.word,
+        wordLength: this.wordLength,
+        streak: Math.max(0, Number(this.streak) || 0),
+        guessCount: Math.max(0, Number(this.guessCount) || 0),
+        elapsedMs: this.getElapsedMs(),
+        placements,
+        locked,
+        orientHintUsed: !!this.orientHintUsed,
+        disableHintUsed: !!this.disableHintUsed,
+        meaningRevealed: !!this.meaningRevealed,
+        savedAt: Date.now(),
+      };
+    }
+
+    persistSoloSession() {
+      if (!this.isJamoSoloMode()) return;
+      const data = this.serializeSoloSession();
+      if (data) {
+        this.saveBestOnLeave();
+        saveSoloSession(data);
+      } else {
+        clearSoloSession();
+      }
+    }
+
+    clearSoloSessionSave() {
+      clearSoloSession();
+    }
+
+    restoreSoloPlacements(placements, lockedKeys) {
+      if (!Array.isArray(placements) || !placements.length) return;
+      const locks = lockedKeys instanceof Set ? lockedKeys : new Set();
+      placements.forEach((p) => {
+        const block = this.blocks[p.syl];
+        const zoneKey = p.zone === 'jungV' ? `jungV-${p.subIndex ?? 0}` : p.zone;
+        const dropZone = block?.zones[zoneKey];
+        if (!dropZone || dropZone.placedTileId) return;
+        const tile = Object.values(this.tileMap).find(
+          (t) => t.syllableIndex === p.syl
+            && t.zoneType === p.zone
+            && (t.subIndex ?? 0) === (p.subIndex ?? 0)
+            && t.char === p.char
+            && t.inBank
+        ) || (p.tileId ? this.tileMap[p.tileId] : null);
+        if (!tile || tile.locked) return;
+        if (tile.inBank || !tile.zoneRef) {
+          if (!this.tryPlaceTile(tile, dropZone)) return;
+        }
+        const key = `${p.syl}:${p.zone}:${p.subIndex ?? 0}`;
+        if (locks.has(key)) {
+          dropZone.setLocked(true);
+          tile.setLocked();
+        }
+      });
+    }
+
+    tryRestoreSoloSession() {
+      if (!this.isJamoSoloMode()) return false;
+      const saved = loadSoloSession();
+      if (!saved) return false;
+      if (saved.wordLength && saved.wordLength !== this.wordLength) return false;
+      this.streak = saved.streak;
+      this.bestStreak = Math.max(this.bestStreak, this.streak);
+      this.startRound({ word: saved.word }, {
+        guessCount: saved.guessCount,
+        elapsedMs: saved.elapsedMs,
+        locked: [],
+      });
+      const lockKeys = new Set(
+        (saved.locked || []).map((p) => `${p.syl}:${p.zone}:${p.subIndex ?? 0}`)
+      );
+      this.restoreSoloPlacements(saved.placements || saved.locked || [], lockKeys);
+      this.orientHintUsed = !!saved.orientHintUsed;
+      this.disableHintUsed = !!saved.disableHintUsed;
+      this.meaningRevealed = !!saved.meaningRevealed;
+      this.updateHintButtons();
+      this.updateStreakDisplay();
+      this.updateCheckButton();
+      return true;
+    }
+
+    leaveAndSaveSolo() {
+      this.persistSoloSession();
+      const href = (global.location.pathname.split('/').pop() || 'match.html')
+        + (global.location.search || '');
+      global.HomeNav?.setActiveGame?.({
+        href,
+        type: 'page',
+        at: Date.now(),
+      });
+      global.PauseQuitUI?.close?.();
+      global.location.href = 'index.html';
+    }
+
     openPauseMenu() {
       if (!this.isJamoSoloMode() || !global.PauseQuitUI) return;
       global.PauseQuitUI.show({
         mode: 'jamo',
         streak: this.streak,
+        offerSave: true,
         onResume: () => {},
         onQuit: () => {
           this.streak = 0;
           this.saveBestOnLeave();
+          clearSoloSession();
           global.HomeNav?.clearActiveGame?.();
           global.location.href = 'index.html';
         },
+        onSaveProgress: () => this.leaveAndSaveSolo(),
       });
     }
 
@@ -5536,6 +5698,7 @@
         }
         await this.revealHintWord(resolvedWord);
         this.spawnConfetti();
+        if (this.isJamoSoloMode()) clearSoloSession();
         this.showResults(elapsed);
       } else if (!composedWord && this.hasAllDockTilesOnBoard() && this.shouldUseDictionaryCheck()) {
         this.feedback.show('error', t('match.feedbackCantCompose'));
@@ -5752,6 +5915,7 @@
 
     continuePlaying() {
       this.els.results.classList.add('hidden');
+      if (this.isJamoSoloMode()) clearSoloSession();
       if (this.multiFindMode) {
         this.startMultiRound(MMP()?.pickPuzzle?.(this.multiPuzzle?.id));
         return;

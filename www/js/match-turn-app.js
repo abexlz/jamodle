@@ -105,6 +105,7 @@
       this._autoWritesBlocked = false;
       this._quotaPaused = false;
       this._leftMatch = false;
+      this._softLeave = false;
       this._playedRevealKey = null;
       this._emotes = null;
       this._lastRoundKey = null;
@@ -130,6 +131,7 @@
 
       document.title = rt('pageTitle');
       this.renderShell();
+      this.mountHomeNav();
       this.renderMain(`<div class="race-panel"><p class="race-panel-title">${escapeHtml(rt('loading'))}</p></div>`);
 
       this.matchUnsub = RS().subscribeMatch(
@@ -175,7 +177,7 @@
     destroy() {
       global.RaceRematchUI?.teardown?.();
       this.stopTurnLiveWatch();
-      this.leaveMatch();
+      if (!this._softLeave) this.leaveMatch();
       this._localeOff?.();
       this.matchUnsub?.();
       if (this.countdownTimer) {
@@ -241,7 +243,7 @@
     }
 
     leaveMatch() {
-      if (this._leftMatch) return;
+      if (this._leftMatch || this._softLeave) return;
       const data = this.matchData;
       if (!this.matchId || !this.myUid || !data) return;
       if (data.status === 'done' || data.status === 'declined' || data.status === 'abandoned') return;
@@ -249,9 +251,27 @@
       RS().abandonMatch(this.matchId, this.myUid).catch(() => {});
     }
 
+    softLeaveForHome() {
+      this._softLeave = true;
+      try {
+        this.game?.notifyTurnLiveChange?.();
+      } catch { /* ignore */ }
+    }
+
+    mountHomeNav() {
+      if (!global.HomeNav?.mountGamePage || !this.matchId) return;
+      const href = `match-turn.html?id=${encodeURIComponent(this.matchId)}`
+        + (new URLSearchParams(global.location.search).get('bot') === '1' ? '&bot=1' : '');
+      global.HomeNav.mountGamePage({
+        href,
+        type: 'page',
+        onLeave: () => this.softLeaveForHome(),
+      });
+    }
+
     async leaveMatchAndGo(href) {
       global.RaceRematchUI?.teardown?.();
-      if (!this._leftMatch) {
+      if (!this._leftMatch && !this._softLeave) {
         this._leftMatch = true;
         if (this.matchId && this.myUid) {
           await RS().abandonMatch(this.matchId, this.myUid).catch(() => {});

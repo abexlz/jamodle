@@ -57,6 +57,7 @@
       this._resultsRendered = false;
       this._activeSeenAtMs = null;
       this._leftMatch = false;
+      this._softLeave = false;
       this._emotes = null;
     }
 
@@ -78,6 +79,7 @@
 
       document.title = rt('pageTitle');
       this.renderShell();
+      this.mountHomeNav();
       this.renderMain(`
         <div class="race-panel">
           <p class="race-panel-title">${escapeHtml(rt('loading'))}</p>
@@ -98,7 +100,7 @@
 
     destroy() {
       global.RaceRematchUI?.teardown?.();
-      this.leaveMatch();
+      if (!this._softLeave) this.leaveMatch();
       if (this._localeOff) {
         this._localeOff();
         this._localeOff = null;
@@ -166,7 +168,7 @@
     }
 
     leaveMatch() {
-      if (this._leftMatch) return;
+      if (this._leftMatch || this._softLeave) return;
       const data = this.matchData;
       if (!this.matchId || !this.myUid || !data) return;
       if (data.status === 'done' || data.status === 'declined' || data.status === 'abandoned') return;
@@ -174,9 +176,23 @@
       RS().abandonMatch(this.matchId, this.myUid).catch(() => {});
     }
 
+    softLeaveForHome() {
+      this._softLeave = true;
+    }
+
+    mountHomeNav() {
+      if (!global.HomeNav?.mountGamePage || !this.matchId) return;
+      const href = `match-race.html?id=${encodeURIComponent(this.matchId)}`;
+      global.HomeNav.mountGamePage({
+        href,
+        type: 'page',
+        onLeave: () => this.softLeaveForHome(),
+      });
+    }
+
     async leaveMatchAndGo(href) {
       global.RaceRematchUI?.teardown?.();
-      if (!this._leftMatch) {
+      if (!this._leftMatch && !this._softLeave) {
         this._leftMatch = true;
         if (this.matchId && this.myUid) {
           await RS().abandonMatch(this.matchId, this.myUid).catch(() => {});
