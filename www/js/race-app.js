@@ -503,6 +503,8 @@
         resultLine,
         resultKind,
         winnerUid: data.winnerUid,
+        battleMatchId: this.matchId,
+        battleFriend: !!global.RaceResultsUI?.isFriendBattleMatch?.(data, this.matchId),
         players: [
           {
             uid: this.myUid,
