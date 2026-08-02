@@ -41,7 +41,10 @@ body > #home-bottom-bar.home-bottom-bar,
   background-color: var(--home-nav-bg);
   background-image: var(--home-nav-bg-tint);
   border-top: 1px solid var(--home-nav-border);
-  box-shadow: 0 -8px 28px rgba(8, 20, 30, 0.28);
+  box-shadow:
+    0 -2px 0 rgba(255, 255, 255, 0.12),
+    0 -6px 16px rgba(0, 20, 30, 0.35),
+    0 -2px 6px rgba(0, 0, 0, 0.22);
   -webkit-backdrop-filter: var(--home-nav-blur);
   backdrop-filter: var(--home-nav-blur);
   pointer-events: auto;
@@ -52,7 +55,10 @@ body > #home-bottom-bar.home-bottom-bar,
 }
 
 [data-theme="dark"] .home-bottom-bar {
-  box-shadow: 0 -6px 22px rgba(0, 0, 0, 0.38);
+  box-shadow:
+    0 -2px 0 rgba(255, 255, 255, 0.1),
+    0 -6px 16px rgba(0, 0, 0, 0.45),
+    0 -2px 6px rgba(0, 0, 0, 0.3);
 }
 
 .home-bottom-bar-inner {
