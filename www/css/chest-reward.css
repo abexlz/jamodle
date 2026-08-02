@@ -1,4 +1,4 @@
-/* Quest chest reward — tap to open + coin fly */
+/* Quest chest reward — tap to open, prize reel, coin fly */
 
 .chest-reward-overlay {
   position: fixed;
@@ -18,9 +18,9 @@
   pointer-events: none;
   transition:
     opacity 0.32s ease,
-    background 0.4s ease,
-    backdrop-filter 0.4s ease,
-    -webkit-backdrop-filter 0.4s ease;
+    background 0.45s ease,
+    backdrop-filter 0.45s ease,
+    -webkit-backdrop-filter 0.45s ease;
 }
 
 .chest-reward-overlay.visible {
@@ -28,7 +28,7 @@
   pointer-events: auto;
 }
 
-/* Clear the dim once opened so coins fly over the live HUD */
+/* Keep dim while spinning; clear after reveal so coins fly over live HUD */
 .chest-reward-overlay.is-opened {
   background: transparent;
   backdrop-filter: none;
@@ -37,7 +37,7 @@
 
 .chest-reward-stage {
   position: relative;
-  width: min(100%, 360px);
+  width: min(100%, 400px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -66,6 +66,7 @@
   letter-spacing: 0.02em;
 }
 
+.chest-reward-overlay.is-spinning .chest-reward-title,
 .chest-reward-overlay.is-opened .chest-reward-title {
   opacity: 0;
   height: 0;
@@ -76,24 +77,33 @@
 
 .chest-reward-hint {
   margin: 0;
+  min-height: 1.2em;
   font-family: 'Jua', sans-serif;
   font-size: 0.95rem;
   color: rgba(255, 255, 255, 0.88);
   animation: chestHintPulse 1.4s ease-in-out infinite;
 }
 
+.chest-reward-overlay.is-spinning .chest-reward-hint {
+  animation: none;
+  color: #ffe566;
+}
+
 .chest-reward-overlay.is-opened .chest-reward-hint {
   animation: none;
   opacity: 0;
   height: 0;
+  min-height: 0;
   overflow: hidden;
   margin: 0;
 }
 
+/* ── Chest ── */
+
 .chest-reward-chest-wrap {
   position: relative;
-  width: min(72vw, 260px);
-  height: min(72vw, 260px);
+  width: min(72vw, 240px);
+  height: min(72vw, 240px);
   margin: 4px 0 8px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -103,12 +113,12 @@
   padding: 0;
   box-shadow: none !important;
   filter: none !important;
+  transition: opacity 0.35s ease, transform 0.4s cubic-bezier(0.22, 1.2, 0.36, 1);
 }
 
 .chest-reward-chest-wrap:active,
 .chest-reward-chest-wrap.is-pressed,
 .chest-reward-chest-wrap:hover {
-  /* no-press already skips app button chrome; keep anim transforms intact */
   box-shadow: none !important;
   filter: none !important;
 }
@@ -117,6 +127,16 @@
   outline: 3px solid #ffe566;
   outline-offset: 6px;
   border-radius: 24px;
+}
+
+.chest-reward-overlay.is-spinning .chest-reward-chest-wrap,
+.chest-reward-overlay.is-opened .chest-reward-chest-wrap {
+  opacity: 0;
+  transform: scale(0.55) translateY(-24px);
+  pointer-events: none;
+  height: 0;
+  margin: 0;
+  overflow: hidden;
 }
 
 .chest-reward-glow {
@@ -131,10 +151,9 @@
   filter: blur(2px);
 }
 
-.chest-reward-overlay.is-opened .chest-reward-glow {
+.chest-reward-overlay.is-chest-open .chest-reward-glow {
   opacity: 1;
   transform: scale(1.15);
-  animation: chestGlowPulse 1.8s ease-in-out infinite;
 }
 
 .chest-reward-img {
@@ -154,12 +173,12 @@
   transform: scale(0.88);
 }
 
-.chest-reward-overlay.is-opened .chest-reward-img--closed {
+.chest-reward-overlay.is-chest-open .chest-reward-img--closed {
   opacity: 0;
   transform: scale(1.06);
 }
 
-.chest-reward-overlay.is-opened .chest-reward-img--open {
+.chest-reward-overlay.is-chest-open .chest-reward-img--open {
   opacity: 1;
   transform: scale(1);
 }
@@ -183,7 +202,7 @@
   opacity: 0;
 }
 
-.chest-reward-overlay.is-opened .chest-reward-sparkles {
+.chest-reward-overlay.is-chest-open .chest-reward-sparkles {
   opacity: 1;
 }
 
@@ -203,6 +222,190 @@
 .chest-reward-sparkle:nth-child(4) { left: 30%; top: 48%; animation-delay: 0.45s; }
 .chest-reward-sparkle:nth-child(5) { left: 66%; top: 46%; animation-delay: 0.2s; }
 .chest-reward-sparkle:nth-child(6) { left: 52%; top: 58%; animation-delay: 0.55s; }
+
+/* ── Prize reel (CS-style case open) ── */
+
+.chest-reel {
+  width: min(100vw - 24px, 400px);
+  margin: 8px 0 4px;
+  animation: chestReelIn 0.4s cubic-bezier(0.22, 1.2, 0.36, 1);
+}
+
+.chest-reel[hidden] {
+  display: none !important;
+}
+
+.chest-reel-window {
+  position: relative;
+  height: 118px;
+  overflow: hidden;
+  border-radius: 18px;
+  border: 3px solid #5eb0e8;
+  background:
+    linear-gradient(180deg, rgba(14, 42, 62, 0.95) 0%, rgba(8, 28, 44, 0.98) 100%);
+  box-shadow:
+    0 8px 0 #2a6fa0,
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 12px 28px rgba(0, 0, 0, 0.35);
+}
+
+.chest-reel-track {
+  position: absolute;
+  top: 10px;
+  left: 0;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  height: calc(100% - 20px);
+  will-change: transform;
+  padding: 0;
+}
+
+.chest-reel-card {
+  flex: 0 0 88px;
+  width: 88px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border-radius: 14px;
+  border: 2.5px solid #7ec8f0;
+  background: linear-gradient(180deg, #dff3ff 0%, #b7ddf5 55%, #9ccfec 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 3px 0 rgba(20, 70, 100, 0.25);
+  color: #0a3d52;
+  box-sizing: border-box;
+}
+
+.chest-reel-card--common {
+  border-color: #8ec8e8;
+  background: linear-gradient(180deg, #e8f6ff 0%, #c5e4f8 100%);
+}
+
+.chest-reel-card--uncommon {
+  border-color: #4ecf8a;
+  background: linear-gradient(180deg, #e3ffe8 0%, #b8f0c8 100%);
+}
+
+.chest-reel-card--rare {
+  border-color: #73b5f2;
+  background: linear-gradient(180deg, #dceeff 0%, #a8d4ff 100%);
+}
+
+.chest-reel-card--legendary {
+  border-color: #e6b82e;
+  background: linear-gradient(180deg, #fff4b8 0%, #ffd84a 55%, #f5c020 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 3px 0 #c4a82d,
+    0 0 16px rgba(255, 200, 60, 0.45);
+}
+
+.chest-reel-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  line-height: 1;
+}
+
+.chest-reel-card-icon .coin-icon {
+  width: 30px;
+  height: 30px;
+}
+
+.chest-reel-emoji {
+  font-size: 26px;
+  line-height: 1;
+}
+
+.chest-reel-card-amt {
+  font-family: 'Jua', sans-serif;
+  font-size: 1.15rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  color: #0a3d52;
+}
+
+.chest-reel-card--legendary .chest-reel-card-amt {
+  color: #5c3a08;
+}
+
+.chest-reel-card-sub {
+  font-family: 'Jua', sans-serif;
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+  opacity: 0.72;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.chest-reel-card.is-winner.is-landed {
+  animation: chestReelWinnerPop 0.55s cubic-bezier(0.22, 1.5, 0.36, 1);
+  z-index: 2;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 0 0 3px #fff,
+    0 0 22px rgba(255, 210, 70, 0.75),
+    0 4px 0 #c4a82d;
+}
+
+.chest-reel-marker {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 3px;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, #ffe566 0%, #ffcc33 50%, #f5b820 100%);
+  box-shadow: 0 0 10px rgba(255, 210, 70, 0.85);
+  z-index: 4;
+  pointer-events: none;
+}
+
+.chest-reel-marker::before,
+.chest-reel-marker::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+}
+
+.chest-reel-marker::before {
+  top: -2px;
+  border-top: 10px solid #ffe566;
+}
+
+.chest-reel-marker::after {
+  bottom: -2px;
+  border-bottom: 10px solid #f5b820;
+}
+
+.chest-reel-fade {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 48px;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.chest-reel-fade--left {
+  left: 0;
+  background: linear-gradient(90deg, rgba(8, 28, 44, 0.95) 0%, transparent 100%);
+}
+
+.chest-reel-fade--right {
+  right: 0;
+  background: linear-gradient(270deg, rgba(8, 28, 44, 0.95) 0%, transparent 100%);
+}
+
+/* ── Amounts / continue ── */
 
 .chest-reward-amounts {
   display: flex;
@@ -331,11 +534,6 @@
   50% { opacity: 1; transform: scale(1.04); }
 }
 
-@keyframes chestGlowPulse {
-  0%, 100% { opacity: 0.75; transform: scale(1.1); }
-  50% { opacity: 1; transform: scale(1.22); }
-}
-
 @keyframes chestSparkle {
   0% { opacity: 0; transform: scale(0.4) rotate(0deg); }
   35% { opacity: 1; transform: scale(1.15) rotate(20deg); }
@@ -349,17 +547,31 @@
   100% { transform: scale(1); }
 }
 
+@keyframes chestReelIn {
+  0% { opacity: 0; transform: translateY(16px) scale(0.94); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes chestReelWinnerPop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.12); }
+  70% { transform: scale(0.97); }
+  100% { transform: scale(1.05); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .chest-reward-hint,
   .chest-reward-chest-wrap.is-idle,
-  .chest-reward-overlay.is-opened .chest-reward-glow,
-  .chest-reward-sparkle {
+  .chest-reward-sparkle,
+  .chest-reel,
+  .chest-reel-card.is-winner.is-landed {
     animation: none !important;
   }
 
   .chest-reward-stage,
   .chest-reward-amounts,
-  .chest-reward-continue {
+  .chest-reward-continue,
+  .chest-reward-chest-wrap {
     transition: none !important;
   }
 }

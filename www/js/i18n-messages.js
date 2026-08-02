@@ -1208,9 +1208,12 @@
       "chestTitle": "Treasure Chest!",
       "chestTap": "Tap to open",
       "chestOpening": "Opening…",
+      "chestSpinning": "Opening…",
       "chestOpened": "Chest opened",
       "chestContinue": "Nice!",
       "chestReward": "Chest reward",
+      "reelHint": "Hint",
+      "reelHeart": "Life",
       "defs": {
         "daily-play": {
           "title": "Daily Hangul-dle",
@@ -2681,9 +2684,12 @@
       "chestTitle": "보물 상자!",
       "chestTap": "탭해서 열기",
       "chestOpening": "여는 중…",
+      "chestSpinning": "여는 중…",
       "chestOpened": "상자 열림",
       "chestContinue": "좋아!",
       "chestReward": "상자 보상",
+      "reelHint": "힌트",
+      "reelHeart": "목숨",
       "defs": {
         "daily-play": {
           "title": "데일리 한글놀이",

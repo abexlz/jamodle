@@ -219,7 +219,7 @@
         coins: reward.coins,
         xp: reward.xp,
         coinsBefore,
-        autoOpen: true,
+        autoOpen: false,
         onComplete: () => {
           global.PlayerHud?.refresh?.();
           resolve();
@@ -229,7 +229,7 @@
   }
 
   /**
-   * Present auto-claimed quest rewards (toasts + auto-opening chests).
+   * Present auto-claimed quest rewards (toasts + tap-to-open chests).
    * @param {{ rewards?: Array, coinsBefore?: number, wheelAvailable?: boolean }} result
    */
   function presentAutoRewards(result) {

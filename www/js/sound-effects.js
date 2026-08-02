@@ -369,6 +369,18 @@
       playTone({ freq: base, duration: 0.055, peak: 0.08, type: 'sine' });
       playTone({ freq: base * 1.5, duration: 0.08, peak: 0.055, type: 'triangle', delay: 0.02 });
     },
+
+    /** Soft tick as prize cards pass the reel marker */
+    reelTick() {
+      playTone({ freq: 720 + Math.random() * 180, duration: 0.028, peak: 0.045, type: 'triangle' });
+    },
+
+    /** Landing sting when the reel stops on the prize */
+    reelLand() {
+      playTone({ freq: 392, duration: 0.07, peak: 0.09, type: 'sine' });
+      playTone({ freq: 523, duration: 0.09, peak: 0.11, type: 'sine', delay: 0.05 });
+      playTone({ freq: 784, duration: 0.16, peak: 0.12, type: 'triangle', delay: 0.11 });
+    },
   };
 
   global.addEventListener('pointerdown', unlock, { passive: true });

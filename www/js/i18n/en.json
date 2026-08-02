@@ -1204,9 +1204,12 @@
     "chestTitle": "Treasure Chest!",
     "chestTap": "Tap to open",
     "chestOpening": "Opening…",
+    "chestSpinning": "Opening…",
     "chestOpened": "Chest opened",
     "chestContinue": "Nice!",
     "chestReward": "Chest reward",
+    "reelHint": "Hint",
+    "reelHeart": "Life",
     "defs": {
       "daily-play": {
         "title": "Daily Hangul-dle",

@@ -1,13 +1,36 @@
 /**
- * Quest chest rewards — tap-to-open overlay with coin fly to HUD.
+ * Quest chest rewards — tap to open, CS-style prize reel, coin fly to HUD.
  */
 (function (global) {
   'use strict';
 
-  const STYLES_HREF = 'css/chest-reward.css?v=3';
+  const STYLES_HREF = 'css/chest-reward.css?v=4';
   const CHEST_CLOSED = 'assets/chests/chest-closed.png';
   const CHEST_OPEN = 'assets/chests/chest-open.png';
   const COIN_SRC = 'assets/coin.png';
+
+  const CARD_W = 88;
+  const CARD_GAP = 10;
+  const STRIDE = CARD_W + CARD_GAP;
+  const REEL_COUNT = 42;
+  const WINNER_INDEX = 34;
+
+  const FILLER_POOL = [
+    { kind: 'coins', amount: 5, tier: 'common' },
+    { kind: 'coins', amount: 8, tier: 'common' },
+    { kind: 'coins', amount: 10, tier: 'common' },
+    { kind: 'coins', amount: 12, tier: 'common' },
+    { kind: 'coins', amount: 15, tier: 'uncommon' },
+    { kind: 'coins', amount: 20, tier: 'uncommon' },
+    { kind: 'coins', amount: 40, tier: 'rare' },
+    { kind: 'coins', amount: 50, tier: 'rare' },
+    { kind: 'xp', amount: 10, tier: 'common' },
+    { kind: 'xp', amount: 15, tier: 'common' },
+    { kind: 'xp', amount: 25, tier: 'uncommon' },
+    { kind: 'xp', amount: 50, tier: 'rare' },
+    { kind: 'hint', amount: 1, tier: 'uncommon' },
+    { kind: 'heart', amount: 1, tier: 'uncommon' },
+  ];
 
   let activeOverlay = null;
   let opening = false;
@@ -52,6 +75,123 @@
     return new Promise((resolve) => global.setTimeout(resolve, ms));
   }
 
+  function easeOutQuint(x) {
+    return 1 - ((1 - x) ** 5);
+  }
+
+  function pickFiller(avoidCoins) {
+    const pool = FILLER_POOL.filter((p) => !(p.kind === 'coins' && p.amount === avoidCoins));
+    return pool[Math.floor(Math.random() * pool.length)] || FILLER_POOL[0];
+  }
+
+  function winnerTier(coins) {
+    if (coins >= 40) return 'legendary';
+    if (coins >= 25) return 'rare';
+    if (coins >= 15) return 'uncommon';
+    return 'common';
+  }
+
+  function buildReelItems(reward) {
+    const coins = Math.max(0, Math.floor(Number(reward.coins) || 0));
+    const items = [];
+    for (let i = 0; i < REEL_COUNT; i++) {
+      if (i === WINNER_INDEX) {
+        items.push({
+          kind: 'coins',
+          amount: coins,
+          tier: winnerTier(coins),
+          xp: Math.max(0, Math.floor(Number(reward.xp) || 0)),
+          winner: true,
+        });
+      } else {
+        items.push({ ...pickFiller(coins), winner: false });
+      }
+    }
+    return items;
+  }
+
+  function cardIconHtml(item) {
+    if (item.kind === 'coins') {
+      return global.CoinIcon?.html?.('coin-icon coin-icon--md') || '🪙';
+    }
+    if (item.kind === 'xp') return '<span class="chest-reel-emoji" aria-hidden="true">⭐</span>';
+    if (item.kind === 'hint') return '<span class="chest-reel-emoji" aria-hidden="true">💡</span>';
+    if (item.kind === 'heart') return '<span class="chest-reel-emoji" aria-hidden="true">❤️</span>';
+    return global.CoinIcon?.html?.('coin-icon coin-icon--md') || '🪙';
+  }
+
+  function cardLabel(item) {
+    if (item.kind === 'xp') return `+${item.amount}`;
+    if (item.kind === 'hint' || item.kind === 'heart') return `×${item.amount}`;
+    return String(item.amount);
+  }
+
+  function cardSub(item) {
+    if (item.kind === 'xp') return 'XP';
+    if (item.kind === 'hint') return t('quests.reelHint') || 'Hint';
+    if (item.kind === 'heart') return t('quests.reelHeart') || 'Life';
+    return t('shop.coins') || 'Coins';
+  }
+
+  function buildReelCardsHtml(items) {
+    return items.map((item, i) => `
+      <div class="chest-reel-card chest-reel-card--${escapeHtml(item.tier)}${item.winner ? ' is-winner' : ''}"
+        data-reel-index="${i}" aria-hidden="true">
+        <span class="chest-reel-card-icon">${cardIconHtml(item)}</span>
+        <span class="chest-reel-card-amt">${escapeHtml(cardLabel(item))}</span>
+        <span class="chest-reel-card-sub">${escapeHtml(cardSub(item))}</span>
+      </div>
+    `).join('');
+  }
+
+  function buildOverlayHtml(reward) {
+    const coinIcon = global.CoinIcon?.html?.('coin-icon coin-icon--lg') || '🪙';
+    const items = buildReelItems(reward);
+    return `
+      <div class="chest-reward-stage">
+        <h2 class="chest-reward-title">${escapeHtml(t('quests.chestTitle'))}</h2>
+        <p class="chest-reward-hint" id="chest-reward-hint">${escapeHtml(t('quests.chestTap'))}</p>
+
+        <button type="button" class="chest-reward-chest-wrap no-press is-idle" id="chest-reward-tap"
+          aria-label="${escapeHtml(t('quests.chestTap'))}">
+          <span class="chest-reward-glow" aria-hidden="true"></span>
+          <img class="chest-reward-img chest-reward-img--closed" src="${CHEST_CLOSED}" alt="" draggable="false">
+          <img class="chest-reward-img chest-reward-img--open" src="${CHEST_OPEN}" alt="" draggable="false">
+          <span class="chest-reward-sparkles" aria-hidden="true">
+            <span class="chest-reward-sparkle"></span>
+            <span class="chest-reward-sparkle"></span>
+            <span class="chest-reward-sparkle"></span>
+            <span class="chest-reward-sparkle"></span>
+            <span class="chest-reward-sparkle"></span>
+            <span class="chest-reward-sparkle"></span>
+          </span>
+        </button>
+
+        <div class="chest-reel" id="chest-reel" hidden>
+          <div class="chest-reel-window" aria-hidden="true">
+            <div class="chest-reel-fade chest-reel-fade--left"></div>
+            <div class="chest-reel-fade chest-reel-fade--right"></div>
+            <div class="chest-reel-marker"></div>
+            <div class="chest-reel-track" id="chest-reel-track" style="transform: translate3d(0,0,0)">
+              ${buildReelCardsHtml(items)}
+            </div>
+          </div>
+        </div>
+
+        <div class="chest-reward-amounts" id="chest-reward-amounts" aria-live="polite">
+          <div class="chest-reward-coins">
+            <span aria-hidden="true">${coinIcon}</span>
+            <span>+${escapeHtml(String(reward.coins || 0))}</span>
+          </div>
+          <div class="chest-reward-xp">+${escapeHtml(String(reward.xp || 0))} XP</div>
+        </div>
+        <button type="button" class="chest-reward-continue" id="chest-reward-continue">
+          ${escapeHtml(t('quests.chestContinue'))}
+        </button>
+      </div>
+    `;
+  }
+
   function getHudCoinEl() {
     return (
       document.querySelector('.menu-hud-coins.player-hud-compact')
@@ -94,41 +234,6 @@
     if (n <= 25) return 12;
     if (n <= 45) return 16;
     return 20;
-  }
-
-  function buildOverlayHtml(reward, { autoOpen = false } = {}) {
-    const coinIcon = global.CoinIcon?.html?.('coin-icon coin-icon--lg') || '🪙';
-    const hint = autoOpen ? t('quests.chestOpening') : t('quests.chestTap');
-    return `
-      <div class="chest-reward-stage">
-        <h2 class="chest-reward-title">${escapeHtml(t('quests.chestTitle'))}</h2>
-        <p class="chest-reward-hint">${escapeHtml(hint)}</p>
-        <button type="button" class="chest-reward-chest-wrap no-press is-idle" id="chest-reward-tap"
-          aria-label="${escapeHtml(hint)}">
-          <span class="chest-reward-glow" aria-hidden="true"></span>
-          <img class="chest-reward-img chest-reward-img--closed" src="${CHEST_CLOSED}" alt="" draggable="false">
-          <img class="chest-reward-img chest-reward-img--open" src="${CHEST_OPEN}" alt="" draggable="false">
-          <span class="chest-reward-sparkles" aria-hidden="true">
-            <span class="chest-reward-sparkle"></span>
-            <span class="chest-reward-sparkle"></span>
-            <span class="chest-reward-sparkle"></span>
-            <span class="chest-reward-sparkle"></span>
-            <span class="chest-reward-sparkle"></span>
-            <span class="chest-reward-sparkle"></span>
-          </span>
-        </button>
-        <div class="chest-reward-amounts" id="chest-reward-amounts" aria-live="polite">
-          <div class="chest-reward-coins">
-            <span aria-hidden="true">${coinIcon}</span>
-            <span>+${escapeHtml(String(reward.coins || 0))}</span>
-          </div>
-          <div class="chest-reward-xp">+${escapeHtml(String(reward.xp || 0))} XP</div>
-        </div>
-        <button type="button" class="chest-reward-continue" id="chest-reward-continue">
-          ${escapeHtml(t('quests.chestContinue'))}
-        </button>
-      </div>
-    `;
   }
 
   function spawnTrail(x, y, delay) {
@@ -191,29 +296,21 @@
         fill: 'forwards',
       });
 
-      // Trail near burst peak
       spawnTrail(mid1.x, mid1.y, delay + duration * 0.12);
 
       anim.finished
-        .then(() => {
-          el.remove();
-          resolve();
-        })
-        .catch(() => {
-          el.remove();
-          resolve();
-        });
+        .then(() => { el.remove(); resolve(); })
+        .catch(() => { el.remove(); resolve(); });
     });
   }
 
   async function playCoinFlight(overlay, reward, coinsBefore) {
-    const chestBtn = overlay.querySelector('#chest-reward-tap');
-    const from = getElCenter(chestBtn) || {
+    const reel = overlay.querySelector('#chest-reel');
+    const winnerCard = overlay.querySelector('.chest-reel-card.is-winner');
+    const from = getElCenter(winnerCard) || getElCenter(reel) || {
       x: global.innerWidth / 2,
       y: global.innerHeight / 2,
     };
-    // Spawn from upper-center of chest (mouth)
-    from.y -= 18;
 
     const hud = getHudCoinEl();
     const to = getElCenter(hud?.querySelector?.('.menu-hud-coins-coin') || hud) || {
@@ -225,7 +322,6 @@
     const totalCoins = Math.max(0, Math.floor(Number(reward.coins) || 0));
     let landed = 0;
 
-    // Hold HUD at pre-claim value until coins arrive
     setDisplayedCoins(coinsBefore);
 
     if (reduceMotion()) {
@@ -242,8 +338,7 @@
       const flight = flyOneCoin(from, to, delay, size).then(() => {
         landed += 1;
         const progress = landed / count;
-        const shown = coinsBefore + Math.round(totalCoins * progress);
-        setDisplayedCoins(shown);
+        setDisplayedCoins(coinsBefore + Math.round(totalCoins * progress));
         bumpHud();
         global.SoundEffects?.coinCollect?.();
       });
@@ -254,6 +349,61 @@
     await Promise.all(flights);
     setDisplayedCoins(coinsBefore + totalCoins);
     global.PlayerHud?.refresh?.();
+  }
+
+  function computeStopOffset(windowEl) {
+    const windowW = windowEl?.clientWidth || 320;
+    const centerPad = (windowW - CARD_W) / 2;
+    // Land with a tiny random bias so it doesn't feel robotic
+    const jitter = (Math.random() * 10) - 5;
+    return (WINNER_INDEX * STRIDE) - centerPad + jitter;
+  }
+
+  function playReelSpin(overlay) {
+    const track = overlay.querySelector('#chest-reel-track');
+    const windowEl = overlay.querySelector('.chest-reel-window');
+    if (!track || !windowEl) return Promise.resolve();
+
+    if (reduceMotion()) {
+      const stopAt = computeStopOffset(windowEl);
+      track.style.transform = `translate3d(${-stopAt}px, 0, 0)`;
+      overlay.querySelector('.chest-reel-card.is-winner')?.classList.add('is-landed');
+      return Promise.resolve();
+    }
+
+    const stopAt = computeStopOffset(windowEl);
+    const duration = 4200 + Math.floor(Math.random() * 600);
+    let lastTickIndex = -1;
+
+    return new Promise((resolve) => {
+      const start = performance.now();
+
+      function frame(now) {
+        const tNorm = Math.min(1, (now - start) / duration);
+        const eased = easeOutQuint(tNorm);
+        const x = stopAt * eased;
+        track.style.transform = `translate3d(${-x}px, 0, 0)`;
+
+        const passing = Math.floor((x + (windowEl.clientWidth / 2)) / STRIDE);
+        if (passing !== lastTickIndex && passing >= 0) {
+          lastTickIndex = passing;
+          if (tNorm < 0.97) global.SoundEffects?.reelTick?.();
+        }
+
+        if (tNorm < 1) {
+          requestAnimationFrame(frame);
+          return;
+        }
+
+        track.style.transform = `translate3d(${-stopAt}px, 0, 0)`;
+        const winner = overlay.querySelector('.chest-reel-card.is-winner');
+        winner?.classList.add('is-landed');
+        global.SoundEffects?.reelLand?.();
+        resolve();
+      }
+
+      requestAnimationFrame(frame);
+    });
   }
 
   function closeOverlay(overlay, onComplete) {
@@ -270,23 +420,48 @@
   }
 
   async function openChest(overlay, reward, coinsBefore, onComplete) {
-    if (opening || overlay.classList.contains('is-opened')) return;
+    if (opening || overlay.classList.contains('is-opened') || overlay.classList.contains('is-spinning')) {
+      return;
+    }
     opening = true;
 
     const chestBtn = overlay.querySelector('#chest-reward-tap');
+    const hint = overlay.querySelector('#chest-reward-hint');
+    const reel = overlay.querySelector('#chest-reel');
+
     chestBtn?.classList.remove('is-idle');
     chestBtn?.classList.add('is-shake');
     global.SoundEffects?.chestShake?.();
 
-    await wait(reduceMotion() ? 80 : 520);
+    await wait(reduceMotion() ? 60 : 480);
 
-    overlay.classList.add('is-opened');
     chestBtn?.classList.remove('is-shake');
     chestBtn?.classList.add('is-burst');
-    chestBtn?.setAttribute('aria-label', t('quests.chestOpened'));
+    overlay.classList.add('is-chest-open');
     global.SoundEffects?.chestOpen?.();
 
-    await wait(reduceMotion() ? 60 : 180);
+    await wait(reduceMotion() ? 80 : 420);
+
+    // Swap to reel
+    overlay.classList.add('is-spinning');
+    overlay.classList.remove('is-chest-open');
+    if (hint) hint.textContent = t('quests.chestSpinning');
+    if (reel) reel.hidden = false;
+    chestBtn?.setAttribute('tabindex', '-1');
+    chestBtn?.setAttribute('aria-hidden', 'true');
+
+    await wait(reduceMotion() ? 40 : 180);
+    await playReelSpin(overlay);
+
+    await wait(reduceMotion() ? 80 : 380);
+
+    // Undim + reveal
+    overlay.classList.add('is-opened');
+    overlay.classList.remove('is-spinning');
+    if (hint) {
+      hint.textContent = '';
+      hint.hidden = true;
+    }
 
     const amounts = overlay.querySelector('#chest-reward-amounts');
     amounts?.classList.add('is-visible');
@@ -297,10 +472,9 @@
     continueBtn?.classList.add('is-visible');
     continueBtn?.focus?.();
 
-    // Auto-dismiss if user doesn't tap
     const autoClose = global.setTimeout(() => {
       closeOverlay(overlay, onComplete);
-    }, 4200);
+    }, 4800);
 
     continueBtn?.addEventListener('click', () => {
       global.clearTimeout(autoClose);
@@ -320,7 +494,6 @@
       coins: Math.max(0, Math.floor(Number(opts.coins) || 0)),
       xp: Math.max(0, Math.floor(Number(opts.xp) || 0)),
     };
-    const autoOpen = opts.autoOpen === true;
 
     const profile = global.ProfileService?.loadProfile?.();
     const currentCoins = profile?.coins ?? reward.coins;
@@ -339,7 +512,7 @@
     overlay.setAttribute('role', 'dialog');
     overlay.setAttribute('aria-modal', 'true');
     overlay.setAttribute('aria-label', t('quests.chestTitle'));
-    overlay.innerHTML = buildOverlayHtml(reward, { autoOpen });
+    overlay.innerHTML = buildOverlayHtml(reward);
 
     document.body.appendChild(overlay);
     document.body.classList.add('chest-reward-open');
@@ -347,39 +520,33 @@
     opening = false;
     global.I18n?.applyToDocument?.(overlay);
 
-    // Show pre-claim balance while chest is closed
     setDisplayedCoins(coinsBefore);
     requestAnimationFrame(() => overlay.classList.add('visible'));
     global.SoundEffects?.chestAppear?.();
 
     const chestBtn = overlay.querySelector('#chest-reward-tap');
     const onOpen = () => openChest(overlay, reward, coinsBefore, opts.onComplete);
+    chestBtn?.addEventListener('click', onOpen, { once: true });
 
-    if (autoOpen) {
-      chestBtn?.setAttribute('tabindex', '-1');
-      global.setTimeout(onOpen, reduceMotion() ? 180 : 650);
-    } else {
-      chestBtn?.addEventListener('click', onOpen, { once: true });
-
-      // Soft idle shake cue (manual tap mode only)
-      if (!reduceMotion()) {
-        const idleShake = global.setInterval(() => {
-          if (!activeOverlay || overlay.classList.contains('is-opened') || opening) {
-            global.clearInterval(idleShake);
-            return;
+    // Soft idle shake cue while waiting for tap
+    if (!reduceMotion()) {
+      const idleShake = global.setInterval(() => {
+        if (!activeOverlay || opening || overlay.classList.contains('is-spinning')
+          || overlay.classList.contains('is-opened')) {
+          global.clearInterval(idleShake);
+          return;
+        }
+        chestBtn?.classList.remove('is-idle');
+        void chestBtn?.offsetWidth;
+        chestBtn?.classList.add('is-shake');
+        global.SoundEffects?.chestShake?.(true);
+        global.setTimeout(() => {
+          chestBtn?.classList.remove('is-shake');
+          if (!opening && !overlay.classList.contains('is-opened')) {
+            chestBtn?.classList.add('is-idle');
           }
-          chestBtn?.classList.remove('is-idle');
-          void chestBtn?.offsetWidth;
-          chestBtn?.classList.add('is-shake');
-          global.SoundEffects?.chestShake?.(true);
-          global.setTimeout(() => {
-            chestBtn?.classList.remove('is-shake');
-            if (!overlay.classList.contains('is-opened')) {
-              chestBtn?.classList.add('is-idle');
-            }
-          }, 560);
-        }, 2400);
-      }
+        }, 560);
+      }, 2400);
     }
 
     return overlay;
