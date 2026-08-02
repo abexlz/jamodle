@@ -208,20 +208,36 @@
 
   let rewardQueue = Promise.resolve();
 
-  function showChestReward(reward, coinsBefore) {
+  function showChestReward(pendingChest) {
     return new Promise((resolve) => {
-      if (!global.ChestRewardUI?.show) {
-        showQuestCompleteToast([reward]);
+      if (!pendingChest) {
         resolve();
         return;
       }
+
+      if (!global.ChestRewardUI?.show) {
+        QS()?.redeemPendingChest?.(pendingChest.id);
+        showQuestCompleteToast([pendingChest]);
+        global.PlayerHud?.refresh?.();
+        resolve();
+        return;
+      }
+
+      const profile = global.ProfileService?.loadProfile?.();
+      const coinsBefore = profile?.coins || 0;
+
       global.ChestRewardUI.show({
-        coins: reward.coins,
-        xp: reward.xp,
+        coins: pendingChest.coins,
+        xp: pendingChest.xp,
         coinsBefore,
         autoOpen: false,
+        onOpenStart: () => {
+          QS()?.redeemPendingChest?.(pendingChest.id);
+          updateTabBadge();
+        },
         onComplete: () => {
           global.PlayerHud?.refresh?.();
+          updateTabBadge();
           resolve();
         },
       });
@@ -229,25 +245,35 @@
   }
 
   /**
-   * Present auto-claimed quest rewards (toasts + tap-to-open chests).
+   * Present auto-claimed quest rewards.
+   * Chests are queued for the menu unless deferChests is false.
    * @param {{ rewards?: Array, coinsBefore?: number, wheelAvailable?: boolean }} result
+   * @param {{ deferChests?: boolean }} [opts]
    */
-  function presentAutoRewards(result) {
+  function presentAutoRewards(result, opts = {}) {
     if (!result) return;
+    const deferChests = opts.deferChests !== false;
     const rewards = Array.isArray(result.rewards) ? result.rewards : [];
     const toastRewards = rewards.filter((r) => !r.chest);
     const chestRewards = rewards.filter((r) => r.chest);
-    let runningBefore = result.coinsBefore != null
-      ? result.coinsBefore
-      : Math.max(0, (global.ProfileService?.loadProfile?.()?.coins || 0)
-        - rewards.reduce((sum, r) => sum + (r.coins || 0), 0));
 
     if (toastRewards.length) showQuestCompleteToast(toastRewards);
 
+    // After a game: keep chests for the menu. On menu, open them.
+    if (deferChests) {
+      updateTabBadge();
+      if (result.wheelAvailable && document.getElementById('menu-root')) {
+        setTimeout(() => global.WheelUI?.tryShow?.(), toastRewards.length ? 1200 : 400);
+      }
+      return;
+    }
+
     rewardQueue = rewardQueue.then(async () => {
       for (const reward of chestRewards) {
-        await showChestReward(reward, runningBefore);
-        runningBefore += reward.coins || 0;
+        const pending = QS()?.getPendingChests?.()?.find((c) => (
+          c.id === reward.pendingChestId || c.questId === reward.questId
+        ));
+        await showChestReward(pending || reward);
       }
       global.PlayerHud?.refresh?.();
       if (result.wheelAvailable) {
@@ -259,12 +285,50 @@
     });
   }
 
+  let presentingPendingChests = false;
+
+  /** Open any queued chest rewards while the player is on the home menu. */
+  function tryShowPendingChests() {
+    const menuScreen = document.getElementById('menu-screen');
+    if (!menuScreen || menuScreen.classList.contains('hidden')) return;
+    if (presentingPendingChests) return;
+    if (document.getElementById('chest-reward-overlay')) return;
+
+    const pending = QS()?.getPendingChests?.() || [];
+    if (!pending.length) return;
+
+    presentingPendingChests = true;
+    rewardQueue = rewardQueue.then(async () => {
+      // Re-read each time — redeem removes items as they open.
+      while (true) {
+        const next = QS()?.getPendingChests?.()?.[0];
+        if (!next) break;
+        if (document.getElementById('menu-screen')?.classList.contains('hidden')) break;
+        await showChestReward(next);
+        await new Promise((r) => setTimeout(r, 280));
+      }
+      updateTabBadge();
+      if (QS()?.isDailyWheelAvailable?.(global.ProfileService?.loadProfile?.())) {
+        setTimeout(() => global.WheelUI?.tryShow?.(), 400);
+      }
+    }).catch((err) => {
+      console.warn('[QuestUI] tryShowPendingChests failed', err);
+    }).finally(() => {
+      presentingPendingChests = false;
+    });
+  }
+
   let pendingFlushDone = false;
 
   function flushPendingClaims() {
     if (pendingFlushDone) return null;
     pendingFlushDone = true;
-    return QS()?.claimAllPending?.({ deferHud: true, present: true });
+    // Claim leftover GET-era quests into pending chests / instant rewards.
+    const result = QS()?.claimAllPending?.({ deferHud: true, present: false });
+    if (result?.rewards?.length) {
+      presentAutoRewards(result, { deferChests: true });
+    }
+    return result;
   }
 
   let activeQuestScope = 'daily';
@@ -338,8 +402,9 @@
       return;
     }
 
-    // Migrate any old completed-but-unclaimed quests.
+    // Migrate any old completed-but-unclaimed quests, then open menu chests.
     flushPendingClaims();
+    tryShowPendingChests();
 
     updateTabBadge();
     startQuestTimer(root);
@@ -366,6 +431,7 @@
     updateTabBadge,
     showQuestCompleteToast,
     presentAutoRewards,
+    tryShowPendingChests,
     flushPendingClaims,
     scrollToQuests,
     stopQuestTimer,

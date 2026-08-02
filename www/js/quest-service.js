@@ -408,7 +408,17 @@
       weekly: [],
       weeklyPlayDays: [],
       dailyWheelClaimed: false,
+      pendingChests: [],
     };
+  }
+
+  function ensurePendingChests(qs) {
+    if (!Array.isArray(qs.pendingChests)) qs.pendingChests = [];
+    return qs.pendingChests;
+  }
+
+  function makePendingChestId(questId) {
+    return `${questId}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   }
 
   function normalizeQuestEntry(raw, questId) {
@@ -431,6 +441,7 @@
     if (!Array.isArray(qs.weekly)) qs.weekly = [];
     if (!Array.isArray(qs.weeklyPlayDays)) qs.weeklyPlayDays = [];
     if (typeof qs.dailyWheelClaimed !== 'boolean') qs.dailyWheelClaimed = false;
+    ensurePendingChests(qs);
 
     const today = getTodayKey();
     const week = getWeekKey();
@@ -554,11 +565,38 @@
 
   function claimQuestRewards(profile, entries) {
     const results = [];
+    const qs = ensureQuestState(profile);
+    const pending = ensurePendingChests(qs);
+
     entries.forEach((entry) => {
       if (entry.claimed) return;
       const def = QUEST_DEFS[entry.questId];
       if (!def || entry.progress < entry.target) return;
       entry.claimed = true;
+
+      const isChest = questHasChest(def);
+      if (isChest) {
+        // Coins/XP stay pending until the player opens the chest in the menu.
+        const chest = {
+          id: makePendingChestId(entry.questId),
+          questId: entry.questId,
+          xp: def.xp,
+          coins: def.coins,
+          icon: def.icon,
+        };
+        pending.push(chest);
+        results.push({
+          questId: entry.questId,
+          xp: def.xp,
+          coins: def.coins,
+          icon: def.icon,
+          chest: true,
+          pending: true,
+          pendingChestId: chest.id,
+        });
+        return;
+      }
+
       profile.totalXp = (profile.totalXp || 0) + def.xp;
       profile.coins = (profile.coins || 0) + def.coins;
       results.push({
@@ -566,10 +604,48 @@
         xp: def.xp,
         coins: def.coins,
         icon: def.icon,
-        chest: questHasChest(def),
+        chest: false,
       });
     });
     return results;
+  }
+
+  function getPendingChests() {
+    const profile = global.ProfileService?.loadProfile?.();
+    if (!profile) return [];
+    const qs = ensureQuestState(profile);
+    return ensurePendingChests(qs).map((c) => ({ ...c }));
+  }
+
+  function countPendingChests() {
+    return getPendingChests().length;
+  }
+
+  /**
+   * Grant one queued chest reward (called when the player opens it in the menu).
+   * @param {string} chestId
+   */
+  function redeemPendingChest(chestId) {
+    const profile = global.ProfileService?.loadProfile?.();
+    if (!profile || !chestId) return null;
+
+    const qs = ensureQuestState(profile);
+    const pending = ensurePendingChests(qs);
+    const idx = pending.findIndex((c) => c.id === chestId);
+    if (idx < 0) return null;
+
+    const chest = pending[idx];
+    const coinsBefore = profile.coins || 0;
+    pending.splice(idx, 1);
+    profile.totalXp = (profile.totalXp || 0) + (chest.xp || 0);
+    profile.coins = coinsBefore + (chest.coins || 0);
+    global.ProfileService?.saveProfile?.(profile);
+    global.PlayerHud?.refresh?.();
+
+    return {
+      ...chest,
+      coinsBefore,
+    };
   }
 
   function refreshQuestUi(opts = {}) {
@@ -625,7 +701,7 @@
 
   /**
    * Record game activity for quest progress.
-   * Completing a quest auto-claims XP/coins and presents rewards (toasts / chests).
+   * Completing a quest auto-claims: instant toast rewards, chests queued for the menu.
    * @param {string} mode
    * @param {{ won?: boolean, guessCount?: number, friendBattle?: boolean, coopWin?: boolean }} [meta]
    */
@@ -656,9 +732,8 @@
 
     global.ProfileService?.saveProfile?.(profile);
 
-    const hasChest = rewards.some((r) => r.chest);
     if (readyToClaim.length) {
-      refreshQuestUi({ deferHud: hasChest });
+      refreshQuestUi();
     }
 
     const result = {
@@ -666,10 +741,12 @@
       readyToClaim,
       wheelAvailable: isDailyWheelAvailable(profile),
       coinsBefore,
+      pendingChests: getPendingChests(),
     };
 
+    // Toasts / wheel only — chests open later in the menu.
     if (rewards.length || result.wheelAvailable) {
-      global.QuestUI?.presentAutoRewards?.(result);
+      global.QuestUI?.presentAutoRewards?.(result, { deferChests: true });
     }
 
     return result;
@@ -711,6 +788,7 @@
       const target = q.target ?? QUEST_DEFS[q.questId]?.target ?? 1;
       return !q.claimed && q.progress < target;
     }).length;
+    count += countPendingChests();
     if (global.WheelService?.isDailyWheelAvailable?.(global.ProfileService?.loadProfile?.())) {
       count += 1;
     }
@@ -762,6 +840,9 @@
     recordActivity,
     claimQuest,
     claimAllPending,
+    getPendingChests,
+    countPendingChests,
+    redeemPendingChest,
     countIncomplete,
     countCompleted,
     isDailyWheelAvailable,

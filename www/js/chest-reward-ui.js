@@ -4,7 +4,7 @@
 (function (global) {
   'use strict';
 
-  const STYLES_HREF = 'css/chest-reward.css?v=4';
+  const STYLES_HREF = 'css/chest-reward.css?v=5';
   const CHEST_CLOSED = 'assets/chests/chest-closed.png';
   const CHEST_OPEN = 'assets/chests/chest-open.png';
   const COIN_SRC = 'assets/coin.png';
@@ -419,11 +419,17 @@
     }, 320);
   }
 
-  async function openChest(overlay, reward, coinsBefore, onComplete) {
+  async function openChest(overlay, reward, coinsBefore, onComplete, onOpenStart) {
     if (opening || overlay.classList.contains('is-opened') || overlay.classList.contains('is-spinning')) {
       return;
     }
     opening = true;
+
+    if (typeof onOpenStart === 'function') {
+      try { onOpenStart(); } catch (err) {
+        console.warn('[ChestRewardUI] onOpenStart failed', err);
+      }
+    }
 
     const chestBtn = overlay.querySelector('#chest-reward-tap');
     const hint = overlay.querySelector('#chest-reward-hint');
@@ -484,7 +490,7 @@
   }
 
   /**
-   * @param {{ coins: number, xp?: number, coinsBefore?: number, autoOpen?: boolean, onComplete?: Function }} opts
+   * @param {{ coins: number, xp?: number, coinsBefore?: number, autoOpen?: boolean, onOpenStart?: Function, onComplete?: Function }} opts
    */
   function show(opts = {}) {
     ensureStyles();
@@ -525,7 +531,13 @@
     global.SoundEffects?.chestAppear?.();
 
     const chestBtn = overlay.querySelector('#chest-reward-tap');
-    const onOpen = () => openChest(overlay, reward, coinsBefore, opts.onComplete);
+    const onOpen = () => openChest(
+      overlay,
+      reward,
+      coinsBefore,
+      opts.onComplete,
+      opts.onOpenStart,
+    );
     chestBtn?.addEventListener('click', onOpen, { once: true });
 
     // Soft idle shake cue while waiting for tap

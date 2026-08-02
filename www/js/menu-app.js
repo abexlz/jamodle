@@ -112,6 +112,7 @@
     updateHomeTabBodyClass(next);
     updateTabBarUI();
     global.MultiplayerUI?.mount?.();
+    global.QuestUI?.tryShowPendingChests?.();
   }
 
   function mountMenu(rootId, tab) {
@@ -138,6 +139,7 @@
     global.WheelUI?.updateMenuWheelNav?.();
     global.DailyCalendarModal?.updateMenuCalendarNav?.();
     bindMenuTopBar();
+    global.QuestUI?.tryShowPendingChests?.();
   }
 
   function refreshMenu() {

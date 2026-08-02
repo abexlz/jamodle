@@ -106,10 +106,14 @@ savedProfile = makeProfile({
 });
 const raceResult = QS.recordActivity('battle', { won: true, jamodlePvpWin: true });
 assert(raceResult.readyToClaim?.some((q) => q.questId === 'race-win'), 'race win counts jamodle pvp wins');
-assert(raceResult.rewards?.some((q) => q.questId === 'race-win'), 'race win auto-claims rewards');
+assert(raceResult.rewards?.some((q) => q.questId === 'race-win' && q.chest), 'race win auto-claims as chest');
 assert(
   savedProfile.questState.daily.find((q) => q.questId === 'race-win')?.claimed,
   'race-win marked claimed after auto-claim',
+);
+assert(
+  savedProfile.questState.pendingChests?.some((c) => c.questId === 'race-win'),
+  'chest reward queued for menu open',
 );
 
 let friendBattleDay = null;
@@ -172,6 +176,8 @@ assert.equal(QS.countCompleted({
   daily: [{ progress: 1, target: 1, claimed: false }],
   weekly: [{ progress: 0, target: 2, claimed: false }],
 }), 1, 'completed count tracks beaten quests only');
+// Clear queued chests so incomplete count reflects unfinished quests only.
+if (savedProfile?.questState) savedProfile.questState.pendingChests = [];
 assert.equal(QS.countIncomplete({
   daily: [{ progress: 1, target: 1, claimed: true }],
   weekly: [{ progress: 0, target: 2, claimed: false }],
@@ -202,9 +208,14 @@ const chestClaim = QS.claimQuest('race-win', { deferHud: true });
 assert(chestClaim.ok, 'chest quest claim succeeds');
 assert(chestClaim.rewards?.[0]?.chest, 'claim result marks chest reward');
 assert.equal(chestClaim.coinsBefore, 10, 'claim reports coins before reward');
-assert.equal(savedProfile.coins, 10 + QS.QUEST_DEFS['race-win'].coins, 'coins granted on claim');
+assert.equal(savedProfile.coins, 10, 'chest claim queues coins until menu open');
+assert.equal(
+  savedProfile.questState.pendingChests?.length,
+  1,
+  'pending chest queued on claim',
+);
 
-// Auto-claim via recordActivity when a quest crosses the finish line
+// Auto-claim via recordActivity queues chest; redeem grants on open
 global.ProfileService.getTodayKey = () => raceWinDay;
 savedProfile = makeProfile({
   coins: 5,
@@ -221,13 +232,22 @@ savedProfile = makeProfile({
     weekly: [],
     weeklyPlayDays: [],
     dailyWheelClaimed: false,
+    pendingChests: [],
   },
 });
 const auto = QS.recordActivity('battle', { won: true, jamodlePvpWin: true });
 const raceDef = QS.QUEST_DEFS['race-win'];
-assert(auto.rewards?.some((r) => r.questId === 'race-win' && r.chest), 'auto-claim returns chest reward');
-assert.equal(auto.coinsBefore, 5, 'auto-claim reports pre-reward coin balance');
-assert.equal(savedProfile.coins, 5 + raceDef.coins, 'auto-claim grants coins');
-assert.equal(savedProfile.totalXp, raceDef.xp, 'auto-claim grants xp');
+assert(auto.rewards?.some((r) => r.questId === 'race-win' && r.chest && r.pending), 'auto-claim queues chest');
+assert.equal(savedProfile.coins, 5, 'coins stay pending until chest open');
+assert.equal(savedProfile.totalXp, 0, 'xp stays pending until chest open');
+assert.equal(QS.countPendingChests(), 1, 'one pending chest after auto-claim');
+
+const pending = QS.getPendingChests()[0];
+const redeemed = QS.redeemPendingChest(pending.id);
+assert(redeemed, 'redeem pending chest succeeds');
+assert.equal(redeemed.coinsBefore, 5, 'redeem reports coins before grant');
+assert.equal(savedProfile.coins, 5 + raceDef.coins, 'redeem grants coins');
+assert.equal(savedProfile.totalXp, raceDef.xp, 'redeem grants xp');
+assert.equal(QS.countPendingChests(), 0, 'pending chest cleared after redeem');
 
 console.log('quest-service.test.js: all passed');
