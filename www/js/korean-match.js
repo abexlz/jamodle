@@ -1425,6 +1425,7 @@
         onQuit: () => {
           this.streak = 0;
           this.saveBestOnLeave();
+          global.HomeNav?.clearActiveGame?.();
           global.location.href = 'index.html';
         },
       });

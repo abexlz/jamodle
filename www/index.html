@@ -1679,7 +1679,7 @@
   .panel-close:hover{ color: var(--text); border-color: var(--text-soft); }
 
 </style>
-<link rel="stylesheet" href="css/home-nav.css?v=7">
+<link rel="stylesheet" href="css/home-nav.css?v=8">
 <link rel="stylesheet" href="css/app-theme.css?v=21">
 <link rel="stylesheet" href="css/cosmetic-themes.css">
 <link rel="stylesheet" href="css/shop.css">
@@ -1692,8 +1692,8 @@
 <link rel="stylesheet" href="css/app-wordle-ui.css?v=22">
 <link rel="stylesheet" href="css/daily-calendar.css?v=10" id="daily-cal-styles">
 <link rel="stylesheet" href="css/menu-typography.css?v=1">
-<link rel="stylesheet" href="css/menu-responsive.css?v=10">
-<link rel="stylesheet" href="css/game-layout.css?v=14">
+<link rel="stylesheet" href="css/menu-responsive.css?v=11">
+<link rel="stylesheet" href="css/game-layout.css?v=15">
 <link rel="stylesheet" href="css/app-fonts.css?v=3">
 </head>
 <body>
@@ -1892,8 +1892,8 @@
 <script src="js/daily-calendar-service.js"></script>
 <script src="js/daily-calendar-modal.js"></script>
 <script src="js/menu-components.js?v=20260801b"></script>
-<script src="js/home-nav.js"></script>
-<script src="js/menu-app.js"></script>
+<script src="js/home-nav.js?v=20260802a"></script>
+<script src="js/menu-app.js?v=20260802a"></script>
 <script src="js/multiplayer-ui.js?v=20260801e"></script>
 <script src="js/learning-streak.js"></script>
 <script src="js/level-utils.js"></script>
@@ -2409,14 +2409,63 @@ function replayMenuBrandIntro() {
   brand.classList.add('brand-intro');
 }
 
+let dailyGameParked = false;
+
+function parkDailyGame(){
+  const gameScreen = document.getElementById('game-screen');
+  if(!gameScreen || gameScreen.classList.contains('hidden')) return false;
+  if(state.gameMode !== 'daily' || state.over) return false;
+  if(state.gameMode === 'daily') saveDailyProgress();
+  dailyGameParked = true;
+  document.getElementById('menu-screen').classList.remove('hidden');
+  gameScreen.classList.add('hidden');
+  document.body.classList.remove('game-active');
+  document.body.classList.add('home-menu-active', 'daily-game-parked');
+  document.documentElement.classList.add('viewport-fit-lock');
+  window.HomeNav?.setActiveGame?.({ type: 'daily', at: Date.now() });
+  window.HomeNav?.show?.();
+  return true;
+}
+
+function resumeDailyGame(){
+  if(!dailyGameParked || state.gameMode !== 'daily' || state.over) return false;
+  dailyGameParked = false;
+  document.getElementById('menu-screen').classList.add('hidden');
+  document.getElementById('game-screen').classList.remove('hidden');
+  document.body.classList.add('game-active', 'has-home-bottom-bar');
+  document.body.classList.remove('home-menu-active', 'daily-game-parked');
+  document.documentElement.classList.add('viewport-fit-lock');
+  window.HomeNav?.clearActiveGame?.();
+  window.HomeNav?.show?.({ activeTab: 'menu' });
+  document.getElementById('guess-input')?.focus?.();
+  return true;
+}
+
+window.GameShell = {
+  park(tab){
+    if(tab === 'menu') return false;
+    return parkDailyGame();
+  },
+  resume(){
+    return resumeDailyGame();
+  },
+  clearParked(){
+    dailyGameParked = false;
+    window.HomeNav?.clearActiveGame?.();
+    document.body.classList.remove('daily-game-parked');
+  },
+};
+
 function showMenu(){
   state.over = true;
   state.animating = false;
+  dailyGameParked = false;
+  window.HomeNav?.clearActiveGame?.();
   dismissExtraLifePopup();
   FirebaseSocial?.closePanels?.();
   document.getElementById('menu-screen').classList.remove('hidden');
   document.getElementById('game-screen').classList.add('hidden');
-  document.body.classList.remove('game-active');
+  document.body.classList.remove('game-active', 'daily-game-parked');
   document.documentElement.classList.add('viewport-fit-lock');
   document.getElementById('overlay').classList.remove('show', 'loss');
   document.getElementById('modal').classList.remove('win');
@@ -2448,11 +2497,15 @@ function updateGameUI(){
 function startGame(wordLength){
   state.gameMode = 'daily';
   state.wordLength = wordLength;
-  window.HomeNav?.hide?.();
+  dailyGameParked = false;
+  document.body.classList.remove('daily-game-parked');
   document.getElementById('menu-screen').classList.add('hidden');
   document.getElementById('game-screen').classList.remove('hidden');
-  document.body.classList.add('game-active');
+  document.body.classList.add('game-active', 'has-home-bottom-bar');
+  document.body.classList.remove('home-menu-active');
   document.documentElement.classList.add('viewport-fit-lock');
+  window.HomeNav?.setActiveGame?.({ type: 'daily', at: Date.now() });
+  window.HomeNav?.show?.({ activeTab: 'menu' });
   updateGameUI();
   newGame();
   document.getElementById('guess-input').focus();
@@ -3082,6 +3135,8 @@ async function submitGuess(){
   if(won){
     state.over = true;
     state.won = true;
+    dailyGameParked = false;
+    window.HomeNav?.clearActiveGame?.();
     if(state.gameMode === 'daily') saveDailyProgress();
     const usedHint = state.hintSyllables.length > 0 || state.hintDefinitionUsed || state.hintElimUsed;
     if(window.XpService?.awardAndCelebrate){
@@ -3098,6 +3153,8 @@ async function submitGuess(){
   if(state.guesses.length >= state.maxGuesses){
     state.over = true;
     state.won = false;
+    dailyGameParked = false;
+    window.HomeNav?.clearActiveGame?.();
     if(state.gameMode === 'daily') saveDailyProgress();
     window.scrollTo(0, 0);
     setTimeout(() => showExtraLifePopup(), 200);

@@ -60,8 +60,14 @@ html.large-text #home-bottom-bar.home-bottom-bar {
   --menu-bar-teal-mid: #0e92a6;
   --menu-bar-teal-low: #0a7f92;
   --menu-bg-teal: #0097B2;
-  --home-nav-bg: linear-gradient(180deg, #0a8fa5 0%, #077a8e 55%, #066978 100%);
-  --home-nav-border: rgba(123, 207, 255, 0.5);
+  --home-nav-bg: rgba(6, 90, 104, 0.72);
+  --home-nav-bg-tint: linear-gradient(
+    180deg,
+    rgba(18, 160, 180, 0.55) 0%,
+    rgba(8, 110, 126, 0.62) 55%,
+    rgba(5, 80, 92, 0.7) 100%
+  );
+  --home-nav-border: rgba(123, 207, 255, 0.42);
 }
 
 html.large-text body.home-menu-active,

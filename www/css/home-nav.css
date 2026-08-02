@@ -5,9 +5,16 @@
   --home-nav-offset: calc(
     var(--home-nav-section-h) + var(--safe-bottom, env(safe-area-inset-bottom, 0px))
   );
-  --home-nav-bg: linear-gradient(180deg, #0a8fa5 0%, #077a8e 55%, #066978 100%);
-  --home-nav-border: rgba(123, 207, 255, 0.5);
-  --home-nav-divider: rgba(255, 255, 255, 0.22);
+  --home-nav-bg: rgba(6, 90, 104, 0.72);
+  --home-nav-bg-tint: linear-gradient(
+    180deg,
+    rgba(18, 160, 180, 0.55) 0%,
+    rgba(8, 110, 126, 0.62) 55%,
+    rgba(5, 80, 92, 0.7) 100%
+  );
+  --home-nav-blur: blur(18px) saturate(1.35);
+  --home-nav-border: rgba(123, 207, 255, 0.42);
+  --home-nav-divider: rgba(255, 255, 255, 0.2);
   --home-nav-active-accent: #ffe566;
   --home-nav-icon-size: clamp(42px, 10.5vw, 52px);
 }
@@ -31,9 +38,12 @@ body > #home-bottom-bar.home-bottom-bar,
   width: 100%;
   box-sizing: border-box;
   padding: 0;
-  background: var(--home-nav-bg);
-  border-top: 2px solid var(--home-nav-border);
-  box-shadow: 0 -8px 28px rgba(8, 20, 30, 0.42);
+  background-color: var(--home-nav-bg);
+  background-image: var(--home-nav-bg-tint);
+  border-top: 1px solid var(--home-nav-border);
+  box-shadow: 0 -8px 28px rgba(8, 20, 30, 0.28);
+  -webkit-backdrop-filter: var(--home-nav-blur);
+  backdrop-filter: var(--home-nav-blur);
   pointer-events: auto;
 }
 
@@ -204,4 +214,21 @@ body.has-home-bottom-bar.home-menu-active #menu-screen #menu-root {
 
 body.has-home-bottom-bar:not(.home-menu-active) {
   padding-bottom: calc(var(--home-nav-offset) + 12px);
+}
+
+/* Game modes keep the translucent bar visible with content inset */
+body.has-home-bottom-bar.game-active,
+body.has-home-bottom-bar.home-nav-game {
+  padding-bottom: var(--home-nav-offset) !important;
+}
+
+body.has-home-bottom-bar.game-active #game-screen #bottom-bar {
+  padding-bottom: 0;
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  body > #home-bottom-bar.home-bottom-bar,
+  .home-bottom-bar {
+    background-color: rgba(6, 90, 104, 0.92);
+  }
 }

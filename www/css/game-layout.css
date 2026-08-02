@@ -48,6 +48,10 @@ body.game-active {
     calc(var(--viewport-fit-pad-y) + var(--safe-bottom)) !important;
 }
 
+body.has-home-bottom-bar.game-active {
+  padding-bottom: var(--home-nav-offset, calc(76px + var(--safe-bottom))) !important;
+}
+
 body.match-page,
 body.match-race-page,
 body.match-turn-page {
@@ -57,12 +61,23 @@ body.match-turn-page {
     calc(var(--viewport-fit-pad-y) + var(--safe-bottom)) !important;
 }
 
+body.has-home-bottom-bar.match-page,
+body.has-home-bottom-bar.match-race-page,
+body.has-home-bottom-bar.match-turn-page {
+  padding-bottom: var(--home-nav-offset, calc(76px + var(--safe-bottom))) !important;
+}
+
 body:has(#race-root.race-app),
 body:has(#related-words-app) {
   padding:
     calc(8px + var(--safe-top))
     14px
     calc(8px + var(--safe-bottom)) !important;
+}
+
+body.has-home-bottom-bar:has(#related-words-app),
+body.has-home-bottom-bar:has(#race-root.race-app) {
+  padding-bottom: var(--home-nav-offset, calc(76px + var(--safe-bottom))) !important;
 }
 
 /* ── Index: daily Wordle game screen ── */

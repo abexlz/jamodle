@@ -79,7 +79,24 @@
 
   function setHomeTab(tab) {
     const next = normalizeHomeTab(tab);
-    if (next === activeHomeTab) return;
+
+    // Resume a parked in-page daily game when returning to Home.
+    if (next === 'menu' && global.GameShell?.resume?.()) {
+      activeHomeTab = 'menu';
+      try { sessionStorage.setItem(HOME_TAB_KEY, 'menu'); } catch { /* ignore */ }
+      updateTabBarUI();
+      return;
+    }
+
+    // Park an in-progress daily game before showing shop/quests/learn.
+    if (next !== 'menu') {
+      global.GameShell?.park?.(next);
+    }
+
+    if (next === activeHomeTab) {
+      updateTabBarUI();
+      return;
+    }
     activeHomeTab = next;
     try {
       sessionStorage.setItem(HOME_TAB_KEY, next);

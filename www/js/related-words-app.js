@@ -832,12 +832,14 @@
         onQuit: () => {
           this.resetSoloStreak();
           clearSoloLeftMark();
+          global.HomeNav?.clearActiveGame?.();
           global.location.href = 'index.html';
         },
         onSaveProgressAd: () => {
           if (!global.confirm(t('pauseQuit.saveAdConfirm'))) return;
           this.persistSoloProgress();
           clearSoloLeftMark();
+          global.HomeNav?.clearActiveGame?.();
           global.PauseQuitUI.close();
           global.location.href = 'index.html';
         },
