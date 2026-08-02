@@ -7,26 +7,11 @@
   border-top: 2px solid var(--border-soft, #F0ECE8);
 }
 
-.shop-section-header {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 6px;
-  margin-bottom: 10px;
-}
-
-.shop-section-title {
-  margin: 0;
-  font-family: 'Jua', sans-serif;
-  font-size: 18px;
-  color: var(--heading, #7B8FD4);
-}
-
 .shop-section-balance {
   margin: 0;
   font-size: 13px;
   color: var(--text-soft, #9AA3AD);
+  text-align: center;
 }
 
 .shop-section-balance strong {
@@ -232,6 +217,9 @@
 }
 
 .shop-scope-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   margin-bottom: 14px;
 }
 

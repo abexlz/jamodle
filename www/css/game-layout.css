@@ -412,10 +412,19 @@ body.home-menu-active #menu-screen.is-quests-tab .quest-list {
 body.home-menu-active #menu-screen.is-quests-tab .quest-card {
   flex: 0 0 auto;
   min-height: auto;
-  padding: 8px 10px;
+  padding: 10px 12px;
 }
 
-body.home-menu-active.home-tab-shop .shop-section-header,
+body.home-menu-active #menu-screen.is-shop-tab .shop-section {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+body.home-menu-active #menu-screen.is-quests-tab .quest-section {
+  padding-top: 0;
+}
+
 body.home-menu-active.home-tab-shop .shop-scope-bar {
   flex-shrink: 0;
 }
@@ -508,13 +517,6 @@ body.home-menu-active.home-tab-learn .section-header {
     --home-nav-section-h: clamp(64px, 10.5dvh, 80px);
   }
 
-  body.home-menu-active #menu-screen .quest-section-header {
-    display: none;
-  }
-
-  body.home-menu-active #menu-screen .shop-section-header {
-    margin-bottom: 4px;
-  }
 }
 
 /* Scale-to-fit fallback for very short viewports */

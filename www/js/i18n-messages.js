@@ -1212,6 +1212,7 @@
       "progress": "{{current}} / {{target}}",
       "complete": "Done!",
       "claim": "Claim",
+      "get": "GET",
       "empty": "No quests right now.",
       "rewardToast": "Quest complete! +{{xp}} XP · 🪙 {{coins}}",
       "defs": {
@@ -2688,6 +2689,7 @@
       "progress": "{{current}} / {{target}}",
       "complete": "완료!",
       "claim": "받기",
+      "get": "받기",
       "empty": "퀘스트가 없어요.",
       "rewardToast": "퀘스트 완료! +{{xp}} XP · 🪙 {{coins}}",
       "defs": {

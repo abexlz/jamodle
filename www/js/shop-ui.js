@@ -128,12 +128,7 @@
     const scope = activeShopScope;
 
     return `
-      <section class="shop-section" id="shop-section" aria-labelledby="shop-section-heading">
-        <div class="shop-section-header">
-          <h2 class="shop-section-title" id="shop-section-heading">🛒 ${escapeHtml(t('shop.title'))}</h2>
-          <p class="shop-section-balance">${escapeHtml(t('shop.balance'))}: <strong>${global.CoinIcon?.html?.('coin-icon coin-icon--sm') || '🪙'} ${inv.coins}</strong></p>
-        </div>
-
+      <section class="shop-section" id="shop-section" aria-label="${escapeHtml(t('shop.title'))}">
         <div class="shop-scope-bar">
           <div class="shop-scope-switch" role="tablist" aria-label="${escapeHtml(t('shop.title'))}">
             <button type="button" class="shop-scope-btn${scope === 'item' ? ' is-active' : ''}"
@@ -145,6 +140,7 @@
               ${escapeHtml(t('shop.scopeCosmetic'))}
             </button>
           </div>
+          <p class="shop-section-balance">${escapeHtml(t('shop.balance'))}: <strong>${global.CoinIcon?.html?.('coin-icon coin-icon--sm') || '🪙'} ${inv.coins}</strong></p>
         </div>
 
         <div class="shop-scope-panel${scope === 'item' ? '' : ' hidden'}" data-shop-scope-panel="item"

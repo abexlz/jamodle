@@ -37,35 +37,36 @@
       current: progressCurrent,
       target: entry.target,
     });
+    const displayPct = claimed ? 100 : pct;
 
     let statusHtml = '';
     if (claimable) {
-      statusHtml = `<button type="button" class="quest-claim-btn">${escapeHtml(t('quests.claim'))}</button>`;
+      statusHtml = `<button type="button" class="quest-claim-btn">${escapeHtml(t('quests.get'))}</button>`;
     } else if (claimed) {
-      statusHtml = `<span class="quest-done-label">${escapeHtml(t('quests.complete'))}</span>`;
+      statusHtml = `<span class="quest-done-check" aria-label="${escapeHtml(t('quests.complete'))}">✓</span>`;
     } else {
-      statusHtml = `<span class="quest-reward-compact">+${def.xp} XP · ${global.CoinIcon?.html?.('coin-icon coin-icon--sm') || '🪙'} ${def.coins}</span>`;
+      statusHtml = `<span class="quest-status-idle" aria-hidden="true"></span>`;
     }
 
-    const displayPct = claimed ? 100 : pct;
-    const footHtml = `
-        <div class="quest-card-foot">
+    const coinIcon = global.CoinIcon?.html?.('coin-icon coin-icon--md') || '🪙';
+
+    return `
+      <article class="quest-card${tierClass}${stateClass}" data-quest-id="${escapeHtml(entry.questId)}"${claimable ? ' data-claimable="true"' : ''} aria-label="${escapeHtml(taskText)}">
+        <div class="quest-card-quest">
+          <p class="quest-card-task">${escapeHtml(taskText)}</p>
           <div class="quest-progress" role="progressbar"
             aria-valuemin="0" aria-valuemax="100" aria-valuenow="${displayPct}"
             aria-label="${escapeHtml(progressLabel)}">
             <div class="quest-progress-fill" style="width:${displayPct}%"></div>
+            <span class="quest-progress-text">${displayPct}%</span>
           </div>
-          <span class="quest-progress-pct">${displayPct}%</span>
-        </div>`;
-
-    return `
-      <article class="quest-card${tierClass}${stateClass}" data-quest-id="${escapeHtml(entry.questId)}"${claimable ? ' data-claimable="true"' : ''} aria-label="${escapeHtml(taskText)}">
-        <div class="quest-card-top">
-          <span class="quest-card-icon" aria-hidden="true">${def.icon}</span>
-          <p class="quest-card-task">${escapeHtml(taskText)}</p>
-          <div class="quest-card-status">${statusHtml}</div>
         </div>
-        ${footHtml}
+        <div class="quest-card-status">${statusHtml}</div>
+        <div class="quest-card-reward" aria-label="+${def.xp} XP · ${def.coins} ${escapeHtml(t('shop.coins'))}">
+          <span class="quest-reward-icon" aria-hidden="true">${coinIcon}</span>
+          <span class="quest-reward-amount" aria-hidden="true">${def.coins}</span>
+          <span class="quest-reward-xp" aria-hidden="true">+${def.xp} XP</span>
+        </div>
       </article>
     `;
   }
@@ -117,11 +118,7 @@
     const scope = activeQuestScope;
 
     return `
-      <section class="quest-section" id="quest-section" aria-labelledby="quest-section-heading">
-        <div class="quest-section-header">
-          <h2 class="quest-section-title" id="quest-section-heading">🎯 ${escapeHtml(t('quests.title'))}</h2>
-        </div>
-
+      <section class="quest-section" id="quest-section" aria-label="${escapeHtml(t('quests.title'))}">
         <div class="quest-scope-bar">
           <div class="quest-scope-switch" role="tablist" aria-label="${escapeHtml(t('quests.title'))}">
             <button type="button" class="quest-scope-btn${scope === 'daily' ? ' is-active' : ''}"
@@ -138,12 +135,12 @@
         </div>
 
         <div class="quest-scope-panel${scope === 'daily' ? '' : ' hidden'}" data-quest-scope-panel="daily"
-          role="tabpanel" aria-labelledby="quest-scope-daily">
+          role="tabpanel">
           ${renderQuestList(dailyCards)}
         </div>
 
         <div class="quest-scope-panel${scope === 'weekly' ? '' : ' hidden'}" data-quest-scope-panel="weekly"
-          role="tabpanel" aria-labelledby="quest-scope-weekly">
+          role="tabpanel">
           ${renderQuestList(weeklyCards)}
         </div>
       </section>
@@ -300,10 +297,13 @@
 
     scope.querySelectorAll('.quest-card[data-claimable="true"]').forEach((card) => {
       const questId = card.dataset.questId;
-      card.addEventListener('click', (e) => {
+      const claim = (e) => {
         e.preventDefault();
+        e.stopPropagation();
         if (questId) handleQuestClaim(questId);
-      });
+      };
+      card.querySelector('.quest-claim-btn')?.addEventListener('click', claim);
+      card.addEventListener('click', claim);
     });
   }
 
