@@ -248,7 +248,22 @@
     border: 0;
   }
 
-  .jamo-bank > .jamo-tile:not(.in-zone) {
+  /* Fixed dock cells — empty slots keep the bank shape when tiles leave. */
+  .jamo-dock-slot {
+    --dock-tile-local: var(--dock-tile-size, var(--tile-size));
+    flex: 0 0 var(--dock-tile-local);
+    width: var(--dock-tile-local);
+    height: var(--dock-tile-local);
+    min-width: var(--dock-tile-local);
+    max-width: var(--dock-tile-local);
+    min-height: var(--dock-tile-local);
+    max-height: var(--dock-tile-local);
+    box-sizing: border-box;
+    position: relative;
+  }
+
+  .jamo-bank > .jamo-tile:not(.in-zone),
+  .jamo-bank .jamo-dock-slot > .jamo-tile:not(.in-zone) {
     --dock-tile-local: var(--dock-tile-size, var(--tile-size));
     --jamo-glyph-ratio: var(--jamo-dock-glyph-ratio);
     width: var(--dock-tile-local) !important;
@@ -998,8 +1013,10 @@
   }
 
   .jamo-tile.dragging { opacity: .45; transform: scale(.92); pointer-events: none; }
-  /* Only collapse dock stubs — never hide a tile that has been moved into a slot. */
+  /* Only collapse dock stubs — never hide a tile that has been moved into a slot.
+     Slots themselves keep size; collapsing the tile inside an empty-looking cell is fine. */
   .jamo-bank > .jamo-tile.hidden-in-bank,
+  .jamo-bank .jamo-dock-slot > .jamo-tile.hidden-in-bank,
   body.match-turn-page .jamo-bank > .jamo-tile.hidden-in-bank,
   body.match-turn-page .jamo-bank--turn > .jamo-tile.hidden-in-bank,
   body.match-turn-page .race-turn-dock-stack .jamo-bank > .jamo-tile.hidden-in-bank,
@@ -1008,6 +1025,7 @@
   /* Merge ingredients must stay invisible even if briefly parented under merge UI. */
   .jamo-tile.merge-consumed,
   .jamo-bank > .jamo-tile.merge-consumed,
+  .jamo-bank .jamo-dock-slot > .jamo-tile.merge-consumed,
   body.match-turn-page .jamo-bank > .jamo-tile.merge-consumed,
   body.match-turn-page .race-turn-dock-stack .jamo-bank > .jamo-tile.merge-consumed {
     display: none !important;
@@ -1049,7 +1067,8 @@
      hide a tile that has already been locked into a green drop-zone. */
   .merge-slot > .jamo-tile.merge-consumed,
   .merge-result > .jamo-tile.merge-consumed,
-  .jamo-bank > .jamo-tile.merge-consumed {
+  .jamo-bank > .jamo-tile.merge-consumed,
+  .jamo-bank .jamo-dock-slot > .jamo-tile.merge-consumed {
     display: none !important;
     opacity: 0 !important;
     visibility: hidden !important;
@@ -3230,8 +3249,20 @@
     box-shadow: none !important;
   }
 
+  body.match-turn-page .race-turn-dock-stack .jamo-dock-slot {
+    --dock-tile-local: var(--turn-dock-tile-size, var(--dock-tile-size, var(--tile-size, 44px)));
+    flex: 0 0 var(--dock-tile-local) !important;
+    width: var(--dock-tile-local) !important;
+    height: var(--dock-tile-local) !important;
+    min-width: var(--dock-tile-local) !important;
+    max-width: var(--dock-tile-local) !important;
+    min-height: var(--dock-tile-local) !important;
+    max-height: var(--dock-tile-local) !important;
+  }
+
   body.match-turn-page .race-turn-dock-stack .jamo-bank > .jamo-tile:not(.in-zone):not(.hidden-in-bank),
-  body.match-turn-page .race-turn-dock-stack .jamo-bank--turn > .jamo-tile:not(.in-zone):not(.hidden-in-bank) {
+  body.match-turn-page .race-turn-dock-stack .jamo-bank--turn > .jamo-tile:not(.in-zone):not(.hidden-in-bank),
+  body.match-turn-page .race-turn-dock-stack .jamo-dock-slot > .jamo-tile:not(.in-zone):not(.hidden-in-bank) {
     --dock-tile-local: var(--turn-dock-tile-size, var(--dock-tile-size, var(--tile-size, 44px)));
     flex: 0 0 var(--dock-tile-local) !important;
     width: var(--dock-tile-local) !important;

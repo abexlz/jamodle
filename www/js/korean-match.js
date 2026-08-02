@@ -266,7 +266,12 @@
       if (this.locked) return;
       this.inBank = true;
       this.zoneRef = null;
-      if (this.el.parentElement !== bankContainer) bankContainer.appendChild(this.el);
+      const game = global.KoreanMatchGame?.instance;
+      if (game?.mountTileInDockSlot && bankContainer && game.els?.bank === bankContainer) {
+        game.mountTileInDockSlot(this);
+      } else if (this.el.parentElement !== bankContainer) {
+        bankContainer.appendChild(this.el);
+      }
       this.el.classList.remove('in-zone', 'locked', 'selected', 'revealing', 'revealed', 'revealing-wrong', 'dragging');
       // Keep merge-consumed / hidden stubs invisible — callers that want a
       // playable dock tile must clear merge-consumed explicitly (unmerge revive).
@@ -1832,8 +1837,12 @@
       (MMP()?.buildTilesFromPuzzle?.(puzzle) || []).forEach((def) => {
         const tile = new JamoTile({ ...def });
         this.tileMap[tile.id] = tile;
-        this.els.bank.appendChild(tile.el);
+        this.mountTileInDockSlot(tile);
       });
+      this._dockLayoutCount = Object.keys(this.tileMap).length;
+      this._originalDockCount = this._dockLayoutCount;
+      this.resetDockLayoutSize();
+      this.syncDockTileSize();
     }
 
     /** True when every jamo tile has left the dock (bank). */
@@ -2132,7 +2141,7 @@
         const tile = new JamoTile({ ...def, id: `tile-${tileCounter++}`, targetChar: def.char });
         this.tileMap[tile.id] = tile;
         if (this.shuffleRotations) this.applyRandomTileRotation(tile, rng);
-        this.els.bank.appendChild(tile.el);
+        this.mountTileInDockSlot(tile);
       });
       this._originalDockCount = defs.length;
       this._dockLayoutCount = defs.length;
@@ -2161,6 +2170,56 @@
       this._dockFittedMinHeight = 0;
     }
 
+    /** True when the live tile node is currently parented under the jamo bank. */
+    isTileInDockDom(tile) {
+      if (!tile?.el || !this.els.bank) return false;
+      return this.els.bank.contains(tile.el);
+    }
+
+    /**
+     * Permanent dock cell for a tile id. Empty cells keep the bank shape when
+     * the tile is on the board or otherwise away from the dock.
+     */
+    ensureDockSlot(tileId) {
+      const bank = this.els.bank;
+      if (!bank || !tileId) return null;
+      const safeId = String(tileId).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+      let slot = bank.querySelector(`.jamo-dock-slot[data-dock-slot="${safeId}"]`);
+      if (slot) return slot;
+
+      // Reuse a vacated cell whose owner left the inventory (e.g. merge sources).
+      const recyclable = [...bank.querySelectorAll('.jamo-dock-slot')].find((el) => {
+        if (el.querySelector('.jamo-tile')) return false;
+        const ownerId = el.dataset.dockSlot;
+        return !ownerId || !this.tileMap?.[ownerId];
+      });
+      if (recyclable) {
+        recyclable.dataset.dockSlot = tileId;
+        return recyclable;
+      }
+
+      slot = document.createElement('div');
+      slot.className = 'jamo-dock-slot';
+      slot.dataset.dockSlot = tileId;
+      slot.setAttribute('aria-hidden', 'true');
+      bank.appendChild(slot);
+      return slot;
+    }
+
+    /** Place a playable tile into its reserved dock cell. */
+    mountTileInDockSlot(tile) {
+      if (!tile?.el || !this.els.bank) return;
+      const slot = this.ensureDockSlot(tile.id);
+      if (!slot) return;
+      if (tile.el.parentElement !== slot) slot.appendChild(tile.el);
+    }
+
+    /** Keep an empty dock cell when a tile leaves the bank mid-round. */
+    preserveDockSlotFor(tile) {
+      if (!tile?.id || !this.els.bank) return;
+      this.ensureDockSlot(tile.id);
+    }
+
     /**
      * Keep dock tiles at the design max size for this viewport and reserve the
      * full round footprint so the bank does not shrink as letters leave.
@@ -2176,10 +2235,12 @@
       const rootTile = parseFloat(getComputedStyle(this.root).getPropertyValue('--tile-size'));
       const tileSize = Number.isFinite(rootTile) && rootTile > 0 ? rootTile : 46;
 
-      // Layout against round capacity, never the remaining visible count.
+      const slotCount = bank.querySelectorAll('.jamo-dock-slot').length;
+      // Layout against round capacity / reserved slots, never remaining tiles.
       const capacity = Math.max(
         this._dockLayoutCount || 0,
         this._originalDockCount || 0,
+        slotCount,
         Object.keys(this.tileMap || {}).length,
         n
       );
@@ -2291,7 +2352,7 @@
           tile.setChar(def.startChar);
         }
         this.tileMap[tile.id] = tile;
-        this.els.bank.appendChild(tile.el);
+        this.mountTileInDockSlot(tile);
       });
       this._originalDockCount = (tileDefs || []).length;
       this._dockLayoutCount = (tileDefs || []).length;
@@ -2614,6 +2675,7 @@
       }
       tile.inBank = false;
       tile.el.classList.remove('in-zone', 'dragging', 'hidden-in-bank');
+      this.preserveDockSlotFor(tile);
       if (tile.el.parentElement) tile.el.remove();
     }
 
@@ -2683,6 +2745,7 @@
         tile.inBank = false;
         tile.mergeDockRef = null;
         tile.mergeDockSlot = null;
+        this.preserveDockSlotFor(tile);
         tile.el?.classList.add('hidden-in-bank', 'merge-consumed');
         tile.el?.classList.remove('in-zone', 'selected', 'dragging');
         if (tile.el?.isConnected) tile.el.remove();
@@ -2730,10 +2793,12 @@
     /**
      * Ensure a placed tile is gone from the dock DOM and not counted as remaining.
      * Removes duplicate nodes with the same id; never orphans the live tile element.
+     * Leaves an empty dock slot so the bank shape stays fixed.
      */
     purgeTileFromDock(tile) {
       if (!tile?.el || !this.els.bank) return;
       tile.inBank = false;
+      this.preserveDockSlotFor(tile);
       this.els.bank.querySelectorAll('.jamo-tile').forEach((el) => {
         const id = el.dataset.tileId;
         if (!id || id !== tile.id) return;
@@ -2757,7 +2822,7 @@
           return;
         }
         const inDockVisible = tile.inBank
-          && tile.el?.parentElement === this.els.bank
+          && this.isTileInDockDom(tile)
           && !tile.el.classList.contains('hidden-in-bank');
         if (inDockVisible) dock += 1;
         else placed += 1;
@@ -3830,6 +3895,7 @@
           || tile.mergeDockRef
           || !tile.el?.isConnected
           || tile.el.parentElement === this.els.bank
+          || tile.el.parentElement?.classList?.contains('jamo-dock-slot')
         )
       ));
       const preferPlayable = (list) => {
@@ -3963,7 +4029,7 @@
         // Last resort: reuse any free dock tile (keeps inventory size stable).
         tile = Object.values(this.tileMap).find((t) => (
           t.inBank && !t.locked && !t.zoneRef && !t.mergeDockRef
-          && t.el?.parentElement === this.els.bank
+          && this.isTileInDockDom(t)
         )) || null;
         if (tile) {
           tile.zoneType = placement.zone;
@@ -4845,7 +4911,9 @@
 
       entries.forEach((entry) => {
         const tile = this.tileMap[entry.id];
-        if (tile?.el && tile.inBank && !tile.locked && !tile.zoneRef) bank.appendChild(tile.el);
+        if (tile?.el && tile.inBank && !tile.locked && !tile.zoneRef) {
+          this.mountTileInDockSlot(tile);
+        }
       });
 
       // Fallback when live.bank is stale: hide dock tiles consumed by board/merge chars.

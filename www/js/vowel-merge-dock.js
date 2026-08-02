@@ -264,6 +264,8 @@
       tile.mergeDockSlot = index;
       tile.zoneRef = null;
 
+      global.KoreanMatchGame?.instance?.preserveDockSlotFor?.(tile);
+
       const el = this.callbacks.renderTileInSlot?.(tile) || tile.el;
       el.classList?.remove('hidden-in-bank', 'dragging', 'selected', 'in-zone', 'snap-in');
       el.style.removeProperty('transform');
@@ -292,6 +294,7 @@
       tile.mergeDockRef = 'result';
       tile.inBank = false;
       tile.zoneRef = null;
+      global.KoreanMatchGame?.instance?.preserveDockSlotFor?.(tile);
       const el = this.callbacks.renderTileInSlot?.(tile) || tile.el;
       el.classList?.remove('hidden-in-bank', 'dragging', 'selected', 'in-zone', 'snap-in');
       el.style.removeProperty('transform');
