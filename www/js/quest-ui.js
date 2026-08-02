@@ -48,10 +48,18 @@
       statusHtml = `<span class="quest-status-idle" aria-hidden="true"></span>`;
     }
 
+    const hasChest = !!QS()?.questHasChest?.(def);
     const coinIcon = global.CoinIcon?.html?.('coin-icon coin-icon--md') || '🪙';
+    const rewardIcon = hasChest
+      ? `<img class="quest-reward-chest" src="assets/chests/chest-closed.png" alt="" draggable="false">`
+      : coinIcon;
+    const chestClass = hasChest ? ' quest-card--chest' : '';
+    const rewardAria = hasChest
+      ? `${t('quests.chestReward')} · +${def.xp} XP · ${def.coins} ${t('shop.coins')}`
+      : `+${def.xp} XP · ${def.coins} ${t('shop.coins')}`;
 
     return `
-      <article class="quest-card${tierClass}${stateClass}" data-quest-id="${escapeHtml(entry.questId)}"${claimable ? ' data-claimable="true"' : ''} aria-label="${escapeHtml(taskText)}">
+      <article class="quest-card${tierClass}${stateClass}${chestClass}" data-quest-id="${escapeHtml(entry.questId)}"${claimable ? ' data-claimable="true"' : ''}${hasChest ? ' data-chest="true"' : ''} aria-label="${escapeHtml(taskText)}">
         <div class="quest-card-quest">
           <p class="quest-card-task">${escapeHtml(taskText)}</p>
           <div class="quest-progress" role="progressbar"
@@ -62,8 +70,8 @@
           </div>
         </div>
         <div class="quest-card-status">${statusHtml}</div>
-        <div class="quest-card-reward" aria-label="+${def.xp} XP · ${def.coins} ${escapeHtml(t('shop.coins'))}">
-          <span class="quest-reward-icon" aria-hidden="true">${coinIcon}</span>
+        <div class="quest-card-reward" aria-label="${escapeHtml(rewardAria)}">
+          <span class="quest-reward-icon" aria-hidden="true">${rewardIcon}</span>
           <span class="quest-reward-amount" aria-hidden="true">${def.coins}</span>
           <span class="quest-reward-xp" aria-hidden="true">+${def.xp} XP</span>
         </div>
@@ -205,8 +213,30 @@
   }
 
   function handleQuestClaim(questId) {
-    const result = QS()?.claimQuest?.(questId);
+    const def = QS()?.getQuestDef?.(questId);
+    const useChest = !!QS()?.questHasChest?.(def) && !!global.ChestRewardUI?.show;
+    const result = QS()?.claimQuest?.(questId, { deferHud: useChest });
     if (!result?.ok) return;
+
+    const reward = result.rewards?.[0];
+    const afterChest = () => {
+      global.PlayerHud?.refresh?.();
+      if (result.wheelAvailable) {
+        setTimeout(() => global.WheelUI?.tryShow?.(), 400);
+      }
+    };
+
+    if (useChest && reward) {
+      global.SoundEffects?.select?.();
+      global.ChestRewardUI.show({
+        coins: reward.coins,
+        xp: reward.xp,
+        coinsBefore: result.coinsBefore,
+        onComplete: afterChest,
+      });
+      return;
+    }
+
     if (result.rewards?.length) showQuestCompleteToast(result.rewards);
     if (result.wheelAvailable) {
       setTimeout(() => global.WheelUI?.tryShow?.(), result.rewards?.length ? 1200 : 400);

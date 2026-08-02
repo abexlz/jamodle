@@ -225,12 +225,12 @@
           "body": "Drag each jamo from the dock into the matching slot."
         },
         "placeGam": {
-          "title": "Add a final consonant — 산",
-          "body": "Korean syllables can end with a 받침. Place ㅅ, ㅏ, and ㄴ to make 산."
+          "title": "Add a final consonant — 감",
+          "body": "Korean syllables can end with a 받침. Place ㄱ, ㅏ, and ㅁ to make 감."
         },
         "rotateVowel": {
-          "title": "Rotate a vowel — 코",
-          "body": "Select ㅏ and tap Rotate until it becomes ㅗ, then drag it into the slot to make 코 (nose)."
+          "title": "Rotate a vowel",
+          "body": "Select ㅏ and tap Rotate until it becomes ㅗ, then drag it into the slot."
         },
         "rotateConsonant": {
           "title": "Rotate ㄱ and ㄴ",
@@ -277,7 +277,6 @@
       "winSub": "{{clue}} → {{answer}}",
       "chainCompleteTitle": "Chain complete!",
       "chainCompleteSub": "You finished all {{count}} links in this chain.",
-      "nextChainTitle": "Next chain: {{title}}",
       "newChain": "Start a new chain",
       "lossTitle": "Out of guesses",
       "lossSub": "After {{clue}}, the next word was:",
@@ -287,14 +286,6 @@
       "comboLabel": "combo",
       "bestCombo": "Best combo: {{count}}",
       "recallDockAria": "Recall {{char}} from answer",
-      "hintLabel": "Hint",
-      "hintCost": "🪙 {{count}}",
-      "hintAria": "Reveal first syllable for {{count}} coins",
-      "hintAdLabel": "Ad",
-      "hintAdAria": "Watch an ad to reveal the first syllable",
-      "hintAdConfirm": "Watch a short ad for a hint? (Demo — no ad will play.)",
-      "hintInsufficient": "Not enough coins.",
-      "hintUnavailable": "Hint unavailable right now.",
       "extraGuessTitle": "Extra guess?",
       "extraGuessUseToken": "Use extra guess ({{count}})",
       "extraGuessBuyCoins": "🪙 {{count}} coins",
@@ -1094,7 +1085,6 @@
       "roundEnded": "Round over",
       "nextRound": "Next round",
       "nextRoundSoon": "Next word starting soon…",
-      "nextRoundIn": "Next word in {{n}}…",
       "coinFlipTitle": "Coin flip",
       "coinFlipStarts": "{{name}} goes first",
       "coinFlipYouStart": "You go first!",
@@ -1215,6 +1205,11 @@
       "get": "GET",
       "empty": "No quests right now.",
       "rewardToast": "Quest complete! +{{xp}} XP · 🪙 {{coins}}",
+      "chestTitle": "Treasure Chest!",
+      "chestTap": "Tap to open",
+      "chestOpened": "Chest opened",
+      "chestContinue": "Nice!",
+      "chestReward": "Chest reward",
       "defs": {
         "daily-play": {
           "title": "Daily Hangul-dle",
@@ -1229,8 +1224,8 @@
           "desc": "Play {{count}} Hangul-dle rounds"
         },
         "friend-battle": {
-          "title": "Friend 1v1 battle",
-          "desc": "Finish 1 friend challenge 1v1 (Hangul-dle race/turn OR Word Chain). Win or lose both count — random matchmaking does not."
+          "title": "Friend battle",
+          "desc": "Play one 1v1 Hangul-dle or Word Chain battle with a friend"
         },
         "login-streak-3": {
           "title": "Login streak",
@@ -1242,15 +1237,15 @@
         },
         "classic-first-try": {
           "title": "First try!",
-          "desc": "Solve a solo Hangul-dle word on your first Check"
+          "desc": "Solve a Hangul-dle word on your first try"
         },
         "race-win": {
-          "title": "Win a Hangul-dle 1v1",
-          "desc": "Win 1 Hangul-dle 1v1 match (fast race OR turn-based). Friend challenge or random match both count."
+          "title": "Hangul-dle",
+          "desc": "Win a 1v1 Hangul-dle match"
         },
         "coop-win": {
-          "title": "Win turn-based 1v1",
-          "desc": "Win 1 turn-based Hangul-dle 1v1 series"
+          "title": "Hangul-dle",
+          "desc": "Win a turn-based Hangul-dle match"
         },
         "total-5-wins": {
           "title": "Daily scorer",
@@ -1702,12 +1697,12 @@
           "body": "도크에서 자모를 끌어 알맞은 칸에 놓아 보세요."
         },
         "placeGam": {
-          "title": "받침 넣기 — 산",
-          "body": "한글 음절 끝에는 받침이 올 수 있어요. ㅅ, ㅏ, ㄴ을 놓아 산을 만들어 보세요."
+          "title": "받침 넣기 — 감",
+          "body": "한글 음절 끝에는 받침이 올 수 있어요. ㄱ, ㅏ, ㅁ을 놓아 감을 만들어 보세요."
         },
         "rotateVowel": {
-          "title": "모음 돌리기 — 코",
-          "body": "ㅏ를 선택하고 돌리기를 눌러 ㅗ가 될 때까지 돌린 뒤, 칸에 놓아 코를 만들어 보세요."
+          "title": "모음 돌리기",
+          "body": "ㅏ를 선택하고 돌리기를 눌러 ㅗ가 될 때까지 돌린 뒤, 칸에 놓으세요."
         },
         "rotateConsonant": {
           "title": "ㄱ · ㄴ 돌리기",
@@ -1754,7 +1749,6 @@
       "winSub": "{{clue}} → {{answer}}",
       "chainCompleteTitle": "체인 완료!",
       "chainCompleteSub": "이 체인 {{count}}단계를 모두 마쳤어요.",
-      "nextChainTitle": "다음 체인: {{title}}",
       "newChain": "새 체인 시작",
       "lossTitle": "기회를 모두 썼어요",
       "lossSub": "{{clue}} 다음 단어는:",
@@ -1764,14 +1758,6 @@
       "comboLabel": "콤보",
       "bestCombo": "최고 콤보: {{count}}",
       "recallDockAria": "답에서 {{char}} 되돌리기",
-      "hintLabel": "힌트",
-      "hintCost": "🪙 {{count}}",
-      "hintAria": "{{count}} 코인으로 첫 음절 공개",
-      "hintAdLabel": "광고",
-      "hintAdAria": "광고를 보고 첫 음절 공개",
-      "hintAdConfirm": "짧은 광고를 보고 힌트를 받을까요? (데모 — 광고는 재생되지 않아요.)",
-      "hintInsufficient": "코인이 부족해요.",
-      "hintUnavailable": "지금은 힌트를 쓸 수 없어요.",
       "extraGuessTitle": "한 번 더 할까요?",
       "extraGuessUseToken": "추가 시도권 사용 ({{count}})",
       "extraGuessBuyCoins": "🪙 {{count}} 코인",
@@ -2571,7 +2557,6 @@
       "roundEnded": "라운드 종료",
       "nextRound": "다음 라운드",
       "nextRoundSoon": "다음 단어가 곧 시작됩니다…",
-      "nextRoundIn": "{{n}}초 후 다음 단어…",
       "coinFlipTitle": "동전 던지기",
       "coinFlipStarts": "{{name}} 선공",
       "coinFlipYouStart": "내가 선공!",
@@ -2692,6 +2677,11 @@
       "get": "받기",
       "empty": "퀘스트가 없어요.",
       "rewardToast": "퀘스트 완료! +{{xp}} XP · 🪙 {{coins}}",
+      "chestTitle": "보물 상자!",
+      "chestTap": "탭해서 열기",
+      "chestOpened": "상자 열림",
+      "chestContinue": "좋아!",
+      "chestReward": "상자 보상",
       "defs": {
         "daily-play": {
           "title": "데일리 한글놀이",
@@ -2706,8 +2696,8 @@
           "desc": "한글놀이 {{count}}판 플레이"
         },
         "friend-battle": {
-          "title": "친구 1v1 대결",
-          "desc": "친구 도전 1v1 1판 완료 (한글놀이 레이스/턴제 또는 단어 체인). 승패 모두 인정 · 랜덤 매칭은 제외"
+          "title": "친구 대결",
+          "desc": "친구와 1v1 한글놀이 또는 단어 체인 1판 (승패 무관)"
         },
         "login-streak-3": {
           "title": "연속 출석",
@@ -2719,15 +2709,15 @@
         },
         "classic-first-try": {
           "title": "첫 시도 정답",
-          "desc": "솔로 한글놀이에서 첫 번째 확인으로 정답"
+          "desc": "한글놀이에서 첫 시도 정답"
         },
         "race-win": {
-          "title": "한글놀이 1v1 승리",
-          "desc": "한글놀이 1v1 1승 (빠른 레이스 또는 턴제). 친구 도전·랜덤 매칭 모두 인정"
+          "title": "한글놀이",
+          "desc": "1v1 한글놀이에서 승리"
         },
         "coop-win": {
-          "title": "턴제 1v1 승리",
-          "desc": "턴제 한글놀이 1v1 시리즈 1승"
+          "title": "한글놀이",
+          "desc": "턴제 한글놀이에서 승리"
         },
         "total-5-wins": {
           "title": "오늘의 정답",

@@ -1198,8 +1198,14 @@
     "progress": "{{current}} / {{target}}",
     "complete": "Done!",
     "claim": "Claim",
+    "get": "GET",
     "empty": "No quests right now.",
     "rewardToast": "Quest complete! +{{xp}} XP · 🪙 {{coins}}",
+    "chestTitle": "Treasure Chest!",
+    "chestTap": "Tap to open",
+    "chestOpened": "Chest opened",
+    "chestContinue": "Nice!",
+    "chestReward": "Chest reward",
     "defs": {
       "daily-play": {
         "title": "Daily Hangul-dle",

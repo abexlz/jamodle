@@ -857,7 +857,11 @@
     /* app-buttons.css */
   }
 
-  body > *:not(#confetti-canvas):not(#overlay):not(#daily-gift-overlay):not(#wheel-overlay):not(#daily-cal-overlay):not(#multiplayer-overlay):not(#battle-mode-overlay):not(#battle-matchmaking-overlay):not(#battle-multiplayer-placeholder):not(#race-length-overlay):not(#race-challenge-overlay):not(#home-bottom-bar):not(#extra-life){ position:relative; z-index:1; }
+  body > *:not(#confetti-canvas):not(#overlay):not(#daily-gift-overlay):not(#wheel-overlay):not(#daily-cal-overlay):not(#multiplayer-overlay):not(#battle-mode-overlay):not(#battle-matchmaking-overlay):not(#battle-multiplayer-placeholder):not(#race-length-overlay):not(#race-challenge-overlay):not(#chest-reward-overlay):not(#home-bottom-bar):not(#extra-life){ position:relative; z-index:1; }
+
+  body.chest-reward-open {
+    overflow: hidden;
+  }
 
   .mode-badge{
     display: inline-block;
@@ -1685,7 +1689,7 @@
 <link rel="stylesheet" href="css/shop.css">
 <link rel="stylesheet" href="css/profile.css">
 <link rel="stylesheet" href="css/menu-hud.css?v=4">
-<link rel="stylesheet" href="css/quests.css?v=20260802a">
+<link rel="stylesheet" href="css/quests.css?v=20260802c">
 <link rel="stylesheet" href="css/wheel.css">
 <link rel="stylesheet" href="css/multiplayer.css?v=27">
 <link rel="stylesheet" href="css/race.css?v=20260801a">
@@ -1880,8 +1884,8 @@
 <script src="js/word-chain-service.js?v=20260705a"></script>
 <script src="js/user-preferences.js"></script>
 <script src="js/button-press.js?v=20260706n"></script>
-<script src="js/sound-effects.js"></script>
-<script src="js/i18n-messages.js?v=20260802b"></script>
+<script src="js/sound-effects.js?v=20260802c"></script>
+<script src="js/i18n-messages.js?v=20260802c"></script>
 <script src="js/i18n.js?v=20260705a"></script>
 <script src="js/app-bootstrap.js"></script>
 <script src="js/app-nav.js"></script>
@@ -1907,9 +1911,10 @@
 <script src="js/profile-ui.js"></script>
 <script src="js/player-hud.js"></script>
 <script src="js/shop-ui.js?v=20260802a"></script>
-<script src="js/quest-service.js?v=20260801a"></script>
+<script src="js/quest-service.js?v=20260802c"></script>
 <script src="js/wheel-service.js"></script>
-<script src="js/quest-ui.js?v=20260802a"></script>
+<script src="js/chest-reward-ui.js?v=20260802c"></script>
+<script src="js/quest-ui.js?v=20260802c"></script>
 <script src="js/wheel-ui.js"></script>
 <script src="js/daily-gift-ui.js"></script>
 <script>

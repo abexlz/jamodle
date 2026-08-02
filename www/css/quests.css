@@ -354,6 +354,28 @@
   vertical-align: 0;
 }
 
+.quest-reward-chest {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25));
+}
+
+.quest-card--chest .quest-card-reward {
+  min-width: 48px;
+}
+
+.quest-card.is-claimable.quest-card--chest .quest-reward-chest {
+  animation: questChestWiggle 1.8s ease-in-out infinite;
+}
+
+@keyframes questChestWiggle {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  30% { transform: rotate(-6deg) scale(1.05); }
+  60% { transform: rotate(5deg) scale(1.05); }
+}
+
 .quest-reward-amount {
   font-family: 'Jua', sans-serif;
   font-size: 13px;

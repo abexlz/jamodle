@@ -318,6 +318,57 @@
       playTone({ freq: 392, duration: 0.18, peak: 0.09 });
       playTone({ freq: 262, duration: 0.28, peak: 0.08, delay: 0.16 });
     },
+
+    /** Soft whoosh when a chest appears */
+    chestAppear() {
+      playTone({ freq: 220, freqEnd: 380, duration: 0.18, peak: 0.07, type: 'sine' });
+      playTone({ freq: 480, freqEnd: 720, duration: 0.16, peak: 0.05, type: 'triangle', delay: 0.04 });
+    },
+
+    /**
+     * Wooden rattle while the chest shakes.
+     * @param {boolean} [soft]
+     */
+    chestShake(soft) {
+      const peak = soft ? 0.05 : 0.09;
+      playTone({ freq: 140, duration: 0.045, peak, type: 'triangle' });
+      playTone({ freq: 110, duration: 0.04, peak: peak * 0.85, type: 'square', delay: 0.05 });
+      playTone({ freq: 160, duration: 0.04, peak: peak * 0.7, type: 'triangle', delay: 0.1 });
+      if (!soft) {
+        playTone({ freq: 95, duration: 0.06, peak: 0.07, type: 'sine', delay: 0.16 });
+      }
+    },
+
+    /** Big open sting — creak + bright reward chime */
+    chestOpen() {
+      playTone({ freq: 90, freqEnd: 160, duration: 0.16, peak: 0.12, type: 'sawtooth' });
+      playTone({ freq: 180, freqEnd: 90, duration: 0.12, peak: 0.08, type: 'triangle', delay: 0.05 });
+      playTone({ freq: 523, duration: 0.1, peak: 0.12, type: 'sine', delay: 0.12 });
+      playTone({ freq: 659, duration: 0.1, peak: 0.13, type: 'sine', delay: 0.18 });
+      playTone({ freq: 784, duration: 0.1, peak: 0.13, type: 'sine', delay: 0.24 });
+      playTone({ freq: 1047, duration: 0.22, peak: 0.14, type: 'sine', delay: 0.31 });
+      playTone({ freq: 1319, duration: 0.28, peak: 0.08, type: 'triangle', delay: 0.42 });
+    },
+
+    /** Metallic coin whoosh while flying */
+    coinFly() {
+      playTone({ freq: 880 + Math.random() * 220, duration: 0.05, peak: 0.045, type: 'triangle' });
+      playTone({
+        freq: 1200 + Math.random() * 300,
+        freqEnd: 1600,
+        duration: 0.07,
+        peak: 0.04,
+        type: 'sine',
+        delay: 0.02,
+      });
+    },
+
+    /** Satisfying ding when a coin lands in the HUD */
+    coinCollect() {
+      const base = 980 + Math.random() * 160;
+      playTone({ freq: base, duration: 0.055, peak: 0.08, type: 'sine' });
+      playTone({ freq: base * 1.5, duration: 0.08, peak: 0.055, type: 'triangle', delay: 0.02 });
+    },
   };
 
   global.addEventListener('pointerdown', unlock, { passive: true });

@@ -172,4 +172,31 @@ assert.equal(QS.countIncomplete({
   weekly: [{ progress: 0, target: 2, claimed: false }],
 }), 2, 'incomplete count still tracks unclaimed quests');
 
+assert(QS.questHasChest('race-win'), 'medium daily quests award chests');
+assert(QS.questHasChest('weekly-match-8'), 'weekly quests award chests');
+assert(!QS.questHasChest('play-2'), 'small daily quests stay toast-only');
+
+global.ProfileService.getTodayKey = () => raceWinDay;
+savedProfile = makeProfile({
+  coins: 10,
+  questState: {
+    dailyKey: raceWinDay,
+    daily: QS.buildDailyQuestIds(raceWinDay).map((questId) => ({
+      questId,
+      progress: questId === 'race-win' ? QS.QUEST_DEFS[questId].target : 0,
+      claimed: false,
+      target: QS.QUEST_DEFS[questId].target,
+    })),
+    weeklyKey: '2026-07-07',
+    weekly: [],
+    weeklyPlayDays: [],
+    dailyWheelClaimed: false,
+  },
+});
+const chestClaim = QS.claimQuest('race-win', { deferHud: true });
+assert(chestClaim.ok, 'chest quest claim succeeds');
+assert(chestClaim.rewards?.[0]?.chest, 'claim result marks chest reward');
+assert.equal(chestClaim.coinsBefore, 10, 'claim reports coins before reward');
+assert.equal(savedProfile.coins, 10 + QS.QUEST_DEFS['race-win'].coins, 'coins granted on claim');
+
 console.log('quest-service.test.js: all passed');

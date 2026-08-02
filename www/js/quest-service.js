@@ -476,6 +476,13 @@
     return QUEST_DEFS[questId] || null;
   }
 
+  /** Medium dailies + weeklies award a tap-to-open chest. */
+  function questHasChest(defOrId) {
+    const def = typeof defOrId === 'string' ? QUEST_DEFS[defOrId] : defOrId;
+    if (!def) return false;
+    return def.tier === 'weekly' || def.tier === 'daily-medium';
+  }
+
   function getQuestSnapshot() {
     const profile = global.ProfileService?.loadProfile?.();
     if (!profile) {
@@ -559,6 +566,7 @@
         xp: def.xp,
         coins: def.coins,
         icon: def.icon,
+        chest: questHasChest(def),
       });
     });
     return results;
@@ -605,7 +613,7 @@
     return { rewards: [], readyToClaim, wheelAvailable: false };
   }
 
-  function claimQuest(questId) {
+  function claimQuest(questId, opts = {}) {
     const profile = global.ProfileService?.loadProfile?.();
     if (!profile) return { ok: false, rewards: [], wheelAvailable: false };
 
@@ -616,15 +624,18 @@
       return { ok: false, rewards: [], wheelAvailable: false };
     }
 
+    const coinsBefore = profile.coins || 0;
     const rewards = claimQuestRewards(profile, [entry]);
     global.ProfileService?.saveProfile?.(profile);
-    global.PlayerHud?.refresh?.();
+    if (!opts.deferHud) {
+      global.PlayerHud?.refresh?.();
+    }
 
     const wheelAvailable = isDailyWheelAvailable(profile);
     const menuRoot = document.getElementById('menu-root');
     if (menuRoot) global.QuestUI?.refreshSection?.(menuRoot);
 
-    return { ok: true, rewards, wheelAvailable };
+    return { ok: true, rewards, wheelAvailable, coinsBefore };
   }
 
   function countCompleted(snapshot) {
@@ -681,6 +692,7 @@
     getTodayKey,
     getWeekKey,
     getQuestDef,
+    questHasChest,
     getQuestSnapshot,
     recordActivity,
     claimQuest,
