@@ -915,17 +915,9 @@
         return;
       }
 
-      const isJamoSolo = !this.versus && !this.isDaily && !this.tutorialMode && !this.multiFindMode && !this.turnBased;
-
-      const headerBack = this.versus
-        ? ''
-        : isJamoSolo && global.PauseQuitUI
-        ? global.PauseQuitUI.pauseButtonHtml('match-pause-btn')
-        : `<a class="back-link match-chrome-back" href="index.html" data-i18n="match.back">${t('match.back')}</a>`;
-
-      const headerEnd = this.versus
-        ? ''
-        : `<a class="match-chrome-btn match-chrome-settings" href="settings.html" id="match-settings-btn" data-i18n-aria="nav.settings">⚙️</a>`;
+      const chromeTitle = this.isDaily
+        ? (t('match.titleDaily') || 'Daily Hangul-dle')
+        : (t('match.title') || t('menu.modes.classic.title') || 'Hangul-dle');
 
       const learningStreakBar = '';
 
@@ -938,7 +930,7 @@
         ? ''
         : '';
 
-      // Keep streak/guesses/timer nodes in DOM for game updates; chrome is nav-only.
+      // Keep streak/guesses/timer nodes in DOM for game updates; chrome shows title only.
       const hiddenStatsHtml = (!this.versus && !this.turnBased)
         ? `<div class="match-chrome-stats" aria-hidden="true">
             <span id="match-streak"></span>
@@ -947,13 +939,12 @@
           </div>`
         : '';
 
-      const headerHtml = (headerBack || headerEnd)
-        ? `<header class="match-chrome">
-            <div class="match-chrome-start">${headerBack}</div>
-            <div class="match-chrome-end">${headerEnd}</div>
+      const headerHtml = this.versus
+        ? hiddenStatsHtml
+        : `<header class="match-chrome">
+            <h1 class="match-chrome-title">${escapeHtml(chromeTitle)}</h1>
             ${hiddenStatsHtml}
-          </header>`
-        : hiddenStatsHtml;
+          </header>`;
 
       const showEnglish = prefs()?.shouldShowEnglish?.() !== false;
       const meaningBtnHtml = showEnglish

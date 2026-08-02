@@ -2071,7 +2071,7 @@
     flex-shrink: 0;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     gap: 8px;
     min-height: 44px;
     margin: 0 0 4px;
@@ -2081,12 +2081,22 @@
     box-shadow: none;
   }
 
+  body.match-page .match-chrome-title {
+    margin: 0;
+    padding: 0 8px;
+    font-family: 'Jua', 'Noto Sans KR', sans-serif;
+    font-size: clamp(22px, 6vw, 28px);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    line-height: 1.1;
+    color: #fff;
+    text-align: center;
+    text-shadow: 0 2px 0 rgba(0, 55, 68, 0.35);
+  }
+
   body.match-page .match-chrome-start,
   body.match-page .match-chrome-end {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 40px;
+    display: none;
   }
 
   body.match-page .match-chrome-stats {

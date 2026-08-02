@@ -419,8 +419,8 @@
       "back": "← Home"
     },
     "match": {
-      "title": "Korean Match",
-      "titleDaily": "Daily Match",
+      "title": "Hangul-dle",
+      "titleDaily": "Daily Hangul-dle",
       "subtitle": "Drag jamo to build the Korean word",
       "subtitleDaily": "Today's word · updates at midnight (KST)",
       "buildLabel": "Place jamo in the empty slots",
@@ -1910,8 +1910,8 @@
       "back": "← 홈"
     },
     "match": {
-      "title": "자모게임",
-      "titleDaily": "오늘의 자모게임",
+      "title": "한글놀이",
+      "titleDaily": "오늘의 한글놀이",
       "subtitle": "자모를 끌어 한글 단어를 맞춰 보세요",
       "subtitleDaily": "오늘의 단어 · 자정(KST)에 갱신",
       "buildLabel": "빈 칸에 자모를 놓으세요",

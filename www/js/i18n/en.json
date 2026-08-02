@@ -415,8 +415,8 @@
     "back": "← Home"
   },
   "match": {
-    "title": "Korean Match",
-    "titleDaily": "Daily Match",
+    "title": "Hangul-dle",
+    "titleDaily": "Daily Hangul-dle",
     "subtitle": "Drag jamo to build the Korean word",
     "subtitleDaily": "Today's word · updates at midnight (KST)",
     "buildLabel": "Place jamo in the empty slots",
