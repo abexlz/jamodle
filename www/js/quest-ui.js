@@ -26,11 +26,10 @@
   function renderQuestCard(entry) {
     const def = entry.def || QS()?.getQuestDef?.(entry.questId);
     if (!def) return '';
-    const claimable = !entry.claimed && entry.progress >= entry.target;
-    const claimed = entry.claimed;
+    const claimed = entry.claimed || entry.progress >= entry.target;
     const pct = Math.min(100, Math.round((entry.progress / entry.target) * 100));
     const tierClass = def.tier === 'weekly' ? ' quest-card--weekly' : '';
-    const stateClass = claimable ? ' is-claimable' : (claimed ? ' is-complete' : '');
+    const stateClass = claimed ? ' is-complete' : '';
     const taskText = questDesc(entry.questId, entry.target);
     const progressCurrent = Math.min(entry.progress, entry.target);
     const progressLabel = t('quests.progress', {
@@ -39,14 +38,9 @@
     });
     const displayPct = claimed ? 100 : pct;
 
-    let statusHtml = '';
-    if (claimable) {
-      statusHtml = `<button type="button" class="quest-claim-btn">${escapeHtml(t('quests.get'))}</button>`;
-    } else if (claimed) {
-      statusHtml = `<span class="quest-done-check" aria-label="${escapeHtml(t('quests.complete'))}">✓</span>`;
-    } else {
-      statusHtml = `<span class="quest-status-idle" aria-hidden="true"></span>`;
-    }
+    const statusHtml = claimed
+      ? `<span class="quest-done-check" aria-label="${escapeHtml(t('quests.complete'))}">✓</span>`
+      : `<span class="quest-status-idle" aria-hidden="true"></span>`;
 
     const hasChest = !!QS()?.questHasChest?.(def);
     const coinIcon = global.CoinIcon?.html?.('coin-icon coin-icon--md') || '🪙';
@@ -59,7 +53,7 @@
       : `+${def.xp} XP · ${def.coins} ${t('shop.coins')}`;
 
     return `
-      <article class="quest-card${tierClass}${stateClass}${chestClass}" data-quest-id="${escapeHtml(entry.questId)}"${claimable ? ' data-claimable="true"' : ''}${hasChest ? ' data-chest="true"' : ''} aria-label="${escapeHtml(taskText)}">
+      <article class="quest-card${tierClass}${stateClass}${chestClass}" data-quest-id="${escapeHtml(entry.questId)}"${hasChest ? ' data-chest="true"' : ''} aria-label="${escapeHtml(taskText)}">
         <div class="quest-card-quest">
           <p class="quest-card-task">${escapeHtml(taskText)}</p>
           <div class="quest-progress" role="progressbar"
@@ -169,18 +163,18 @@
 
   function updateTabBadge() {
     const snap = QS()?.getQuestSnapshot?.();
-    const completed = QS()?.countCompleted?.(snap) ?? 0;
+    const remaining = QS()?.countIncomplete?.(snap) ?? 0;
     const btn = document.querySelector('[data-home-tab="quests"]');
     if (!btn) return;
     let badge = btn.querySelector('.home-tab-badge');
-    if (completed > 0) {
+    if (remaining > 0) {
       if (!badge) {
         badge = document.createElement('span');
         badge.className = 'home-tab-badge';
         badge.setAttribute('aria-hidden', 'true');
         btn.appendChild(badge);
       }
-      badge.textContent = String(completed);
+      badge.textContent = String(remaining);
     } else if (badge) {
       badge.remove();
     }
@@ -212,35 +206,65 @@
     });
   }
 
-  function handleQuestClaim(questId) {
-    const def = QS()?.getQuestDef?.(questId);
-    const useChest = !!QS()?.questHasChest?.(def) && !!global.ChestRewardUI?.show;
-    const result = QS()?.claimQuest?.(questId, { deferHud: useChest });
-    if (!result?.ok) return;
+  let rewardQueue = Promise.resolve();
 
-    const reward = result.rewards?.[0];
-    const afterChest = () => {
-      global.PlayerHud?.refresh?.();
-      if (result.wheelAvailable) {
-        setTimeout(() => global.WheelUI?.tryShow?.(), 400);
+  function showChestReward(reward, coinsBefore) {
+    return new Promise((resolve) => {
+      if (!global.ChestRewardUI?.show) {
+        showQuestCompleteToast([reward]);
+        resolve();
+        return;
       }
-    };
-
-    if (useChest && reward) {
-      global.SoundEffects?.select?.();
       global.ChestRewardUI.show({
         coins: reward.coins,
         xp: reward.xp,
-        coinsBefore: result.coinsBefore,
-        onComplete: afterChest,
+        coinsBefore,
+        autoOpen: true,
+        onComplete: () => {
+          global.PlayerHud?.refresh?.();
+          resolve();
+        },
       });
-      return;
-    }
+    });
+  }
 
-    if (result.rewards?.length) showQuestCompleteToast(result.rewards);
-    if (result.wheelAvailable) {
-      setTimeout(() => global.WheelUI?.tryShow?.(), result.rewards?.length ? 1200 : 400);
-    }
+  /**
+   * Present auto-claimed quest rewards (toasts + auto-opening chests).
+   * @param {{ rewards?: Array, coinsBefore?: number, wheelAvailable?: boolean }} result
+   */
+  function presentAutoRewards(result) {
+    if (!result) return;
+    const rewards = Array.isArray(result.rewards) ? result.rewards : [];
+    const toastRewards = rewards.filter((r) => !r.chest);
+    const chestRewards = rewards.filter((r) => r.chest);
+    let runningBefore = result.coinsBefore != null
+      ? result.coinsBefore
+      : Math.max(0, (global.ProfileService?.loadProfile?.()?.coins || 0)
+        - rewards.reduce((sum, r) => sum + (r.coins || 0), 0));
+
+    if (toastRewards.length) showQuestCompleteToast(toastRewards);
+
+    rewardQueue = rewardQueue.then(async () => {
+      for (const reward of chestRewards) {
+        await showChestReward(reward, runningBefore);
+        runningBefore += reward.coins || 0;
+      }
+      global.PlayerHud?.refresh?.();
+      if (result.wheelAvailable) {
+        await new Promise((r) => setTimeout(r, chestRewards.length || toastRewards.length ? 500 : 350));
+        global.WheelUI?.tryShow?.();
+      }
+    }).catch((err) => {
+      console.warn('[QuestUI] presentAutoRewards failed', err);
+    });
+  }
+
+  let pendingFlushDone = false;
+
+  function flushPendingClaims() {
+    if (pendingFlushDone) return null;
+    pendingFlushDone = true;
+    return QS()?.claimAllPending?.({ deferHud: true, present: true });
   }
 
   let activeQuestScope = 'daily';
@@ -314,6 +338,9 @@
       return;
     }
 
+    // Migrate any old completed-but-unclaimed quests.
+    flushPendingClaims();
+
     updateTabBadge();
     startQuestTimer(root);
 
@@ -323,17 +350,6 @@
         const next = btn.dataset.questScope;
         if (next) setQuestScope(next, scope);
       });
-    });
-
-    scope.querySelectorAll('.quest-card[data-claimable="true"]').forEach((card) => {
-      const questId = card.dataset.questId;
-      const claim = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (questId) handleQuestClaim(questId);
-      };
-      card.querySelector('.quest-claim-btn')?.addEventListener('click', claim);
-      card.addEventListener('click', claim);
     });
   }
 
@@ -349,6 +365,8 @@
     refreshSection,
     updateTabBadge,
     showQuestCompleteToast,
+    presentAutoRewards,
+    flushPendingClaims,
     scrollToQuests,
     stopQuestTimer,
   };

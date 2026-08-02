@@ -3253,13 +3253,8 @@
       this.awardWinXp();
       if (advance.chainDone) {
         try {
-          const questResult = global.QuestService?.recordActivity?.('relatedWordsChain') || {};
-          if (questResult.rewards?.length) {
-            global.QuestUI?.showQuestCompleteToast?.(questResult.rewards);
-          }
-          if (questResult.wheelAvailable) {
-            setTimeout(() => global.WheelUI?.tryShow?.(), questResult.rewards?.length ? 1200 : 400);
-          }
+          // Auto-claims and presents toast/chest rewards.
+          global.QuestService?.recordActivity?.('relatedWordsChain');
         } catch (err) {
           console.warn('[Jamodeul] Chain quest progress failed.', err);
         }

@@ -4,7 +4,7 @@
 (function (global) {
   'use strict';
 
-  const STYLES_HREF = 'css/chest-reward.css?v=2';
+  const STYLES_HREF = 'css/chest-reward.css?v=3';
   const CHEST_CLOSED = 'assets/chests/chest-closed.png';
   const CHEST_OPEN = 'assets/chests/chest-open.png';
   const COIN_SRC = 'assets/coin.png';
@@ -96,14 +96,15 @@
     return 20;
   }
 
-  function buildOverlayHtml(reward) {
+  function buildOverlayHtml(reward, { autoOpen = false } = {}) {
     const coinIcon = global.CoinIcon?.html?.('coin-icon coin-icon--lg') || '🪙';
+    const hint = autoOpen ? t('quests.chestOpening') : t('quests.chestTap');
     return `
       <div class="chest-reward-stage">
         <h2 class="chest-reward-title">${escapeHtml(t('quests.chestTitle'))}</h2>
-        <p class="chest-reward-hint">${escapeHtml(t('quests.chestTap'))}</p>
+        <p class="chest-reward-hint">${escapeHtml(hint)}</p>
         <button type="button" class="chest-reward-chest-wrap no-press is-idle" id="chest-reward-tap"
-          aria-label="${escapeHtml(t('quests.chestTap'))}">
+          aria-label="${escapeHtml(hint)}">
           <span class="chest-reward-glow" aria-hidden="true"></span>
           <img class="chest-reward-img chest-reward-img--closed" src="${CHEST_CLOSED}" alt="" draggable="false">
           <img class="chest-reward-img chest-reward-img--open" src="${CHEST_OPEN}" alt="" draggable="false">
@@ -309,7 +310,7 @@
   }
 
   /**
-   * @param {{ coins: number, xp?: number, coinsBefore?: number, onComplete?: Function }} opts
+   * @param {{ coins: number, xp?: number, coinsBefore?: number, autoOpen?: boolean, onComplete?: Function }} opts
    */
   function show(opts = {}) {
     ensureStyles();
@@ -319,6 +320,7 @@
       coins: Math.max(0, Math.floor(Number(opts.coins) || 0)),
       xp: Math.max(0, Math.floor(Number(opts.xp) || 0)),
     };
+    const autoOpen = opts.autoOpen === true;
 
     const profile = global.ProfileService?.loadProfile?.();
     const currentCoins = profile?.coins ?? reward.coins;
@@ -337,7 +339,7 @@
     overlay.setAttribute('role', 'dialog');
     overlay.setAttribute('aria-modal', 'true');
     overlay.setAttribute('aria-label', t('quests.chestTitle'));
-    overlay.innerHTML = buildOverlayHtml(reward);
+    overlay.innerHTML = buildOverlayHtml(reward, { autoOpen });
 
     document.body.appendChild(overlay);
     document.body.classList.add('chest-reward-open');
@@ -352,26 +354,32 @@
 
     const chestBtn = overlay.querySelector('#chest-reward-tap');
     const onOpen = () => openChest(overlay, reward, coinsBefore, opts.onComplete);
-    chestBtn?.addEventListener('click', onOpen, { once: true });
 
-    // Soft idle shake cue
-    if (!reduceMotion()) {
-      const idleShake = global.setInterval(() => {
-        if (!activeOverlay || overlay.classList.contains('is-opened') || opening) {
-          global.clearInterval(idleShake);
-          return;
-        }
-        chestBtn?.classList.remove('is-idle');
-        void chestBtn?.offsetWidth;
-        chestBtn?.classList.add('is-shake');
-        global.SoundEffects?.chestShake?.(true);
-        global.setTimeout(() => {
-          chestBtn?.classList.remove('is-shake');
-          if (!overlay.classList.contains('is-opened')) {
-            chestBtn?.classList.add('is-idle');
+    if (autoOpen) {
+      chestBtn?.setAttribute('tabindex', '-1');
+      global.setTimeout(onOpen, reduceMotion() ? 180 : 650);
+    } else {
+      chestBtn?.addEventListener('click', onOpen, { once: true });
+
+      // Soft idle shake cue (manual tap mode only)
+      if (!reduceMotion()) {
+        const idleShake = global.setInterval(() => {
+          if (!activeOverlay || overlay.classList.contains('is-opened') || opening) {
+            global.clearInterval(idleShake);
+            return;
           }
-        }, 560);
-      }, 2400);
+          chestBtn?.classList.remove('is-idle');
+          void chestBtn?.offsetWidth;
+          chestBtn?.classList.add('is-shake');
+          global.SoundEffects?.chestShake?.(true);
+          global.setTimeout(() => {
+            chestBtn?.classList.remove('is-shake');
+            if (!overlay.classList.contains('is-opened')) {
+              chestBtn?.classList.add('is-idle');
+            }
+          }, 560);
+        }, 2400);
+      }
     }
 
     return overlay;

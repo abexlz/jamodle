@@ -301,15 +301,11 @@
       const mode = resolveMode(safe);
       const result = awardLearningXp(safe);
       try {
-        const questResult = global.QuestService?.recordActivity?.(mode, {
+        // Quests auto-claim + present rewards (toast / chest) inside recordActivity.
+        global.QuestService?.recordActivity?.(mode, {
           won: safe.won === true,
           guessCount: safe.guessCount,
-        }) || {};
-        const questRewards = questResult.rewards || [];
-        if (questRewards.length) global.QuestUI?.showQuestCompleteToast?.(questRewards);
-        if (questResult.wheelAvailable) {
-          setTimeout(() => global.WheelUI?.tryShow?.(), questRewards.length ? 1200 : 400);
-        }
+        });
       } catch (questErr) {
         console.warn('[Jamodeul] Quest progress failed safely.', questErr);
       }

@@ -572,26 +572,72 @@
     return results;
   }
 
-  function refreshQuestUi() {
-    global.PlayerHud?.refresh?.();
+  function refreshQuestUi(opts = {}) {
+    if (!opts.deferHud) {
+      global.PlayerHud?.refresh?.();
+    }
     const menuRoot = document.getElementById('menu-root');
     if (menuRoot) global.QuestUI?.refreshSection?.(menuRoot);
   }
 
+  function collectPendingEntries(qs) {
+    return [...(qs.daily || []), ...(qs.weekly || [])].filter((entry) => {
+      if (entry.claimed) return false;
+      const target = entry.target ?? QUEST_DEFS[entry.questId]?.target ?? 1;
+      return entry.progress >= target;
+    });
+  }
+
+  /**
+   * Claim every completed-but-unclaimed quest (migration + auto-claim helper).
+   * @param {{ deferHud?: boolean, present?: boolean }} [opts]
+   */
+  function claimAllPending(opts = {}) {
+    const profile = global.ProfileService?.loadProfile?.();
+    if (!profile) return { rewards: [], wheelAvailable: false, coinsBefore: 0 };
+
+    const qs = ensureQuestState(profile);
+    const pending = collectPendingEntries(qs);
+    if (!pending.length) {
+      global.ProfileService?.saveProfile?.(profile);
+      return { rewards: [], wheelAvailable: isDailyWheelAvailable(profile), coinsBefore: profile.coins || 0 };
+    }
+
+    const coinsBefore = profile.coins || 0;
+    const rewards = claimQuestRewards(profile, pending);
+    global.ProfileService?.saveProfile?.(profile);
+
+    const hasChest = rewards.some((r) => r.chest);
+    refreshQuestUi({ deferHud: opts.deferHud || hasChest });
+
+    const result = {
+      rewards,
+      readyToClaim: pending,
+      wheelAvailable: isDailyWheelAvailable(profile),
+      coinsBefore,
+    };
+
+    if (opts.present !== false) {
+      global.QuestUI?.presentAutoRewards?.(result);
+    }
+    return result;
+  }
+
   /**
    * Record game activity for quest progress.
+   * Completing a quest auto-claims XP/coins and presents rewards (toasts / chests).
    * @param {string} mode
    * @param {{ won?: boolean, guessCount?: number, friendBattle?: boolean, coopWin?: boolean }} [meta]
    */
   function recordActivity(mode, meta) {
     const profile = global.ProfileService?.loadProfile?.();
-    if (!profile) return { rewards: [], wheelAvailable: false };
+    if (!profile) return { rewards: [], readyToClaim: [], wheelAvailable: false, coinsBefore: 0 };
 
     const qs = ensureQuestState(profile);
     const events = resolveQuestEvents(mode, meta || {});
     if (!events.length) {
       global.ProfileService?.saveProfile?.(profile);
-      return { rewards: [], wheelAvailable: false };
+      return { rewards: [], readyToClaim: [], wheelAvailable: false, coinsBefore: profile.coins || 0 };
     }
 
     const today = getTodayKey();
@@ -605,12 +651,28 @@
     const readyDaily = incrementQuestList(qs.daily, events);
     const readyWeekly = incrementQuestList(qs.weekly, events);
     const readyToClaim = [...readyDaily, ...readyWeekly];
+    const coinsBefore = profile.coins || 0;
+    const rewards = claimQuestRewards(profile, readyToClaim);
 
     global.ProfileService?.saveProfile?.(profile);
 
-    if (readyToClaim.length) refreshQuestUi();
+    const hasChest = rewards.some((r) => r.chest);
+    if (readyToClaim.length) {
+      refreshQuestUi({ deferHud: hasChest });
+    }
 
-    return { rewards: [], readyToClaim, wheelAvailable: false };
+    const result = {
+      rewards,
+      readyToClaim,
+      wheelAvailable: isDailyWheelAvailable(profile),
+      coinsBefore,
+    };
+
+    if (rewards.length || result.wheelAvailable) {
+      global.QuestUI?.presentAutoRewards?.(result);
+    }
+
+    return result;
   }
 
   function claimQuest(questId, opts = {}) {
@@ -645,7 +707,10 @@
 
   function countIncomplete(snapshot) {
     const all = [...(snapshot?.daily || []), ...(snapshot?.weekly || [])];
-    let count = all.filter((q) => !q.claimed).length;
+    let count = all.filter((q) => {
+      const target = q.target ?? QUEST_DEFS[q.questId]?.target ?? 1;
+      return !q.claimed && q.progress < target;
+    }).length;
     if (global.WheelService?.isDailyWheelAvailable?.(global.ProfileService?.loadProfile?.())) {
       count += 1;
     }
@@ -696,6 +761,7 @@
     getQuestSnapshot,
     recordActivity,
     claimQuest,
+    claimAllPending,
     countIncomplete,
     countCompleted,
     isDailyWheelAvailable,

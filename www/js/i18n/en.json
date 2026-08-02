@@ -1186,7 +1186,7 @@
   },
   "quests": {
     "title": "Quests",
-    "subtitle": "Complete quests for bonus XP and coins.",
+    "subtitle": "Finish quests to earn XP and coins automatically.",
     "dailyTitle": "Daily quests",
     "dailyHint": "Complete all 3 for a bonus wheel spin! (KST)",
     "scopeDaily": "Daily",
@@ -1203,6 +1203,7 @@
     "rewardToast": "Quest complete! +{{xp}} XP · 🪙 {{coins}}",
     "chestTitle": "Treasure Chest!",
     "chestTap": "Tap to open",
+    "chestOpening": "Opening…",
     "chestOpened": "Chest opened",
     "chestContinue": "Nice!",
     "chestReward": "Chest reward",
