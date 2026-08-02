@@ -4,7 +4,7 @@
 (function (global) {
   'use strict';
 
-  const STYLES_HREF = 'css/chest-reward.css?v=1';
+  const STYLES_HREF = 'css/chest-reward.css?v=2';
   const CHEST_CLOSED = 'assets/chests/chest-closed.png';
   const CHEST_OPEN = 'assets/chests/chest-open.png';
   const COIN_SRC = 'assets/coin.png';
@@ -102,7 +102,7 @@
       <div class="chest-reward-stage">
         <h2 class="chest-reward-title">${escapeHtml(t('quests.chestTitle'))}</h2>
         <p class="chest-reward-hint">${escapeHtml(t('quests.chestTap'))}</p>
-        <button type="button" class="chest-reward-chest-wrap is-idle" id="chest-reward-tap"
+        <button type="button" class="chest-reward-chest-wrap no-press is-idle" id="chest-reward-tap"
           aria-label="${escapeHtml(t('quests.chestTap'))}">
           <span class="chest-reward-glow" aria-hidden="true"></span>
           <img class="chest-reward-img chest-reward-img--closed" src="${CHEST_CLOSED}" alt="" draggable="false">

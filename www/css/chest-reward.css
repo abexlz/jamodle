@@ -16,12 +16,23 @@
   -webkit-backdrop-filter: blur(10px);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.32s ease;
+  transition:
+    opacity 0.32s ease,
+    background 0.4s ease,
+    backdrop-filter 0.4s ease,
+    -webkit-backdrop-filter 0.4s ease;
 }
 
 .chest-reward-overlay.visible {
   opacity: 1;
   pointer-events: auto;
+}
+
+/* Clear the dim once opened so coins fly over the live HUD */
+.chest-reward-overlay.is-opened {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .chest-reward-stage {
@@ -47,8 +58,20 @@
   font-family: 'Jua', sans-serif;
   font-size: clamp(1.35rem, 5vw, 1.7rem);
   color: #ffe566;
-  text-shadow: 0 2px 0 #c4a82d, 0 6px 18px rgba(0, 0, 0, 0.35);
+  text-shadow:
+    0 1px 0 #c4a82d,
+    0 2px 0 rgba(0, 0, 0, 0.35),
+    0 0 14px rgba(0, 0, 0, 0.45),
+    0 6px 18px rgba(0, 0, 0, 0.35);
   letter-spacing: 0.02em;
+}
+
+.chest-reward-overlay.is-opened .chest-reward-title {
+  opacity: 0;
+  height: 0;
+  overflow: hidden;
+  margin: 0;
+  transition: opacity 0.25s ease;
 }
 
 .chest-reward-hint {
@@ -78,6 +101,16 @@
   border: none;
   background: transparent;
   padding: 0;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+.chest-reward-chest-wrap:active,
+.chest-reward-chest-wrap.is-pressed,
+.chest-reward-chest-wrap:hover {
+  /* no-press already skips app button chrome; keep anim transforms intact */
+  box-shadow: none !important;
+  filter: none !important;
 }
 
 .chest-reward-chest-wrap:focus-visible {
@@ -194,7 +227,10 @@
   font-family: 'Jua', sans-serif;
   font-size: 1.65rem;
   color: #ffe566;
-  text-shadow: 0 2px 0 #b8921f;
+  text-shadow:
+    0 2px 0 #b8921f,
+    0 0 12px rgba(0, 0, 0, 0.4),
+    0 2px 8px rgba(0, 0, 0, 0.35);
 }
 
 .chest-reward-coins .coin-icon {
@@ -205,7 +241,8 @@
 .chest-reward-xp {
   font-family: 'Jua', sans-serif;
   font-size: 1.05rem;
-  color: rgba(255, 255, 255, 0.9);
+  color: #fff;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35), 0 0 10px rgba(0, 0, 0, 0.45);
 }
 
 .chest-reward-continue {
