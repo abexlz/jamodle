@@ -7,6 +7,8 @@
   const BAR_ID = 'home-bottom-bar';
   const HOME_TAB_KEY = 'jamodeul-home-tab';
   const ACTIVE_GAME_KEY = 'jamodeul-active-game';
+  /** Learn tab skips its landing screen and opens tutorial step 1. */
+  const LEARN_TUTORIAL_HREF = 'match-tutorial.html?start=1';
 
   let leaveHook = null;
 
@@ -224,8 +226,29 @@
     return false;
   }
 
+  function openLearnTutorial() {
+    // Don't restore the old Learn landing tab after leaving the tutorial.
+    storeHomeTab('menu');
+    global.location.href = LEARN_TUTORIAL_HREF;
+  }
+
   function handleTabClick(tab) {
     if (tab === 'settings') return;
+
+    if (tab === 'learn') {
+      if (isIndexPage()) {
+        global.GameShell?.park?.('learn');
+      } else if (!(global.location.pathname || '').includes('match-tutorial')) {
+        runLeaveHook();
+        setActiveGame({
+          href: currentPageHref(),
+          type: 'page',
+          at: Date.now(),
+        });
+      }
+      openLearnTutorial();
+      return;
+    }
 
     if (isIndexPage()) {
       // External game resume (Word Chain / Hangul-dle) takes priority on Home.

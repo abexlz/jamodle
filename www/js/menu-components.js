@@ -267,25 +267,16 @@
     return renderMenuTop();
   }
 
-  function getRecommendedModeId() {
-    return 'tutorial';
-  }
-
+  /** Learn tab redirects to the tutorial; this is only a last-resort fallback. */
   function renderLearnHangul() {
-    const section = MC().MENU.sections.find((s) => s.id === 'learn');
-    if (!section?.modes?.length) return '';
-    const recId = getRecommendedModeId();
-    const cards = section.modes.map((mode) => WordGameBar({
-      ...mode,
-      recommended: mode.id === recId,
-    })).join('');
     return `
       <div class="menu-sections learn-tab-section">
-        ${SectionHeader({
-          title: t('menu.learnHangul'),
-          titleKo: showKoSupport() ? section.titleKo : '',
-        })}
-        <div class="word-games-grid daily-challenges-grid">${cards}</div>
+        <a class="learning-mode-card accent-muted" href="match-tutorial.html?start=1">
+          <span class="mode-icon" aria-hidden="true">📘</span>
+          <span class="learning-mode-content">
+            <span class="mode-name" data-i18n="menu.tutorialMode">${escapeHtml(t('menu.tutorialMode'))}</span>
+          </span>
+        </a>
       </div>
     `;
   }

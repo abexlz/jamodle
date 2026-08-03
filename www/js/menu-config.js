@@ -72,18 +72,8 @@
         type: 'learning',
         title: 'Learn Hangul',
         titleKo: '한글 배우기',
-        modes: [
-          {
-            id: 'tutorial',
-            icon: '📘',
-            title: 'Tutorial',
-            subtitle: 'Learn placement, rotation, merge, and word building.',
-            subtitleKo: '배치 · 돌리기 · 합치기 · 단어 만들기',
-            accent: ACCENTS.muted,
-            href: 'match-tutorial.html?start=1',
-            recommended: false,
-          },
-        ],
+        // Learn tab opens match-tutorial.html?start=1 directly (no landing modes).
+        modes: [],
       },
     ],
     menuTop: [

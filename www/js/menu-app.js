@@ -80,6 +80,14 @@
   function setHomeTab(tab) {
     const next = normalizeHomeTab(tab);
 
+    // Learn tab has no landing page — open tutorial step 1 directly.
+    if (next === 'learn') {
+      global.GameShell?.park?.('learn');
+      try { sessionStorage.setItem(HOME_TAB_KEY, 'menu'); } catch { /* ignore */ }
+      global.location.href = 'match-tutorial.html?start=1';
+      return;
+    }
+
     // Resume a parked in-page daily game when returning to Home.
     if (next === 'menu' && global.GameShell?.resume?.()) {
       activeHomeTab = 'menu';
@@ -93,7 +101,7 @@
       return;
     }
 
-    // Park an in-progress daily game before showing shop/quests/learn.
+    // Park an in-progress daily game before showing shop/quests.
     if (next !== 'menu') {
       global.GameShell?.park?.(next);
     }
@@ -131,6 +139,12 @@
       return;
     }
     activeHomeTab = tab || readInitialHomeTab();
+    // Legacy ?tab=learn / stored learn tab → tutorial step 1 (no Learn landing).
+    if (activeHomeTab === 'learn') {
+      try { sessionStorage.setItem(HOME_TAB_KEY, 'menu'); } catch { /* ignore */ }
+      global.location.replace('match-tutorial.html?start=1');
+      return;
+    }
     root.innerHTML = global.MenuComponents.renderMenu(activeHomeTab);
     global.I18n?.applyToDocument?.(root);
     global.ShopUI?.bindSection?.(root);
