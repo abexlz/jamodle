@@ -1086,10 +1086,9 @@
         ${statsRow}
         <section class="hint-area" id="match-hint" aria-label="Word hint"></section>
         <p class="hint-meaning hidden" id="match-meaning" aria-live="polite"></p>
-        <div class="meaning-hint-popup hidden" id="match-meaning-popup" role="dialog" aria-modal="false" aria-labelledby="match-meaning-popup-label" aria-live="polite">
+        <div class="meaning-hint-popup hidden" id="match-meaning-popup" role="dialog" aria-modal="false" aria-label="${t('match.hints.meaning')}" aria-live="polite">
           <div class="meaning-hint-popup-inner">
             <button type="button" class="meaning-hint-popup-close" id="match-meaning-popup-close" aria-label="${t('shop.close') || 'Close'}">×</button>
-            <span class="meaning-hint-popup-label" id="match-meaning-popup-label" data-i18n="match.hints.meaning">${t('match.hints.meaning')}</span>
             <p class="meaning-hint-popup-text" id="match-meaning-popup-text"></p>
           </div>
         </div>
