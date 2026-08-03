@@ -12,7 +12,6 @@
       wordLength: 1,
       titleKey: 'tutorial.steps.placeSo.title',
       bodyKey: 'tutorial.steps.placeSo.body',
-      hideMerge: true,
       placements: [
         { char: 'ㅅ', zoneType: 'cho', syllableIndex: 0 },
         { char: 'ㅗ', zoneType: 'jungH', syllableIndex: 0 },
@@ -25,7 +24,6 @@
       wordLength: 1,
       titleKey: 'tutorial.steps.placeGam.title',
       bodyKey: 'tutorial.steps.placeGam.body',
-      hideMerge: true,
       placements: [
         { char: 'ㅅ', zoneType: 'cho', syllableIndex: 0 },
         { char: 'ㅏ', zoneType: 'jungV', syllableIndex: 0 },
@@ -39,7 +37,6 @@
       wordLength: 1,
       titleKey: 'tutorial.steps.rotateVowel.title',
       bodyKey: 'tutorial.steps.rotateVowel.body',
-      hideMerge: true,
       prePlaced: [{ char: 'ㅋ', zoneType: 'cho', syllableIndex: 0, locked: true }],
       bankTiles: [{ char: 'ㅏ', zoneType: 'jungH', syllableIndex: 0 }],
       rotateTarget: { from: 'ㅏ', to: 'ㅗ' },
@@ -52,7 +49,6 @@
       wordLength: 1,
       titleKey: 'tutorial.steps.rotateConsonant.title',
       bodyKey: 'tutorial.steps.rotateConsonant.body',
-      hideMerge: true,
       bankTiles: [
         { char: 'ㄱ', zoneType: 'cho', syllableIndex: 0 },
         { char: 'ㅏ', zoneType: 'jungV', syllableIndex: 0 },
@@ -88,7 +84,6 @@
       wordLength: 1,
       titleKey: 'tutorial.steps.compoundVowel.title',
       bodyKey: 'tutorial.steps.compoundVowel.body',
-      hideMerge: true,
       placements: [
         { char: 'ㄱ', zoneType: 'cho', syllableIndex: 0 },
         { char: 'ㅗ', zoneType: 'jungH', syllableIndex: 0 },
@@ -102,7 +97,6 @@
       wordLength: 2,
       titleKey: 'tutorial.steps.solveHwasal.title',
       bodyKey: 'tutorial.steps.solveHwasal.body',
-      hideMerge: false,
       bankTiles: [
         { char: 'ㅎ', zoneType: 'cho', syllableIndex: 0 },
         { char: 'ㅜ', zoneType: 'jungH', syllableIndex: 0 },

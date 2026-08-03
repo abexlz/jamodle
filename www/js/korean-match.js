@@ -2510,7 +2510,8 @@
         this.applyPrePlaced(step.prePlaced);
       }
 
-      this.els.mergeDockEl?.classList.toggle('hidden', !!step.hideMerge);
+      // Keep rotate + merge dock visible like Hangul-dle (never hide the empty merge slots).
+      this.els.mergeDockEl?.classList.remove('hidden');
       this.els.rotationDock?.classList.toggle('hidden', !!step.hideRotation);
       this.els.check?.classList.remove('hidden');
       this.tutorialCheckAllowed = false;
