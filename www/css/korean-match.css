@@ -2196,9 +2196,9 @@
   body.match-page .match-chrome-title-img,
   .hangul-dle-title-img {
     display: block;
-    height: clamp(58px, 16.2vw, 78px);
+    height: clamp(75px, 21.1vw, 101px);
     width: auto;
-    max-width: min(100%, 578px);
+    max-width: min(100%, 751px);
     object-fit: contain;
     margin: 0 auto;
     pointer-events: none;
@@ -2437,14 +2437,14 @@
 
   body.match-race-page .syllable-blocks-row[data-syl-count="1"] .syllable-block {
     flex: 0 0 auto;
-    width: min(100px, 30vw);
-    max-width: min(100px, 30vw);
-    min-width: min(88px, 26vw);
+    width: min(200px, 60vw);
+    max-width: min(200px, 60vw);
+    min-width: min(176px, 52vw);
   }
 
   body.match-race-page #match-app:has(.syllable-blocks-row[data-syl-count="1"]) {
-    --block-size: min(100px, 30vw);
-    --tile-size: min(48px, 14vw);
+    --block-size: min(200px, 60vw);
+    --tile-size: min(96px, 28vw);
   }
 
   body.match-race-page .syllable-grid {
@@ -3394,14 +3394,14 @@
 
   body.match-turn-page .blocks-area .syllable-blocks-row[data-syl-count="1"] .syllable-block {
     flex: 0 0 auto;
-    width: min(100px, 30vw);
-    max-width: min(100px, 30vw);
-    min-width: min(88px, 26vw);
+    width: min(200px, 60vw);
+    max-width: min(200px, 60vw);
+    min-width: min(176px, 52vw);
   }
 
   body.match-turn-page #match-app:has(.syllable-blocks-row[data-syl-count="1"]) {
-    --block-size: min(100px, 30vw);
-    --tile-size: min(48px, 14vw);
+    --block-size: min(200px, 60vw);
+    --tile-size: min(96px, 28vw);
   }
 
   body.match-turn-page .blocks-area .syllable-block .jamo-tile.selected {

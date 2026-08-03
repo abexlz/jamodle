@@ -303,24 +303,11 @@
         return;
       }
 
-      const mode = this.matchModeLabel(data);
       const opp = HUD()?.updateBattleHud?.(data, {
         els: this.els,
         myUid: this.myUid,
         matchId: this.matchId,
         onOpp: (opponent) => {
-          const count = opponent.progress?.guessCount || 0;
-          const finished = opponent.progress?.finished;
-          let statusText = '';
-          if (finished && opponent.progress?.won === true) statusText = rt('oppDone');
-          else if (finished) statusText = rt('oppGaveUp');
-
-          if (this.els.centerTitle) this.els.centerTitle.textContent = mode;
-          if (this.els.centerSub) {
-            const attemptLine = rt('oppAttempts', { count });
-            this.els.centerSub.textContent = statusText ? `${attemptLine}${statusText}` : attemptLine;
-          }
-
           if (this.game && opponent.progress?.won === true && !this.game.checkedComplete) {
             this.game.setEnabled(false);
             this.game.feedback?.show('info', rt('oppFinishedFirst'));

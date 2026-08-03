@@ -691,20 +691,10 @@
     }
 
     renderBattleHud(data) {
-      const mode = this.turnModeLabel(data);
       HUD()?.updateBattleHud?.(data, {
         els: this.els,
         myUid: this.myUid,
         matchId: this.matchId,
-        onOpp: () => {
-          if (this.els.centerTitle) this.els.centerTitle.textContent = mode;
-          if (this.els.centerSub) {
-            const roundNum = data.roundNumber || 1;
-            const turnNum = data.turnNumber || 1;
-            this.els.centerSub.textContent = rt('roundTurn', { round: roundNum, turn: turnNum })
-              || `Round ${roundNum} · Turn ${turnNum}`;
-          }
-        },
       });
     }
 

@@ -1316,13 +1316,6 @@
         myUid: MY_UID,
         matchId: this.matchId,
         onOpp: () => {
-          if (this.els.centerTitle) this.els.centerTitle.textContent = this.turnModeLabel(data);
-          if (this.els.centerSub) {
-            const roundNum = data.roundNumber || 1;
-            const turnNum = data.turnNumber || 1;
-            this.els.centerSub.textContent = rt('roundTurn', { round: roundNum, turn: turnNum })
-              || `Round ${roundNum} · Turn ${turnNum}`;
-          }
           this.renderBotOpponentCard();
         },
       });
