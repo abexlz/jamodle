@@ -779,12 +779,13 @@
   }
 
   .merge-slot {
-    width: calc(var(--tile-size) * 0.72);
-    height: calc(var(--tile-size) * 0.72);
-    min-width: 36px;
-    min-height: 36px;
-    max-width: calc(var(--tile-size) * 0.72);
-    max-height: calc(var(--tile-size) * 0.72);
+    --merge-slot-size: var(--dock-tile-size, var(--tile-size));
+    width: var(--merge-slot-size);
+    height: var(--merge-slot-size);
+    min-width: var(--merge-slot-size);
+    min-height: var(--merge-slot-size);
+    max-width: var(--merge-slot-size);
+    max-height: var(--merge-slot-size);
     border-radius: 12px;
     border: 2px dashed var(--border);
     background: var(--card);
@@ -1099,7 +1100,7 @@
     /* app-buttons.css */
   }
 </style>
-<link rel="stylesheet" href="css/korean-match.css?v=20260803i">
+<link rel="stylesheet" href="css/korean-match.css?v=20260803j">
 <link rel="stylesheet" href="css/answer-tts.css">
 <link rel="stylesheet" href="css/pause-quit.css?v=2">
 <link rel="stylesheet" href="css/app-theme.css?v=22">
@@ -1315,12 +1316,13 @@
   }
 
   body.match-page .merge-slot {
-    width: calc(var(--tile-size) * 0.72);
-    height: calc(var(--tile-size) * 0.72);
-    min-width: 32px;
-    min-height: 32px;
-    max-width: calc(var(--tile-size) * 0.72);
-    max-height: calc(var(--tile-size) * 0.72);
+    --merge-slot-size: var(--dock-tile-size, var(--tile-size));
+    width: var(--merge-slot-size);
+    height: var(--merge-slot-size);
+    min-width: var(--merge-slot-size);
+    min-height: var(--merge-slot-size);
+    max-width: var(--merge-slot-size);
+    max-height: var(--merge-slot-size);
   }
 
   body.match-page .merge-result {

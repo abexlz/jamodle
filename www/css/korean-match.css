@@ -50,7 +50,7 @@
     --syl-grid-row-cho: 0.92fr;
     --syl-grid-row-jungH: 0.624fr;
     --syl-grid-row-jong: 0.81fr;
-    --merge-slot-scale: 0.78;
+    --merge-slot-scale: 1;
     --merge-result-scale: 0.78;
     --merge-result-height-scale: 1.24;
     --jamo-merge-glyph-ratio: 0.768;
@@ -1533,12 +1533,13 @@
   }
 
   .merge-slot {
-    width: calc(var(--tile-size) * var(--merge-slot-scale));
-    height: calc(var(--tile-size) * var(--merge-slot-scale));
-    min-width: 38px;
-    min-height: 38px;
-    max-width: calc(var(--tile-size) * var(--merge-slot-scale));
-    max-height: calc(var(--tile-size) * var(--merge-slot-scale));
+    --merge-slot-size: var(--dock-tile-size, var(--tile-size));
+    width: var(--merge-slot-size);
+    height: var(--merge-slot-size);
+    min-width: var(--merge-slot-size);
+    min-height: var(--merge-slot-size);
+    max-width: var(--merge-slot-size);
+    max-height: var(--merge-slot-size);
   }
 
   .merge-result {
@@ -2876,12 +2877,13 @@
   }
 
   body.match-page .merge-slot {
-    width: calc(var(--tile-size) * 0.72);
-    height: calc(var(--tile-size) * 0.72);
-    min-width: 32px;
-    min-height: 32px;
-    max-width: calc(var(--tile-size) * 0.72);
-    max-height: calc(var(--tile-size) * 0.72);
+    --merge-slot-size: var(--dock-tile-size, var(--tile-size));
+    width: var(--merge-slot-size);
+    height: var(--merge-slot-size);
+    min-width: var(--merge-slot-size);
+    min-height: var(--merge-slot-size);
+    max-width: var(--merge-slot-size);
+    max-height: var(--merge-slot-size);
   }
 
   body.match-page .merge-result {
@@ -3312,12 +3314,13 @@
   }
 
   body.match-turn-page .merge-slot {
-    width: calc(var(--tile-size) * 0.74);
-    height: calc(var(--tile-size) * 0.74);
-    min-width: 30px;
-    min-height: 30px;
-    max-width: calc(var(--tile-size) * 0.74);
-    max-height: calc(var(--tile-size) * 0.74);
+    --merge-slot-size: var(--turn-dock-tile-size, var(--dock-tile-size, var(--tile-size)));
+    width: var(--merge-slot-size);
+    height: var(--merge-slot-size);
+    min-width: var(--merge-slot-size);
+    min-height: var(--merge-slot-size);
+    max-width: var(--merge-slot-size);
+    max-height: var(--merge-slot-size);
   }
 
   body.match-turn-page .merge-result {
