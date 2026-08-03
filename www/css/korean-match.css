@@ -2390,18 +2390,15 @@
     display: grid !important;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr;
-    flex: none !important;
-    align-self: center;
-    justify-self: center;
+    flex: 0 0 auto !important;
+    position: relative !important;
+    inset: auto !important;
     --four-gap: clamp(4px, 1.2vw, 8px);
-    /* Absolute fill of the flex mid-column — does not push the dock. */
-    position: absolute !important;
-    inset: 1.5% !important;
-    width: auto !important;
-    height: auto !important;
-    max-width: none !important;
-    max-height: none !important;
-    margin: 0 !important;
+    width: 97%;
+    max-width: 97%;
+    height: auto;
+    max-height: 97%;
+    margin: 0 auto !important;
     gap: var(--four-gap);
     align-content: stretch;
     justify-content: stretch;
@@ -2415,12 +2412,15 @@
   body.match-race-page .blocks-area:has(.syllable-blocks-row[data-syl-count="4"]) {
     flex: 1 1 0 !important;
     min-height: 0 !important;
-    max-height: 100% !important;
+    max-height: none !important;
     align-self: stretch !important;
     width: 100% !important;
     margin-top: 0 !important;
     position: relative !important;
-    display: block !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
     overflow: hidden !important;
   }
 
@@ -3392,17 +3392,16 @@
     display: grid !important;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr;
-    flex: none !important;
+    flex: 0 0 auto !important;
+    position: relative !important;
+    inset: auto !important;
     overflow: visible;
     --four-gap: clamp(4px, 1.2vw, 8px);
-    /* Absolute fill of the flex mid-column — does not push the dock. */
-    position: absolute !important;
-    inset: 1.5% !important;
-    width: auto !important;
-    height: auto !important;
-    max-width: none !important;
-    max-height: none !important;
-    margin: 0 !important;
+    width: 97%;
+    max-width: 97%;
+    height: auto;
+    max-height: 97%;
+    margin: 0 auto !important;
     gap: var(--four-gap);
     align-content: stretch;
     justify-content: stretch;
@@ -3416,12 +3415,15 @@
   body.match-turn-page .blocks-area:has(.syllable-blocks-row[data-syl-count="4"]) {
     flex: 1 1 0 !important;
     min-height: 0 !important;
-    max-height: 100% !important;
+    max-height: none !important;
     align-self: stretch !important;
     width: 100% !important;
     margin-top: 0 !important;
     position: relative !important;
-    display: block !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
     overflow: hidden !important;
   }
 

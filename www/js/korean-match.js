@@ -1317,9 +1317,9 @@
     }
 
     /**
-     * 4-letter battle board: clear legacy inline oversizing so CSS
-     * (absolute inset 1.5% ≈ 97% of the flex mid-column) can size the board
-     * without pushing the dock off-screen.
+     * 4-letter board: size to 97% of the scoreboard↔dock mid-column in pixels.
+     * Avoids absolute % inset (collapses when parent height is indefinite) and
+     * avoids forcing .blocks-area min-height (pushes the dock off-screen).
      */
     syncFourLetterBoardSize() {
       const row = this.els?.blocks;
@@ -1345,9 +1345,53 @@
         return;
       }
 
-      // Drop previous forced min-heights that ate the dock, then let CSS fill 97%.
+      const app = this.root;
+      const dock = app?.querySelector?.('.bank-section--turn, .bank-section');
+      const footer = app?.querySelector?.('.match-footer');
+      const hud = document.getElementById('race-battle-hud');
+      if (!app || !area || !dock) return;
+
       clearArea();
-      clearRow();
+      row.style.position = 'relative';
+      row.style.removeProperty('inset');
+      row.style.removeProperty('top');
+      row.style.removeProperty('bottom');
+      row.style.removeProperty('left');
+      row.style.removeProperty('right');
+      // Temporary small height so flex can allocate the mid-column without content min-size blowout.
+      row.style.setProperty('height', '1px');
+      row.style.setProperty('width', '97%');
+      void app.offsetHeight;
+
+      const appH = app.clientHeight || 0;
+      const dockH = dock.getBoundingClientRect().height || 0;
+      const footerH = footer?.getBoundingClientRect().height || 0;
+      const gap = parseFloat(getComputedStyle(app).gap) || 0;
+      const fromApp = Math.floor(appH - dockH - footerH - gap * 3);
+
+      const areaRect = area.getBoundingClientRect();
+      const dockTop = dock.getBoundingClientRect().top;
+      const fromArea = Math.floor(dockTop - areaRect.top);
+
+      let usableH = fromArea > 60 ? fromArea : fromApp;
+      if (fromApp > 60) usableH = Math.min(usableH, fromApp);
+
+      if (hud) {
+        const hudToDock = Math.floor(dockTop - hud.getBoundingClientRect().bottom);
+        if (hudToDock > 60) usableH = Math.min(usableH > 60 ? usableH : hudToDock, hudToDock);
+      }
+
+      const usableW = Math.floor(area.clientWidth || app.clientWidth || areaRect.width);
+      if (usableH < 60 || usableW < 60) return;
+
+      const h = Math.max(64, Math.floor(usableH * 0.97));
+      const w = Math.max(64, Math.floor(usableW * 0.97));
+
+      row.style.setProperty('width', `${w}px`, 'important');
+      row.style.setProperty('height', `${h}px`, 'important');
+      row.style.setProperty('max-width', `${w}px`, 'important');
+      row.style.setProperty('max-height', `${h}px`, 'important');
+      row.style.setProperty('aspect-ratio', 'unset', 'important');
     }
 
     applyMeaningPreference() {
