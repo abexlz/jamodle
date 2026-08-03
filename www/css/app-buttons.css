@@ -527,14 +527,17 @@ button.ghost:disabled,
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 3px;
   text-align: center;
   aspect-ratio: auto;
-  width: 100%;
+  width: fit-content;
+  max-width: 100%;
+  align-self: center;
   min-width: 0;
-  padding: 6px 8px;
+  padding: 6px 12px 6px 6px;
   background: var(--lavender, #E8DEFF);
   border-color: var(--lavender-btn, #CFC0F5);
+  box-sizing: border-box;
 }
 
 .rotation-dock-icon {
@@ -542,10 +545,13 @@ button.ghost:disabled,
   line-height: 1;
   color: var(--heading, #7B8FD4);
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .rotation-dock-label {
-  font-size: clamp(16px, 4.1vw, 19px);
+  font-size: clamp(18px, 4.5vw, 21px);
   line-height: 1.15;
   white-space: nowrap;
   overflow: visible;

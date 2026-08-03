@@ -31,7 +31,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/app-preferences.css?v=2">
-<link rel="stylesheet" href="css/app-buttons.css?v=12">
+<link rel="stylesheet" href="css/app-buttons.css?v=13">
 <style>
   :root {
     --bg: #FFF8F5;
@@ -1100,10 +1100,10 @@
     /* app-buttons.css */
   }
 </style>
-<link rel="stylesheet" href="css/korean-match.css?v=20260803y">
+<link rel="stylesheet" href="css/korean-match.css?v=20260803z">
 <link rel="stylesheet" href="css/answer-tts.css">
 <link rel="stylesheet" href="css/pause-quit.css?v=2">
-<link rel="stylesheet" href="css/app-theme.css?v=24">
+<link rel="stylesheet" href="css/app-theme.css?v=25">
 <link rel="stylesheet" href="css/home-nav.css?v=12">
 <link rel="stylesheet" href="css/app-wordle-ui.css?v=22">
 <style>
@@ -1296,14 +1296,18 @@
   }
 
   body.match-page .rotation-dock {
-    padding: 4px 8px !important;
+    padding: 4px 12px 4px 6px !important;
     min-height: 46px !important;
     max-height: 52px !important;
-    gap: 4px !important;
+    gap: 3px !important;
+    justify-content: center !important;
+    align-self: center;
+    width: fit-content;
+    max-width: 100%;
   }
 
   body.match-page .rotation-dock-label {
-    font-size: clamp(17px, 4.3vw, 21px) !important;
+    font-size: clamp(19px, 4.7vw, 23px) !important;
     font-weight: 400;
     letter-spacing: 0.01em;
     overflow: visible !important;
