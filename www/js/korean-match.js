@@ -2188,7 +2188,6 @@
       if (!bank) return;
       bank.style.removeProperty('min-height');
       bank.style.removeProperty('min-width');
-      bank.style.removeProperty('max-width');
       bank.style.removeProperty('max-height');
       this._dockFittedMinHeight = 0;
       this._dockFittedMinWidth = 0;
@@ -2301,9 +2300,11 @@
       bank.classList.toggle('jamo-bank--wrap12', rows > 1);
 
       const colsUsed = Math.min(cols, capacity);
+      const fittedW = Math.ceil(colsUsed * tileSize + gap * Math.max(colsUsed - 1, 0) + padX);
       const fittedH = Math.ceil(rows * tileSize + gap * Math.max(rows - 1, 0) + padY);
-      // Never shrink mid-round as tiles leave the dock (height only — width stays in flex).
+      // Never shrink mid-round as tiles leave the dock.
       let lockedH = Math.max(this._dockFittedMinHeight || 0, fittedH);
+      let lockedW = Math.max(this._dockFittedMinWidth || 0, fittedW);
 
       // Stretch dock up to the Rotate button column when tools are taller.
       const row = bank.closest('.race-turn-bottom, .bank-row');
@@ -2319,11 +2320,18 @@
         }
       }
 
+      // Cap width so a huge 1-letter tile size can't shove the bank over the merge tray.
+      if (row) {
+        const rowGap = parseFloat(getComputedStyle(row).gap) || 6;
+        const toolsW = tools?.getBoundingClientRect().width || 0;
+        const availableW = Math.max(tileSize + padX, row.clientWidth - toolsW - rowGap);
+        lockedW = Math.min(lockedW, Math.floor(availableW));
+      }
+
       this._dockFittedMinHeight = lockedH;
-      this._dockFittedMinWidth = 0;
+      this._dockFittedMinWidth = lockedW;
       bank.style.minHeight = `${lockedH}px`;
-      bank.style.removeProperty('min-width');
-      bank.style.removeProperty('max-width');
+      bank.style.minWidth = `${lockedW}px`;
       bank.dataset.dockFitted = 'true';
       this.packDockSlots();
     }
