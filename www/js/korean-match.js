@@ -1318,7 +1318,8 @@
 
     /**
      * 4-letter board: fill ~97% of the scoreboard↔dock gap, then stretch
-     * +5% upward and +20% downward (capped so it never covers the dock).
+     * +10% upward and +40% downward (+20% on top of the prior +20%;
+     * capped so it never covers the dock).
      */
     syncFourLetterBoardSize() {
       const row = this.els?.blocks;
@@ -1379,8 +1380,8 @@
       if (usableH < 60 || usableW < 60) return;
 
       const baseH = Math.max(64, Math.floor(usableH * 0.97));
-      const extendUp = Math.floor(baseH * 0.05);
-      const extendDown = Math.floor(baseH * 0.20);
+      const extendUp = Math.floor(baseH * 0.10);
+      const extendDown = Math.floor(baseH * 0.40);
       let h = baseH + extendUp + extendDown;
       let shiftDown = Math.floor((extendDown - extendUp) / 2);
       if (h > usableH) {
