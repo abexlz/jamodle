@@ -147,6 +147,12 @@ button.ghost,
   white-space: nowrap;
 }
 
+.rotation-dock-label {
+  max-width: none;
+  overflow: visible;
+  text-overflow: clip;
+}
+
 .match-hint-btn .app-btn-title {
   font-size: clamp(14px, 3.6vw, 17px);
 }
@@ -521,29 +527,29 @@ button.ghost:disabled,
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 4px;
   text-align: center;
   aspect-ratio: auto;
   width: 100%;
   min-width: 0;
-  padding: 8px 12px;
+  padding: 6px 8px;
   background: var(--lavender, #E8DEFF);
   border-color: var(--lavender-btn, #CFC0F5);
 }
 
 .rotation-dock-icon {
-  font-size: clamp(30px, 7.5vw, 39px);
+  font-size: clamp(24px, 6vw, 31px);
   line-height: 1;
   color: var(--heading, #7B8FD4);
   flex-shrink: 0;
 }
 
 .rotation-dock-label {
-  font-size: clamp(20px, 5.1vw, 24px);
+  font-size: clamp(16px, 4.1vw, 19px);
   line-height: 1.15;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: visible;
+  text-overflow: clip;
 }
 
 .rotation-dock.drag-over {

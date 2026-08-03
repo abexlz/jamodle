@@ -429,25 +429,25 @@ button.ghost,
   flex-direction: row !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 8px !important;
+  gap: 4px !important;
   text-align: left;
   aspect-ratio: auto !important;
   width: 100%;
-  padding: 10px 14px !important;
+  padding: 6px 8px !important;
 }
 
 .rotation-dock-icon {
-  font-size: clamp(33px, 8.25vw, 42px) !important;
+  font-size: clamp(26px, 6.6vw, 34px) !important;
   line-height: 1;
   flex-shrink: 0;
 }
 
 .rotation-dock-label {
-  font-size: clamp(23px, 5.7vw, 27px) !important;
+  font-size: clamp(18px, 4.6vw, 22px) !important;
   line-height: 1.15;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: visible !important;
+  text-overflow: clip !important;
   max-width: none;
 }
 
