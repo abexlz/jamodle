@@ -326,10 +326,9 @@
     position: relative;
     background: var(--card);
     border: 2px solid var(--border);
-    border-radius: 18px;
+    border-radius: clamp(8px, 9%, 16px);
     padding: 10px;
     box-shadow: var(--shadow-sm);
-    border-radius: 16px 20px 18px 22px / 20px 16px 22px 18px;
     display: flex;
     align-items: stretch;
     justify-content: stretch;
@@ -352,7 +351,7 @@
   .drop-zone {
     background: var(--zone-bg);
     border: 2px dashed var(--border);
-    border-radius: 12px 14px 13px 15px / 14px 12px 15px 13px;
+    border-radius: clamp(4px, 14%, 8px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1100,7 +1099,7 @@
     /* app-buttons.css */
   }
 </style>
-<link rel="stylesheet" href="css/korean-match.css?v=20260803f">
+<link rel="stylesheet" href="css/korean-match.css?v=20260803g">
 <link rel="stylesheet" href="css/answer-tts.css">
 <link rel="stylesheet" href="css/pause-quit.css?v=2">
 <link rel="stylesheet" href="css/app-theme.css?v=21">
@@ -1205,26 +1204,19 @@
   }
 
   body.match-page .blocks-area {
-    flex: 1 1 auto;
+    flex: 0 0 auto;
     min-height: 0;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
-    overflow: hidden;
+    justify-content: flex-end;
+    overflow: visible;
+    margin-top: auto;
   }
 
-  body.match-page .blocks-area::before {
-    content: '';
-    flex: 3 1 0;
-    min-height: 0;
-    pointer-events: none;
-  }
-
+  body.match-page .blocks-area::before,
   body.match-page .blocks-area::after {
-    content: '';
-    flex: 1 1 0;
-    min-height: 0;
-    pointer-events: none;
+    content: none;
+    display: none;
   }
 
   body.match-page .section-label {
@@ -1275,16 +1267,27 @@
 
   body.match-page .bank-section {
     flex-shrink: 0;
+    margin-top: 8px;
+  }
+
+  body.match-page .bank-section + .match-footer {
     margin-top: auto;
+    padding-top: clamp(16px, 5vh, 48px);
   }
 
   body.match-page .bank-row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
     gap: 6px;
     align-items: stretch;
+    justify-content: flex-start;
   }
 
   body.match-page .bank-tools {
+    flex: 0 0 auto;
     gap: 4px;
+    max-width: 34%;
   }
 
   body.match-page .rotation-dock {
@@ -1459,9 +1462,16 @@
       --tile-size: clamp(32px, 9vw, 46px);
     }
 
+    body.match-page .bank-row,
     .bank-row {
-      flex-wrap: wrap;
-      justify-content: center;
+      flex-wrap: nowrap !important;
+      justify-content: flex-start !important;
+    }
+
+    body.match-page .bank-tools {
+      flex: 0 0 auto;
+      min-width: 72px;
+      max-width: min(112px, 32vw);
     }
   }
 </style>
@@ -1553,7 +1563,7 @@
 <script src="js/race-countdown.js"></script>
 <script src="js/pause-quit-ui.js?v=3"></script>
 <script src="js/answer-tts.js?v=20260803c"></script>
-<script src="js/korean-match.js?v=20260803f"></script>
+<script src="js/korean-match.js?v=20260803g"></script>
 <script>
 const isDailyMatch = MatchDaily.isDailyModeFromUrl();
 
