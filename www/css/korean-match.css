@@ -2573,16 +2573,12 @@
     width: min(156px, 55vw);
     max-width: min(156px, 55vw);
     min-width: min(130px, 47vw);
+    /* A square guide prevents the one-syllable grid from looking side-squeezed. */
+    aspect-ratio: 1 / 1;
   }
 
   body.match-page:not(.match-race-page) #match-app:has(.syllable-blocks-row[data-syl-count="1"]) {
     --block-size: min(156px, 55vw);
-    /* +30% dock/merge letters vs shared 2-letter scale */
-    --tile-size: clamp(42px, 12.5vw, 65px);
-  }
-
-  body.match-page:not(.match-race-page) #match-app:has(.syllable-blocks-row[data-syl-count="4"]) {
-    --tile-size: clamp(42px, 12.5vw, 65px);
   }
 
   body.match-page:not(.match-race-page) .syllable-blocks-row .syllable-grid {
