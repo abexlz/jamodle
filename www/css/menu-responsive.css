@@ -94,8 +94,8 @@ html.high-contrast .menu-header::before {
 }
 
 html.large-text body.home-menu-active {
-  --home-nav-section-h: clamp(76px, 12.5dvh, 94px);
-  --home-nav-icon-size: clamp(42px, 10.5vw, 52px);
+  --home-nav-section-h: clamp(49px, 7.8dvh, 60px);
+  --home-nav-icon-size: clamp(26px, 6.6vw, 32px);
 }
 
 /* ── Fluid scale tokens ── */

@@ -49,7 +49,7 @@ body.game-active {
 }
 
 body.has-home-bottom-bar.game-active {
-  padding-bottom: var(--home-nav-offset, calc(76px + var(--safe-bottom))) !important;
+  padding-bottom: var(--home-nav-offset, calc(46px + var(--safe-bottom))) !important;
 }
 
 body.match-page,
@@ -64,7 +64,7 @@ body.match-turn-page {
 body.has-home-bottom-bar.match-page,
 body.has-home-bottom-bar.match-race-page,
 body.has-home-bottom-bar.match-turn-page {
-  padding-bottom: var(--home-nav-offset, calc(76px + var(--safe-bottom))) !important;
+  padding-bottom: var(--home-nav-offset, calc(46px + var(--safe-bottom))) !important;
 }
 
 body:has(#race-root.race-app),
@@ -77,7 +77,7 @@ body:has(#related-words-app) {
 
 body.has-home-bottom-bar:has(#related-words-app),
 body.has-home-bottom-bar:has(#race-root.race-app) {
-  padding-bottom: var(--home-nav-offset, calc(76px + var(--safe-bottom))) !important;
+  padding-bottom: var(--home-nav-offset, calc(46px + var(--safe-bottom))) !important;
 }
 
 /* ── Index: daily Wordle game screen ── */
@@ -545,7 +545,7 @@ body.home-menu-active.home-tab-learn .section-header {
   body.home-menu-active {
     --menu-header-gap: 4px;
     --menu-profile-size: clamp(38px, 10vw, 44px);
-    --home-nav-section-h: clamp(64px, 10.5dvh, 80px);
+    --home-nav-section-h: clamp(38px, 6.3dvh, 48px);
   }
 
 }

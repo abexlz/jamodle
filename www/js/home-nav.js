@@ -10,6 +10,61 @@
 
   let leaveHook = null;
 
+  /**
+   * Vercel Toolbar / Comments inject a bottom-right control that overlaps the
+   * settings gear and opens Vercel's panel instead of settings.html.
+   */
+  function neutralizeVercelToolbar(root) {
+    const scope = root || document;
+    const nodes = scope.querySelectorAll?.(
+      [
+        'script[src*="vercel.live"]',
+        'iframe[src*="vercel.live"]',
+        'vercel-live-feedback',
+        '#vercel-live-feedback',
+        '[data-vercel-toolbar]',
+        '[id^="vercel-live"]',
+        '[class*="vercel-toolbar"]',
+      ].join(', ')
+    );
+    nodes?.forEach((el) => {
+      try {
+        el.remove();
+      } catch {
+        el.style.setProperty('display', 'none', 'important');
+        el.style.setProperty('pointer-events', 'none', 'important');
+      }
+    });
+  }
+
+  function watchVercelToolbar() {
+    if (typeof document === 'undefined' || document.documentElement?.dataset?.vercelToolbarNeutralized === '1') {
+      return;
+    }
+    document.documentElement.dataset.vercelToolbarNeutralized = '1';
+    neutralizeVercelToolbar(document);
+
+    if (typeof MutationObserver !== 'function') return;
+    const obs = new MutationObserver((mutations) => {
+      for (const m of mutations) {
+        for (const node of m.addedNodes) {
+          if (!(node instanceof Element)) continue;
+          const hit =
+            /vercel\.live/i.test(node.getAttribute?.('src') || '') ||
+            /vercel-live|vercel-toolbar/i.test(`${node.id || ''} ${node.className || ''} ${node.tagName || ''}`) ||
+            node.querySelector?.(
+              'script[src*="vercel.live"], iframe[src*="vercel.live"], vercel-live-feedback, #vercel-live-feedback, [data-vercel-toolbar], [id^="vercel-live"], [class*="vercel-toolbar"]'
+            );
+          if (hit) {
+            neutralizeVercelToolbar(document);
+            return;
+          }
+        }
+      }
+    });
+    obs.observe(document.documentElement, { childList: true, subtree: true });
+  }
+
   function isIndexPage() {
     const path = (global.location.pathname || '').split('/').pop() || 'index.html';
     return path === '' || path === 'index.html';
@@ -236,6 +291,7 @@
 
     document.body.classList.add('has-home-bottom-bar');
     document.documentElement.classList.add('viewport-fit-lock');
+    watchVercelToolbar();
     bind();
     setActiveTab(options.activeTab || detectActiveTab());
     global.I18n?.applyToDocument?.(bar);
@@ -289,6 +345,7 @@
   }
 
   function autoMount() {
+    watchVercelToolbar();
     if (!shouldAutoMount()) return;
     show();
   }

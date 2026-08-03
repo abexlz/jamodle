@@ -1,7 +1,8 @@
 /* Home bottom tab bar — fixed segmented nav on menu screens */
 
 :root {
-  --home-nav-section-h: clamp(76px, 12.5dvh, 94px);
+  /* 60% of prior bar height so game chrome keeps more board space */
+  --home-nav-section-h: clamp(46px, 7.5dvh, 56px);
   --home-nav-offset: calc(
     var(--home-nav-section-h) + var(--safe-bottom, env(safe-area-inset-bottom, 0px))
   );
@@ -16,15 +17,15 @@
   --home-nav-border: rgba(123, 207, 255, 0.42);
   --home-nav-divider: rgba(255, 255, 255, 0.2);
   --home-nav-active-accent: #ffe566;
-  --home-nav-icon-size: clamp(42px, 10.5vw, 52px);
+  --home-nav-icon-size: clamp(25px, 6.3vw, 31px);
 }
 
 html.large-text {
-  --home-nav-section-h: clamp(82px, 13dvh, 100px);
+  --home-nav-section-h: clamp(49px, 7.8dvh, 60px);
   --home-nav-offset: calc(
     var(--home-nav-section-h) + var(--safe-bottom, env(safe-area-inset-bottom, 0px))
   );
-  --home-nav-icon-size: clamp(44px, 11vw, 54px);
+  --home-nav-icon-size: clamp(26px, 6.6vw, 32px);
 }
 
 /* ── Bottom bar shell ── */
@@ -34,7 +35,8 @@ body > #home-bottom-bar.home-bottom-bar,
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 220;
+  /* Above typical page chrome; Vercel toolbar is neutralized separately. */
+  z-index: 2147483000;
   width: 100%;
   box-sizing: border-box;
   padding: 0;
@@ -47,6 +49,13 @@ body > #home-bottom-bar.home-bottom-bar,
     0 -2px 6px rgba(0, 0, 0, 0.22);
   -webkit-backdrop-filter: var(--home-nav-blur);
   backdrop-filter: var(--home-nav-blur);
+  pointer-events: auto;
+}
+
+/* Ensure the settings gear receives taps even if a host overlay is nearby. */
+.home-bottom-bar .home-tab-btn[data-home-tab="settings"] {
+  position: relative;
+  z-index: 1;
   pointer-events: auto;
 }
 
@@ -91,7 +100,7 @@ body > #home-bottom-bar.home-bottom-bar,
   width: 100%;
   min-width: 0;
   min-height: var(--home-nav-section-h);
-  padding: 10px 8px;
+  padding: 6px 5px;
   margin: 0;
   border: none;
   border-left: 1px solid var(--home-nav-divider);
@@ -115,8 +124,8 @@ body > #home-bottom-bar.home-bottom-bar,
 }
 
 .home-bottom-bar-inner--4 .home-tab-btn {
-  min-height: 56px;
-  padding: 8px 6px;
+  min-height: 34px;
+  padding: 5px 4px;
 }
 
 .home-tab-btn--link {
@@ -145,10 +154,10 @@ body > #home-bottom-bar.home-bottom-bar,
   top: 0;
   left: 16%;
   right: 16%;
-  height: 4px;
-  border-radius: 0 0 4px 4px;
+  height: 3px;
+  border-radius: 0 0 3px 3px;
   background: var(--home-nav-active-accent);
-  box-shadow: 0 0 10px rgba(255, 209, 102, 0.45);
+  box-shadow: 0 0 8px rgba(255, 209, 102, 0.45);
 }
 
 .home-tab-icon-img {
@@ -176,8 +185,8 @@ body > #home-bottom-bar.home-bottom-bar,
 }
 
 .home-tab-badge {
-  top: clamp(8px, 2vw, 12px);
-  right: clamp(10px, 3.5vw, 16px);
+  top: clamp(4px, 1.2vw, 7px);
+  right: clamp(6px, 2.1vw, 10px);
 }
 
 /* ── Page shell: menu fills viewport above the bar ── */
