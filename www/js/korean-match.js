@@ -943,10 +943,16 @@
           </div>`
         : '';
 
+      const chromeTitleHtml = this.tutorialMode
+        ? `<h1 class="match-chrome-title">${escapeHtml(chromeTitle)}</h1>`
+        : `<h1 class="match-chrome-title match-chrome-title--logo">
+            <img class="match-chrome-title-img" src="assets/hangul-dle-title.png" alt="${escapeHtml(chromeTitle)}" draggable="false">
+          </h1>`;
+
       const headerHtml = this.versus
         ? hiddenStatsHtml
         : `<header class="match-chrome${this.tutorialMode ? ' match-chrome--tutorial' : ''}">
-            <h1 class="match-chrome-title">${escapeHtml(chromeTitle)}</h1>
+            ${chromeTitleHtml}
             ${this.tutorialMode
               ? '<p class="tutorial-lesson-progress" id="tutorial-lesson-progress" aria-live="polite"></p>'
               : ''}

@@ -2187,6 +2187,24 @@
     text-shadow: 0 2px 0 rgba(0, 55, 68, 0.35);
   }
 
+  body.match-page .match-chrome-title--logo {
+    padding: 0;
+    line-height: 0;
+    text-shadow: none;
+  }
+
+  body.match-page .match-chrome-title-img,
+  .hangul-dle-title-img {
+    display: block;
+    height: clamp(34px, 9.5vw, 46px);
+    width: auto;
+    max-width: min(100%, 340px);
+    object-fit: contain;
+    margin: 0 auto;
+    pointer-events: none;
+    user-select: none;
+  }
+
   body.match-page .match-chrome-start,
   body.match-page .match-chrome-end {
     display: none;
