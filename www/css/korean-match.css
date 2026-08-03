@@ -1417,12 +1417,12 @@
 
   body.match-page .match-actions > .match-action-btn {
     grid-column: auto !important;
-    min-height: 50px !important;
-    max-height: 56px !important;
+    min-height: 56px !important;
+    max-height: 64px !important;
     aspect-ratio: auto !important;
     border-radius: 18px !important;
     font-family: 'Jua', 'Noto Sans KR', sans-serif !important;
-    font-size: clamp(16px, 4.2vw, 19px) !important;
+    font-size: clamp(26px, 6.7vw, 30px) !important;
     font-weight: 400 !important;
     line-height: 1 !important;
     white-space: nowrap;
@@ -2178,7 +2178,7 @@
     margin: 0;
     padding: 0 8px;
     font-family: 'Jua', 'Noto Sans KR', sans-serif;
-    font-size: clamp(22px, 6vw, 28px);
+    font-size: clamp(33px, 9vw, 42px);
     font-weight: 400;
     letter-spacing: 0.02em;
     line-height: 1.1;
@@ -2959,18 +2959,18 @@
 
   body.match-page .rotation-dock {
     padding: 6px 10px !important;
-    min-height: 42px !important;
-    max-height: 46px !important;
+    min-height: 50px !important;
+    max-height: 56px !important;
   }
 
   body.match-page .rotation-dock-label {
-    font-size: clamp(14px, 3.6vw, 17px) !important;
+    font-size: clamp(21px, 5.4vw, 26px) !important;
     font-weight: 400;
     letter-spacing: 0.02em;
   }
 
   body.match-page .rotation-dock-icon {
-    font-size: clamp(20px, 5vw, 24px) !important;
+    font-size: clamp(30px, 7.5vw, 36px) !important;
   }
 
   body.match-page .vowel-merge-dock {
@@ -3098,9 +3098,9 @@
     }
 
     body.match-page .match-actions > .match-action-btn {
-      font-size: clamp(14px, 3.8vw, 17px) !important;
-      min-height: 44px !important;
-      max-height: 48px !important;
+      font-size: clamp(22px, 6.1vw, 27px) !important;
+      min-height: 52px !important;
+      max-height: 58px !important;
     }
 
     body.match-page .learning-streak-bar {
@@ -3146,7 +3146,7 @@
     }
 
     body.match-page .rotation-dock-label {
-      font-size: clamp(11px, 3vw, 14px) !important;
+      font-size: clamp(17px, 4.5vw, 21px) !important;
     }
   }
 
