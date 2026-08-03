@@ -521,12 +521,16 @@
       if (step.type === 'guided-rotate') {
         if (step.rotateTarget && !this.rotateDone) {
           const tile = this.findBankTile(step.rotateTarget.from);
-          if (tile?.el) tile.el.classList.add('selected');
-          game.els.rotationDock?.classList.add('tap-target');
-          this.setTutorialFocus([tile?.el, game.els.rotationDock]);
-          if (tile?.el && game.els.rotationDock) {
-            this.coach.pointFinger(tile.el, game.els.rotationDock);
+          if (tile && !tile.locked) {
+            game.selectedTile = tile;
+            tile.setSelected?.(true);
+            tile.el?.classList.add('selected');
+            game.updateRotationDockLabel?.();
+            game.updateSelectionHighlights?.();
           }
+          // Pips-style: tap the lifted tile again to rotate (dock still works).
+          this.setTutorialFocus([tile?.el]);
+          if (tile?.el) this.coach.pointFinger(tile.el, tile.el);
           return;
         }
 
