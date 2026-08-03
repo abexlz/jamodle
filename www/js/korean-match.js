@@ -1317,64 +1317,37 @@
     }
 
     /**
-     * 4-letter battle board: fill ~97% of the scoreboard↔dock mid-column.
-     * CSS % / cqh fails when ancestors use height:auto; size from #match-app chrome.
+     * 4-letter battle board: clear legacy inline oversizing so CSS
+     * (absolute inset 1.5% ≈ 97% of the flex mid-column) can size the board
+     * without pushing the dock off-screen.
      */
     syncFourLetterBoardSize() {
       const row = this.els?.blocks;
       if (!row) return;
 
-      const clear = () => {
-        ['height', 'width', 'max-height', 'max-width', 'aspect-ratio'].forEach((p) => {
+      const area = row.closest('.blocks-area');
+      const clearRow = () => {
+        ['height', 'width', 'max-height', 'max-width', 'aspect-ratio', 'top', 'bottom', 'left', 'right', 'position', 'inset'].forEach((p) => {
           row.style.removeProperty(p);
         });
-        const area = row.closest('.blocks-area');
-        if (area) {
-          area.style.removeProperty('height');
-          area.style.removeProperty('min-height');
-          area.style.removeProperty('flex');
-        }
+      };
+      const clearArea = () => {
+        if (!area) return;
+        area.style.removeProperty('height');
+        area.style.removeProperty('min-height');
+        area.style.removeProperty('max-height');
+        area.style.removeProperty('flex');
       };
 
       if (row.dataset.sylCount !== '4') {
-        clear();
+        clearRow();
+        clearArea();
         return;
       }
 
-      const app = this.root;
-      const area = row.closest('.blocks-area');
-      const dock = app?.querySelector?.('.bank-section--turn, .bank-section');
-      const footer = app?.querySelector?.('.match-footer');
-      if (!app || !area || !dock) return;
-
-      const appRect = app.getBoundingClientRect();
-      const dockH = dock.getBoundingClientRect().height || 0;
-      const footerH = footer?.getBoundingClientRect().height || 0;
-      const gap = parseFloat(getComputedStyle(app).gap) || 0;
-      // blocks + feedback + bank + footer → up to 3 gaps between them
-      let areaH = Math.floor(appRect.height - dockH - footerH - gap * 3);
-      const liveH = area.getBoundingClientRect().height;
-      if (liveH > 80) areaH = Math.max(areaH, Math.floor(liveH));
-
-      const hud = document.getElementById('race-battle-hud');
-      if (hud) {
-        const hudGap = Math.floor(dock.getBoundingClientRect().top - hud.getBoundingClientRect().bottom);
-        if (hudGap > 80) areaH = Math.max(areaH, hudGap);
-      }
-
-      const areaW = Math.floor(area.getBoundingClientRect().width || appRect.width);
-      if (areaH < 80 || areaW < 80) return;
-
-      const h = Math.max(64, Math.floor(areaH * 0.97));
-      const w = Math.max(64, Math.floor(areaW * 0.97));
-
-      area.style.setProperty('flex', '1 1 0', 'important');
-      area.style.setProperty('min-height', `${areaH}px`, 'important');
-      row.style.setProperty('height', `${h}px`, 'important');
-      row.style.setProperty('width', `${w}px`, 'important');
-      row.style.setProperty('max-height', `${h}px`, 'important');
-      row.style.setProperty('max-width', `${w}px`, 'important');
-      row.style.setProperty('aspect-ratio', 'unset', 'important');
+      // Drop previous forced min-heights that ate the dock, then let CSS fill 97%.
+      clearArea();
+      clearRow();
     }
 
     applyMeaningPreference() {
