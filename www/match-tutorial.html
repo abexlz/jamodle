@@ -30,24 +30,43 @@
 <link rel="stylesheet" href="css/app-theme.css?v=22">
 <link rel="stylesheet" href="css/app-wordle-ui.css?v=22">
 <link rel="stylesheet" href="css/answer-tts.css">
-<link rel="stylesheet" href="css/tutorial.css?v=20260803e">
+<link rel="stylesheet" href="css/tutorial.css?v=20260803f">
 <link rel="stylesheet" href="css/home-nav.css?v=12">
 <style>
-  body {
-    margin: 0;
+  /* Match Hangul-dle (match.html) shell sizing — one-screen flex column */
+  body.match-page.tutorial-page {
+    display: flex;
+    flex-direction: column;
     min-height: 100dvh;
+    height: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    margin: 0;
     color: var(--text, #5D6470);
     font-family: 'Noto Sans KR', sans-serif;
-    padding: calc(12px + env(safe-area-inset-top, 0px)) 12px calc(16px + env(safe-area-inset-bottom, 0px));
+    padding: calc(6px + env(safe-area-inset-top, 0px)) 10px calc(6px + env(safe-area-inset-bottom, 0px));
   }
-  body.match-page #match-app {
-    --block-size: min(180px, 42vw);
-    --tile-size: min(78px, calc(var(--block-size) * 0.48));
-    max-width: 520px;
+
+  body.match-page.tutorial-page #match-app {
+    --app-btn-min-h: 44px;
+    --app-btn-max-h: 50px;
+    --block-size: clamp(64px, 19vw, 88px);
+    --tile-size: clamp(36px, 9.5vw, 50px);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    max-width: 100%;
+    width: 100%;
     margin: 0 auto;
+    gap: 4px;
+    overflow: hidden;
+    box-sizing: border-box;
   }
 </style>
-<link rel="stylesheet" href="css/game-layout.css?v=2">
+<link rel="stylesheet" href="css/game-layout.css?v=15">
 <link rel="stylesheet" href="css/app-fonts.css?v=3">
 </head>
 <body class="match-page tutorial-page">
@@ -86,7 +105,7 @@
 <script src="js/match-tutorial-app.js?v=20260801c"></script>
 <script>
 (async function () {
-  await AppBootstrap?.init?.();
+  await AppBootstrap?.bootstrap?.();
   I18n?.init?.();
   ProfileService?.loadProfile?.();
   const params = new URLSearchParams(location.search);
@@ -97,6 +116,11 @@
     return;
   }
   new MatchTutorialApp().mount();
+  // Same home-nav shell as Hangul-dle match pages
+  window.HomeNav?.mountGamePage?.({
+    href: (location.pathname.split('/').pop() || 'match-tutorial.html') + (location.search || ''),
+    type: 'page',
+  });
 })();
 </script>
 </body>

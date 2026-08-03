@@ -20,6 +20,7 @@
   padding: 12px 14px 14px;
   box-shadow: 0 4px 0 rgba(0, 80, 110, 0.12);
   text-align: center;
+  flex-shrink: 0;
 }
 
 .tutorial-lesson-progress {
@@ -57,38 +58,6 @@ body.tutorial-page .match-chrome-title {
 
 body.tutorial-page .title-block h1 {
   color: #FFD743 !important;
-}
-
-/* Empty syllable slots — 1.5× vs prior tutorial/match 1-letter size */
-body.tutorial-page.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="1"] .syllable-block {
-  flex: 0 0 auto !important;
-  width: min(234px, 82vw) !important;
-  max-width: min(234px, 82vw) !important;
-  min-width: min(195px, 70vw) !important;
-  aspect-ratio: 1 / 1;
-}
-
-body.tutorial-page.match-page:not(.match-race-page) #match-app:has(.syllable-blocks-row[data-syl-count="1"]) {
-  --block-size: min(234px, 82vw) !important;
-  --tile-size: min(78px, 23vw) !important;
-}
-
-body.tutorial-page.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="2"] {
-  justify-content: center;
-  gap: clamp(8px, 2vw, 14px);
-}
-
-body.tutorial-page.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="2"] .syllable-block {
-  flex: 0 0 min(132px, 40vw) !important;
-  width: min(132px, 40vw) !important;
-  max-width: min(132px, 40vw) !important;
-  min-width: min(110px, 34vw) !important;
-  aspect-ratio: 1 / 1;
-}
-
-body.tutorial-page.match-page:not(.match-race-page) #match-app:has(.syllable-blocks-row[data-syl-count="2"]) {
-  --block-size: min(132px, 40vw) !important;
-  --tile-size: min(63px, 19vw) !important;
 }
 
 /* Explicit dim / focus — only targeted elements stay bright */
@@ -195,7 +164,7 @@ body.tutorial-page .merge-result,
   filter: none !important;
 }
 
-/* Check answer — always full-width in tutorial, clear of the home nav */
+/* Check — full-width because Reset is hidden; stay in normal match flex flow */
 .tutorial-match .match-actions {
   display: flex !important;
   grid-template-columns: unset !important;
@@ -212,49 +181,20 @@ body.tutorial-page .merge-result,
   font-size: clamp(18px, 4.8vw, 22px) !important;
 }
 
-/* Keep Check above the fixed home bottom bar on every tutorial step */
-body.tutorial-page.has-home-bottom-bar {
-  --tutorial-check-clearance: calc(var(--home-nav-offset, 56px) + 72px);
-  padding-bottom: var(--tutorial-check-clearance) !important;
-}
-
-body.tutorial-page #match-app {
-  box-sizing: border-box;
+/* Same shell padding as Hangul-dle match pages (home-nav clearance only) */
+body.tutorial-page.has-home-bottom-bar.match-page {
+  padding-bottom: var(--home-nav-offset, calc(46px + var(--safe-bottom, 0px))) !important;
 }
 
 body.tutorial-page .match-footer,
 .tutorial-match .match-footer {
   flex: 0 0 auto !important;
   flex-shrink: 0 !important;
-  position: fixed;
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(520px, calc(100% - 24px));
-  bottom: calc(var(--home-nav-offset, 56px) + 8px);
-  z-index: 230;
-  margin: 0 !important;
-  padding: 8px 0 0 !important;
-  box-sizing: border-box;
-  background: transparent;
-  pointer-events: none;
-}
-
-body.tutorial-page .match-footer > *,
-.tutorial-match .match-footer > * {
-  pointer-events: auto;
-}
-
-body.tutorial-page .bank-section + .match-footer {
-  padding-top: 8px !important;
-}
-
-/* Reserve the fixed footer’s height inside the flex column */
-body.tutorial-page #match-app::after {
-  content: '';
-  display: block;
-  flex: 0 0 auto;
-  height: calc(clamp(48px, 12vw, 56px) + 16px);
-  pointer-events: none;
+  position: relative;
+  z-index: 8;
+  margin-top: auto !important;
+  padding-top: clamp(8px, 2vh, 16px) !important;
+  padding-bottom: 8px !important;
 }
 
 /* Pre-placed locked tiles stay bright and correct-colored during guidance */
