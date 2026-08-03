@@ -525,24 +525,28 @@ html.reduce-motion .race-round-reveal-card {
 
 .race-coin-flip-legend-item::before {
   content: '';
-  width: 12px;
-  height: 12px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.85);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  background-color: #c5c8cc;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.28);
 }
 
+/* Player 1 = 500-won obverse (crane); player 2 = reverse (500). */
 .race-coin-flip-legend-item--blue::before {
-  background: #2F6FED;
+  background-image: url('../assets/coin-flip/500-front.webp');
 }
 
 .race-coin-flip-legend-item--red::before {
-  background: #E23B3B;
+  background-image: url('../assets/coin-flip/500-back.webp');
 }
 
 .race-coin-flip-coin {
-  width: clamp(88px, 22vw, 120px);
-  height: clamp(88px, 22vw, 120px);
+  width: clamp(96px, 24vw, 132px);
+  height: clamp(96px, 24vw, 132px);
   margin: 0 auto 16px;
   position: relative;
   transform-style: preserve-3d;
@@ -561,23 +565,22 @@ html.reduce-motion .race-round-reveal-card {
   border-radius: 50%;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  border: 4px solid rgba(255, 255, 255, 0.92);
+  background-color: #c5c8cc;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   box-shadow:
-    inset 0 0 0 6px rgba(255, 255, 255, 0.22),
-    0 8px 20px rgba(0, 0, 0, 0.28);
+    0 0 0 1px rgba(255, 255, 255, 0.35),
+    0 10px 24px rgba(0, 0, 0, 0.32);
 }
 
 .race-coin-face--blue {
-  background:
-    radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.45), transparent 42%),
-    linear-gradient(145deg, #5B8FFF 0%, #2F6FED 55%, #1E4FC4 100%);
+  background-image: url('../assets/coin-flip/500-front.webp');
   transform: rotateY(0deg);
 }
 
 .race-coin-face--red {
-  background:
-    radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.4), transparent 42%),
-    linear-gradient(145deg, #FF6B6B 0%, #E23B3B 55%, #B81F1F 100%);
+  background-image: url('../assets/coin-flip/500-back.webp');
   transform: rotateY(180deg);
 }
 
@@ -605,14 +608,10 @@ html.reduce-motion .race-round-reveal-card {
   text-shadow: 0 2px 0 rgba(140, 70, 0, 0.35);
 }
 
-.race-coin-flip-result--blue {
-  color: #5B8FFF;
-  text-shadow: 0 2px 0 rgba(30, 79, 196, 0.35);
-}
-
+.race-coin-flip-result--blue,
 .race-coin-flip-result--red {
-  color: #FF6B6B;
-  text-shadow: 0 2px 0 rgba(184, 31, 31, 0.35);
+  color: #FFD743;
+  text-shadow: 0 2px 0 rgba(140, 70, 0, 0.35);
 }
 
 .race-coin-flip-result.hidden { display: none; }

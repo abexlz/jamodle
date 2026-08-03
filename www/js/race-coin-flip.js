@@ -1,6 +1,7 @@
 /**
  * Coin flip overlay before each Jamo 1v1 round.
- * Blue = player 1, red = player 2.
+ * Uses a Korean 500-won coin: front (crane) = player 1, back (500) = player 2.
+ * CSS class names still use blue/red for the two faces.
  */
 (function (global) {
   'use strict';
