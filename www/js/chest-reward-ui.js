@@ -4,10 +4,35 @@
 (function (global) {
   'use strict';
 
-  const STYLES_HREF = 'css/chest-reward.css?v=6';
+  const STYLES_HREF = 'css/chest-reward.css?v=7';
   const CHEST_CLOSED = 'assets/chests/chest-closed.png';
   const CHEST_OPEN = 'assets/chests/chest-open.png';
   const COIN_SRC = 'assets/coin.png';
+
+  const TIER_ASSETS = {
+    wooden: {
+      closed: 'assets/chests/wooden-closed.png',
+      open: 'assets/chests/wooden-open.png',
+    },
+    original: {
+      closed: CHEST_CLOSED,
+      open: CHEST_OPEN,
+    },
+    mega: {
+      closed: 'assets/chests/mega-closed.png',
+      open: 'assets/chests/mega-open.png',
+    },
+  };
+
+  function resolveChestAssets(opts = {}) {
+    const tier = opts.chestTier && TIER_ASSETS[opts.chestTier]
+      ? TIER_ASSETS[opts.chestTier]
+      : TIER_ASSETS.original;
+    return {
+      closed: opts.closedSrc || tier.closed,
+      open: opts.openSrc || tier.open,
+    };
+  }
 
   const CARD_W = 88;
   const CARD_GAP = 10;
@@ -77,6 +102,10 @@
     [
       CHEST_CLOSED,
       CHEST_OPEN,
+      TIER_ASSETS.wooden.closed,
+      TIER_ASSETS.wooden.open,
+      TIER_ASSETS.mega.closed,
+      TIER_ASSETS.mega.open,
       COIN_SRC,
       ...Object.values(BUFF_ICONS),
     ].forEach((src) => {
@@ -108,6 +137,8 @@
   function buildReelItems(reward) {
     const coins = Math.max(0, Math.floor(Number(reward.coins) || 0));
     const bonusItem = typeof reward.bonusItem === 'string' ? reward.bonusItem : null;
+    const bonusKind = typeof reward.bonusKind === 'string' ? reward.bonusKind : null;
+    const bonusAmount = Math.max(0, Math.floor(Number(reward.bonusAmount) || 0));
     const items = [];
     for (let i = 0; i < REEL_COUNT; i++) {
       if (i === WINNER_INDEX) {
@@ -118,6 +149,27 @@
             tier: 'legendary',
             coins,
             xp: Math.max(0, Math.floor(Number(reward.xp) || 0)),
+            winner: true,
+          });
+        } else if (bonusKind === 'hint') {
+          items.push({
+            kind: 'hint',
+            amount: bonusAmount || 1,
+            tier: 'uncommon',
+            winner: true,
+          });
+        } else if (bonusKind === 'heart') {
+          items.push({
+            kind: 'heart',
+            amount: bonusAmount || 1,
+            tier: 'uncommon',
+            winner: true,
+          });
+        } else if ((reward.xp || 0) > 0 && coins <= 0) {
+          items.push({
+            kind: 'xp',
+            amount: Math.max(0, Math.floor(Number(reward.xp) || 0)),
+            tier: winnerTier(reward.xp || 0),
             winner: true,
           });
         } else {
@@ -176,19 +228,63 @@
     `).join('');
   }
 
-  function buildOverlayHtml(reward) {
+  function buildAmountsHtml(reward) {
     const coinIcon = global.CoinIcon?.html?.('coin-icon coin-icon--lg') || '🪙';
+    const parts = [];
+    if ((reward.coins || 0) > 0) {
+      parts.push(`
+        <div class="chest-reward-coins">
+          <span aria-hidden="true">${coinIcon}</span>
+          <span>+${escapeHtml(String(reward.coins || 0))}</span>
+        </div>
+      `);
+    }
+    if ((reward.xp || 0) > 0) {
+      parts.push(`<div class="chest-reward-xp">+${escapeHtml(String(reward.xp || 0))} XP</div>`);
+    }
+    if (reward.bonusItem) {
+      parts.push(`
+        <div class="chest-reward-bonus">
+          <img class="chest-reward-bonus-img" src="${escapeHtml(BUFF_ICONS[reward.bonusItem] || COIN_SRC)}" alt="" width="36" height="36" decoding="async" draggable="false">
+          <span>${escapeHtml(t(`shop.items.${reward.bonusItem}`) || reward.bonusItem)}</span>
+        </div>
+      `);
+    } else if (reward.bonusKind === 'hint') {
+      parts.push(`
+        <div class="chest-reward-bonus">
+          <span class="chest-reel-emoji" aria-hidden="true">💡</span>
+          <span>+${escapeHtml(String(reward.bonusAmount || 1))} ${escapeHtml(t('quests.reelHint') || 'Hint')}</span>
+        </div>
+      `);
+    } else if (reward.bonusKind === 'heart') {
+      parts.push(`
+        <div class="chest-reward-bonus">
+          <span class="chest-reel-emoji" aria-hidden="true">❤️</span>
+          <span>+${escapeHtml(String(reward.bonusAmount || 1))} ${escapeHtml(t('quests.reelHeart') || 'Life')}</span>
+        </div>
+      `);
+    } else if (reward.prizeLabel && !(reward.coins || reward.xp)) {
+      parts.push(`<div class="chest-reward-xp">${escapeHtml(reward.prizeLabel)}</div>`);
+    }
+    if (!parts.length) {
+      parts.push(`<div class="chest-reward-xp">${escapeHtml(reward.prizeLabel || t('quests.chestOpened'))}</div>`);
+    }
+    return parts.join('');
+  }
+
+  function buildOverlayHtml(reward, assets) {
     const items = buildReelItems(reward);
+    const title = reward.title || t('quests.chestTitle');
     return `
       <div class="chest-reward-stage">
-        <h2 class="chest-reward-title">${escapeHtml(t('quests.chestTitle'))}</h2>
+        <h2 class="chest-reward-title">${escapeHtml(title)}</h2>
         <p class="chest-reward-hint" id="chest-reward-hint">${escapeHtml(t('quests.chestTap'))}</p>
 
         <button type="button" class="chest-reward-chest-wrap no-press is-idle" id="chest-reward-tap"
           aria-label="${escapeHtml(t('quests.chestTap'))}">
           <span class="chest-reward-glow" aria-hidden="true"></span>
-          <img class="chest-reward-img chest-reward-img--closed" src="${CHEST_CLOSED}" alt="" draggable="false">
-          <img class="chest-reward-img chest-reward-img--open" src="${CHEST_OPEN}" alt="" draggable="false">
+          <img class="chest-reward-img chest-reward-img--closed" src="${escapeHtml(assets.closed)}" alt="" draggable="false">
+          <img class="chest-reward-img chest-reward-img--open" src="${escapeHtml(assets.open)}" alt="" draggable="false">
           <span class="chest-reward-sparkles" aria-hidden="true">
             <span class="chest-reward-sparkle"></span>
             <span class="chest-reward-sparkle"></span>
@@ -211,17 +307,7 @@
         </div>
 
         <div class="chest-reward-amounts" id="chest-reward-amounts" aria-live="polite">
-          <div class="chest-reward-coins">
-            <span aria-hidden="true">${coinIcon}</span>
-            <span>+${escapeHtml(String(reward.coins || 0))}</span>
-          </div>
-          <div class="chest-reward-xp">+${escapeHtml(String(reward.xp || 0))} XP</div>
-          ${reward.bonusItem ? `
-            <div class="chest-reward-bonus">
-              <img class="chest-reward-bonus-img" src="${escapeHtml(BUFF_ICONS[reward.bonusItem] || COIN_SRC)}" alt="" width="36" height="36" decoding="async" draggable="false">
-              <span>${escapeHtml(t(`shop.items.${reward.bonusItem}`) || reward.bonusItem)}</span>
-            </div>
-          ` : ''}
+          ${buildAmountsHtml(reward)}
         </div>
         <button type="button" class="chest-reward-continue" id="chest-reward-continue">
           ${escapeHtml(t('quests.chestContinue'))}
@@ -236,12 +322,15 @@
       || document.querySelector('.menu-hud-coins')
       || document.querySelector('[data-player-hud="compact"] .menu-hud-coins')
       || document.querySelector('.player-hud-coins')
+      || document.querySelector('.chest-room-balance')
       || document.getElementById('player-hud')
     );
   }
 
   function getHudCoinValueEl(hud) {
-    return hud?.querySelector?.('.menu-hud-coins-value') || null;
+    return hud?.querySelector?.('.menu-hud-coins-value')
+      || hud?.querySelector?.('#chest-room-coins')
+      || null;
   }
 
   function getElCenter(el) {
@@ -528,15 +617,27 @@
   }
 
   /**
-   * @param {{ coins: number, xp?: number, coinsBefore?: number, autoOpen?: boolean, onOpenStart?: Function, onComplete?: Function }} opts
+   * @param {{
+   *   coins: number, xp?: number, coinsBefore?: number, autoOpen?: boolean,
+   *   bonusItem?: string, bonusKind?: string, bonusAmount?: number,
+   *   prizeLabel?: string, title?: string, chestTier?: string,
+   *   closedSrc?: string, openSrc?: string,
+   *   onOpenStart?: Function, onComplete?: Function
+   * }} opts
    */
   function show(opts = {}) {
     ensureStyles();
     preloadImages();
 
+    const assets = resolveChestAssets(opts);
     const reward = {
       coins: Math.max(0, Math.floor(Number(opts.coins) || 0)),
       xp: Math.max(0, Math.floor(Number(opts.xp) || 0)),
+      bonusItem: typeof opts.bonusItem === 'string' ? opts.bonusItem : null,
+      bonusKind: typeof opts.bonusKind === 'string' ? opts.bonusKind : null,
+      bonusAmount: Math.max(0, Math.floor(Number(opts.bonusAmount) || 0)),
+      prizeLabel: opts.prizeLabel || '',
+      title: opts.title || '',
     };
 
     const profile = global.ProfileService?.loadProfile?.();
@@ -555,8 +656,8 @@
     overlay.className = 'chest-reward-overlay';
     overlay.setAttribute('role', 'dialog');
     overlay.setAttribute('aria-modal', 'true');
-    overlay.setAttribute('aria-label', t('quests.chestTitle'));
-    overlay.innerHTML = buildOverlayHtml(reward);
+    overlay.setAttribute('aria-label', reward.title || t('quests.chestTitle'));
+    overlay.innerHTML = buildOverlayHtml(reward, assets);
 
     document.body.appendChild(overlay);
     document.body.classList.add('chest-reward-open');

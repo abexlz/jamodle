@@ -14,9 +14,15 @@ global.ProfileService = {
 
 global.PlayerHud = { refresh: () => {} };
 global.HintTokens = { grant: () => {} };
+global.BuffService = {
+  scaleCoins: (n) => n,
+  scaleXp: (n) => n,
+  activate: () => {},
+};
 global.document = { getElementById: () => null };
 
 require('../www/js/quest-service.js');
+require('../www/js/chest-room-service.js');
 require('../www/js/wheel-service.js');
 
 const QS = global.QuestService;

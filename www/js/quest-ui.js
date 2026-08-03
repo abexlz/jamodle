@@ -85,16 +85,18 @@
   function renderWheelChip(snap) {
     const wheelReady = QS()?.isDailyWheelAvailable?.(global.ProfileService?.loadProfile?.());
     const wheelClaimed = snap.dailyWheelClaimed;
-    const href = wheelReady ? 'wheel.html?spin=1' : 'wheel.html';
+    const href = wheelReady ? 'chest-room.html?claim=1' : 'chest-room.html';
     const label = wheelClaimed
       ? t('wheel.claimed')
       : wheelReady
-        ? t('wheel.spin')
+        ? t('chestRoom.openFree')
         : t('wheel.spinShort');
     const stateClass = wheelClaimed ? ' is-claimed' : (wheelReady ? ' is-ready' : '');
     return `
       <a href="${escapeHtml(href)}" class="quest-wheel-chip${stateClass}" id="quest-wheel-chip">
-        <span class="quest-wheel-chip-icon" aria-hidden="true">🎡</span>
+        <span class="quest-wheel-chip-icon quest-chest-chip-icon" aria-hidden="true">
+          <img src="assets/chests/mega-closed.png" alt="" width="22" height="22" decoding="async" draggable="false">
+        </span>
         <span class="quest-wheel-chip-label">${escapeHtml(label)}</span>
       </a>
     `;
@@ -229,7 +231,9 @@
       global.ChestRewardUI.show({
         coins: pendingChest.coins,
         xp: pendingChest.xp,
+        bonusItem: pendingChest.bonusItem || null,
         coinsBefore,
+        chestTier: pendingChest.chestTier || 'original',
         autoOpen: false,
         onOpenStart: () => {
           QS()?.redeemPendingChest?.(pendingChest.id);

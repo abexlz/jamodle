@@ -1190,7 +1190,7 @@
     "title": "Quests",
     "subtitle": "Finish quests to earn XP and coins automatically.",
     "dailyTitle": "Daily quests",
-    "dailyHint": "Complete all 3 for a bonus wheel spin! (KST)",
+    "dailyHint": "Complete all 3 for a free Mega Box! (KST)",
     "scopeDaily": "Daily",
     "scopeWeekly": "Weekly",
     "refreshIn": "Refreshes in",
@@ -1300,18 +1300,18 @@
     }
   },
   "wheel": {
-    "title": "Bonus wheel!",
-    "pageTitle": "Daily Bonus Wheel",
-    "pageNav": "Daily bonus wheel",
-    "subtitle": "All daily quests done — spin for a prize!",
-    "bonusTitle": "Daily bonus wheel",
-    "lockedDesc": "Complete all {{total}} daily quests to unlock ({{done}}/{{total}} done)",
-    "readyDesc": "All dailies complete — spin the wheel!",
-    "claimedDesc": "You already spun today. Come back tomorrow!",
-    "spin": "Spin!",
-    "spinShort": "SPIN!",
+    "title": "Chest Room",
+    "pageTitle": "Chest Room",
+    "pageNav": "Chest Room",
+    "subtitle": "Buy chests or claim your free Mega Box!",
+    "bonusTitle": "Free Mega Box",
+    "lockedDesc": "Complete all {{total}} daily quests for a free Mega Box ({{done}}/{{total}} done)",
+    "readyDesc": "All dailies complete — open your free Mega Box!",
+    "claimedDesc": "Free Mega Box already claimed today. Come back tomorrow!",
+    "spin": "Open!",
+    "spinShort": "BOX",
     "locked": "Locked",
-    "claimed": "Spun!",
+    "claimed": "Claimed!",
     "wonTitle": "You won!",
     "continue": "Awesome!",
     "backHome": "← Home",
@@ -1326,6 +1326,63 @@
       "xp-40": "+40 XP",
       "hint-1": "+1 hint token",
       "extra-1": "+1 extra-guess token"
+    }
+  },
+  "chestRoom": {
+    "pageTitle": "Chest Room",
+    "pageNav": "Chest Room",
+    "backHome": "← Home",
+    "goQuests": "View daily quests →",
+    "lockedDesc": "Complete all {{total}} daily quests for a free Mega Box ({{done}}/{{total}} done)",
+    "readyDesc": "All dailies complete — claim your free Mega Box!",
+    "claimedDesc": "Free Mega Box claimed today. You can still buy chests!",
+    "free": "FREE",
+    "freeBadge": "FREE",
+    "openFree": "Open free!",
+    "buy": "Buy",
+    "needCoins": "Need {{price}} coins for that chest.",
+    "freeMegaTitle": "Free Mega Box!",
+    "tiers": {
+      "wooden": {
+        "name": "Wooden Box",
+        "desc": "Small coin & XP prizes",
+        "opened": "Wooden Box"
+      },
+      "original": {
+        "name": "Original Chest",
+        "desc": "Balanced rewards & tokens",
+        "opened": "Original Chest"
+      },
+      "mega": {
+        "name": "Mega Box",
+        "desc": "Best prizes — gems, boosts & more",
+        "opened": "Mega Box"
+      }
+    },
+    "prizes": {
+      "coins-3": "+3 coins",
+      "coins-5": "+5 coins",
+      "coins-8": "+8 coins",
+      "coins-12": "+12 coins",
+      "coins-15": "+15 coins",
+      "coins-20": "+20 coins",
+      "coins-25": "+25 coins",
+      "coins-40": "+40 coins",
+      "coins-50": "+50 coins",
+      "coins-60": "+60 coins",
+      "coins-100": "+100 coins",
+      "xp-10": "+10 XP",
+      "xp-15": "+15 XP",
+      "xp-20": "+20 XP",
+      "xp-30": "+30 XP",
+      "xp-40": "+40 XP",
+      "xp-50": "+50 XP",
+      "xp-80": "+80 XP",
+      "hint-1": "+1 hint token",
+      "hint-2": "+2 hint tokens",
+      "extra-1": "+1 extra-guess token",
+      "buff-xp": "2× XP boost",
+      "buff-coin": "2× coin boost"
     }
   },
   "dailyGift": {

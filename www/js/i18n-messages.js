@@ -1194,7 +1194,7 @@
       "title": "Quests",
       "subtitle": "Finish quests to earn XP and coins automatically.",
       "dailyTitle": "Daily quests",
-      "dailyHint": "Complete all 3 for a bonus wheel spin! (KST)",
+      "dailyHint": "Complete all 3 for a free Mega Box! (KST)",
       "scopeDaily": "Daily",
       "scopeWeekly": "Weekly",
       "refreshIn": "Refreshes in",
@@ -1304,18 +1304,18 @@
       }
     },
     "wheel": {
-      "title": "Bonus wheel!",
-      "pageTitle": "Daily Bonus Wheel",
-      "pageNav": "Daily bonus wheel",
-      "subtitle": "All daily quests done — spin for a prize!",
-      "bonusTitle": "Daily bonus wheel",
-      "lockedDesc": "Complete all {{total}} daily quests to unlock ({{done}}/{{total}} done)",
-      "readyDesc": "All dailies complete — spin the wheel!",
-      "claimedDesc": "You already spun today. Come back tomorrow!",
-      "spin": "Spin!",
-      "spinShort": "SPIN!",
+      "title": "Chest Room",
+      "pageTitle": "Chest Room",
+      "pageNav": "Chest Room",
+      "subtitle": "Buy chests or claim your free Mega Box!",
+      "bonusTitle": "Free Mega Box",
+      "lockedDesc": "Complete all {{total}} daily quests for a free Mega Box ({{done}}/{{total}} done)",
+      "readyDesc": "All dailies complete — open your free Mega Box!",
+      "claimedDesc": "Free Mega Box already claimed today. Come back tomorrow!",
+      "spin": "Open!",
+      "spinShort": "BOX",
       "locked": "Locked",
-      "claimed": "Spun!",
+      "claimed": "Claimed!",
       "wonTitle": "You won!",
       "continue": "Awesome!",
       "backHome": "← Home",
@@ -1330,6 +1330,63 @@
         "xp-40": "+40 XP",
         "hint-1": "+1 hint token",
         "extra-1": "+1 extra-guess token"
+      }
+    },
+    "chestRoom": {
+      "pageTitle": "Chest Room",
+      "pageNav": "Chest Room",
+      "backHome": "← Home",
+      "goQuests": "View daily quests →",
+      "lockedDesc": "Complete all {{total}} daily quests for a free Mega Box ({{done}}/{{total}} done)",
+      "readyDesc": "All dailies complete — claim your free Mega Box!",
+      "claimedDesc": "Free Mega Box claimed today. You can still buy chests!",
+      "free": "FREE",
+      "freeBadge": "FREE",
+      "openFree": "Open free!",
+      "buy": "Buy",
+      "needCoins": "Need {{price}} coins for that chest.",
+      "freeMegaTitle": "Free Mega Box!",
+      "tiers": {
+        "wooden": {
+          "name": "Wooden Box",
+          "desc": "Small coin & XP prizes",
+          "opened": "Wooden Box"
+        },
+        "original": {
+          "name": "Original Chest",
+          "desc": "Balanced rewards & tokens",
+          "opened": "Original Chest"
+        },
+        "mega": {
+          "name": "Mega Box",
+          "desc": "Best prizes — gems, boosts & more",
+          "opened": "Mega Box"
+        }
+      },
+      "prizes": {
+        "coins-3": "+3 coins",
+        "coins-5": "+5 coins",
+        "coins-8": "+8 coins",
+        "coins-12": "+12 coins",
+        "coins-15": "+15 coins",
+        "coins-20": "+20 coins",
+        "coins-25": "+25 coins",
+        "coins-40": "+40 coins",
+        "coins-50": "+50 coins",
+        "coins-60": "+60 coins",
+        "coins-100": "+100 coins",
+        "xp-10": "+10 XP",
+        "xp-15": "+15 XP",
+        "xp-20": "+20 XP",
+        "xp-30": "+30 XP",
+        "xp-40": "+40 XP",
+        "xp-50": "+50 XP",
+        "xp-80": "+80 XP",
+        "hint-1": "+1 hint token",
+        "hint-2": "+2 hint tokens",
+        "extra-1": "+1 extra-guess token",
+        "buff-xp": "2× XP boost",
+        "buff-coin": "2× coin boost"
       }
     },
     "dailyGift": {
@@ -2706,7 +2763,7 @@
       "title": "퀘스트",
       "subtitle": "퀘스트를 완료하면 XP와 코인을 자동으로 받아요.",
       "dailyTitle": "일일 퀘스트",
-      "dailyHint": "3개를 모두 완료하면 보너스 룰렛! (한국 시간)",
+      "dailyHint": "3개를 모두 완료하면 메가 박스 무료! (한국 시간)",
       "scopeDaily": "일일",
       "scopeWeekly": "주간",
       "refreshIn": "갱신까지",
@@ -2816,16 +2873,16 @@
       }
     },
     "wheel": {
-      "title": "보너스 룰렛!",
-      "pageTitle": "일일 보너스 룰렛",
-      "pageNav": "일일 보너스 룰렛",
-      "subtitle": "일일 퀘스트 완료 — 돌려서 보상 받기!",
-      "bonusTitle": "일일 보너스 룰렛",
-      "lockedDesc": "일일 퀘스트 {{total}}개를 모두 완료하면 잠금 해제 ({{done}}/{{total}})",
-      "readyDesc": "일일 퀘스트 완료 — 룰렛을 돌려보세요!",
-      "claimedDesc": "오늘은 이미 돌렸어요. 내일 다시!",
-      "spin": "돌리기!",
-      "spinShort": "SPIN!",
+      "title": "상자방",
+      "pageTitle": "상자방",
+      "pageNav": "상자방",
+      "subtitle": "상자를 사거나 무료 메가 박스를 받으세요!",
+      "bonusTitle": "무료 메가 박스",
+      "lockedDesc": "일일 퀘스트 {{total}}개를 모두 완료하면 메가 박스 무료 ({{done}}/{{total}})",
+      "readyDesc": "일일 퀘스트 완료 — 무료 메가 박스를 여세요!",
+      "claimedDesc": "오늘 무료 메가 박스는 이미 받았어요. 내일 다시!",
+      "spin": "열기!",
+      "spinShort": "BOX",
       "locked": "잠김",
       "claimed": "완료!",
       "wonTitle": "당첨!",
@@ -2842,6 +2899,63 @@
         "xp-40": "+40 XP",
         "hint-1": "힌트 토큰 +1",
         "extra-1": "추가 시도권 +1"
+      }
+    },
+    "chestRoom": {
+      "pageTitle": "상자방",
+      "pageNav": "상자방",
+      "backHome": "← 홈",
+      "goQuests": "일일 퀘스트 보기 →",
+      "lockedDesc": "일일 퀘스트 {{total}}개를 모두 완료하면 메가 박스 무료 ({{done}}/{{total}})",
+      "readyDesc": "일일 퀘스트 완료 — 무료 메가 박스를 받으세요!",
+      "claimedDesc": "오늘 무료 메가 박스는 받았어요. 상자는 계속 살 수 있어요!",
+      "free": "무료",
+      "freeBadge": "무료",
+      "openFree": "무료 열기!",
+      "buy": "구매",
+      "needCoins": "이 상자는 {{price}} 코인이 필요해요.",
+      "freeMegaTitle": "무료 메가 박스!",
+      "tiers": {
+        "wooden": {
+          "name": "나무 상자",
+          "desc": "작은 코인·XP 보상",
+          "opened": "나무 상자"
+        },
+        "original": {
+          "name": "오리지널 상자",
+          "desc": "균형 잡힌 보상·토큰",
+          "opened": "오리지널 상자"
+        },
+        "mega": {
+          "name": "메가 박스",
+          "desc": "최고 보상 — 보석·부스트 등",
+          "opened": "메가 박스"
+        }
+      },
+      "prizes": {
+        "coins-3": "+3 코인",
+        "coins-5": "+5 코인",
+        "coins-8": "+8 코인",
+        "coins-12": "+12 코인",
+        "coins-15": "+15 코인",
+        "coins-20": "+20 코인",
+        "coins-25": "+25 코인",
+        "coins-40": "+40 코인",
+        "coins-50": "+50 코인",
+        "coins-60": "+60 코인",
+        "coins-100": "+100 코인",
+        "xp-10": "+10 XP",
+        "xp-15": "+15 XP",
+        "xp-20": "+20 XP",
+        "xp-30": "+30 XP",
+        "xp-40": "+40 XP",
+        "xp-50": "+50 XP",
+        "xp-80": "+80 XP",
+        "hint-1": "힌트 토큰 +1",
+        "hint-2": "힌트 토큰 +2",
+        "extra-1": "추가 시도권 +1",
+        "buff-xp": "XP 2배 부스트",
+        "buff-coin": "코인 2배 부스트"
       }
     },
     "dailyGift": {
