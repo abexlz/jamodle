@@ -191,6 +191,51 @@
   animation: chestShake 0.55s cubic-bezier(0.36, 0.07, 0.19, 0.97);
 }
 
+.chest-reward-chest-wrap.is-shake-1 {
+  animation-name: chestShakeSoft;
+  animation-duration: 0.5s;
+}
+
+.chest-reward-chest-wrap.is-shake-2 {
+  animation-name: chestShake;
+  animation-duration: 0.55s;
+}
+
+.chest-reward-chest-wrap.is-shake-3 {
+  animation-name: chestShakeHard;
+  animation-duration: 0.7s;
+}
+
+.chest-tap-progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  min-height: 12px;
+}
+
+.chest-tap-progress[hidden] {
+  display: none !important;
+}
+
+.chest-tap-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+  transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+
+.chest-tap-dot.is-filled {
+  background: #ffe566;
+  border-color: #fff;
+  transform: scale(1.15);
+  box-shadow: 0 0 8px rgba(255, 229, 102, 0.65);
+}
+
 .chest-reward-chest-wrap.is-burst .chest-reward-img--open {
   animation: chestOpenPop 0.45s cubic-bezier(0.22, 1.5, 0.36, 1);
 }
@@ -549,6 +594,24 @@
   60% { transform: translateX(8px) rotate(3deg); }
   75% { transform: translateX(-4px) rotate(-1.5deg); }
   90% { transform: translateX(3px) rotate(1deg); }
+}
+
+@keyframes chestShakeSoft {
+  0%, 100% { transform: translateX(0) rotate(0deg) scale(1); }
+  25% { transform: translateX(-5px) rotate(-2deg) scale(1.02); }
+  50% { transform: translateX(5px) rotate(2deg) scale(1.02); }
+  75% { transform: translateX(-3px) rotate(-1deg) scale(1.01); }
+}
+
+@keyframes chestShakeHard {
+  0%, 100% { transform: translateX(0) rotate(0deg) scale(1); }
+  10% { transform: translateX(-14px) rotate(-7deg) scale(1.04); }
+  22% { transform: translateX(14px) rotate(7deg) scale(1.05); }
+  34% { transform: translateX(-12px) rotate(-6deg) scale(1.04); }
+  46% { transform: translateX(12px) rotate(6deg) scale(1.05); }
+  58% { transform: translateX(-8px) rotate(-3deg) scale(1.03); }
+  70% { transform: translateX(8px) rotate(3deg) scale(1.03); }
+  85% { transform: translateX(-3px) rotate(-1deg) scale(1.01); }
 }
 
 @keyframes chestOpenPop {

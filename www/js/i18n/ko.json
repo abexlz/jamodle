@@ -1204,9 +1204,11 @@
     "empty": "퀘스트가 없어요.",
     "rewardToast": "퀘스트 완료! +{{xp}} XP · 🪙 {{coins}}",
     "chestTitle": "보물 상자!",
-    "chestTap": "탭해서 열기",
-    "chestOpening": "여는 중…",
-    "chestSpinning": "여는 중…",
+      "chestTap": "탭해서 열기",
+      "chestTapMulti": "{{count}}번 탭해서 열기",
+      "chestTapAgain": "계속 탭! ({{current}}/{{total}})",
+      "chestOpening": "여는 중…",
+      "chestSpinning": "여는 중…",
     "chestOpened": "상자 열림",
     "chestContinue": "좋아!",
     "chestReward": "상자 보상",
@@ -1381,8 +1383,10 @@
       "hint-1": "힌트 토큰 +1",
       "hint-2": "힌트 토큰 +2",
       "extra-1": "추가 시도권 +1",
+      "extra-2": "추가 시도권 +2",
       "buff-xp": "XP 2배 부스트",
-      "buff-coin": "코인 2배 부스트"
+      "buff-coin": "코인 2배 부스트",
+      "buff-daily": "7일 일일 잠금해제"
     }
   },
   "dailyGift": {

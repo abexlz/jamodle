@@ -4,7 +4,7 @@
 (function (global) {
   'use strict';
 
-  const STYLES_HREF = 'css/chest-reward.css?v=7';
+  const STYLES_HREF = 'css/chest-reward.css?v=8';
   const CHEST_CLOSED = 'assets/chests/chest-closed.png';
   const CHEST_OPEN = 'assets/chests/chest-open.png';
   const COIN_SRC = 'assets/coin.png';
@@ -24,6 +24,13 @@
     },
   };
 
+  /** How many taps before the chest fully opens. */
+  const TIER_TAP_COUNTS = {
+    wooden: 2,
+    original: 3,
+    mega: 4,
+  };
+
   function resolveChestAssets(opts = {}) {
     const tier = opts.chestTier && TIER_ASSETS[opts.chestTier]
       ? TIER_ASSETS[opts.chestTier]
@@ -32,6 +39,17 @@
       closed: opts.closedSrc || tier.closed,
       open: opts.openSrc || tier.open,
     };
+  }
+
+  function resolveTapCount(opts = {}) {
+    if (opts.tapCount != null) {
+      return Math.max(1, Math.floor(Number(opts.tapCount) || 1));
+    }
+    if (reduceMotion()) return 1;
+    const tier = opts.chestTier && TIER_TAP_COUNTS[opts.chestTier]
+      ? opts.chestTier
+      : 'original';
+    return TIER_TAP_COUNTS[tier] || 3;
   }
 
   const CARD_W = 88;
@@ -272,13 +290,19 @@
     return parts.join('');
   }
 
-  function buildOverlayHtml(reward, assets) {
+  function buildOverlayHtml(reward, assets, tapTotal) {
     const items = buildReelItems(reward);
     const title = reward.title || t('quests.chestTitle');
+    const dots = Array.from({ length: Math.max(1, tapTotal) }, (_, i) => (
+      `<span class="chest-tap-dot" data-tap-dot="${i}" aria-hidden="true"></span>`
+    )).join('');
     return `
       <div class="chest-reward-stage">
         <h2 class="chest-reward-title">${escapeHtml(title)}</h2>
         <p class="chest-reward-hint" id="chest-reward-hint">${escapeHtml(t('quests.chestTap'))}</p>
+        <div class="chest-tap-progress" id="chest-tap-progress" aria-hidden="true">
+          ${dots}
+        </div>
 
         <button type="button" class="chest-reward-chest-wrap no-press is-idle" id="chest-reward-tap"
           aria-label="${escapeHtml(t('quests.chestTap'))}">
@@ -546,6 +570,47 @@
     }, 320);
   }
 
+  function updateTapHint(overlay, tapsDone, tapTotal) {
+    const hint = overlay.querySelector('#chest-reward-hint');
+    const progress = overlay.querySelector('#chest-tap-progress');
+    const remaining = Math.max(0, tapTotal - tapsDone);
+    if (hint) {
+      if (tapsDone <= 0) {
+        hint.textContent = tapTotal > 1
+          ? t('quests.chestTapMulti', { count: tapTotal })
+          : t('quests.chestTap');
+      } else if (remaining > 0) {
+        hint.textContent = t('quests.chestTapAgain', {
+          current: tapsDone,
+          total: tapTotal,
+        });
+      } else {
+        hint.textContent = t('quests.chestOpening');
+      }
+    }
+    progress?.querySelectorAll('[data-tap-dot]').forEach((dot) => {
+      const idx = Number(dot.getAttribute('data-tap-dot')) || 0;
+      dot.classList.toggle('is-filled', idx < tapsDone);
+    });
+    if (progress) {
+      progress.hidden = tapTotal <= 1;
+      progress.setAttribute('aria-hidden', tapTotal <= 1 ? 'true' : 'false');
+    }
+  }
+
+  function playTapShake(chestBtn, intensity) {
+    if (!chestBtn) return;
+    const level = Math.max(1, Math.min(3, intensity));
+    chestBtn.classList.remove('is-idle', 'is-shake', 'is-shake-1', 'is-shake-2', 'is-shake-3');
+    void chestBtn.offsetWidth;
+    chestBtn.classList.add('is-shake', `is-shake-${level}`);
+    global.SoundEffects?.chestShake?.(level === 1);
+    global.setTimeout(() => {
+      chestBtn.classList.remove('is-shake', 'is-shake-1', 'is-shake-2', 'is-shake-3');
+      if (!opening) chestBtn.classList.add('is-idle');
+    }, level >= 3 ? 720 : 560);
+  }
+
   async function openChest(overlay, reward, coinsBefore, onComplete, onOpenStart) {
     if (opening || overlay.classList.contains('is-opened') || overlay.classList.contains('is-spinning')) {
       return;
@@ -561,16 +626,18 @@
     const chestBtn = overlay.querySelector('#chest-reward-tap');
     const hint = overlay.querySelector('#chest-reward-hint');
     const reel = overlay.querySelector('#chest-reel');
+    const progress = overlay.querySelector('#chest-tap-progress');
 
-    chestBtn?.classList.remove('is-idle');
-    chestBtn?.classList.add('is-shake');
+    chestBtn?.classList.remove('is-idle', 'is-shake', 'is-shake-1', 'is-shake-2', 'is-shake-3');
+    chestBtn?.classList.add('is-shake', 'is-shake-3');
     global.SoundEffects?.chestShake?.();
 
     await wait(reduceMotion() ? 60 : 480);
 
-    chestBtn?.classList.remove('is-shake');
+    chestBtn?.classList.remove('is-shake', 'is-shake-3');
     chestBtn?.classList.add('is-burst');
     overlay.classList.add('is-chest-open');
+    if (progress) progress.hidden = true;
     global.SoundEffects?.chestOpen?.();
 
     await wait(reduceMotion() ? 80 : 420);
@@ -621,7 +688,7 @@
    *   coins: number, xp?: number, coinsBefore?: number, autoOpen?: boolean,
    *   bonusItem?: string, bonusKind?: string, bonusAmount?: number,
    *   prizeLabel?: string, title?: string, chestTier?: string,
-   *   closedSrc?: string, openSrc?: string,
+   *   closedSrc?: string, openSrc?: string, tapCount?: number,
    *   onOpenStart?: Function, onComplete?: Function
    * }} opts
    */
@@ -630,6 +697,7 @@
     preloadImages();
 
     const assets = resolveChestAssets(opts);
+    const tapTotal = resolveTapCount(opts);
     const reward = {
       coins: Math.max(0, Math.floor(Number(opts.coins) || 0)),
       xp: Math.max(0, Math.floor(Number(opts.xp) || 0)),
@@ -657,7 +725,7 @@
     overlay.setAttribute('role', 'dialog');
     overlay.setAttribute('aria-modal', 'true');
     overlay.setAttribute('aria-label', reward.title || t('quests.chestTitle'));
-    overlay.innerHTML = buildOverlayHtml(reward, assets);
+    overlay.innerHTML = buildOverlayHtml(reward, assets, tapTotal);
 
     document.body.appendChild(overlay);
     document.body.classList.add('chest-reward-open');
@@ -670,34 +738,47 @@
     global.SoundEffects?.chestAppear?.();
 
     const chestBtn = overlay.querySelector('#chest-reward-tap');
-    const onOpen = () => openChest(
-      overlay,
-      reward,
-      coinsBefore,
-      opts.onComplete,
-      opts.onOpenStart,
-    );
-    chestBtn?.addEventListener('click', onOpen, { once: true });
+    let tapsDone = 0;
+    let tapBusy = false;
+    updateTapHint(overlay, 0, tapTotal);
 
-    // Soft idle shake cue while waiting for tap
+    const onTap = () => {
+      if (opening || tapBusy || overlay.classList.contains('is-opened')
+        || overlay.classList.contains('is-spinning')) {
+        return;
+      }
+      tapsDone += 1;
+      updateTapHint(overlay, tapsDone, tapTotal);
+
+      if (tapsDone < tapTotal) {
+        tapBusy = true;
+        const intensity = Math.min(3, tapsDone);
+        playTapShake(chestBtn, intensity);
+        global.setTimeout(() => { tapBusy = false; }, intensity >= 3 ? 420 : 320);
+        return;
+      }
+
+      chestBtn?.removeEventListener('click', onTap);
+      openChest(
+        overlay,
+        reward,
+        coinsBefore,
+        opts.onComplete,
+        opts.onOpenStart,
+      );
+    };
+    chestBtn?.addEventListener('click', onTap);
+
+    // Soft idle shake cue while waiting for first taps
     if (!reduceMotion()) {
       const idleShake = global.setInterval(() => {
-        if (!activeOverlay || opening || overlay.classList.contains('is-spinning')
+        if (!activeOverlay || opening || tapBusy || overlay.classList.contains('is-spinning')
           || overlay.classList.contains('is-opened')) {
           global.clearInterval(idleShake);
           return;
         }
-        chestBtn?.classList.remove('is-idle');
-        void chestBtn?.offsetWidth;
-        chestBtn?.classList.add('is-shake');
-        global.SoundEffects?.chestShake?.(true);
-        global.setTimeout(() => {
-          chestBtn?.classList.remove('is-shake');
-          if (!opening && !overlay.classList.contains('is-opened')) {
-            chestBtn?.classList.add('is-idle');
-          }
-        }, 560);
-      }, 2400);
+        playTapShake(chestBtn, 1);
+      }, 2600);
     }
 
     return overlay;
@@ -708,5 +789,6 @@
   global.ChestRewardUI = {
     show,
     preloadImages,
+    TIER_TAP_COUNTS,
   };
 })(typeof window !== 'undefined' ? window : globalThis);

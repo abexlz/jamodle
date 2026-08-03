@@ -1204,9 +1204,11 @@
     "empty": "No quests right now.",
     "rewardToast": "Quest complete! +{{xp}} XP · 🪙 {{coins}}",
     "chestTitle": "Treasure Chest!",
-    "chestTap": "Tap to open",
-    "chestOpening": "Opening…",
-    "chestSpinning": "Opening…",
+      "chestTap": "Tap to open",
+      "chestTapMulti": "Tap {{count}} times to open",
+      "chestTapAgain": "Keep tapping! ({{current}}/{{total}})",
+      "chestOpening": "Opening…",
+      "chestSpinning": "Opening…",
     "chestOpened": "Chest opened",
     "chestContinue": "Nice!",
     "chestReward": "Chest reward",
@@ -1381,8 +1383,10 @@
       "hint-1": "+1 hint token",
       "hint-2": "+2 hint tokens",
       "extra-1": "+1 extra-guess token",
+      "extra-2": "+2 extra-guess tokens",
       "buff-xp": "2× XP boost",
-      "buff-coin": "2× coin boost"
+      "buff-coin": "2× coin boost",
+      "buff-daily": "7-day daily unlock"
     }
   },
   "dailyGift": {

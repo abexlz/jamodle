@@ -1209,6 +1209,8 @@
       "rewardToast": "Quest complete! +{{xp}} XP · 🪙 {{coins}}",
       "chestTitle": "Treasure Chest!",
       "chestTap": "Tap to open",
+      "chestTapMulti": "Tap {{count}} times to open",
+      "chestTapAgain": "Keep tapping! ({{current}}/{{total}})",
       "chestOpening": "Opening…",
       "chestSpinning": "Opening…",
       "chestOpened": "Chest opened",
@@ -1385,8 +1387,10 @@
         "hint-1": "+1 hint token",
         "hint-2": "+2 hint tokens",
         "extra-1": "+1 extra-guess token",
+        "extra-2": "+2 extra-guess tokens",
         "buff-xp": "2× XP boost",
-        "buff-coin": "2× coin boost"
+        "buff-coin": "2× coin boost",
+        "buff-daily": "7-day daily unlock"
       }
     },
     "dailyGift": {
@@ -2778,6 +2782,8 @@
       "rewardToast": "퀘스트 완료! +{{xp}} XP · 🪙 {{coins}}",
       "chestTitle": "보물 상자!",
       "chestTap": "탭해서 열기",
+      "chestTapMulti": "{{count}}번 탭해서 열기",
+      "chestTapAgain": "계속 탭! ({{current}}/{{total}})",
       "chestOpening": "여는 중…",
       "chestSpinning": "여는 중…",
       "chestOpened": "상자 열림",
@@ -2954,8 +2960,10 @@
         "hint-1": "힌트 토큰 +1",
         "hint-2": "힌트 토큰 +2",
         "extra-1": "추가 시도권 +1",
+        "extra-2": "추가 시도권 +2",
         "buff-xp": "XP 2배 부스트",
-        "buff-coin": "코인 2배 부스트"
+        "buff-coin": "코인 2배 부스트",
+        "buff-daily": "7일 일일 잠금해제"
       }
     },
     "dailyGift": {
