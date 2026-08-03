@@ -321,17 +321,15 @@
     `;
   }
 
-  function renderHangulDleTitleLogo(altText) {
-    const alt = escapeHtml(altText || 'Hangul-dle');
-    return `<img class="hangul-dle-title-img" src="assets/hangul-dle-title.png" alt="${alt}" draggable="false">`;
-  }
-
   function renderWordChainTitle(text) {
     const raw = String(text || '').trim();
     if (!raw) return '';
 
-    if (/^hangul[-\s]?dle$/i.test(raw) || raw === '한글놀이') {
-      return renderHangulDleTitleLogo(raw);
+    if (/^hangul[-\s]?dle$/i.test(raw)) {
+      return '<span class="menu-title-line menu-title-line1">Hangul</span><span class="menu-title-line menu-title-line2">-dle</span>';
+    }
+    if (raw === '한글놀이') {
+      return '<span class="menu-title-line menu-title-line1">한글</span><span class="menu-title-line menu-title-line2">놀이</span>';
     }
 
     const hyphenSplit = raw.match(/^(.+?)[-–](.+)$/);
