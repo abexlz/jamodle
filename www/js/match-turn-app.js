@@ -831,37 +831,8 @@
       requestAnimationFrame(() => this.game?.syncDockTileSize?.());
     }
 
-    updateTurnUrgencyOverlay(data) {
-      const el = this.els.turnUrgency;
-      if (!el || !this.gameStarted || data.status !== 'active') {
-        this.hideTurnUrgencyOverlay();
-        return;
-      }
-      if (RS().isRushPhase(data) || !data.currentTurnUid) {
-        this.hideTurnUrgencyOverlay();
-        return;
-      }
-      if (data.currentTurnUid !== this.myUid) {
-        this.hideTurnUrgencyOverlay();
-        return;
-      }
-
-      const remainingMs = this.getTurnRemainingMs(data);
-      const sec = Math.ceil(remainingMs / 1000);
-      if (remainingMs <= 0 || sec > 5) {
-        this.hideTurnUrgencyOverlay();
-        return;
-      }
-
-      if (this._lastUrgencySec === sec) return;
-      this._lastUrgencySec = sec;
-      el.textContent = String(sec);
-      el.classList.remove('hidden');
-      el.setAttribute('aria-hidden', 'false');
-      void el.offsetWidth;
-      el.style.animation = 'none';
-      void el.offsetWidth;
-      el.style.animation = '';
+    updateTurnUrgencyOverlay() {
+      this.hideTurnUrgencyOverlay();
     }
 
     hideTurnUrgencyOverlay() {

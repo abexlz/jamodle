@@ -1693,26 +1693,8 @@
       this.game?.syncDockTileSize?.();
     }
 
-    updateTurnUrgencyOverlay(data) {
-      const el = this.els.turnUrgency;
-      if (!el || !this.gameStarted || data.status !== 'active') {
-        this.hideTurnUrgencyOverlay();
-        return;
-      }
-      if (data.currentTurnUid !== MY_UID) {
-        this.hideTurnUrgencyOverlay();
-        return;
-      }
-      const remainingMs = this.getTurnRemainingMs(data);
-      const sec = Math.ceil(remainingMs / 1000);
-      if (remainingMs <= 0 || sec > 5) {
-        this.hideTurnUrgencyOverlay();
-        return;
-      }
-      if (this._lastUrgencySec === sec) return;
-      this._lastUrgencySec = sec;
-      el.textContent = String(sec);
-      el.classList.remove('hidden');
+    updateTurnUrgencyOverlay() {
+      this.hideTurnUrgencyOverlay();
     }
 
     hideTurnUrgencyOverlay() {

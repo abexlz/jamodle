@@ -11,15 +11,17 @@
 }
 
 .race-header {
+  position: relative;
   display: flex;
   align-items: flex-start;
-  gap: 10px;
+  justify-content: center;
+  gap: 0;
   margin: 0;
   padding: 0;
 }
 
 .race-header h1 {
-  flex: 1;
+  flex: 0 1 auto;
   text-align: center;
   font-family: 'Jua', sans-serif;
   font-size: 22px;
@@ -32,12 +34,14 @@
   font-size: 0;
   color: transparent;
   text-shadow: none;
+  width: 80vw;
+  max-width: 80vw;
 }
 
 .race-header-title-img {
   display: block;
-  width: 80%;
-  max-width: 80%;
+  width: 100%;
+  max-width: 100%;
   height: auto;
   margin: 0 auto;
   object-fit: contain;
@@ -46,12 +50,20 @@
 }
 
 .race-header-spacer {
+  position: absolute;
+  left: 0;
+  top: 0;
   width: 40px;
   height: 40px;
   flex-shrink: 0;
+  pointer-events: none;
 }
 
 .race-settings-link {
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 2;
   width: 40px;
   height: 40px;
   border-radius: 50%;
