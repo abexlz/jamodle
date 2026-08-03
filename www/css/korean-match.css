@@ -2368,18 +2368,21 @@
     width: 100%;
   }
 
-  body.match-race-page .syllable-blocks-row[data-syl-count="4"],
-  body.match-race-page .syllable-blocks-row[data-syl-count="5"],
-  body.match-race-page .syllable-blocks-row[data-syl-count="6"] {
+  body.match-race-page .syllable-blocks-row[data-syl-count="4"] {
     flex-wrap: wrap;
     width: max-content;
-    max-width: min(320px, 86vw);
+    max-width: min(220px, 60vw);
     margin-inline: auto;
     gap: clamp(3px, 1vw, 6px);
   }
 
-  body.match-race-page .syllable-blocks-row[data-syl-count="4"] {
-    max-width: min(220px, 60vw);
+  body.match-race-page .syllable-blocks-row[data-syl-count="5"],
+  body.match-race-page .syllable-blocks-row[data-syl-count="6"] {
+    flex-wrap: wrap;
+    width: 100%;
+    max-width: 100%;
+    margin-inline: 0;
+    gap: clamp(3px, 1vw, 6px);
   }
 
   body.match-race-page .syllable-blocks-row .syllable-block {
@@ -2393,17 +2396,20 @@
     box-shadow: none;
   }
 
-  body.match-race-page .syllable-blocks-row[data-syl-count="4"] .syllable-block,
-  body.match-race-page .syllable-blocks-row[data-syl-count="5"] .syllable-block,
-  body.match-race-page .syllable-blocks-row[data-syl-count="6"] .syllable-block {
-    --wrap-block: clamp(64px, 18vw, 96px);
+  body.match-race-page .syllable-blocks-row[data-syl-count="4"] .syllable-block {
+    --wrap-block: clamp(64px, 20vw, 92px);
     flex: 0 0 var(--wrap-block);
     width: var(--wrap-block);
     max-width: var(--wrap-block);
   }
 
-  body.match-race-page .syllable-blocks-row[data-syl-count="4"] .syllable-block {
-    --wrap-block: clamp(64px, 20vw, 92px);
+  body.match-race-page .syllable-blocks-row[data-syl-count="5"] .syllable-block,
+  body.match-race-page .syllable-blocks-row[data-syl-count="6"] .syllable-block {
+    --wrap-gap: clamp(3px, 1vw, 6px);
+    --wrap-block: calc((100% - 2 * var(--wrap-gap)) / 3);
+    flex: 0 0 var(--wrap-block);
+    width: var(--wrap-block);
+    max-width: var(--wrap-block);
   }
 
   /* 1-syllable words must not stretch to full row width in 1v1 */
@@ -2511,20 +2517,24 @@
     width: 100%;
   }
 
-  /* 4 → 2×2, 5 → 3+2, 6 → 3+3 — compact centered grid, not full-bleed */
-  body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="4"],
-  body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="5"],
-  body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="6"] {
+  /* 4 → 2×2 — keep compact; 5 → 3+2 / 6 → 3+3 — fill available width */
+  body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="4"] {
     flex-wrap: wrap;
     width: max-content;
-    max-width: min(340px, 86vw);
+    max-width: min(240px, 64vw);
     margin-inline: auto;
     gap: clamp(4px, 1.2vw, 8px);
     justify-content: center;
   }
 
-  body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="4"] {
-    max-width: min(240px, 64vw);
+  body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="5"],
+  body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="6"] {
+    flex-wrap: wrap;
+    width: 100%;
+    max-width: 100%;
+    margin-inline: 0;
+    gap: clamp(4px, 1.2vw, 8px);
+    justify-content: center;
   }
 
   body.match-page:not(.match-race-page) .syllable-blocks-row .syllable-block {
@@ -2538,17 +2548,20 @@
     box-shadow: none;
   }
 
-  body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="4"] .syllable-block,
-  body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="5"] .syllable-block,
-  body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="6"] .syllable-block {
-    --wrap-block: clamp(72px, 22vw, 108px);
+  body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="4"] .syllable-block {
+    --wrap-block: clamp(72px, 24vw, 104px);
     flex: 0 0 var(--wrap-block);
     width: var(--wrap-block);
     max-width: var(--wrap-block);
   }
 
-  body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="4"] .syllable-block {
-    --wrap-block: clamp(72px, 24vw, 104px);
+  body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="5"] .syllable-block,
+  body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="6"] .syllable-block {
+    --wrap-gap: clamp(4px, 1.2vw, 8px);
+    --wrap-block: calc((100% - 2 * var(--wrap-gap)) / 3);
+    flex: 0 0 var(--wrap-block);
+    width: var(--wrap-block);
+    max-width: var(--wrap-block);
   }
 
   body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="1"] {
@@ -2599,6 +2612,14 @@
     margin-bottom: 8px;
     padding-bottom: 10px;
     border-bottom: 2px dashed var(--border-soft, #F0ECE8);
+  }
+
+  /* .blocks-area { display:flex } beats a bare .hidden — keep opp panel collapsed until shown. */
+  .opp-submission-area.hidden,
+  body.match-page .blocks-area.opp-submission-area.hidden,
+  body.match-race-page .blocks-area.opp-submission-area.hidden,
+  body.match-turn-page .blocks-area.opp-submission-area.hidden {
+    display: none !important;
   }
 
   .opp-submission-area .section-label {
@@ -3288,19 +3309,23 @@
     overflow: hidden;
   }
 
-  body.match-turn-page .blocks-area .syllable-blocks-row[data-syl-count="4"],
-  body.match-turn-page .blocks-area .syllable-blocks-row[data-syl-count="5"],
-  body.match-turn-page .blocks-area .syllable-blocks-row[data-syl-count="6"] {
+  body.match-turn-page .blocks-area .syllable-blocks-row[data-syl-count="4"] {
     flex-wrap: wrap;
     overflow: visible;
     width: max-content;
-    max-width: min(320px, 86vw);
+    max-width: min(220px, 60vw);
     margin-inline: auto;
     gap: clamp(3px, 1vw, 6px);
   }
 
-  body.match-turn-page .blocks-area .syllable-blocks-row[data-syl-count="4"] {
-    max-width: min(220px, 60vw);
+  body.match-turn-page .blocks-area .syllable-blocks-row[data-syl-count="5"],
+  body.match-turn-page .blocks-area .syllable-blocks-row[data-syl-count="6"] {
+    flex-wrap: wrap;
+    overflow: visible;
+    width: 100%;
+    max-width: 100%;
+    margin-inline: 0;
+    gap: clamp(3px, 1vw, 6px);
   }
 
   body.match-turn-page .blocks-area .syllable-block {
@@ -3315,17 +3340,20 @@
     padding: clamp(2px, 0.6vw, 4px);
   }
 
-  body.match-turn-page .blocks-area .syllable-blocks-row[data-syl-count="4"] .syllable-block,
-  body.match-turn-page .blocks-area .syllable-blocks-row[data-syl-count="5"] .syllable-block,
-  body.match-turn-page .blocks-area .syllable-blocks-row[data-syl-count="6"] .syllable-block {
-    --wrap-block: clamp(64px, 18vw, 96px);
+  body.match-turn-page .blocks-area .syllable-blocks-row[data-syl-count="4"] .syllable-block {
+    --wrap-block: clamp(64px, 20vw, 92px);
     flex: 0 0 var(--wrap-block);
     width: var(--wrap-block);
     max-width: var(--wrap-block);
   }
 
-  body.match-turn-page .blocks-area .syllable-blocks-row[data-syl-count="4"] .syllable-block {
-    --wrap-block: clamp(64px, 20vw, 92px);
+  body.match-turn-page .blocks-area .syllable-blocks-row[data-syl-count="5"] .syllable-block,
+  body.match-turn-page .blocks-area .syllable-blocks-row[data-syl-count="6"] .syllable-block {
+    --wrap-gap: clamp(3px, 1vw, 6px);
+    --wrap-block: calc((100% - 2 * var(--wrap-gap)) / 3);
+    flex: 0 0 var(--wrap-block);
+    width: var(--wrap-block);
+    max-width: var(--wrap-block);
   }
 
   body.match-turn-page .blocks-area .syllable-blocks-row[data-syl-count="1"] {
