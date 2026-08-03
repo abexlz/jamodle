@@ -127,11 +127,11 @@ body.tutorial-page.match-page:not(.match-race-page) #match-app:has(.syllable-blo
 
 /* Keep Check above the fixed home bottom bar on every tutorial step */
 body.tutorial-page.has-home-bottom-bar {
-  padding-bottom: calc(var(--home-nav-offset, 56px) + 8px) !important;
+  --tutorial-check-clearance: calc(var(--home-nav-offset, 56px) + 72px);
+  padding-bottom: var(--tutorial-check-clearance) !important;
 }
 
 body.tutorial-page #match-app {
-  padding-bottom: 0;
   box-sizing: border-box;
 }
 
@@ -139,17 +139,35 @@ body.tutorial-page .match-footer,
 .tutorial-match .match-footer {
   flex: 0 0 auto !important;
   flex-shrink: 0 !important;
-  position: relative;
-  z-index: 40;
-  margin-top: auto !important;
-  padding-top: 10px !important;
-  padding-bottom: 12px !important;
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(520px, calc(100% - 24px));
+  bottom: calc(var(--home-nav-offset, 56px) + 8px);
+  z-index: 230;
+  margin: 0 !important;
+  padding: 8px 0 0 !important;
+  box-sizing: border-box;
   background: transparent;
+  pointer-events: none;
+}
+
+body.tutorial-page .match-footer > *,
+.tutorial-match .match-footer > * {
+  pointer-events: auto;
 }
 
 body.tutorial-page .bank-section + .match-footer {
-  /* Drop the large spacer that was pushing Check under the nav */
-  padding-top: 10px !important;
+  padding-top: 8px !important;
+}
+
+/* Reserve the fixed footer’s height inside the flex column */
+body.tutorial-page #match-app::after {
+  content: '';
+  display: block;
+  flex: 0 0 auto;
+  height: calc(clamp(48px, 12vw, 56px) + 16px);
+  pointer-events: none;
 }
 
 /* Pre-placed locked tiles stay bright and correct-colored during guidance */
