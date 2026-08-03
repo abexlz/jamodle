@@ -4,7 +4,8 @@
 (function (global) {
   'use strict';
 
-  const REPEAT_GAP_MS = 220;
+  /** Pause between full-word repeats (half of previous 220ms). */
+  const REPEAT_GAP_MS = 110;
   /** Web Speech rate was 0.82 — slowed to 80% to match server TTS. */
   const DEFAULT_RATE = 0.82 * 0.8;
   /**

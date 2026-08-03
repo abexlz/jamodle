@@ -6,7 +6,8 @@
 
   const GESTURE_TTL_MS = 10000;
   const CLICK_DEBOUNCE_MS = 450;
-  const REPEAT_GAP_MS = 200;
+  /** Pause between 1st and 2nd full-word readings (half of previous 200ms). */
+  const REPEAT_GAP_MS = 100;
 
   let lastGestureAt = 0;
   let lastClickAt = 0;
