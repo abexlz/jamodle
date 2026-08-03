@@ -1317,9 +1317,9 @@
     }
 
     /**
-     * 4-letter board: size to 97% of the scoreboard↔dock mid-column in pixels.
-     * Avoids absolute % inset (collapses when parent height is indefinite) and
-     * avoids forcing .blocks-area min-height (pushes the dock off-screen).
+     * 4-letter board: fill 97% of the visible scoreboard↔dock gap (pixels).
+     * Uses the HUD/dock rects as the source of truth so a short #match-app
+     * cannot under-size the board into a centered square.
      */
     syncFourLetterBoardSize() {
       const row = this.els?.blocks;
@@ -1338,50 +1338,45 @@
         area.style.removeProperty('max-height');
         area.style.removeProperty('flex');
       };
+      const clearApp = () => {
+        this.root?.style?.removeProperty('min-height');
+      };
 
       if (row.dataset.sylCount !== '4') {
         clearRow();
         clearArea();
+        clearApp();
         return;
       }
 
       const app = this.root;
       const dock = app?.querySelector?.('.bank-section--turn, .bank-section');
-      const footer = app?.querySelector?.('.match-footer');
       const hud = document.getElementById('race-battle-hud');
       if (!app || !area || !dock) return;
 
       clearArea();
+
+      // Stretch #match-app to its flex parent so the mid-column is real viewport space.
+      const mine = app.parentElement;
+      const mineH = mine?.clientHeight || 0;
+      if (mineH > 80) {
+        app.style.setProperty('min-height', `${Math.floor(mineH)}px`);
+      }
+
       row.style.position = 'relative';
-      row.style.removeProperty('inset');
-      row.style.removeProperty('top');
-      row.style.removeProperty('bottom');
-      row.style.removeProperty('left');
-      row.style.removeProperty('right');
-      // Temporary small height so flex can allocate the mid-column without content min-size blowout.
-      row.style.setProperty('height', '1px');
+      row.style.setProperty('height', '0px');
       row.style.setProperty('width', '97%');
       void app.offsetHeight;
 
-      const appH = app.clientHeight || 0;
-      const dockH = dock.getBoundingClientRect().height || 0;
-      const footerH = footer?.getBoundingClientRect().height || 0;
-      const gap = parseFloat(getComputedStyle(app).gap) || 0;
-      const fromApp = Math.floor(appH - dockH - footerH - gap * 3);
-
-      const areaRect = area.getBoundingClientRect();
       const dockTop = dock.getBoundingClientRect().top;
-      const fromArea = Math.floor(dockTop - areaRect.top);
+      const hudBottom = hud?.getBoundingClientRect().bottom;
+      void app.offsetHeight;
+      const gapFromHud = hudBottom != null ? Math.floor(dockTop - hudBottom) : 0;
+      const gapFromArea = Math.floor(dockTop - area.getBoundingClientRect().top);
+      // Scoreboard↔dock is the visual target. Use area gap only as fallback.
+      const usableH = gapFromHud > 60 ? gapFromHud : gapFromArea;
+      const usableW = Math.floor(area.getBoundingClientRect().width || app.getBoundingClientRect().width);
 
-      let usableH = fromArea > 60 ? fromArea : fromApp;
-      if (fromApp > 60) usableH = Math.min(usableH, fromApp);
-
-      if (hud) {
-        const hudToDock = Math.floor(dockTop - hud.getBoundingClientRect().bottom);
-        if (hudToDock > 60) usableH = Math.min(usableH > 60 ? usableH : hudToDock, hudToDock);
-      }
-
-      const usableW = Math.floor(area.clientWidth || app.clientWidth || areaRect.width);
       if (usableH < 60 || usableW < 60) return;
 
       const h = Math.max(64, Math.floor(usableH * 0.97));

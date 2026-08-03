@@ -3451,8 +3451,22 @@
     aspect-ratio: unset !important;
   }
 
-  body.match-turn-page #match-app:has(.syllable-blocks-row[data-syl-count="4"]) {
+  body.match-turn-page #match-app:has(.syllable-blocks-row[data-syl-count="4"]),
+  body.match-race-page #match-app:has(.syllable-blocks-row[data-syl-count="4"]) {
     --tile-size: min(48px, 14vw);
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    height: 100% !important;
+    max-height: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  body.match-turn-page .race-turn-mine:has(.syllable-blocks-row[data-syl-count="4"]) {
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
   }
 
   body.match-turn-page .blocks-area .syllable-blocks-row[data-syl-count="4"] .syllable-grid {
