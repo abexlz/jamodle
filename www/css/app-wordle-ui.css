@@ -378,6 +378,24 @@
   filter: none !important;
 }
 
+.race-results-duel--series .race-results-duel-side--winner,
+.race-results-duel--series .race-results-duel-side--loser {
+  transform: none !important;
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+.race-results-duel--series .race-results-duel-side--winner .race-results-duel-name,
+.race-results-duel--series .race-results-duel-side--loser .race-results-duel-name {
+  font-size: clamp(28px, 7.6vw, 34px) !important;
+}
+
+.race-results-duel--series .race-results-duel-score,
+.race-results-duel--series .race-results-duel-score-sep {
+  font-size: clamp(28px, 7.6vw, 34px) !important;
+  font-weight: 400 !important;
+}
+
 .race-results-answer {
   border-top-color: rgba(123, 207, 255, 0.32) !important;
 }

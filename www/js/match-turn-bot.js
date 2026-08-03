@@ -1933,6 +1933,7 @@
       if (data.winnerUid === MY_UID) resultLine = rt('win');
       else if (data.winnerUid) resultLine = rt('loss');
       const displayWord = shared.solvedWord || data.target;
+      const series = RS().getSeriesScoreForPlayer(data, MY_UID, BOT_UID);
 
       this.renderMain(RUI.renderResultsPanel({
         resultLine,
@@ -1941,9 +1942,10 @@
         battleXpMode: data.winnerUid === MY_UID ? 'koreanMatch' : '',
         battleMatchId: this.matchId,
         battleQuestMode: 'turn',
+        scoreLayout: 'inline',
         players: [
-          { uid: MY_UID, name: myDisplayName() },
-          { uid: BOT_UID, name: this.botName() },
+          { uid: MY_UID, name: myDisplayName(), score: series.myWins },
+          { uid: BOT_UID, name: this.botName(), score: series.oppWins },
         ],
         answerTilesHtml: RUI.buildMatchWinTiles(displayWord),
         rematchLabel: rt('rematch'),

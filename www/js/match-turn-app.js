@@ -1281,6 +1281,7 @@
           ? (data.player2Progress || RS().defaultProgress())
           : null;
       const displayWord = shared.solvedWord || winnerProgress?.solvedWord || data.target;
+      const series = RS().getSeriesScoreForPlayer(data, this.myUid, opp?.uid);
 
       this.renderMain(RUI.renderResultsPanel({
         resultLine,
@@ -1290,14 +1291,16 @@
         battleMatchId: this.matchId,
         battleQuestMode: 'turn',
         battleFriend: !!global.RaceResultsUI?.isFriendBattleMatch?.(data, this.matchId),
+        scoreLayout: 'inline',
         players: [
           {
             uid: this.myUid,
             name: myDisplayName(
               data.player1Uid === this.myUid ? data.player1Name : data.player2Name
             ),
+            score: series.myWins,
           },
-          { uid: opp?.uid, name: opp?.name || rt('opponent') },
+          { uid: opp?.uid, name: opp?.name || rt('opponent'), score: series.oppWins },
         ],
         answerTilesHtml: RUI.buildMatchWinTiles(displayWord),
         rematchLabel: rt('rematch'),

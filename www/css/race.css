@@ -2372,6 +2372,53 @@ html.reduce-motion .race-turn-swap {
   text-shadow: none;
 }
 
+/* Hangul-dle series — score sits between names, same size as names */
+.race-results-duel--series {
+  flex-wrap: nowrap;
+  align-items: flex-end;
+  gap: clamp(10px, 3vw, 18px);
+}
+
+.race-results-duel--series .race-results-duel-side {
+  flex: 1 1 0;
+  max-width: 168px;
+  transform: none;
+}
+
+.race-results-duel--series .race-results-duel-side--winner,
+.race-results-duel--series .race-results-duel-side--loser {
+  transform: none;
+  opacity: 1;
+  filter: none;
+}
+
+.race-results-duel--series .race-results-duel-side--loser .race-results-duel-card-wrap {
+  transform: none;
+}
+
+.race-results-duel--series .race-results-duel-name {
+  font-size: clamp(28px, 7.6vw, 34px);
+  text-shadow: none;
+}
+
+.race-results-duel--series .race-results-duel-scoreline {
+  flex: 0 0 auto;
+  width: auto;
+  order: 0;
+  margin: 0;
+  align-self: flex-end;
+  padding-bottom: 0.1em;
+  gap: 0.12em;
+}
+
+.race-results-duel--series .race-results-duel-score,
+.race-results-duel--series .race-results-duel-score-sep {
+  font-size: clamp(28px, 7.6vw, 34px);
+  font-weight: 400;
+  min-width: 0;
+  letter-spacing: 0;
+}
+
 .race-results-duel-scoreline {
   flex: 1 0 100%;
   display: flex;
@@ -2454,7 +2501,6 @@ html.reduce-motion .race-turn-swap {
 .race-results-duel-side--winner .race-results-duel-name {
   color: var(--correct-text, #3A7A58);
   text-shadow: 0 0 14px rgba(95, 214, 138, 0.45);
-  font-size: clamp(15px, 4vw, 18px);
 }
 
 .race-results-duel-side--winner .race-results-duel-stat {
@@ -2494,6 +2540,9 @@ html.reduce-motion .race-turn-swap {
   position: relative;
   opacity: 0.72;
   filter: brightness(0.62) saturate(0.75);
+}
+
+.race-results-duel-side--loser .race-results-duel-card-wrap {
   transform: scale(0.94);
 }
 

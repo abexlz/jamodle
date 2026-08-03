@@ -283,7 +283,7 @@
     `;
   }
 
-  function buildPlayersDuelHtml(players, winnerUid, kind) {
+  function buildPlayersDuelHtml(players, winnerUid, kind, { scoreLayout = 'default' } = {}) {
     const statsClass = kind === 'win'
       ? 'race-results-stats race-results-stats--victory'
       : kind === 'loss'
@@ -291,15 +291,25 @@
         : 'race-results-stats';
     const list = players || [];
     const scoreMode = list.some((p) => playerScoreValue(p) != null);
+    const inlineScore = scoreMode && scoreLayout === 'inline';
 
     const sides = list.map((p) => (
       buildPlayerDuelSideHtml(p, playerDuelRole(p, winnerUid), { scoreMode })
-    )).join('');
+    ));
 
     const scoreline = scoreMode ? buildScorelineHtml(list) : '';
-    const modeClass = scoreMode ? ' race-results-duel--scores' : '';
+    const modeClass = !scoreMode
+      ? ''
+      : inlineScore
+        ? ' race-results-duel--series'
+        : ' race-results-duel--scores';
 
-    return `<div class="race-results-duel${modeClass} ${statsClass}" role="group">${sides}${scoreline}</div>`;
+    // Inline series score sits between the two player columns (Name  2:0  Name).
+    const body = inlineScore && sides.length >= 2
+      ? `${sides[0]}${scoreline}${sides.slice(1).join('')}`
+      : `${sides.join('')}${scoreline}`;
+
+    return `<div class="race-results-duel${modeClass} ${statsClass}" role="group">${body}</div>`;
   }
 
   function buildFallbackBattleSummary(name) {
@@ -608,9 +618,10 @@
     battleQuestMode = '',
     battleFriend = false,
     rewardsHtml = '',
+    scoreLayout = 'default',
   }) {
     const kind = resultKind === 'win' || resultKind === 'loss' ? resultKind : 'draw';
-    const duelHtml = buildPlayersDuelHtml(players, winnerUid, kind);
+    const duelHtml = buildPlayersDuelHtml(players, winnerUid, kind, { scoreLayout });
 
     const headingHtml = buildHeadingHtml(resultLine, kind);
     const rematchText = rematchLabel || 'Rematch';
