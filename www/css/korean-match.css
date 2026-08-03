@@ -2166,7 +2166,7 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
-    min-height: 44px;
+    min-height: 72px;
     margin: 0 0 4px;
     padding: 0;
     background: transparent;
@@ -2196,9 +2196,9 @@
   body.match-page .match-chrome-title-img,
   .hangul-dle-title-img {
     display: block;
-    height: clamp(34px, 9.5vw, 46px);
+    height: clamp(58px, 16.2vw, 78px);
     width: auto;
-    max-width: min(100%, 340px);
+    max-width: min(100%, 578px);
     object-fit: contain;
     margin: 0 auto;
     pointer-events: none;
