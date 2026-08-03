@@ -25,6 +25,24 @@
   margin: 0;
 }
 
+.race-header h1.race-header-title--logo {
+  line-height: 0;
+  font-size: 0;
+  color: transparent;
+  text-shadow: none;
+}
+
+.race-header-title-img {
+  display: block;
+  height: clamp(34px, 9.5vw, 46px);
+  width: auto;
+  max-width: min(100%, 260px);
+  margin: 0 auto;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
 .race-settings-link {
   width: 40px;
   height: 40px;

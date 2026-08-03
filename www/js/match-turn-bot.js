@@ -1240,7 +1240,9 @@
       this.root.innerHTML = `
         <header class="race-header">
           <a class="race-back" href="index.html">${escapeHtml(rt('backHome'))}</a>
-          <h1>${escapeHtml(rt('title'))}</h1>
+          <h1 class="race-header-title race-header-title--logo">
+            <img class="race-header-title-img" src="assets/hangul-dle-title.png" alt="${escapeHtml(rt('title'))}" draggable="false">
+          </h1>
           <a class="race-settings-link" href="settings.html" aria-label="Settings">⚙️</a>
         </header>
         ${hud}

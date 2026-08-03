@@ -176,16 +176,29 @@
   function buildResultHeroHtml(kind, headingHtml, rewardsHtml = '') {
     if (kind !== 'win' && kind !== 'loss' && kind !== 'draw') return headingHtml;
 
-    const status = {
-      win: 'Victory!',
-      loss: 'Defeat',
-      draw: 'Draw',
+    const assets = {
+      win: 'assets/results/victory-result-banner.png',
+      loss: 'assets/results/defeat-result-banner.png',
+      draw: 'assets/results/draw-result-banner.png',
     };
-    const alt = status[kind] || status.draw;
+    const alts = {
+      win: 'Victory!',
+      loss: 'Defeat. Better luck next time!',
+      draw: "Draw. It's a tie!",
+    };
+    const sparkleCounts = { win: 18, loss: 10, draw: 14 };
+    const asset = assets[kind];
+    const sparkles = buildSparkleMarkup(sparkleCounts[kind] || 14);
+    const alt = alts[kind] || alts.draw;
 
     return `
-      <div class="race-results-hero race-results-hero--logo race-results-hero--${kind}">
-        <img class="hangul-dle-title-img race-results-brand-logo" src="assets/hangul-dle-title.png" alt="${escapeHtml(alt)}" decoding="async" draggable="false">
+      <div class="race-results-hero race-results-hero--${kind}">
+        <div class="race-results-hero-aura" aria-hidden="true"></div>
+        <div class="race-results-hero-sparkles" aria-hidden="true">${sparkles}</div>
+        <img class="race-results-hero-img" src="${asset}" alt="${escapeHtml(alt)}" decoding="async">
+        <span class="race-results-hero-shine" aria-hidden="true"></span>
+        <span class="race-results-hero-petal race-results-hero-petal--1" aria-hidden="true"></span>
+        <span class="race-results-hero-petal race-results-hero-petal--2" aria-hidden="true"></span>
         <span class="race-results-heading-fallback">${headingHtml}</span>
         ${rewardsHtml}
       </div>`;

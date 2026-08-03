@@ -32,7 +32,7 @@
 <link rel="stylesheet" href="css/answer-tts.css">
 <link rel="stylesheet" href="css/match-emotes.css">
 <link rel="stylesheet" href="css/profile.css">
-<link rel="stylesheet" href="css/race.css?v=20260804b">
+<link rel="stylesheet" href="css/race.css?v=20260804c">
 <link rel="stylesheet" href="css/related-words-race.css?v=20260801a">
 <link rel="stylesheet" href="css/app-theme.css?v=25">
 <link rel="stylesheet" href="css/app-wordle-ui.css?v=24">
@@ -146,8 +146,13 @@
     margin-bottom: 0;
   }
 
-  body.match-race-page.match-turn-page .race-header h1 {
+  body.match-race-page.match-turn-page .race-header h1:not(.race-header-title--logo) {
     font-size: 18px;
+  }
+
+  body.match-race-page.match-turn-page .race-header-title-img {
+    height: clamp(32px, 8.8vw, 42px);
+    max-width: min(100%, 240px);
   }
 
   body.match-race-page.match-turn-page #race-turn-previous {
@@ -228,7 +233,7 @@
 <script src="js/turn-live-rtdb.js?v=20260706j"></script>
 <script src="js/race-service.js?v=20260801c"></script>
 <script src="js/answer-tts.js?v=20260803c"></script>
-<script src="js/race-results-ui.js?v=20260804b"></script>
+<script src="js/race-results-ui.js?v=20260804c"></script>
 <script src="js/race-rematch-ui.js"></script>
 <script src="js/race-countdown.js"></script>
 <script src="js/race-coin-flip.js?v=20260803a"></script>
@@ -250,8 +255,8 @@
 <script src="js/rw-score-odometer.js"></script>
 <script src="js/match-emotes.js?v=20260707y"></script>
 <script src="js/korean-match.js?v=20260804d"></script>
-<script src="js/match-turn-app.js?v=20260804b"></script>
-<script src="js/match-turn-bot.js?v=20260804b"></script>
+<script src="js/match-turn-app.js?v=20260804c"></script>
+<script src="js/match-turn-bot.js?v=20260804c"></script>
 <script>
 (async function () {
   FirebaseSocial?.init?.({});

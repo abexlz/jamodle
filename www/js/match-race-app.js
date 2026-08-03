@@ -135,8 +135,8 @@
       } else if (this.els?.main) {
         const back = this.root.querySelector('.race-back');
         if (back) back.textContent = rt('backProfile');
-        const h1 = this.root.querySelector('.race-header h1');
-        if (h1) h1.textContent = rt('title');
+        const titleImg = this.root.querySelector('.race-header-title-img');
+        if (titleImg) titleImg.alt = rt('title');
       }
     }
 
@@ -145,7 +145,9 @@
       this.root.innerHTML = `
         <header class="race-header">
           <a class="race-back" href="profile.html">${escapeHtml(rt('backProfile'))}</a>
-          <h1>${escapeHtml(rt('title'))}</h1>
+          <h1 class="race-header-title race-header-title--logo">
+            <img class="race-header-title-img" src="assets/hangul-dle-title.png" alt="${escapeHtml(rt('title'))}" draggable="false">
+          </h1>
           <a class="race-settings-link" href="settings.html" aria-label="${escapeHtml(global.I18n?.t('nav.settings') || 'Settings')}">⚙️</a>
         </header>
         ${hud}
