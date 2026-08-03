@@ -374,7 +374,8 @@
     /* Keep readable on the teal theme where --text/--heading are white. */
     --meaning-ink: #1F3A44;
     --meaning-label: #5B6BB5;
-    padding: 14px 18px;
+    position: relative;
+    padding: 18px 40px 14px 18px;
     border-radius: 16px;
     border: 3px solid var(--lavender-btn, #CFC0F5);
     background: linear-gradient(165deg, #ffffff 0%, #f8f4ff 100%);
@@ -383,6 +384,37 @@
       0 3px 0 rgba(140, 70, 0, 0.12);
     text-align: center;
     color: var(--meaning-ink);
+    pointer-events: auto;
+  }
+
+  .meaning-hint-popup-close {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: rgba(91, 107, 181, 0.12);
+    color: var(--meaning-label) !important;
+    -webkit-text-fill-color: var(--meaning-label);
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+    touch-action: manipulation;
+  }
+
+  .meaning-hint-popup-close:active,
+  .meaning-hint-popup-close.is-pressed {
+    transform: scale(0.94);
+    background: rgba(91, 107, 181, 0.22);
   }
 
   .meaning-hint-popup-label {

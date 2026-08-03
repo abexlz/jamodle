@@ -1086,9 +1086,10 @@
         ${statsRow}
         <section class="hint-area" id="match-hint" aria-label="Word hint"></section>
         <p class="hint-meaning hidden" id="match-meaning" aria-live="polite"></p>
-        <div class="meaning-hint-popup hidden" id="match-meaning-popup" aria-live="polite">
+        <div class="meaning-hint-popup hidden" id="match-meaning-popup" role="dialog" aria-modal="false" aria-labelledby="match-meaning-popup-label" aria-live="polite">
           <div class="meaning-hint-popup-inner">
-            <span class="meaning-hint-popup-label" data-i18n="match.hints.meaning">${t('match.hints.meaning')}</span>
+            <button type="button" class="meaning-hint-popup-close" id="match-meaning-popup-close" aria-label="${t('shop.close') || 'Close'}">×</button>
+            <span class="meaning-hint-popup-label" id="match-meaning-popup-label" data-i18n="match.hints.meaning">${t('match.hints.meaning')}</span>
             <p class="meaning-hint-popup-text" id="match-meaning-popup-text"></p>
           </div>
         </div>
@@ -1131,6 +1132,7 @@
         meaning: this.root.querySelector('#match-meaning'),
         meaningPopup: this.root.querySelector('#match-meaning-popup'),
         meaningPopupText: this.root.querySelector('#match-meaning-popup-text'),
+        meaningPopupClose: this.root.querySelector('#match-meaning-popup-close'),
         oppArea: this.root.querySelector('#match-opp-area'),
         oppLabel: this.root.querySelector('#match-opp-label'),
         oppBlocks: this.root.querySelector('#match-opp-blocks'),
@@ -1231,6 +1233,11 @@
       this.els.orientHint?.addEventListener('click', () => this.useOrientHint());
       this.els.disableHint?.addEventListener('click', () => this.useDisableHint());
       this.els.meaningBtn?.addEventListener('click', () => this.useMeaningHint());
+      this.els.meaningPopupClose?.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.hideMeaningPopup();
+      });
       this.els.devAnswerBtn?.addEventListener('click', () => this.devRevealAnswer());
       this.els.continue?.addEventListener('click', () => this.continuePlaying());
       this.els.leave?.addEventListener('click', () => { if (!this.isDaily) this.saveBestOnLeave(); });
@@ -1385,26 +1392,42 @@
       if (!popup) return;
       popup.classList.remove('is-visible');
       popup.classList.add('hidden');
-      if (this.els.meaningPopupText) this.els.meaningPopupText.textContent = '';
+      // Keep meaning text on the node so reopening the book hint can restore it.
     }
 
     showMeaningPopup(text) {
       const popup = this.els.meaningPopup;
       const popupText = this.els.meaningPopupText;
       if (!popup || !popupText) return;
-      const label = text || t('match.hints.noMeaning') || 'No definition found.';
+      const label = text || this.meaningText || t('match.hints.noMeaning') || 'No definition found.';
       popupText.textContent = label;
       // Keep above game chrome / bottom nav; re-parent if a layout ancestor clips.
       if (popup.parentElement !== document.body) {
         document.body.appendChild(popup);
       }
+      // Close button lives on body-mounted popup; re-bind if mount() refs went stale.
+      const closeBtn = popup.querySelector('#match-meaning-popup-close') || this.els.meaningPopupClose;
+      if (closeBtn && !closeBtn.dataset.boundClose) {
+        closeBtn.dataset.boundClose = '1';
+        closeBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          this.hideMeaningPopup();
+        });
+      }
+      this.els.meaningPopupClose = closeBtn;
       popup.classList.remove('hidden', 'is-visible');
       void popup.offsetWidth;
       popup.classList.add('is-visible');
     }
 
     async useMeaningHint() {
-      if (this.meaningRevealed || this.checkedComplete || this.checking) return;
+      if (this.checkedComplete || this.checking) return;
+      // Already unlocked — just reopen the popup without spending tokens again.
+      if (this.meaningRevealed) {
+        this.showMeaningPopup(this.meaningText);
+        return;
+      }
       if (!this.versus) {
         const HT = global.HintTokens;
         if (!HT?.spend(2)) {
@@ -3130,8 +3153,8 @@
         this.els.disableHint.disabled = blocked || this.disableHintUsed || (!unlimited && tokens < 2);
       }
       if (this.els.meaningBtn) {
-        const needsTokens = !this.versus;
-        this.els.meaningBtn.disabled = blocked || this.meaningRevealed
+        const needsTokens = !this.versus && !this.meaningRevealed;
+        this.els.meaningBtn.disabled = blocked
           || (needsTokens && !unlimited && tokens < 2);
       }
       if (this.els.devAnswerBtn) {
