@@ -2389,11 +2389,11 @@
   body.match-race-page .syllable-blocks-row[data-syl-count="4"] {
     flex-wrap: wrap;
     --four-gap: clamp(4px, 1.2vw, 8px);
-    --four-side: min(95cqh, 95cqw, 95%);
+    --four-side: min(114cqh, 114cqw, 100%);
     width: var(--four-side);
     height: var(--four-side);
     max-width: var(--four-side);
-    max-height: 95%;
+    max-height: 100%;
     margin-inline: auto;
     gap: var(--four-gap);
     align-content: center;
@@ -3372,11 +3372,11 @@
     flex-wrap: wrap;
     overflow: visible;
     --four-gap: clamp(4px, 1.2vw, 8px);
-    --four-side: min(95cqh, 95cqw, 95%);
+    --four-side: min(114cqh, 114cqw, 100%);
     width: var(--four-side);
     height: var(--four-side);
     max-width: var(--four-side);
-    max-height: 95%;
+    max-height: 100%;
     margin-inline: auto;
     gap: var(--four-gap);
     align-content: center;
