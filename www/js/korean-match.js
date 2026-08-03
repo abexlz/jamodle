@@ -40,9 +40,13 @@
     });
   }
 
-  /** Columns used for block sizing — one column per syllable so long words stay on one row. */
+  /**
+   * Columns used for block sizing / wrap.
+   * 5 letters → 3 top + 2 bottom; 6 letters → 3 top + 3 bottom; shorter words stay on one row.
+   */
   function layoutSylColumnCount(syllableCount) {
     const n = Number(syllableCount) || 0;
+    if (n >= 5) return 3;
     return Math.max(n, 1);
   }
 

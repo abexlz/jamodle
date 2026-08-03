@@ -566,18 +566,25 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: clamp(12px, 3vw, 20px);
+    align-content: center;
+    gap: clamp(8px, 2vw, 14px);
+    /* One shared frame around all syllable slots (not per-block cards). */
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: clamp(14px, 3.5vw, 22px);
+    padding: clamp(8px, 2vw, 14px);
+    box-shadow: var(--shadow-sm);
+    box-sizing: border-box;
   }
 
   /* ── SyllableBlock layout (sketch reference) ── */
   .syllable-block {
     position: relative;
-    background: var(--card);
-    border: 2px solid var(--border);
-    /* Cap radius so small 4–5 letter blocks don't read as pills. */
-    border-radius: clamp(8px, 9%, 16px);
-    padding: 10px;
-    box-shadow: var(--shadow-sm);
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 2px;
+    box-shadow: none;
     display: flex;
     align-items: stretch;
     justify-content: stretch;
@@ -1571,6 +1578,26 @@
     overflow: visible;
   }
 
+  /* Hide the empty result tray — it only appears when previewing or holding a merge. */
+  .merge-result:not(.filled):not(.has-preview):not(.drag-over):not(.tap-target) {
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    opacity: 0;
+    overflow: hidden;
+    pointer-events: none;
+    box-shadow: none !important;
+  }
+
+  .merge-machine:not(:has(.merge-result.filled)):not(:has(.merge-result.has-preview)):not(:has(.merge-result.drag-over)):not(:has(.merge-result.tap-target)) .merge-arrow {
+    display: none;
+  }
+
   .merge-slot.filled,
   .merge-result.filled {
     border-style: solid;
@@ -2309,7 +2336,7 @@
     margin: 0 0 2px;
   }
 
-  /* Keep all syllable blocks on one row in 1v1 match */
+  /* Keep syllable blocks on one row in 1v1 match (except 5/6 → 3-col wrap) */
   body.match-race-page .syllable-blocks-row {
     flex-wrap: nowrap;
     justify-content: center;
@@ -2317,12 +2344,26 @@
     width: 100%;
   }
 
+  body.match-race-page .syllable-blocks-row[data-syl-count="5"],
+  body.match-race-page .syllable-blocks-row[data-syl-count="6"] {
+    flex-wrap: wrap;
+  }
+
   body.match-race-page .syllable-blocks-row .syllable-block {
     flex: 1 1 0;
     min-width: 0;
     max-width: calc((100% - (var(--syl-count, 5) - 1) * clamp(3px, 1vw, 7px)) / var(--syl-count, 5));
-    padding: clamp(3px, 0.9vw, 6px);
+    padding: clamp(2px, 0.6vw, 4px);
     container-type: inline-size;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+  }
+
+  body.match-race-page .syllable-blocks-row[data-syl-count="5"] .syllable-block,
+  body.match-race-page .syllable-blocks-row[data-syl-count="6"] .syllable-block {
+    flex: 0 0 calc((100% - (var(--syl-count, 3) - 1) * clamp(3px, 1vw, 7px)) / var(--syl-count, 3));
+    max-width: calc((100% - (var(--syl-count, 3) - 1) * clamp(3px, 1vw, 7px)) / var(--syl-count, 3));
   }
 
   /* 1-syllable words must not stretch to full row width in 1v1 */
@@ -2430,12 +2471,27 @@
     width: 100%;
   }
 
+  /* 5 → 3+2, 6 → 3+3 */
+  body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="5"],
+  body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="6"] {
+    flex-wrap: wrap;
+  }
+
   body.match-page:not(.match-race-page) .syllable-blocks-row .syllable-block {
     flex: 1 1 0;
     min-width: 0;
     max-width: calc((100% - (var(--syl-count, 4) - 1) * clamp(3px, 1vw, 10px)) / var(--syl-count, 4));
     aspect-ratio: 1 / 1.12;
-    padding: clamp(4px, 1vw, 6px);
+    padding: clamp(2px, 0.6vw, 4px);
+    background: transparent;
+    border: none;
+    box-shadow: none;
+  }
+
+  body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="5"] .syllable-block,
+  body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="6"] .syllable-block {
+    flex: 0 0 calc((100% - (var(--syl-count, 3) - 1) * clamp(3px, 1vw, 10px)) / var(--syl-count, 3));
+    max-width: calc((100% - (var(--syl-count, 3) - 1) * clamp(3px, 1vw, 10px)) / var(--syl-count, 3));
   }
 
   body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="1"] {
@@ -2474,8 +2530,11 @@
   }
 
   body.match-page .syllable-block {
-    padding: clamp(4px, 1vw, 6px);
+    padding: clamp(2px, 0.6vw, 4px);
     aspect-ratio: 1 / 1.12;
+    background: transparent;
+    border: none;
+    box-shadow: none;
   }
 
   .opp-submission-area {
@@ -2973,14 +3032,16 @@
     }
   }
 
-  body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="4"] .syllable-block,
-  body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="5"] .syllable-block {
-    border-radius: clamp(6px, 7%, 12px);
-    padding: clamp(2px, 0.7vw, 4px);
+  body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="4"],
+  body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="5"],
+  body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="6"] {
+    border-radius: clamp(12px, 3vw, 18px);
+    padding: clamp(6px, 1.5vw, 10px);
   }
 
   body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="4"] .drop-zone,
-  body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="5"] .drop-zone {
+  body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="5"] .drop-zone,
+  body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="6"] .drop-zone {
     border-radius: clamp(3px, 12%, 6px);
   }
 
@@ -3169,12 +3230,28 @@
     overflow: hidden;
   }
 
+  body.match-turn-page .blocks-area .syllable-blocks-row[data-syl-count="5"],
+  body.match-turn-page .blocks-area .syllable-blocks-row[data-syl-count="6"] {
+    flex-wrap: wrap;
+    overflow: visible;
+  }
+
   body.match-turn-page .blocks-area .syllable-block {
     flex: 1 1 0;
     min-width: 0;
     max-width: calc((100% - (var(--syl-count, 5) - 1) * clamp(3px, 1vw, 7px)) / var(--syl-count, 5));
     overflow: hidden;
     contain: layout style;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: clamp(2px, 0.6vw, 4px);
+  }
+
+  body.match-turn-page .blocks-area .syllable-blocks-row[data-syl-count="5"] .syllable-block,
+  body.match-turn-page .blocks-area .syllable-blocks-row[data-syl-count="6"] .syllable-block {
+    flex: 0 0 calc((100% - (var(--syl-count, 3) - 1) * clamp(3px, 1vw, 7px)) / var(--syl-count, 3));
+    max-width: calc((100% - (var(--syl-count, 3) - 1) * clamp(3px, 1vw, 7px)) / var(--syl-count, 3));
   }
 
   body.match-turn-page .blocks-area .syllable-blocks-row[data-syl-count="1"] {
