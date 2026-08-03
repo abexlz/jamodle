@@ -295,7 +295,7 @@
   min-height: clamp(118px, 32vw, 148px);
   padding-top: clamp(18px, 5vw, 28px);
   padding-bottom: clamp(18px, 5vw, 26px);
-  margin-top: clamp(36px, 12vh, 88px);
+  margin-top: clamp(32px, 10.8vh, 79px);
   margin-bottom: 6px;
 }
 
