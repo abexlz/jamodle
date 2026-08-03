@@ -200,9 +200,58 @@
   filter: drop-shadow(0 2px 4px rgba(20, 70, 80, 0.22));
 }
 
-/* Right — rectangular coin shop button */
+/* Right — daily gift + rectangular coin shop button */
+.menu-top-bar .menu-hud-right {
+  pointer-events: auto;
+}
+
 .menu-top-bar .menu-hud-coins-slot {
   pointer-events: auto;
+}
+
+.menu-hud-gift {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(36px, 9.5vw, 42px);
+  height: clamp(36px, 9.5vw, 42px);
+  margin: 0;
+  padding: 0;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  border-radius: 12px;
+  background: linear-gradient(180deg, #ffb347 0%, #ff8c42 55%, #e36b2c 100%);
+  box-shadow: 0 3px 0 rgba(120, 50, 10, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  transition: transform 0.12s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.menu-hud-gift:active {
+  transform: translateY(2px) scale(0.96);
+  box-shadow: 0 1px 0 rgba(120, 50, 10, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.menu-hud-gift-box {
+  font-size: clamp(18px, 5vw, 22px);
+  line-height: 1;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
+}
+
+.menu-hud-gift-dot {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ff4d6d;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+.menu-hud-gift-dot.hidden {
+  display: none;
 }
 
 .menu-hud-bar .menu-hud-coins.player-hud-compact {

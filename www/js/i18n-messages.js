@@ -1348,6 +1348,7 @@
       "dayComplete": "Day {{day}} complete",
       "cycleComplete": "Week complete! Next week unlocks tomorrow.",
       "continue": "Nice!",
+      "pageNav": "Daily rewards",
       "rewards": {
         "coins": "+{{amount}} coins",
         "xp": "+{{amount}} XP",
@@ -2859,6 +2860,7 @@
       "dayComplete": "{{day}}일차 완료",
       "cycleComplete": "한 주를 완료했어요! 내일부터 다음 주가 열려요.",
       "continue": "좋아요!",
+      "pageNav": "출석 보상",
       "rewards": {
         "coins": "+{{amount}} 코인",
         "xp": "+{{amount}} XP",

@@ -223,13 +223,27 @@
     const result = DG()?.claimToday?.();
     if (!result?.ok) {
       closeOverlay(overlay);
+      updateMenuDailyGiftNav();
       return;
     }
     overlay.dataset.claimed = '1';
     overlay.innerHTML = buildRevealModal(result);
     global.I18n?.applyToDocument?.(overlay);
-    overlay.querySelector('.daily-gift-done-btn')?.addEventListener('click', () => closeOverlay(overlay));
+    overlay.querySelector('.daily-gift-done-btn')?.addEventListener('click', () => {
+      closeOverlay(overlay);
+      updateMenuDailyGiftNav();
+    });
     bindOverlayChrome(overlay);
+    updateMenuDailyGiftNav();
+  }
+
+  function updateMenuDailyGiftNav() {
+    const btn = document.getElementById('menu-daily-gift-nav');
+    const dot = document.getElementById('menu-daily-gift-dot');
+    if (!btn) return;
+    const canClaim = !!DG()?.canClaimToday?.();
+    btn.classList.toggle('is-claimable', canClaim);
+    if (dot) dot.classList.toggle('hidden', !canClaim);
   }
 
   function tryShow() {
@@ -241,5 +255,6 @@
   global.DailyGiftUI = {
     tryShow,
     showPicker,
+    updateMenuDailyGiftNav,
   };
 })(typeof window !== 'undefined' ? window : globalThis);

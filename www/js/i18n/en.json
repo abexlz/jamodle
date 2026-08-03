@@ -1344,6 +1344,7 @@
     "dayComplete": "Day {{day}} complete",
     "cycleComplete": "Week complete! Next week unlocks tomorrow.",
     "continue": "Nice!",
+    "pageNav": "Daily rewards",
     "rewards": {
       "coins": "+{{amount}} coins",
       "xp": "+{{amount}} XP",

@@ -143,6 +143,7 @@
     global.QuestUI?.updateTabBadge?.();
     global.WheelUI?.updateMenuWheelNav?.();
     global.DailyCalendarModal?.updateMenuCalendarNav?.();
+    global.DailyGiftUI?.updateMenuDailyGiftNav?.();
     bindMenuTopBar();
     global.QuestUI?.tryShowPendingChests?.();
   }
@@ -157,13 +158,23 @@
   }
 
   function bindMenuTopBar() {
-    const btn = document.getElementById('menu-calendar-nav');
-    if (!btn || btn.dataset.bound === '1') return;
-    btn.dataset.bound = '1';
-    btn.addEventListener('click', () => {
-      global.DailyCalendarModal?.open?.();
-    });
+    const calBtn = document.getElementById('menu-calendar-nav');
+    if (calBtn && calBtn.dataset.bound !== '1') {
+      calBtn.dataset.bound = '1';
+      calBtn.addEventListener('click', () => {
+        global.DailyCalendarModal?.open?.();
+      });
+    }
     global.DailyCalendarModal?.updateMenuCalendarNav?.();
+
+    const giftBtn = document.getElementById('menu-daily-gift-nav');
+    if (giftBtn && giftBtn.dataset.bound !== '1') {
+      giftBtn.dataset.bound = '1';
+      giftBtn.addEventListener('click', () => {
+        global.DailyGiftUI?.showPicker?.();
+      });
+    }
+    global.DailyGiftUI?.updateMenuDailyGiftNav?.();
   }
 
   /**
