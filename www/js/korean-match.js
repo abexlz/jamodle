@@ -1317,8 +1317,9 @@
     }
 
     /**
-     * 4-letter board: fill 97% of the scoreboard↔dock gap, never taller than
-     * that window (prevents the top row being clipped under the HUD).
+     * 4-letter board: fill 97% of the live mid-column between scoreboard and dock.
+     * 1) Force the flex chain so .blocks-area actually owns that space
+     * 2) Size the board to 97% of (dock.top - area.top) — fits under the HUD
      */
     syncFourLetterBoardSize() {
       const row = this.els?.blocks || this.root?.querySelector?.('#match-blocks');
@@ -1353,37 +1354,59 @@
       const dock = app?.querySelector?.('.bank-section--turn, .bank-section')
         || document.querySelector('.bank-section--turn, .bank-section');
       const hud = document.getElementById('race-battle-hud');
+      const mine = app?.parentElement;
+      const main = document.getElementById('race-main') || mine?.parentElement;
+      const footer = app?.querySelector?.('.match-footer');
+
+      const forceFlexChain = () => {
+        [main, mine, app, area].forEach((el) => {
+          if (!el) return;
+          el.style.setProperty('display', 'flex', 'important');
+          el.style.setProperty('flex-direction', 'column', 'important');
+          el.style.setProperty('flex', '1 1 0', 'important');
+          el.style.setProperty('min-height', '0', 'important');
+          el.style.setProperty('max-height', 'none', 'important');
+        });
+        if (app) {
+          app.style.setProperty('overflow', 'hidden', 'important');
+          app.style.setProperty('height', '100%', 'important');
+        }
+        if (area) {
+          area.style.setProperty('justify-content', 'center', 'important');
+          area.style.setProperty('align-items', 'center', 'important');
+          area.style.setProperty('overflow', 'hidden', 'important');
+          area.style.setProperty('width', '100%', 'important');
+        }
+        if (dock) dock.style.setProperty('flex-shrink', '0', 'important');
+        if (footer) footer.style.setProperty('flex-shrink', '0', 'important');
+        void app?.offsetHeight;
+      };
 
       const apply = () => {
+        forceFlexChain();
+
         const dockTop = dock?.getBoundingClientRect?.().top;
         const hudBottom = hud && !hud.classList.contains('hidden')
           ? hud.getBoundingClientRect().bottom
           : null;
         const areaRect = area?.getBoundingClientRect?.();
+        if (!Number.isFinite(dockTop) || !areaRect) return;
 
-        // Hard window: scoreboard bottom → dock top. Never invent a taller gap.
-        let gap = 0;
-        if (Number.isFinite(dockTop) && Number.isFinite(hudBottom) && hudBottom > 0) {
-          gap = Math.floor(dockTop - hudBottom);
-        } else if (Number.isFinite(dockTop) && areaRect) {
-          gap = Math.floor(dockTop - areaRect.top);
-        } else if (area?.clientHeight > 80) {
-          gap = Math.floor(area.clientHeight);
-        } else {
-          gap = Math.floor(window.innerHeight * 0.4);
+        // Available height is the mid-column the board actually lives in.
+        // Prefer area→dock (never covers HUD). Cross-check with HUD→dock.
+        let available = Math.floor(dockTop - areaRect.top);
+        if (Number.isFinite(hudBottom) && hudBottom > 0) {
+          const hudGap = Math.floor(dockTop - hudBottom);
+          // If area starts below the HUD (normal), area→dock is the safe fit.
+          // If area hasn't expanded yet, fall back to HUD gap.
+          if (available < 80 && hudGap > 80) available = hudGap;
+          else if (hudGap > 80) available = Math.min(available, hudGap);
         }
-        if (gap < 60) gap = 60;
+        if (available < 80) available = Math.floor(area.clientHeight || window.innerHeight * 0.4);
 
-        // Also never taller than the live blocks-area (keeps top edge under HUD).
-        if (area?.clientHeight > 80) {
-          gap = Math.min(gap, Math.floor(area.clientHeight));
-        }
-
-        const widthBox = areaRect?.width
-          || app?.getBoundingClientRect?.().width
-          || window.innerWidth;
+        const widthBox = areaRect.width || app?.getBoundingClientRect?.().width || window.innerWidth;
         const w = Math.max(64, Math.floor(widthBox * 0.97));
-        const capH = Math.max(64, Math.floor(gap * 0.97));
+        const capH = Math.max(64, Math.floor(available * 0.97));
 
         let styleEl = document.getElementById(styleId);
         if (!styleEl) {
@@ -1409,8 +1432,7 @@
   max-height: ${capH}px !important;
   aspect-ratio: auto !important;
   padding: 4px !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
+  margin: 0 auto !important;
 }
 #match-blocks[data-syl-count="4"] > .syllable-block,
 .blocks-area .syllable-blocks-row[data-syl-count="4"] > .syllable-block {
@@ -1429,26 +1451,6 @@
   aspect-ratio: auto !important;
   min-height: 0 !important;
 }
-body.match-turn-page .blocks-area:has([data-syl-count="4"]),
-body.match-race-page .blocks-area:has([data-syl-count="4"]) {
-  flex: 1 1 0 !important;
-  min-height: 0 !important;
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: center !important;
-  align-items: center !important;
-  overflow: hidden !important;
-}
-body.match-turn-page #match-app:has([data-syl-count="4"]),
-body.match-race-page #match-app:has([data-syl-count="4"]) {
-  flex: 1 1 0 !important;
-  min-height: 0 !important;
-  height: 100% !important;
-  max-height: none !important;
-  display: flex !important;
-  flex-direction: column !important;
-  overflow: hidden !important;
-}
 `;
 
         row.style.setProperty('height', `${capH}px`, 'important');
@@ -1458,7 +1460,7 @@ body.match-race-page #match-app:has([data-syl-count="4"]) {
         row.style.setProperty('aspect-ratio', 'auto', 'important');
         row.dataset.fourBoardSynced = '1';
         row.dataset.fourH = String(capH);
-        row.dataset.fourGap = String(gap);
+        row.dataset.fourGap = String(available);
 
         row.querySelectorAll(':scope > .syllable-block').forEach((block) => {
           block.style.setProperty('height', '100%', 'important');

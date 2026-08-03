@@ -210,7 +210,7 @@
   }
   body.match-race-page.match-turn-page #match-app > .match-header { display: none; }
 
-  /* 4-letter empty slots: fill the mid-column without covering the scoreboard */
+  /* 4-letter empty slots: JS sets pixel height; CSS only prepares the flex mid-column */
   body.match-turn-page .blocks-area:has(.syllable-blocks-row[data-syl-count="4"]) {
     flex: 1 1 0 !important;
     min-height: 0 !important;
@@ -228,8 +228,8 @@
     align-items: stretch !important;
     width: 97% !important;
     max-width: 97% !important;
-    height: 97% !important;
-    max-height: 97% !important;
+    height: auto !important;
+    max-height: 100% !important;
     min-height: 0 !important;
     aspect-ratio: auto !important;
     padding: 4px !important;
@@ -309,7 +309,7 @@
 <script src="js/rw-score-odometer.js"></script>
 <script src="js/match-emotes.js?v=20260707y"></script>
 <script src="js/four-letter-board-layout.js?v=20260804a"></script>
-<script src="js/korean-match.js?v=20260804q"></script>
+<script src="js/korean-match.js?v=20260804r"></script>
 <script src="js/match-turn-app.js?v=20260804k"></script>
 <script src="js/match-turn-bot.js?v=20260804i"></script>
 <script>
