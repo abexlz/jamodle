@@ -537,11 +537,11 @@ html.reduce-motion .race-round-reveal-card {
 
 /* Player 1 = 500-won obverse (crane); player 2 = reverse (500). */
 .race-coin-flip-legend-item--blue::before {
-  background-image: url('../assets/coin-flip/500-front.webp');
+  background-image: url('../assets/coin-flip/500-front.webp?v=20260803b');
 }
 
 .race-coin-flip-legend-item--red::before {
-  background-image: url('../assets/coin-flip/500-back.webp');
+  background-image: url('../assets/coin-flip/500-back.webp?v=20260803b');
 }
 
 .race-coin-flip-coin {
@@ -575,12 +575,12 @@ html.reduce-motion .race-round-reveal-card {
 }
 
 .race-coin-face--blue {
-  background-image: url('../assets/coin-flip/500-front.webp');
+  background-image: url('../assets/coin-flip/500-front.webp?v=20260803b');
   transform: rotateY(0deg);
 }
 
 .race-coin-face--red {
-  background-image: url('../assets/coin-flip/500-back.webp');
+  background-image: url('../assets/coin-flip/500-back.webp?v=20260803b');
   transform: rotateY(180deg);
 }
 
