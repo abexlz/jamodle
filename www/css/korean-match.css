@@ -2196,8 +2196,8 @@
   body.match-page .match-chrome-title-img,
   .hangul-dle-title-img {
     display: block;
-    width: 80vw;
-    max-width: 80vw;
+    width: 95vw;
+    max-width: 95vw;
     height: auto;
     object-fit: contain;
     margin: 0 auto;
