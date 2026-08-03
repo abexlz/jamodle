@@ -1054,10 +1054,9 @@
     border-width: 2px !important;
     border-color: var(--border) !important;
     border-radius: 10px;
-    box-shadow:
-      0 12px 20px rgba(80, 40, 0, 0.28),
-      0 5px 0 rgba(140, 70, 0, 0.35) !important;
-    transition: transform .18s cubic-bezier(0.34, 1.35, 0.64, 1), box-shadow .18s ease;
+    box-shadow: none !important;
+    opacity: 0.78;
+    transition: transform .18s cubic-bezier(0.34, 1.35, 0.64, 1), opacity .18s ease;
   }
 
   .drop-zone .jamo-tile.in-zone.selected:not(.locked):not(.revealing):not(.revealed) .jamo-tile-front {
@@ -1163,13 +1162,12 @@
   .jamo-tile.selected {
     outline: 5px solid #FFD743;
     outline-offset: 2px;
-    box-shadow:
-      0 12px 20px rgba(80, 40, 0, 0.28),
-      0 5px 0 rgba(140, 70, 0, 0.35);
+    box-shadow: none;
+    opacity: 0.78;
     transform: translateY(-8px) scale(1.14);
     z-index: 8;
     position: relative;
-    transition: transform .18s cubic-bezier(0.34, 1.35, 0.64, 1), box-shadow .18s ease;
+    transition: transform .18s cubic-bezier(0.34, 1.35, 0.64, 1), opacity .18s ease;
   }
 
   /* Let lifted tiles float above their slot / dock cell. */
