@@ -2389,19 +2389,24 @@
   body.match-race-page .syllable-blocks-row[data-syl-count="4"] {
     flex-wrap: wrap;
     --four-gap: clamp(4px, 1.2vw, 8px);
-    --four-side: min(97cqh, 97cqw, 97%);
-    width: var(--four-side);
-    height: var(--four-side);
-    max-width: var(--four-side);
+    width: 97%;
+    height: 97%;
+    max-width: 97%;
     max-height: 97%;
-    margin-inline: auto;
+    margin: 0 auto;
     gap: var(--four-gap);
-    align-content: center;
+    align-content: stretch;
     justify-content: center;
+    align-items: stretch;
+    flex: 0 0 97%;
+    min-height: 0;
+    box-sizing: border-box;
   }
 
   body.match-race-page .blocks-area:has(.syllable-blocks-row[data-syl-count="4"]) {
     container-type: size;
+    flex: 1 1 0;
+    min-height: 0;
     justify-content: center;
     align-items: center;
   }
@@ -2430,10 +2435,10 @@
     --wrap-block: calc((100% - var(--four-gap)) / 2);
     flex: 0 0 var(--wrap-block);
     width: var(--wrap-block);
-    height: var(--wrap-block);
+    height: calc((100% - var(--four-gap)) / 2);
     max-width: var(--wrap-block);
-    max-height: var(--wrap-block);
-    aspect-ratio: 1 / 1;
+    max-height: calc((100% - var(--four-gap)) / 2);
+    aspect-ratio: auto;
   }
 
   body.match-race-page #match-app:has(.syllable-blocks-row[data-syl-count="4"]) {
@@ -3372,19 +3377,24 @@
     flex-wrap: wrap;
     overflow: visible;
     --four-gap: clamp(4px, 1.2vw, 8px);
-    --four-side: min(97cqh, 97cqw, 97%);
-    width: var(--four-side);
-    height: var(--four-side);
-    max-width: var(--four-side);
+    width: 97%;
+    height: 97%;
+    max-width: 97%;
     max-height: 97%;
-    margin-inline: auto;
+    margin: 0 auto;
     gap: var(--four-gap);
-    align-content: center;
+    align-content: stretch;
     justify-content: center;
+    align-items: stretch;
+    flex: 0 0 97%;
+    min-height: 0;
+    box-sizing: border-box;
   }
 
   body.match-turn-page .blocks-area:has(.syllable-blocks-row[data-syl-count="4"]) {
     container-type: size;
+    flex: 1 1 0;
+    min-height: 0;
     justify-content: center;
     align-items: center;
   }
@@ -3405,10 +3415,10 @@
     --wrap-block: calc((100% - var(--four-gap)) / 2);
     flex: 0 0 var(--wrap-block);
     width: var(--wrap-block);
-    height: var(--wrap-block);
+    height: calc((100% - var(--four-gap)) / 2);
     max-width: var(--wrap-block);
-    max-height: var(--wrap-block);
-    aspect-ratio: 1 / 1;
+    max-height: calc((100% - var(--four-gap)) / 2);
+    aspect-ratio: auto;
   }
 
   body.match-turn-page #match-app:has(.syllable-blocks-row[data-syl-count="4"]) {
