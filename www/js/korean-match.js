@@ -945,8 +945,11 @@
 
       const headerHtml = this.versus
         ? hiddenStatsHtml
-        : `<header class="match-chrome">
+        : `<header class="match-chrome${this.tutorialMode ? ' match-chrome--tutorial' : ''}">
             <h1 class="match-chrome-title">${escapeHtml(chromeTitle)}</h1>
+            ${this.tutorialMode
+              ? '<p class="tutorial-lesson-progress" id="tutorial-lesson-progress" aria-live="polite"></p>'
+              : ''}
             ${hiddenStatsHtml}
           </header>`;
 
@@ -1077,7 +1080,6 @@
 
       const tutorialLessonBar = this.tutorialMode
         ? `<section class="tutorial-lesson-bar" id="tutorial-lesson-bar" aria-live="polite">
-            <p class="tutorial-lesson-progress" id="tutorial-lesson-progress"></p>
             <p class="tutorial-lesson-title" id="tutorial-lesson-title"></p>
             <p class="tutorial-lesson-body" id="tutorial-lesson-body"></p>
           </section>`

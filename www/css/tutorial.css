@@ -23,16 +23,6 @@
   flex-shrink: 0;
 }
 
-.tutorial-lesson-progress {
-  margin: 0 0 6px;
-  font-size: 36px;
-  font-weight: 700;
-  line-height: 1.15;
-  text-align: left;
-  color: #3A8AB5 !important;
-  text-shadow: none !important;
-}
-
 .tutorial-lesson-title {
   margin: 0;
   font-family: 'Junegull', sans-serif;
@@ -48,6 +38,36 @@
   line-height: 1.35;
   color: #5D6470 !important;
   text-shadow: none !important;
+}
+
+/* Step progress sits beside top chrome title "TUTORIAL" */
+body.tutorial-page .match-chrome.match-chrome--tutorial {
+  justify-content: space-between;
+  gap: 12px;
+  padding-inline: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+body.tutorial-page .match-chrome--tutorial .match-chrome-title {
+  text-align: left;
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+body.tutorial-page .match-chrome--tutorial .tutorial-lesson-progress {
+  margin: 0;
+  padding: 0;
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: clamp(22px, 6vw, 28px);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+  text-align: right;
+  color: #FFD743 !important;
+  text-shadow: 0 2px 0 rgba(0, 55, 68, 0.35) !important;
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 /* Tutorial chrome title */
