@@ -97,7 +97,7 @@
     setTimeout(show, 80);
   }
 
-  function renderTier(statusInfo) {
+  function renderTiers(statusInfo) {
     const coins = statusInfo.profile?.coins || 0;
     const freeReady = statusInfo.status === 'ready';
     const tiers = CRS()?.listTiers?.() || [];
