@@ -2257,7 +2257,7 @@
       bank.dataset.tileCount = String(n);
 
       const rootTile = parseFloat(getComputedStyle(this.root).getPropertyValue('--tile-size'));
-      const tileSize = Number.isFinite(rootTile) && rootTile > 0 ? rootTile : 46;
+      let tileSize = Number.isFinite(rootTile) && rootTile > 0 ? rootTile : 46;
 
       const slotCount = bank.querySelectorAll('.jamo-dock-slot').length;
       // Layout against round capacity / reserved slots, never remaining tiles.
@@ -2269,8 +2269,10 @@
         n
       );
 
-      bank.style.setProperty('--dock-tile-size', `${tileSize}px`);
-      bank.style.setProperty('--turn-dock-tile-size', `${tileSize}px`);
+      const sylCount = Number(
+        this.root?.querySelector?.('.syllable-blocks-row')?.dataset?.sylCount || 0
+      );
+
       bank.style.maxHeight = 'none';
       bank.style.overflowX = 'hidden';
       bank.style.overflowY = this.turnBased ? 'auto' : 'visible';
@@ -2278,6 +2280,8 @@
       bank.style.alignContent = 'flex-start';
 
       if (!capacity) {
+        bank.style.setProperty('--dock-tile-size', `${tileSize}px`);
+        bank.style.setProperty('--turn-dock-tile-size', `${tileSize}px`);
         bank.classList.remove('jamo-bank--wrap12');
         bank.removeAttribute('data-dock-fitted');
         return;
@@ -2294,6 +2298,22 @@
         if (dockStack?.clientWidth > 0) innerW = dockStack.clientWidth - padX;
       }
       innerW = Math.max(innerW, tileSize);
+
+      // 1-letter: bank tiles +30% vs 2-letter scale, then grow to fill the dock width.
+      if (sylCount === 1) {
+        const target = tileSize * 1.3;
+        const fillSize = Math.floor(
+          (innerW - gap * Math.max(capacity - 1, 0)) / Math.max(capacity, 1)
+        );
+        if (fillSize > 0) {
+          tileSize = fillSize >= target ? fillSize : Math.min(target, fillSize);
+        } else {
+          tileSize = Math.round(target);
+        }
+      }
+
+      bank.style.setProperty('--dock-tile-size', `${tileSize}px`);
+      bank.style.setProperty('--turn-dock-tile-size', `${tileSize}px`);
 
       const cols = Math.max(1, Math.floor((innerW + gap) / (tileSize + gap)));
       const rows = Math.ceil(capacity / cols);
@@ -2325,7 +2345,9 @@
         const rowGap = parseFloat(getComputedStyle(row).gap) || 6;
         const toolsW = tools?.getBoundingClientRect().width || 0;
         const availableW = Math.max(tileSize + padX, row.clientWidth - toolsW - rowGap);
-        lockedW = Math.min(lockedW, Math.floor(availableW));
+        lockedW = Math.min(Math.max(lockedW, fittedW), Math.floor(availableW));
+        // 1-letter: keep bank at full remaining width so filled tiles stay edge-to-edge.
+        if (sylCount === 1) lockedW = Math.floor(availableW);
       }
 
       this._dockFittedMinHeight = lockedH;
