@@ -495,10 +495,6 @@
   box-shadow: none !important;
 }
 
-body.multiplayer-open #home-bottom-bar {
-  display: none !important;
-}
-
 .menu-multiplayer-btn {
   width: 100%;
 }

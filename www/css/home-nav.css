@@ -219,7 +219,7 @@ body.has-home-bottom-bar.home-menu-active #menu-screen #menu-root {
 }
 
 body.has-home-bottom-bar:not(.home-menu-active) {
-  padding-bottom: calc(var(--home-nav-offset) + 12px);
+  padding-bottom: calc(var(--home-nav-offset) + 12px) !important;
 }
 
 /* Game modes keep the translucent bar visible with content inset */

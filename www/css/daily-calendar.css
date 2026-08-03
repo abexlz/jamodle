@@ -674,10 +674,6 @@ html:has(body.daily-cal-open) {
   overflow: hidden;
 }
 
-body.daily-cal-open #home-bottom-bar {
-  display: none !important;
-}
-
 body.daily-cal-open #menu-screen {
   pointer-events: none;
   max-width: 420px;

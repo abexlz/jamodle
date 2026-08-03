@@ -505,7 +505,7 @@
     document.body.appendChild(overlayEl);
     document.body.classList.add('daily-cal-open');
     lockBodyScroll();
-    global.HomeNav?.hide?.();
+    global.HomeNav?.show?.();
     renderBody();
     bindEvents();
     requestAnimationFrame(() => overlayEl.classList.add('visible'));

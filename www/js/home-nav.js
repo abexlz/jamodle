@@ -123,6 +123,9 @@
 
   function detectActiveTab() {
     if (isSettingsPage()) return 'settings';
+    const file = (global.location.pathname || '').split('/').pop() || '';
+    if (file.includes('match-tutorial')) return 'learn';
+    if (file.includes('chest-room') || file.includes('wheel')) return 'shop';
     if (!isIndexPage()) return 'menu';
     return readStoredHomeTab();
   }
@@ -251,13 +254,15 @@
     setActiveTab(options.activeTab || detectActiveTab());
   }
 
+  /**
+   * Bottom nav stays pinned globally. Overlays cover it via z-index instead of hiding.
+   * Only honors an explicit page opt-out via data-no-home-nav="1".
+   */
   function hide() {
+    if (document.body?.dataset?.noHomeNav !== '1') return;
     const bar = document.getElementById(BAR_ID);
     if (bar) bar.classList.add('hidden');
     document.body.classList.remove('home-menu-active');
-    if (!document.body.classList.contains('game-active') && !document.body.classList.contains('has-home-bottom-bar')) {
-      document.documentElement.classList.remove('viewport-fit-lock');
-    }
   }
 
   /** Attach bottom nav on a game page and remember how to return. */
@@ -274,6 +279,24 @@
     show({ activeTab: 'menu' });
     document.body.classList.add('has-home-bottom-bar', 'home-nav-game');
     document.body.classList.remove('home-menu-active');
+  }
+
+  function shouldAutoMount() {
+    if (!document.body) return false;
+    if (document.body.dataset.noHomeNav === '1') return false;
+    if ((global.location.pathname || '').includes('/admin/')) return false;
+    return true;
+  }
+
+  function autoMount() {
+    if (!shouldAutoMount()) return;
+    show();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', autoMount);
+  } else {
+    autoMount();
   }
 
   global.HomeNav = {
