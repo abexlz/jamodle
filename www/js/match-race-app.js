@@ -133,8 +133,6 @@
       if (this.matchData) {
         this.onMatchUpdate(this.matchData);
       } else if (this.els?.main) {
-        const back = this.root.querySelector('.race-back');
-        if (back) back.textContent = rt('backProfile');
         const titleImg = this.root.querySelector('.race-header-title-img');
         if (titleImg) titleImg.alt = rt('title');
       }
@@ -144,7 +142,7 @@
       const hud = HUD()?.shellMarkup?.({ showScores: false, emoteSlot: true }) || '';
       this.root.innerHTML = `
         <header class="race-header">
-          <a class="race-back" href="profile.html">${escapeHtml(rt('backProfile'))}</a>
+          <span class="race-header-spacer" aria-hidden="true"></span>
           <h1 class="race-header-title race-header-title--logo">
             <img class="race-header-title-img" src="assets/hangul-dle-title.png" alt="${escapeHtml(rt('title'))}" draggable="false">
           </h1>
@@ -159,14 +157,6 @@
         main: this.root.querySelector('#race-main'),
         countdown: this.root.querySelector('#race-countdown'),
       };
-      this.wireLeaveHandlers();
-    }
-
-    wireLeaveHandlers() {
-      this.root.querySelector('.race-back')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        this.leaveMatchAndGo(e.currentTarget.getAttribute('href') || 'profile.html');
-      });
     }
 
     leaveMatch() {

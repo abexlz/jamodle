@@ -1239,7 +1239,7 @@
       const hud = HUD()?.shellMarkup?.({ showScores: false, emoteSlot: false }) || '';
       this.root.innerHTML = `
         <header class="race-header">
-          <a class="race-back" href="index.html">${escapeHtml(rt('backHome'))}</a>
+          <span class="race-header-spacer" aria-hidden="true"></span>
           <h1 class="race-header-title race-header-title--logo">
             <img class="race-header-title-img" src="assets/hangul-dle-title.png" alt="${escapeHtml(rt('title'))}" draggable="false">
           </h1>
