@@ -2517,11 +2517,11 @@
     width: 100%;
   }
 
-  /* 4 → 2×2 — +30% slot size vs prior compact grid */
+  /* 4 → 2×2 — larger slots only (tiles/dock unchanged) */
   body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="4"] {
     flex-wrap: wrap;
     width: max-content;
-    max-width: min(312px, 83vw);
+    max-width: min(406px, 100vw);
     margin-inline: auto;
     gap: clamp(5px, 1.5vw, 10px);
     justify-content: center;
@@ -2549,7 +2549,7 @@
   }
 
   body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="4"] .syllable-block {
-    --wrap-block: clamp(94px, 31vw, 135px);
+    --wrap-block: clamp(122px, 40vw, 176px);
     flex: 0 0 var(--wrap-block);
     width: var(--wrap-block);
     max-width: var(--wrap-block);
