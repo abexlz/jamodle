@@ -2788,43 +2788,9 @@
   }
 
   /* Live watch board — check-answer reveal (mirrors active-player flips) */
-  .watch-reveal-banner {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-    margin: 0 0 8px;
-    padding: 8px 12px;
-    border-radius: 12px;
-    background: rgba(0, 70, 85, 0.72);
-    border: 2px solid rgba(123, 207, 255, 0.55);
-    color: #fff;
-    text-align: center;
-    opacity: 0;
-    transform: translateY(-6px);
-    transition: opacity .25s ease, transform .25s ease;
-  }
-
+  .watch-reveal-banner,
   .watch-reveal-banner--show {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  .watch-reveal-banner-title {
-    font-family: 'Jua', sans-serif;
-    font-size: 14px;
-    line-height: 1.2;
-  }
-
-  .watch-reveal-banner-stat {
-    font-size: 18px;
-    font-weight: 800;
-    letter-spacing: 0.02em;
-  }
-
-  .watch-reveal-banner-syllables {
-    font-size: 12px;
-    opacity: 0.9;
+    display: none !important;
   }
 
   .turn-answer-banner {

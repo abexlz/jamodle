@@ -4463,27 +4463,8 @@
     }
 
     showWatchRevealSummary(reveal, labels = {}) {
-      const banner = this.els.watchRevealBanner;
-      if (!banner) return;
-      const correct = reveal?.correctCount || 0;
-      const total = reveal?.totalPlaced || 0;
-      const syllableCorrect = (reveal?.syllableCorrect || []).filter(Boolean).length;
-      const syllableTotal = reveal?.syllableTotal || reveal?.syllableCorrect?.length || this.blocks.length;
-      const name = labels.name || reveal?.byName || '';
-      const title = labels.title
-        || (name ? t('matchTurn.oppLastTurn', { name }) : t('matchTurn.revealStatsOnly', { correct, total }));
-      const stat = labels.stat || t('matchTurn.revealStatsOnly', { correct, total });
-      const syllableLine = syllableTotal > 0
-        ? t('matchTurn.revealSyllableStats', { correct: syllableCorrect, total: syllableTotal })
-        : '';
-      banner.innerHTML = `
-        <span class="watch-reveal-banner-title">${title}</span>
-        <span class="watch-reveal-banner-stat">${stat}</span>
-        ${syllableLine ? `<span class="watch-reveal-banner-syllables">${syllableLine}</span>` : ''}
-      `;
-      banner.classList.remove('hidden');
-      void banner.offsetWidth;
-      banner.classList.add('watch-reveal-banner--show');
+      // Stats banner ("X / Y correct") removed — keep board reveal only.
+      this.hideWatchRevealSummary();
     }
 
     hideWatchRevealSummary() {
