@@ -2163,11 +2163,11 @@
   body.match-page .match-chrome {
     flex-shrink: 0;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     gap: 8px;
-    min-height: 72px;
-    margin: 0 0 4px;
+    min-height: 0;
+    margin: 0 0 2px;
     padding: 0;
     background: transparent;
     border: none;
@@ -2196,9 +2196,9 @@
   body.match-page .match-chrome-title-img,
   .hangul-dle-title-img {
     display: block;
-    height: clamp(113px, 31.7vw, 152px);
+    height: clamp(226px, 63.4vw, 304px);
     width: auto;
-    max-width: min(100%, 1127px);
+    max-width: min(100%, 96vw);
     object-fit: contain;
     margin: 0 auto;
     pointer-events: none;
