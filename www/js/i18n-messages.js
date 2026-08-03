@@ -203,7 +203,7 @@
       "stepDone": "Nice work!",
       "allDone": "You're ready to play!",
       "tryAgain": "Try that again.",
-      "rotateFirst": "Rotate the jamo first.",
+      "rotateFirst": "Rotate the hangul block first.",
       "rotateSuccess": "Great rotation!",
       "mergeFirst": "Fill both merge slots, then tap Merge.",
       "mergeSuccess": "Vowels merged!",
@@ -212,7 +212,7 @@
       "steps": {
         "placeSo": {
           "title": "Build 소",
-          "body": "Drag each jamo from the dock into the matching slot."
+          "body": "Drag each hangul block from the dock into the matching slot."
         },
         "placeGam": {
           "title": "Add a final consonant — 감",
@@ -236,9 +236,10 @@
         },
         "solveHwasal": {
           "title": "Final challenge — 화살",
-          "body": "Build 화살. You may need to rotate jamo — try turning ㅜ into ㅗ for 화."
+          "body": "Build 화살. You may need to rotate hangul blocks — try turning ㅜ into ㅗ for 화."
         }
-      }
+      },
+      "chromeTitle": "TUTORIAL"
     },
     "pauseQuit": {
       "pauseLabel": "Pause",
@@ -1731,7 +1732,7 @@
       "stepDone": "잘했어요!",
       "allDone": "이제 플레이할 준비가 됐어요!",
       "tryAgain": "다시 시도해 보세요.",
-      "rotateFirst": "먼저 자모를 돌려 주세요.",
+      "rotateFirst": "먼저 한글 블록을 돌려 주세요.",
       "rotateSuccess": "잘 돌렸어요!",
       "mergeFirst": "합치기 칸을 채운 뒤 결합을 눌러 주세요.",
       "mergeSuccess": "모음이 합쳐졌어요!",
@@ -1740,7 +1741,7 @@
       "steps": {
         "placeSo": {
           "title": "소 만들기",
-          "body": "도크에서 자모를 끌어 알맞은 칸에 놓아 보세요."
+          "body": "도크에서 한글 블록을 끌어 알맞은 칸에 놓아 보세요."
         },
         "placeGam": {
           "title": "받침 넣기 — 감",
@@ -1764,9 +1765,10 @@
         },
         "solveHwasal": {
           "title": "마지막 도전 — 화살",
-          "body": "화살을 완성하세요. 자모를 돌려야 할 수도 있어요 — 화를 위해 ㅜ를 ㅗ로 바꿔 보세요."
+          "body": "화살을 완성하세요. 한글 블록을 돌려야 할 수도 있어요 — 화를 위해 ㅜ를 ㅗ로 바꿔 보세요."
         }
-      }
+      },
+      "chromeTitle": "TUTORIAL"
     },
     "pauseQuit": {
       "pauseLabel": "일시정지",

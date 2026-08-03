@@ -199,7 +199,7 @@
     "stepDone": "Nice work!",
     "allDone": "You're ready to play!",
     "tryAgain": "Try that again.",
-    "rotateFirst": "Rotate the jamo first.",
+    "rotateFirst": "Rotate the hangul block first.",
     "rotateSuccess": "Great rotation!",
     "mergeFirst": "Fill both merge slots, then tap Merge.",
     "mergeSuccess": "Vowels merged!",
@@ -208,7 +208,7 @@
     "steps": {
       "placeSo": {
         "title": "Build 소",
-        "body": "Drag each jamo from the dock into the matching slot."
+        "body": "Drag each hangul block from the dock into the matching slot."
       },
       "placeGam": {
         "title": "Add a final consonant — 감",
@@ -232,9 +232,10 @@
       },
       "solveHwasal": {
         "title": "Final challenge — 화살",
-        "body": "Build 화살. You may need to rotate jamo — try turning ㅜ into ㅗ for 화."
+        "body": "Build 화살. You may need to rotate hangul blocks — try turning ㅜ into ㅗ for 화."
       }
-    }
+    },
+    "chromeTitle": "TUTORIAL"
   },
   "pauseQuit": {
     "pauseLabel": "Pause",

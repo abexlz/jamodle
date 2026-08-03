@@ -41,10 +41,52 @@
 
 .tutorial-lesson-body {
   margin: 6px 0 0;
-  font-size: 14px;
-  line-height: 1.45;
+  font-size: 28px;
+  line-height: 1.35;
   color: #5D6470 !important;
   text-shadow: none !important;
+}
+
+/* Tutorial chrome title */
+body.tutorial-page .match-chrome-title {
+  color: #FFD743 !important;
+  text-shadow: 0 2px 0 rgba(0, 55, 68, 0.35) !important;
+}
+
+body.tutorial-page .title-block h1 {
+  color: #FFD743 !important;
+}
+
+/* Empty syllable slots — 1.5× vs prior tutorial/match 1-letter size */
+body.tutorial-page.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="1"] .syllable-block {
+  flex: 0 0 auto !important;
+  width: min(234px, 82vw) !important;
+  max-width: min(234px, 82vw) !important;
+  min-width: min(195px, 70vw) !important;
+  aspect-ratio: 1 / 1;
+}
+
+body.tutorial-page.match-page:not(.match-race-page) #match-app:has(.syllable-blocks-row[data-syl-count="1"]) {
+  --block-size: min(234px, 82vw) !important;
+  --tile-size: min(78px, 23vw) !important;
+}
+
+body.tutorial-page.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="2"] {
+  justify-content: center;
+  gap: clamp(8px, 2vw, 14px);
+}
+
+body.tutorial-page.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="2"] .syllable-block {
+  flex: 0 0 min(132px, 40vw) !important;
+  width: min(132px, 40vw) !important;
+  max-width: min(132px, 40vw) !important;
+  min-width: min(110px, 34vw) !important;
+  aspect-ratio: 1 / 1;
+}
+
+body.tutorial-page.match-page:not(.match-race-page) #match-app:has(.syllable-blocks-row[data-syl-count="2"]) {
+  --block-size: min(132px, 40vw) !important;
+  --tile-size: min(63px, 19vw) !important;
 }
 
 /* Explicit dim / focus — only targeted elements stay bright */
@@ -119,7 +161,7 @@
 }
 
 body.tutorial-page .title-block h1 {
-  color: #ffffff !important;
+  color: #FFD743 !important;
 }
 
 html.reduce-motion .tutorial-coach-finger {

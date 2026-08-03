@@ -917,7 +917,9 @@
         return;
       }
 
-      const chromeTitle = this.isDaily
+      const chromeTitle = this.tutorialMode
+        ? (t('tutorial.chromeTitle') || t('tutorial.title') || 'TUTORIAL')
+        : this.isDaily
         ? (t('match.titleDaily') || 'Daily Hangul-dle')
         : (t('match.title') || t('menu.modes.classic.title') || 'Hangul-dle');
 
