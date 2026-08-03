@@ -108,7 +108,7 @@ body.tutorial-page.match-page:not(.match-race-page) #match-app:has(.syllable-blo
   box-shadow: 0 0 0 5px rgba(255, 215, 67, 0.45) !important;
 }
 
-/* Check answer — always full-width in tutorial */
+/* Check answer — always full-width in tutorial, clear of the home nav */
 .tutorial-match .match-actions {
   display: flex !important;
   grid-template-columns: unset !important;
@@ -123,6 +123,33 @@ body.tutorial-page.match-page:not(.match-race-page) #match-app:has(.syllable-blo
   max-height: none !important;
   font-family: var(--font-latin, 'Junegull'), sans-serif !important;
   font-size: clamp(18px, 4.8vw, 22px) !important;
+}
+
+/* Keep Check above the fixed home bottom bar on every tutorial step */
+body.tutorial-page.has-home-bottom-bar {
+  padding-bottom: calc(var(--home-nav-offset, 56px) + 8px) !important;
+}
+
+body.tutorial-page #match-app {
+  padding-bottom: 0;
+  box-sizing: border-box;
+}
+
+body.tutorial-page .match-footer,
+.tutorial-match .match-footer {
+  flex: 0 0 auto !important;
+  flex-shrink: 0 !important;
+  position: relative;
+  z-index: 40;
+  margin-top: auto !important;
+  padding-top: 10px !important;
+  padding-bottom: 12px !important;
+  background: transparent;
+}
+
+body.tutorial-page .bank-section + .match-footer {
+  /* Drop the large spacer that was pushing Check under the nav */
+  padding-top: 10px !important;
 }
 
 /* Pre-placed locked tiles stay bright and correct-colored during guidance */
