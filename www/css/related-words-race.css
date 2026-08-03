@@ -39,9 +39,16 @@
 .rw-race-battle-mid {
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
   margin-bottom: 4px;
+}
+
+.rw-race-battle-mid > .rw-race-battle-center-meta {
+  flex: 0 0 auto;
+  align-self: flex-start;
+  min-height: 76px;
+  justify-content: center;
 }
 
 .rw-race-battle-cluster {
@@ -268,12 +275,37 @@
 }
 
 .rw-race-battle-hud--no-scores .rw-race-battle-mid {
-  gap: clamp(48px, 18vw, 88px);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: start;
+  justify-content: stretch;
+  column-gap: clamp(28px, 9vw, 52px);
+  width: 100%;
+}
+
+.rw-race-battle-hud--no-scores .rw-race-battle-mid > .rw-race-battle-cluster:first-child {
+  justify-self: start;
+}
+
+.rw-race-battle-hud--no-scores .rw-race-battle-mid > .rw-race-battle-cluster:last-child {
+  justify-self: end;
 }
 
 .rw-race-battle-hud--no-scores {
   min-height: clamp(118px, 32vw, 148px);
   padding-bottom: clamp(18px, 5vw, 26px);
+}
+
+.rw-race-battle-hud--no-scores .rw-race-battle-mid > .rw-race-battle-center-meta {
+  min-height: 76px;
+  gap: 0;
+  justify-self: center;
+}
+
+.rw-race-battle-hud--no-scores .race-series-score {
+  height: 76px;
+  margin-bottom: 0;
+  gap: 10px;
 }
 
 .race-series-score {
@@ -290,7 +322,7 @@
 
 .race-series-wins {
   font-family: 'Jua', sans-serif;
-  font-size: clamp(22px, 6vw, 30px);
+  font-size: clamp(33px, 9vw, 45px);
   font-weight: 700;
   line-height: 1;
   min-width: 1.1em;
@@ -316,7 +348,7 @@
 
 .race-series-sep {
   font-family: 'Jua', sans-serif;
-  font-size: clamp(18px, 5vw, 24px);
+  font-size: clamp(27px, 7.5vw, 36px);
   font-weight: 700;
   color: #8A939E;
   line-height: 1;
@@ -392,7 +424,7 @@
   text-align: center;
 }
 
-/* Hangul-dle battle — keep only the series score under cards */
+/* Hangul-dle battle — hide letter/round labels; series score sits between cards */
 body.match-page .rw-race-battle-center-meta .rw-race-chain-title,
 body.match-page .rw-race-battle-center-meta .rw-race-chain-progress {
   display: none !important;
