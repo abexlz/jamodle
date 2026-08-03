@@ -50,7 +50,8 @@
     --syl-grid-row-cho: 0.92fr;
     --syl-grid-row-jungH: 0.624fr;
     --syl-grid-row-jong: 0.81fr;
-    --merge-slot-scale: 1.014; /* 0.78 × 1.3 — merge UI 30% larger */
+    --merge-slot-scale: 1.014; /* input slots: 0.78 × 1.3 */
+    --merge-result-scale: 0.78; /* result tray stays original size */
     --merge-result-height-scale: 1.24;
     --jamo-merge-glyph-ratio: 0.768;
     --jamo-merge-result-glyph-ratio: 0.696;
@@ -1531,12 +1532,12 @@
   }
 
   .merge-result {
-    width: calc(var(--tile-size) * var(--merge-slot-scale) * 2 + 36px);
+    width: calc(var(--tile-size) * var(--merge-result-scale) * 2 + 28px);
     max-width: 100%;
-    height: calc(var(--tile-size) * var(--merge-slot-scale) * var(--merge-result-height-scale));
-    min-width: calc(49px * 2 + 36px);
-    min-height: calc(49px * var(--merge-result-height-scale));
-    max-height: calc(var(--tile-size) * var(--merge-slot-scale) * var(--merge-result-height-scale));
+    height: calc(var(--tile-size) * var(--merge-result-scale) * var(--merge-result-height-scale));
+    min-width: calc(38px * 2 + 28px);
+    min-height: calc(38px * var(--merge-result-height-scale));
+    max-height: calc(var(--tile-size) * var(--merge-result-scale) * var(--merge-result-height-scale));
   }
 
   .merge-slot,
@@ -2844,12 +2845,12 @@
   }
 
   body.match-page .merge-result {
-    width: calc(var(--tile-size) * 0.936 * 2 + 31px);
+    width: calc(var(--tile-size) * 0.72 * 2 + 24px);
     max-width: 100%;
-    height: calc(var(--tile-size) * 0.936 * var(--merge-result-height-scale));
-    min-width: calc(42px * 2 + 31px);
-    min-height: calc(42px * var(--merge-result-height-scale));
-    max-height: calc(var(--tile-size) * 0.936 * var(--merge-result-height-scale));
+    height: calc(var(--tile-size) * 0.72 * var(--merge-result-height-scale));
+    min-width: calc(32px * 2 + 24px);
+    min-height: calc(32px * var(--merge-result-height-scale));
+    max-height: calc(var(--tile-size) * 0.72 * var(--merge-result-height-scale));
   }
 
   body.match-page .jamo-bank {
@@ -3244,12 +3245,12 @@
   }
 
   body.match-turn-page .merge-result {
-    width: calc(var(--tile-size) * 0.962 * 2 + 31px);
+    width: calc(var(--tile-size) * 0.74 * 2 + 24px);
     max-width: 100%;
-    height: calc(var(--tile-size) * 0.962 * var(--merge-result-height-scale));
-    min-width: calc(39px * 2 + 31px);
-    min-height: calc(39px * var(--merge-result-height-scale));
-    max-height: calc(var(--tile-size) * 0.962 * var(--merge-result-height-scale));
+    height: calc(var(--tile-size) * 0.74 * var(--merge-result-height-scale));
+    min-width: calc(30px * 2 + 24px);
+    min-height: calc(30px * var(--merge-result-height-scale));
+    max-height: calc(var(--tile-size) * 0.74 * var(--merge-result-height-scale));
   }
 
   body.match-turn-page .merge-machine {
