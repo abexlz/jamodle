@@ -2573,20 +2573,22 @@
   }
 
   body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="1"] {
-    justify-content: stretch;
+    justify-content: center;
+    width: fit-content;
+    max-width: 100%;
+    margin-inline: auto;
   }
 
   body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="1"] .syllable-block {
-    flex: 1 1 100%;
-    width: 100%;
-    max-width: 100%;
-    min-width: 0;
+    flex: 0 0 auto;
+    width: min(100px, 30vw);
+    max-width: min(100px, 30vw);
+    min-width: min(88px, 26vw);
   }
 
   body.match-page:not(.match-race-page) #match-app:has(.syllable-blocks-row[data-syl-count="1"]) {
-    --block-size: min(120px, 42vw);
-    /* Keep dock tiles compact so merge + bank don't overlap on 1-letter boards. */
-    --tile-size: min(50px, 15vw);
+    --block-size: min(100px, 30vw);
+    --tile-size: min(46px, 14vw);
   }
 
   body.match-page:not(.match-race-page) .syllable-blocks-row .syllable-grid {
@@ -2621,8 +2623,8 @@
   }
 
   body.match-page:not(.match-race-page) #match-app {
-    --block-size: min(88px, calc((100vw - 24px - (var(--syl-count, 4) - 1) * 8px) / var(--syl-count, 4)));
-    --tile-size: min(50px, calc((100vw - 24px - (var(--syl-count, 4) - 1) * 8px) / var(--syl-count, 4) * 0.52));
+    --block-size: min(88px, calc((100vw - (var(--syl-count, 4) - 1) * 1px) / var(--syl-count, 4)));
+    --tile-size: min(48px, calc(var(--block-size) * 0.48));
   }
 
   body.match-page .syllable-block {
