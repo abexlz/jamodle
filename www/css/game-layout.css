@@ -185,6 +185,16 @@ body.match-race-page .race-main {
   flex-direction: column;
 }
 
+body.match-turn-page .race-app,
+body.match-turn-page .race-main,
+body.match-turn-page .race-turn-mine {
+  flex: 1 1 0;
+  min-height: 0 !important;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
 body.match-race-page .race-main #match-app {
   overflow: hidden !important;
 }
