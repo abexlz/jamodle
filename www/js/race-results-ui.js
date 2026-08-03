@@ -176,29 +176,16 @@
   function buildResultHeroHtml(kind, headingHtml, rewardsHtml = '') {
     if (kind !== 'win' && kind !== 'loss' && kind !== 'draw') return headingHtml;
 
-    const assets = {
-      win: 'assets/results/victory-result-banner.png',
-      loss: 'assets/results/defeat-result-banner.png',
-      draw: 'assets/results/draw-result-banner.png',
-    };
-    const alts = {
+    const status = {
       win: 'Victory!',
-      loss: 'Defeat. Better luck next time!',
-      draw: "Draw. It's a tie!",
+      loss: 'Defeat',
+      draw: 'Draw',
     };
-    const sparkleCounts = { win: 18, loss: 10, draw: 14 };
-    const asset = assets[kind];
-    const sparkles = buildSparkleMarkup(sparkleCounts[kind] || 14);
-    const alt = alts[kind] || alts.draw;
+    const alt = status[kind] || status.draw;
 
     return `
-      <div class="race-results-hero race-results-hero--${kind}">
-        <div class="race-results-hero-aura" aria-hidden="true"></div>
-        <div class="race-results-hero-sparkles" aria-hidden="true">${sparkles}</div>
-        <img class="race-results-hero-img" src="${asset}" alt="${alt}" decoding="async">
-        <span class="race-results-hero-shine" aria-hidden="true"></span>
-        <span class="race-results-hero-petal race-results-hero-petal--1" aria-hidden="true"></span>
-        <span class="race-results-hero-petal race-results-hero-petal--2" aria-hidden="true"></span>
+      <div class="race-results-hero race-results-hero--logo race-results-hero--${kind}">
+        <img class="hangul-dle-title-img race-results-brand-logo" src="assets/hangul-dle-title.png" alt="${escapeHtml(alt)}" decoding="async" draggable="false">
         <span class="race-results-heading-fallback">${headingHtml}</span>
         ${rewardsHtml}
       </div>`;
@@ -266,9 +253,9 @@
       ? '<span class="race-results-duel-crown" aria-hidden="true">👑</span>'
       : '';
     const nameHtml = `<p class="race-results-duel-name">${escapeHtml(player.name || '')}</p>`;
-    const statHtml = scoreMode
+    const statHtml = scoreMode || !player.statHtml
       ? ''
-      : `<p class="race-results-duel-stat">${player.statHtml || ''}</p>`;
+      : `<p class="race-results-duel-stat">${player.statHtml}</p>`;
 
     return `
       <div class="race-results-duel-side ${roleClass}" data-battle-uid="${escapeHtml(player.uid || '')}" data-battle-name="${escapeHtml(player.name || '')}">
@@ -627,14 +614,12 @@
 
     const headingHtml = buildHeadingHtml(resultLine, kind);
     const rematchText = rematchLabel || 'Rematch';
-    const homeText = profileLabel || 'Home';
     const vfxHtml = kind === 'win' ? buildVictoryVfxMarkup() : '';
     const headingBlock = (kind === 'win' || kind === 'loss' || kind === 'draw')
       ? buildResultHeroHtml(kind, headingHtml, rewardsHtml)
       : headingHtml;
     const answerHtml = answerTilesHtml
       ? `<div class="race-results-answer">
-          <p class="race-results-answer-label">✨ ${escapeHtml(answerLabel || 'Answer')}</p>
           <div class="race-results-answer-tiles">${answerTilesHtml}</div>
           <p class="race-results-answer-meaning" aria-live="polite"></p>
         </div>`
@@ -653,7 +638,6 @@
         ${answerHtml}
         <div class="race-results-actions">
           <button type="button" class="race-btn race-results-btn race-btn--rematch" id="race-rematch">${escapeHtml(rematchText)}</button>
-          <a class="race-btn race-results-btn race-btn--home" href="${escapeHtml(profileHref)}">${escapeHtml(homeText)}</a>
         </div>
       </div>
     `;

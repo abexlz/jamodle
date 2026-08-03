@@ -1942,13 +1942,11 @@
         battleMatchId: this.matchId,
         battleQuestMode: 'turn',
         players: [
-          { uid: MY_UID, name: myDisplayName(), statHtml: `${shared.guessCount || 0} ${escapeHtml(rt('turns'))}` },
-          { uid: BOT_UID, name: this.botName(), statHtml: `${shared.guessCount || 0} ${escapeHtml(rt('turns'))}` },
+          { uid: MY_UID, name: myDisplayName() },
+          { uid: BOT_UID, name: this.botName() },
         ],
         answerTilesHtml: RUI.buildMatchWinTiles(displayWord),
-        answerLabel: rt('answerLabel'),
         rematchLabel: rt('rematch'),
-        profileLabel: rt('profileLink'),
         profileHref: 'index.html',
       }));
 

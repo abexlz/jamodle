@@ -1296,14 +1296,11 @@
             name: myDisplayName(
               data.player1Uid === this.myUid ? data.player1Name : data.player2Name
             ),
-            statHtml: `${shared.guessCount || 0} ${escapeHtml(rt('turns'))}`,
           },
-          { uid: opp?.uid, name: opp?.name || rt('opponent'), statHtml: `${shared.guessCount || 0} ${escapeHtml(rt('turns'))}` },
+          { uid: opp?.uid, name: opp?.name || rt('opponent') },
         ],
         answerTilesHtml: RUI.buildMatchWinTiles(displayWord),
-        answerLabel: rt('answerLabel'),
         rematchLabel: rt('rematch'),
-        profileLabel: rt('profileLink'),
         profileHref: 'index.html',
       }));
 

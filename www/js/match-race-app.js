@@ -598,18 +598,14 @@
           {
             uid: this.myUid,
             name: rt('me'),
-            statHtml: `${myProgress.guessCount} ${escapeHtml(rt('attempts'))} · ${escapeHtml(formatTime(elapsedFor(myProgress)))}`,
           },
           {
             uid: opp?.uid,
             name: opp?.name || rt('opponent'),
-            statHtml: `${oppProgress.guessCount} ${escapeHtml(rt('attempts'))} · ${escapeHtml(formatTime(elapsedFor(oppProgress)))}`,
           },
         ],
         answerTilesHtml: RUI.buildMatchWinTiles(displayWord),
-        answerLabel: rt('answerLabel'),
         rematchLabel: rt('rematch'),
-        profileLabel: rt('profileLink'),
       }));
 
       RUI.afterResultsMount(this.els.main);

@@ -2324,7 +2324,7 @@ html.reduce-motion .race-turn-swap {
 .race-results-duel-name {
   margin: 0;
   font-family: 'Jua', sans-serif;
-  font-size: clamp(14px, 3.8vw, 17px);
+  font-size: clamp(28px, 7.6vw, 34px);
   font-weight: 400;
   line-height: 1.2;
   color: var(--heading);
@@ -2579,10 +2579,7 @@ html.reduce-motion .race-turn-swap {
 }
 
 .race-results-answer-label {
-  font-family: 'Jua', sans-serif;
-  font-size: 14px;
-  color: var(--heading);
-  margin: 0 0 12px;
+  display: none !important;
 }
 
 .race-results-answer-tiles {
@@ -2594,7 +2591,7 @@ html.reduce-motion .race-turn-swap {
   margin: 12px auto 0;
   max-width: 320px;
   padding: 10px 14px;
-  font-size: 16px;
+  font-size: 32px;
   font-weight: 600;
   line-height: 1.45;
   color: #2d2640;
@@ -2701,10 +2698,10 @@ html.reduce-motion .race-turn-swap {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: clamp(48px, 12vw, 60px);
-  height: clamp(48px, 12vw, 60px);
+  width: clamp(72px, 18vw, 90px);
+  height: clamp(72px, 18vw, 90px);
   font-family: 'Jua', sans-serif;
-  font-size: clamp(24px, 6vw, 32px);
+  font-size: clamp(48px, 12vw, 64px);
   border-radius: 14px;
 }
 
@@ -2911,6 +2908,28 @@ html.reduce-motion .race-turn-swap {
   transform: translateY(8px) scale(0.9);
   opacity: 0;
   animation: raceResultsHeroLand 0.72s cubic-bezier(0.18, 1.45, 0.38, 1) 0.08s both;
+}
+
+.race-results-hero--logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  min-height: 0;
+  padding: 8px 4px 4px;
+}
+
+.race-results-brand-logo {
+  display: block;
+  width: min(100%, 420px);
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  object-fit: contain;
+  position: relative;
+  z-index: 3;
+  filter: drop-shadow(0 6px 0 rgba(0, 35, 42, 0.18));
 }
 
 .race-results-hero--loss .race-results-hero-img {
@@ -3306,8 +3325,8 @@ html.reduce-motion .race-turn-swap {
   width: 100%;
   min-width: 0;
   max-width: 100%;
-  min-height: 52px;
-  height: 52px;
+  min-height: 64px;
+  height: auto;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3315,13 +3334,13 @@ html.reduce-motion .race-turn-swap {
   box-sizing: border-box;
   text-decoration: none;
   font-family: 'Jua', sans-serif;
-  font-size: clamp(15px, 4vw, 17px);
+  font-size: clamp(30px, 8vw, 34px);
   line-height: 1;
   -webkit-text-fill-color: currentColor;
   position: relative;
   overflow: hidden;
   border: 2px solid rgba(255, 204, 51, 0.55) !important;
-  padding: 0 16px;
+  padding: 10px 16px;
 }
 
 .race-results-actions .race-results-btn::before {
@@ -3357,7 +3376,7 @@ html.reduce-motion .race-turn-swap {
 }
 
 .race-results-actions .race-btn--home {
-  color: #ffffff !important;
+  display: none !important;
 }
 
 /* Word chain (끝말잇기) — exact syllable match only; no 두음법칙 in v1 */

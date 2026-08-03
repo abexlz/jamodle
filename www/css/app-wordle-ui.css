@@ -211,10 +211,18 @@
 }
 
 .race-results-hero-img {
-  width: min(100%, 340px) !important;
+  width: min(100%, 420px) !important;
   max-width: 100% !important;
   margin-left: auto !important;
   margin-right: auto !important;
+}
+
+.race-results-brand-logo {
+  width: min(100%, 420px) !important;
+  max-width: 100% !important;
+  height: auto !important;
+  margin: 0 auto !important;
+  display: block !important;
 }
 
 .race-results-hero .race-results-rewards-pill {
@@ -375,7 +383,7 @@
 }
 
 .race-results-answer-label {
-  color: rgba(255, 255, 255, 0.88) !important;
+  display: none !important;
 }
 
 .race-btn,
@@ -401,13 +409,18 @@
 .race-results-btn.race-btn--rematch,
 .race-results-btn.race-btn--home {
   width: 100% !important;
-  min-height: 52px !important;
-  height: 52px !important;
+  min-height: 64px !important;
+  height: auto !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   box-sizing: border-box !important;
-  padding: 0 16px !important;
+  padding: 10px 16px !important;
+  font-size: clamp(30px, 8vw, 34px) !important;
+}
+
+.race-results-btn.race-btn--home {
+  display: none !important;
 }
 
 .race-btn--blue,
