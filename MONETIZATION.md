@@ -27,7 +27,14 @@ No Apple / Google / AdMob account needed for this preview.
 
 ## B. Outside setup — Rewarded ads (AdMob)
 
-### 1. Create AdMob account
+### Status in this repo
+- Ad unit IDs live in `www/js/monetization-service.js` → `CONFIG.admob`
+- `@capacitor-community/admob` is installed
+- **Android** App ID is in `android/app/src/main/res/values/strings.xml` + `AndroidManifest.xml`
+- **iOS** App ID is in `ios/App/App/Info.plist` (`GADApplicationIdentifier`)
+- Keep `useTestAdIds: true` until a real device build shows Google test ads cleanly, then set `false` for store release
+
+### 1. Create AdMob account (done if IDs are filled)
 1. Go to [https://admob.google.com](https://admob.google.com) and sign in with Google.
 2. Create an **app** for iOS and one for Android (or link Play/App Store listings once published).
 3. For each app, create an ad unit:
@@ -38,7 +45,7 @@ No Apple / Google / AdMob account needed for this preview.
 Edit `www/js/monetization-service.js`:
 
 ```js
-useTestAdIds: false,
+useTestAdIds: false, // only after device testing works
 admob: {
   androidAppId: 'ca-app-pub-XXXX~YYYY',
   iosAppId: 'ca-app-pub-XXXX~YYYY',
@@ -47,23 +54,32 @@ admob: {
 },
 ```
 
-### 3. Install AdMob Capacitor plugin (on your machine)
+### 3. Native projects
+Android and iOS shells are already added. After changing `www/`:
 
 ```bash
 cd "/Users/kyh/Code/korean wordle"
-npm install @capacitor-community/admob
 npx cap sync
 ```
 
-Then follow the plugin README for native App ID entries:
+If iOS `pod install` fails with an Xcode CLT error, open **Xcode** once, then:
+
+```bash
+sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+cd ios/App && pod install && cd ../..
+npx cap sync
+```
+
+App ID wiring (already done when using the IDs above):
 
 - **Android**: `android/app/src/main/AndroidManifest.xml` → `com.google.android.gms.ads.APPLICATION_ID`
-- **iOS**: `Info.plist` → `GADApplicationIdentifier`
+- **iOS**: `ios/App/App/Info.plist` → `GADApplicationIdentifier`
 
 ### 4. Test ads
 - Keep `useTestAdIds: true` until everything works (Google test units).
 - Switch to your real IDs and `useTestAdIds: false` before store release.
 - Real ads only fill on a **device build**, not in desktop Chrome.
+- Open with `npm run open:android` or `npm run open:ios`, then Shop → Watch.
 
 ---
 

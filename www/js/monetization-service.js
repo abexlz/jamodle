@@ -21,10 +21,10 @@
     // Set false and fill real IDs once AdMob units exist.
     useTestAdIds: true,
     admob: {
-      androidAppId: 'ca-app-pub-XXXXXXXXXXXXXXXX~YYYYYYYYYY',
-      iosAppId: 'ca-app-pub-XXXXXXXXXXXXXXXX~YYYYYYYYYY',
-      rewardedAndroid: 'ca-app-pub-XXXXXXXXXXXXXXXX/ZZZZZZZZZZ',
-      rewardedIos: 'ca-app-pub-XXXXXXXXXXXXXXXX/ZZZZZZZZZZ',
+      androidAppId: 'ca-app-pub-8908600347255002~1256627911',
+      iosAppId: 'ca-app-pub-8908600347255002~1898791595',
+      rewardedAndroid: 'ca-app-pub-8908600347255002/7950028773',
+      rewardedIos: 'ca-app-pub-8908600347255002/5004567164',
     },
     adRewardCoins: 25,
     adDailyLimit: 5,
@@ -214,21 +214,18 @@
         isTesting: !!CONFIG.useTestAdIds,
       };
 
-      if (typeof AdMob.prepareRewardVideoAd === 'function') {
-        await AdMob.prepareRewardVideoAd(options);
-        const result = await AdMob.showRewardVideoAd();
-        if (result === true || result?.rewarded || result?.type) {
-          return { ok: true };
-        }
-        return { ok: false, reason: 'not-rewarded' };
+      if (typeof AdMob.prepareRewardVideoAd !== 'function'
+          || typeof AdMob.showRewardVideoAd !== 'function') {
+        return { ok: false, reason: 'unsupported-api' };
       }
 
-      if (typeof AdMob.showRewardedAd === 'function') {
-        await AdMob.showRewardedAd(options);
+      await AdMob.prepareRewardVideoAd(options);
+      const result = await AdMob.showRewardVideoAd();
+      // Plugin resolves with AdMobRewardItem { type, amount } when the user earns the reward.
+      if (result === true || result?.rewarded || result?.type != null || result?.amount != null) {
         return { ok: true };
       }
-
-      return { ok: false, reason: 'unsupported-api' };
+      return { ok: false, reason: 'not-rewarded' };
     } catch (err) {
       console.warn('[Monetization] rewarded ad failed', err);
       return { ok: false, reason: 'ad-error', error: String(err?.message || err) };

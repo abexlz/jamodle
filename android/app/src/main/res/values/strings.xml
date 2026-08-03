@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">자모들</string>
+    <string name="title_activity_main">자모들</string>
+    <string name="package_name">com.kyh.jamodeul</string>
+    <string name="custom_url_scheme">com.kyh.jamodeul</string>
+    <string name="admob_app_id">ca-app-pub-8908600347255002~1256627911</string>
+</resources>

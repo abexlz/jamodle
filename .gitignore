@@ -4,6 +4,7 @@ node_modules/
 .env.local
 .vercel
 ios/App/App/public/
+ios/App/Pods/
 android/app/src/main/assets/public/
 *.xcuserdata
 .idea/
