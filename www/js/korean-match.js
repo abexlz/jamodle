@@ -1317,9 +1317,8 @@
     }
 
     /**
-     * 4-letter board: fill 97% of the visible scoreboard↔dock gap (pixels).
-     * Uses the HUD/dock rects as the source of truth so a short #match-app
-     * cannot under-size the board into a centered square.
+     * 4-letter board: fill ~97% of the scoreboard↔dock gap, then stretch
+     * +5% upward and +20% downward (capped so it never covers the dock).
      */
     syncFourLetterBoardSize() {
       const row = this.els?.blocks;
@@ -1327,7 +1326,7 @@
 
       const area = row.closest('.blocks-area');
       const clearRow = () => {
-        ['height', 'width', 'max-height', 'max-width', 'aspect-ratio', 'top', 'bottom', 'left', 'right', 'position', 'inset'].forEach((p) => {
+        ['height', 'width', 'max-height', 'max-width', 'aspect-ratio', 'top', 'bottom', 'left', 'right', 'position', 'inset', 'margin-top'].forEach((p) => {
           row.style.removeProperty(p);
         });
       };
@@ -1366,6 +1365,7 @@
       row.style.position = 'relative';
       row.style.setProperty('height', '0px');
       row.style.setProperty('width', '97%');
+      row.style.removeProperty('margin-top');
       void app.offsetHeight;
 
       const dockTop = dock.getBoundingClientRect().top;
@@ -1373,13 +1373,21 @@
       void app.offsetHeight;
       const gapFromHud = hudBottom != null ? Math.floor(dockTop - hudBottom) : 0;
       const gapFromArea = Math.floor(dockTop - area.getBoundingClientRect().top);
-      // Scoreboard↔dock is the visual target. Use area gap only as fallback.
       const usableH = gapFromHud > 60 ? gapFromHud : gapFromArea;
       const usableW = Math.floor(area.getBoundingClientRect().width || app.getBoundingClientRect().width);
 
       if (usableH < 60 || usableW < 60) return;
 
-      const h = Math.max(64, Math.floor(usableH * 0.97));
+      const baseH = Math.max(64, Math.floor(usableH * 0.97));
+      const extendUp = Math.floor(baseH * 0.05);
+      const extendDown = Math.floor(baseH * 0.20);
+      let h = baseH + extendUp + extendDown;
+      let shiftDown = Math.floor((extendDown - extendUp) / 2);
+      if (h > usableH) {
+        const scale = usableH / h;
+        h = usableH;
+        shiftDown = Math.floor(shiftDown * scale);
+      }
       const w = Math.max(64, Math.floor(usableW * 0.97));
 
       row.style.setProperty('width', `${w}px`, 'important');
@@ -1387,6 +1395,7 @@
       row.style.setProperty('max-width', `${w}px`, 'important');
       row.style.setProperty('max-height', `${h}px`, 'important');
       row.style.setProperty('aspect-ratio', 'unset', 'important');
+      row.style.setProperty('margin-top', `${shiftDown}px`, 'important');
     }
 
     applyMeaningPreference() {
