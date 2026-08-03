@@ -2517,13 +2517,13 @@
     width: 100%;
   }
 
-  /* 4 → 2×2 — keep compact; 5 → 3+2 / 6 → 3+3 — fill available width */
+  /* 4 → 2×2 — +30% slot size vs prior compact grid */
   body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="4"] {
     flex-wrap: wrap;
     width: max-content;
-    max-width: min(240px, 64vw);
+    max-width: min(312px, 83vw);
     margin-inline: auto;
-    gap: clamp(4px, 1.2vw, 8px);
+    gap: clamp(5px, 1.5vw, 10px);
     justify-content: center;
   }
 
@@ -2549,7 +2549,7 @@
   }
 
   body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="4"] .syllable-block {
-    --wrap-block: clamp(72px, 24vw, 104px);
+    --wrap-block: clamp(94px, 31vw, 135px);
     flex: 0 0 var(--wrap-block);
     width: var(--wrap-block);
     max-width: var(--wrap-block);
@@ -2570,14 +2570,19 @@
 
   body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="1"] .syllable-block {
     flex: 0 0 auto;
-    width: min(120px, 42vw);
-    max-width: min(120px, 42vw);
-    min-width: min(100px, 36vw);
+    width: min(156px, 55vw);
+    max-width: min(156px, 55vw);
+    min-width: min(130px, 47vw);
   }
 
   body.match-page:not(.match-race-page) #match-app:has(.syllable-blocks-row[data-syl-count="1"]) {
-    --block-size: min(120px, 42vw);
-    /* Same dock/merge tile scale as 2-letter (do not override --tile-size). */
+    --block-size: min(156px, 55vw);
+    /* +30% dock/merge letters vs shared 2-letter scale */
+    --tile-size: clamp(42px, 12.5vw, 65px);
+  }
+
+  body.match-page:not(.match-race-page) #match-app:has(.syllable-blocks-row[data-syl-count="4"]) {
+    --tile-size: clamp(42px, 12.5vw, 65px);
   }
 
   body.match-page:not(.match-race-page) .syllable-blocks-row .syllable-grid {

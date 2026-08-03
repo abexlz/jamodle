@@ -2299,16 +2299,14 @@
       }
       innerW = Math.max(innerW, tileSize);
 
-      // 1-letter: bank tiles +30% vs 2-letter scale, then grow to fill the dock width.
+      // 1-letter: CSS already +30%; grow further to fill the dock width.
       if (sylCount === 1) {
-        const target = tileSize * 1.3;
+        const target = tileSize;
         const fillSize = Math.floor(
           (innerW - gap * Math.max(capacity - 1, 0)) / Math.max(capacity, 1)
         );
         if (fillSize > 0) {
           tileSize = fillSize >= target ? fillSize : Math.min(target, fillSize);
-        } else {
-          tileSize = Math.round(target);
         }
       }
 
