@@ -2239,6 +2239,7 @@
     /**
      * Keep dock tiles at the design max size for this viewport and reserve the
      * full round footprint so the bank does not shrink as letters leave.
+     * On turn layout, also stretch to the Rotate+merge column height.
      */
     syncDockTileSize() {
       const bank = this.els.bank;
@@ -2265,7 +2266,7 @@
       bank.style.setProperty('--turn-dock-tile-size', `${tileSize}px`);
       bank.style.maxHeight = 'none';
       bank.style.overflowX = 'hidden';
-      bank.style.overflowY = 'visible';
+      bank.style.overflowY = this.turnBased ? 'auto' : 'visible';
 
       if (!capacity) {
         bank.classList.remove('jamo-bank--wrap12');
@@ -2291,10 +2292,58 @@
 
       const fittedH = Math.ceil(rows * tileSize + gap * Math.max(rows - 1, 0) + padY);
       // Never shrink mid-round as tiles leave the dock.
-      const lockedH = Math.max(this._dockFittedMinHeight || 0, fittedH);
+      let lockedH = Math.max(this._dockFittedMinHeight || 0, fittedH);
+
+      // Stretch dock up to the Rotate button column when tools are taller.
+      const row = bank.closest('.race-turn-bottom, .bank-row');
+      const tools = row?.querySelector?.('.bank-tools-core') || row?.querySelector?.('.bank-tools');
+      const dockStack = bank.closest('.race-turn-dock-stack');
+      if (tools) {
+        const toolsH = tools.getBoundingClientRect().height;
+        if (dockStack) {
+          const barH = dockStack.querySelector('.race-turn-bar-mount')?.getBoundingClientRect().height || 0;
+          lockedH = Math.max(lockedH, Math.ceil(toolsH - barH));
+        } else {
+          lockedH = Math.max(lockedH, Math.ceil(toolsH));
+        }
+      }
+
       this._dockFittedMinHeight = lockedH;
       bank.style.minHeight = `${lockedH}px`;
       bank.dataset.dockFitted = 'true';
+      this.packDockSlots();
+    }
+
+    /** Move occupied dock cells to the front so remaining jamo climb in order. */
+    packDockSlots() {
+      const bank = this.els.bank;
+      if (!bank) return;
+      const slots = [...bank.querySelectorAll('.jamo-dock-slot')];
+      if (slots.length < 2) return;
+      const occupied = [];
+      const empty = [];
+      slots.forEach((slot) => {
+        const tile = slot.querySelector('.jamo-tile:not(.hidden-in-bank):not(.merge-consumed)');
+        if (tile) occupied.push(slot);
+        else empty.push(slot);
+      });
+      if (!occupied.length || !empty.length) return;
+      // Only reorder when an empty cell sits before an occupied one.
+      let needsPack = false;
+      let sawEmpty = false;
+      for (const slot of slots) {
+        const hasTile = !!slot.querySelector('.jamo-tile:not(.hidden-in-bank):not(.merge-consumed)');
+        if (!hasTile) sawEmpty = true;
+        else if (sawEmpty) {
+          needsPack = true;
+          break;
+        }
+      }
+      if (!needsPack) return;
+      const frag = document.createDocumentFragment();
+      occupied.forEach((slot) => frag.appendChild(slot));
+      empty.forEach((slot) => frag.appendChild(slot));
+      bank.appendChild(frag);
     }
 
     getVowelSlotSyllableIndex(tile) {

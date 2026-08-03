@@ -50,8 +50,8 @@
     --syl-grid-row-cho: 0.92fr;
     --syl-grid-row-jungH: 0.624fr;
     --syl-grid-row-jong: 0.81fr;
-    --merge-slot-scale: 1.014; /* input slots: 0.78 × 1.3 */
-    --merge-result-scale: 0.78; /* result tray stays original size */
+    --merge-slot-scale: 0.78;
+    --merge-result-scale: 0.78;
     --merge-result-height-scale: 1.24;
     --jamo-merge-glyph-ratio: 0.768;
     --jamo-merge-result-glyph-ratio: 0.696;
@@ -249,7 +249,7 @@
     border: 0;
   }
 
-  /* Fixed dock cells — empty slots keep the bank shape when tiles leave. */
+  /* Dock cells — vacated cells collapse so remaining jamo pack toward the start. */
   .jamo-dock-slot {
     --dock-tile-local: var(--dock-tile-size, var(--tile-size));
     flex: 0 0 var(--dock-tile-local);
@@ -261,6 +261,13 @@
     max-height: var(--dock-tile-local);
     box-sizing: border-box;
     position: relative;
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+  }
+
+  .jamo-dock-slot:not(:has(> .jamo-tile:not(.hidden-in-bank):not(.merge-consumed))) {
+    display: none;
   }
 
   .jamo-bank > .jamo-tile:not(.in-zone),
@@ -1481,7 +1488,7 @@
   body.match-turn-page .race-turn-bottom--versus > .race-turn-dock-stack {
     grid-column: 2;
     grid-row: 2;
-    align-self: end;
+    align-self: stretch;
     min-height: 0;
     height: auto;
   }
@@ -1490,8 +1497,8 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 5px;
-    padding: 10px;
+    gap: 4px;
+    padding: 8px;
     border-radius: 16px;
     border: 2px solid var(--border-soft);
     background: var(--card);
@@ -1525,8 +1532,8 @@
   .merge-slot {
     width: calc(var(--tile-size) * var(--merge-slot-scale));
     height: calc(var(--tile-size) * var(--merge-slot-scale));
-    min-width: 49px;
-    min-height: 49px;
+    min-width: 38px;
+    min-height: 38px;
     max-width: calc(var(--tile-size) * var(--merge-slot-scale));
     max-height: calc(var(--tile-size) * var(--merge-slot-scale));
   }
@@ -2803,7 +2810,7 @@
 
   body.match-page .bank-row {
     gap: 6px;
-    align-items: flex-end;
+    align-items: stretch;
   }
 
   body.match-page .bank-row--versus {
@@ -2831,17 +2838,17 @@
   }
 
   body.match-page .vowel-merge-dock {
-    padding: 5px 8px;
-    gap: 5px;
+    padding: 4px 6px;
+    gap: 3px;
   }
 
   body.match-page .merge-slot {
-    width: calc(var(--tile-size) * 0.936);
-    height: calc(var(--tile-size) * 0.936);
-    min-width: 42px;
-    min-height: 42px;
-    max-width: calc(var(--tile-size) * 0.936);
-    max-height: calc(var(--tile-size) * 0.936);
+    width: calc(var(--tile-size) * 0.72);
+    height: calc(var(--tile-size) * 0.72);
+    min-width: 32px;
+    min-height: 32px;
+    max-width: calc(var(--tile-size) * 0.72);
+    max-height: calc(var(--tile-size) * 0.72);
   }
 
   body.match-page .merge-result {
@@ -2856,14 +2863,14 @@
   body.match-page .jamo-bank {
     padding: 10px 6px;
     gap: 3px;
-    /* Floor only — JS locks the full-round min-height so the dock never shrinks mid-play. */
+    /* Stretch to tools column height; JS still locks a floor so it never shrinks mid-play. */
     min-height: calc(var(--dock-tile-size, var(--tile-size)) + 24px);
     max-height: none;
     overflow-y: visible;
-    align-self: auto;
+    align-self: stretch;
     align-content: flex-start;
     align-items: flex-start;
-    flex: 0 0 auto;
+    flex: 1 1 auto;
   }
 
   body.match-page .bank-row--versus .jamo-bank {
@@ -3184,7 +3191,7 @@
   body.match-turn-page .race-turn-bottom {
     display: flex;
     flex-direction: row;
-    align-items: flex-end;
+    align-items: stretch;
     gap: 8px;
     width: 100%;
   }
@@ -3198,8 +3205,8 @@
     flex-direction: column;
     align-items: stretch;
     width: auto;
-    min-width: 114px;
-    max-width: 34%;
+    min-width: 88px;
+    max-width: 30%;
     flex-shrink: 0;
     gap: 8px;
   }
@@ -3229,19 +3236,19 @@
   body.match-turn-page .vowel-merge-dock {
     flex: 1;
     min-width: 0;
-    min-height: 94px;
+    min-height: 72px;
     justify-content: center;
-    padding: 5px 8px;
-    gap: 4px;
+    padding: 4px 6px;
+    gap: 3px;
   }
 
   body.match-turn-page .merge-slot {
-    width: calc(var(--tile-size) * 0.962);
-    height: calc(var(--tile-size) * 0.962);
-    min-width: 39px;
-    min-height: 39px;
-    max-width: calc(var(--tile-size) * 0.962);
-    max-height: calc(var(--tile-size) * 0.962);
+    width: calc(var(--tile-size) * 0.74);
+    height: calc(var(--tile-size) * 0.74);
+    min-width: 30px;
+    min-height: 30px;
+    max-width: calc(var(--tile-size) * 0.74);
+    max-height: calc(var(--tile-size) * 0.74);
   }
 
   body.match-turn-page .merge-result {
@@ -3258,12 +3265,13 @@
   }
 
   body.match-turn-page .race-turn-dock-stack {
-    flex: 0 0 auto;
+    flex: 1 1 auto;
     min-width: 0;
+    align-self: stretch;
     display: flex;
     flex-direction: column;
     border-radius: 16px;
-    overflow: visible;
+    overflow: hidden;
     background: rgba(0, 70, 85, 0.42);
     border: 2px solid rgba(123, 207, 255, 0.55);
     box-shadow: 0 4px 0 rgba(0, 40, 50, 0.35);
@@ -3294,15 +3302,15 @@
   body.match-turn-page .race-turn-dock-stack .jamo-bank--turn {
     width: 100%;
     max-width: 100%;
-    flex: 0 0 auto;
-    flex-shrink: 0;
+    flex: 1 1 auto;
+    flex-shrink: 1;
     min-height: calc(var(--turn-dock-tile-size, var(--dock-tile-size, var(--tile-size))) + 16px);
     height: auto;
     max-height: none;
     min-width: 0;
     flex-wrap: wrap;
     overflow-x: hidden;
-    overflow-y: visible;
+    overflow-y: auto;
     justify-content: flex-start;
     align-items: flex-start;
     align-content: flex-start;
@@ -3325,6 +3333,10 @@
     max-width: var(--dock-tile-local) !important;
     min-height: var(--dock-tile-local) !important;
     max-height: var(--dock-tile-local) !important;
+  }
+
+  body.match-turn-page .race-turn-dock-stack .jamo-dock-slot:not(:has(> .jamo-tile:not(.hidden-in-bank):not(.merge-consumed))) {
+    display: none !important;
   }
 
   body.match-turn-page .race-turn-dock-stack .jamo-bank > .jamo-tile:not(.in-zone):not(.hidden-in-bank),
@@ -3396,7 +3408,7 @@
     }
 
     body.match-turn-page .vowel-merge-dock {
-      min-height: 75px;
+      min-height: 58px;
     }
 
     body.match-turn-page .race-turn-dock-stack .jamo-bank,
