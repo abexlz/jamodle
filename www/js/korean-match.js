@@ -371,18 +371,15 @@
       vowelColumn.className = 'vowel-column';
       vowelColumn.dataset.zone = 'jungV';
 
-      const jungVSlots = jungVDefs.length
-        ? jungVDefs
-        : [{ zoneType: 'jungV', subIndex: 0, expected: null }];
-      jungVSlots.forEach((def, i) => {
-        this._addZone(vowelColumn, {
-          syllableIndex: this.index,
-          zoneType: 'jungV',
-          slotIndex: 2 + i,
-          subIndex: def.subIndex,
-          expected: def.expected ?? null,
-        }, callbacks);
-      });
+      // Side vowel column is always one tall cell (never stacked jungV sub-slots).
+      const jungVDef = jungVDefs[0] || { zoneType: 'jungV', subIndex: 0, expected: null };
+      this._addZone(vowelColumn, {
+        syllableIndex: this.index,
+        zoneType: 'jungV',
+        slotIndex: 2,
+        subIndex: 0,
+        expected: jungVDef.expected ?? null,
+      }, callbacks);
 
       grid.appendChild(vowelColumn);
 

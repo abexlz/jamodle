@@ -128,10 +128,15 @@ assertEqual(
 const wae = HC.decomposeSyllableForMatch('왜');
 assertEqual(wae.medial, 'ㅙ', '왜 medial');
 assertDeepEqual(wae.medialComponents, ['ㅗ', 'ㅏ', 'ㅣ'], '왜 medialComponents');
-assertEqual(wae.vowelSlots.length, 3, '왜 jungH + 2 jungV slots');
+assertEqual(wae.vowelSlots.length, 2, '왜 jungH + single jungV slot');
 assertEqual(wae.vowelSlots.find((s) => s.zoneType === 'jungH')?.expected, 'ㅗ', '왜 jungH expects ㅗ');
-assertEqual(wae.vowelSlots.filter((s) => s.zoneType === 'jungV')[0]?.expected, 'ㅏ', '왜 jungV0 expects ㅏ');
-assertEqual(wae.vowelSlots.filter((s) => s.zoneType === 'jungV')[1]?.expected, 'ㅣ', '왜 jungV1 expects ㅣ');
+assertEqual(wae.vowelSlots.filter((s) => s.zoneType === 'jungV').length, 1, '왜 only one jungV cell');
+assertEqual(wae.vowelSlots.find((s) => s.zoneType === 'jungV')?.expected, 'ㅐ', '왜 jungV expects merged ㅐ');
+
+const we = HC.decomposeSyllableForMatch('웨');
+assertEqual(we.vowelSlots.find((s) => s.zoneType === 'jungH')?.expected, 'ㅜ', '웨 jungH expects ㅜ');
+assertEqual(we.vowelSlots.filter((s) => s.zoneType === 'jungV').length, 1, '웨 only one jungV cell');
+assertEqual(we.vowelSlots.find((s) => s.zoneType === 'jungV')?.expected, 'ㅔ', '웨 jungV expects merged ㅔ');
 
 const mae = HC.decomposeSyllableForMatch('매');
 assertDeepEqual(mae.medialComponents, ['ㅏ', 'ㅣ'], '매 medialComponents');

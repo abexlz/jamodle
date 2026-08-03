@@ -106,20 +106,50 @@
     'ㅖ': ['ㅕ', 'ㅣ'],
   };
 
-  /** Build drop-zone slots from basic medial components */
+  /** Build drop-zone slots from basic medial components.
+   *  Side (jungV) column is always a single tall cell — never stacked sub-slots.
+   *  Vertical compounds like ㅐ/ㅔ fill that one cell; ㅘ/ㅙ use jungH + one jungV.
+   */
   function buildVowelSlots(medialComponents, medial) {
     if (medial && isVerticalMergeMedial(medial)) {
       return [{ zoneType: ZONE.JUNG_V, subIndex: 0, expected: medial }];
     }
-    const slots = [];
-    (medialComponents || []).forEach((char) => {
-      if (HORIZONTAL_VOWELS.has(char)) {
-        slots.push({ zoneType: ZONE.JUNG_H, subIndex: 0, expected: char });
-      } else if (VERTICAL_VOWELS.has(char)) {
-        const subIndex = slots.filter((s) => s.zoneType === ZONE.JUNG_V).length;
-        slots.push({ zoneType: ZONE.JUNG_V, subIndex, expected: char });
+
+    // Legacy H+V pairs (ㅘ/ㅙ/ㅚ/ㅝ/ㅞ/ㅟ/ㅢ) — one horizontal + one side slot.
+    const legacy = COMPOUND_VOWELS[medial];
+    if (legacy) {
+      const slots = [];
+      if (legacy.h) {
+        slots.push({ zoneType: ZONE.JUNG_H, subIndex: 0, expected: legacy.h });
       }
+      if (legacy.v) {
+        slots.push({ zoneType: ZONE.JUNG_V, subIndex: 0, expected: legacy.v });
+      }
+      return slots;
+    }
+
+    let jungH = null;
+    const verticals = [];
+    (medialComponents || []).forEach((char) => {
+      if (HORIZONTAL_VOWELS.has(char)) jungH = char;
+      else if (VERTICAL_VOWELS.has(char)) verticals.push(char);
     });
+
+    const slots = [];
+    if (jungH) {
+      slots.push({ zoneType: ZONE.JUNG_H, subIndex: 0, expected: jungH });
+    }
+
+    if (verticals.length === 1) {
+      slots.push({ zoneType: ZONE.JUNG_V, subIndex: 0, expected: verticals[0] });
+    } else if (verticals.length >= 2) {
+      // Collapse ㅏ+ㅣ / ㅓ+ㅣ into one side-slot medial (never two stacked jungV cells).
+      const merged = tryComposeVerticalMedial(verticals[0], verticals[1])
+        || tryComposeMedial(verticals)
+        || verticals[0];
+      slots.push({ zoneType: ZONE.JUNG_V, subIndex: 0, expected: merged });
+    }
+
     return slots;
   }
 
@@ -508,6 +538,21 @@
         });
       } else {
         (syl.vowelSlots || []).forEach((vs) => {
+          // Side-slot compounds (ㅐ/ㅔ on 왜/웨) still ship as basic merge ingredients.
+          if (vs.zoneType === ZONE.JUNG_V && isVerticalMergeMedial(vs.expected)) {
+            getMedialComponents(vs.expected).forEach((char) => {
+              if (!PLACEABLE_VERTICAL_VOWELS.has(char)) return;
+              tiles.push({
+                id: `tile-${id++}`,
+                char,
+                zoneType: ZONE.JUNG_V,
+                subIndex: 0,
+                syllableIndex: syl.index,
+                isBasic: true,
+              });
+            });
+            return;
+          }
           tiles.push({
             id: `tile-${id++}`,
             char: vs.expected,
