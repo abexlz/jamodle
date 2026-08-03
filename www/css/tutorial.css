@@ -98,6 +98,18 @@ body.tutorial-page.match-page:not(.match-race-page) #match-app:has(.syllable-blo
   transition: opacity 0.2s ease, filter 0.2s ease;
 }
 
+/*
+ * Rotate / merge / split stay readable during guidance.
+ * Heavy dimming made white icons vanish into the mountain backdrop.
+ */
+.tutorial-match.tutorial-guiding .bank-tools .tutorial-dimmed,
+.tutorial-match.tutorial-guiding .rotation-dock.tutorial-dimmed,
+.tutorial-match.tutorial-guiding .vowel-merge-dock.tutorial-dimmed,
+.tutorial-match.tutorial-guiding .vowel-merge-dock .tutorial-dimmed {
+  opacity: 1 !important;
+  filter: none !important;
+}
+
 .tutorial-match.tutorial-guiding .tutorial-focus {
   opacity: 1 !important;
   filter: none !important;
@@ -106,6 +118,81 @@ body.tutorial-page.match-page:not(.match-race-page) #match-app:has(.syllable-blo
   outline: 3px solid #FFD743 !important;
   outline-offset: 2px;
   box-shadow: 0 0 0 5px rgba(255, 215, 67, 0.45) !important;
+}
+
+/* High-contrast rotate + merge chrome on every tutorial step */
+body.tutorial-page .rotation-dock,
+.tutorial-match .rotation-dock {
+  background: linear-gradient(180deg, #3db4d4 0%, #1f8fad 55%, #187a96 100%) !important;
+  border: 2px solid #7ad4ef !important;
+  color: #ffffff !important;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.35),
+    0 4px 0 rgba(0, 70, 90, 0.4) !important;
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+body.tutorial-page .rotation-dock-icon,
+body.tutorial-page .rotation-dock-label,
+.tutorial-match .rotation-dock-icon,
+.tutorial-match .rotation-dock-label {
+  color: #ffffff !important;
+  text-shadow: 0 2px 0 rgba(0, 45, 60, 0.4) !important;
+  opacity: 1 !important;
+}
+
+body.tutorial-page .rotation-dock[data-dock-mode="merge"],
+.tutorial-match .rotation-dock[data-dock-mode="merge"] {
+  background: linear-gradient(180deg, #5eb6ff 0%, #2f8fd4 100%) !important;
+  border-color: #9ad4ff !important;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.35),
+    0 4px 0 #1f6fa8 !important;
+}
+
+body.tutorial-page .rotation-dock[data-dock-mode="split"],
+.tutorial-match .rotation-dock[data-dock-mode="split"] {
+  background: linear-gradient(180deg, #7ec0ff 0%, #4a8fd0 100%) !important;
+  border-color: #a8d8ff !important;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.35),
+    0 4px 0 #2f6fa8 !important;
+}
+
+body.tutorial-page .vowel-merge-dock.hidden,
+.tutorial-match .vowel-merge-dock.hidden {
+  display: none !important;
+}
+
+body.tutorial-page .vowel-merge-dock:not(.hidden),
+.tutorial-match .vowel-merge-dock:not(.hidden) {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border: 2px solid #5eb8e0 !important;
+  box-shadow: 0 4px 0 rgba(0, 80, 110, 0.18) !important;
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+body.tutorial-page .merge-op,
+body.tutorial-page .merge-arrow,
+.tutorial-match .merge-op,
+.tutorial-match .merge-arrow {
+  color: #0f5a78 !important;
+  opacity: 1 !important;
+  font-weight: 700 !important;
+  font-size: clamp(18px, 4.6vw, 24px) !important;
+  text-shadow: none !important;
+}
+
+body.tutorial-page .merge-slot,
+body.tutorial-page .merge-result,
+.tutorial-match .merge-slot,
+.tutorial-match .merge-result {
+  background: #ffffff !important;
+  border: 2px solid #5eb8e0 !important;
+  opacity: 1 !important;
+  filter: none !important;
 }
 
 /* Check answer — always full-width in tutorial, clear of the home nav */
