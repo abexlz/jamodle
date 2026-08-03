@@ -5,7 +5,13 @@
   'use strict';
 
   const SVC = () => global.DailyCalendarService;
-  const BADGE_ICONS = { bronze: '🥉', silver: '🥈', gold: '🥇' };
+  const BADGE_ASSETS = {
+    bronze: 'assets/calendar/medal-bronze.png',
+    silver: 'assets/calendar/medal-silver.png',
+    gold: 'assets/calendar/medal-gold.png',
+  };
+  const LOCK_ASSET = 'assets/calendar/trophy-lock.png';
+  const STREAK_ASSET = 'assets/rw-streak-fire.png';
 
   let overlayEl = null;
   let viewYear = null;
@@ -36,7 +42,7 @@
       .replace(/"/g, '&quot;');
   }
 
-  const CAL_STYLES_HREF = 'css/daily-calendar.css?v=10';
+  const CAL_STYLES_HREF = 'css/daily-calendar.css?v=11';
 
   function ensureStyles() {
     let link = document.getElementById('daily-cal-styles');
@@ -97,6 +103,24 @@
     return ' is-locked';
   }
 
+  function badgeArtHtml(badge, stateClass) {
+    const src = BADGE_ASSETS[badge.id] || BADGE_ASSETS.bronze;
+    const locked = stateClass.includes('is-locked');
+    if (locked) {
+      return `
+        <span class="daily-cal-badge-art" aria-hidden="true">
+          <img class="daily-cal-badge-img" src="${escapeHtml(src)}" alt="" width="64" height="64" decoding="async">
+          <img class="daily-cal-badge-lock" src="${escapeHtml(LOCK_ASSET)}" alt="" width="40" height="40" decoding="async">
+        </span>
+      `;
+    }
+    return `
+      <span class="daily-cal-badge-art" aria-hidden="true">
+        <img class="daily-cal-badge-img" src="${escapeHtml(src)}" alt="" width="64" height="64" decoding="async">
+      </span>
+    `;
+  }
+
   function buildBadgesHtml() {
     const badges = SVC().getBadgeState(viewYear, viewMonth);
     const wins = SVC().getMonthWinCount(viewYear, viewMonth);
@@ -105,12 +129,15 @@
     const progressPct = Math.min(100, (wins / maxThreshold) * 100);
     const winsUntilNext = wins >= maxThreshold ? 0 : Math.max(0, next - wins);
 
-    const badgesHtml = badges.map((b) => `
-      <div class="daily-cal-badge${milestoneClass(b, badges)}" title="${escapeHtml(t('dailyCalendar.badgeAt', { count: b.threshold }))}">
-        <span class="daily-cal-badge-icon" aria-hidden="true">${BADGE_ICONS[b.id] || '🏅'}</span>
+    const badgesHtml = badges.map((b) => {
+      const state = milestoneClass(b, badges);
+      return `
+      <div class="daily-cal-badge${state}" title="${escapeHtml(t('dailyCalendar.badgeAt', { count: b.threshold }))}">
+        ${badgeArtHtml(b, state)}
         <span class="daily-cal-badge-label">${escapeHtml(t('dailyCalendar.badgeAt', { count: b.threshold }))}</span>
       </div>
-    `).join('');
+    `;
+    }).join('');
 
     const markerPcts = SVC().BADGE_THRESHOLDS.map((threshold) => (threshold / maxThreshold) * 100);
     const markersHtml = markerPcts.map((pct) => `
@@ -146,14 +173,17 @@
     return `
       <div class="daily-cal-stats" aria-label="${escapeHtml(t('dailyCalendar.statsLabel'))}">
         <div class="daily-cal-stat">
+          <img class="daily-cal-stat-icon" src="${escapeHtml(STREAK_ASSET)}" alt="" width="22" height="22" decoding="async" aria-hidden="true">
           <span class="daily-cal-stat-value">${streakInfo.streakDays}</span>
           <span class="daily-cal-stat-label">${escapeHtml(t('dailyCalendar.statStreak'))}</span>
         </div>
         <div class="daily-cal-stat">
+          <img class="daily-cal-stat-icon" src="${escapeHtml(BADGE_ASSETS.silver)}" alt="" width="22" height="22" decoding="async" aria-hidden="true">
           <span class="daily-cal-stat-value">${wins}</span>
           <span class="daily-cal-stat-label">${escapeHtml(t('dailyCalendar.statMonthlyWins'))}</span>
         </div>
         <div class="daily-cal-stat">
+          <img class="daily-cal-stat-icon" src="${escapeHtml(STREAK_ASSET)}" alt="" width="22" height="22" decoding="async" aria-hidden="true">
           <span class="daily-cal-stat-value">${streakInfo.longestStreak}</span>
           <span class="daily-cal-stat-label">${escapeHtml(t('dailyCalendar.statBestStreak'))}</span>
         </div>
@@ -219,8 +249,8 @@
   function buildTrophiesHtml() {
     const badges = SVC().getBadgeState(viewYear, viewMonth);
     const cards = badges.map((b) => `
-      <div class="daily-cal-trophy-card${b.earned ? ' is-earned' : ''}">
-        <div class="daily-cal-badge-icon" aria-hidden="true">${BADGE_ICONS[b.id] || '🏅'}</div>
+      <div class="daily-cal-trophy-card${b.earned ? ' is-earned' : ' is-locked'}">
+        ${badgeArtHtml(b, b.earned ? ' is-earned' : ' is-locked')}
         <div class="daily-cal-badge-label">${escapeHtml(t('dailyCalendar.badgeAt', { count: b.threshold }))}</div>
       </div>
     `).join('');
