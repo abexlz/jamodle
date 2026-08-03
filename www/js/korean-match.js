@@ -2566,6 +2566,11 @@
         this.clearSelection();
         return;
       }
+      // Occupied incompatible slot — cancel the lift instead of switching selection.
+      if (this.selectedTile && (tile.zoneRef || tile.mergeDockRef)) {
+        this.clearSelection();
+        return;
+      }
       if (this.selectedTile) this.selectedTile.setSelected(false);
       this.selectedTile = tile;
       tile.setSelected(true);
@@ -2663,10 +2668,17 @@
     }
 
     onZoneTap(zone) {
-      if (zone.locked || zone.hintDisabled || this.checking || this.inspectMode) return;
+      if (this.checking || this.inspectMode) return;
       if (!this.canArrangeTiles()) return;
       if (this.selectedTile?.zoneRef === zone) return;
-      if (this.selectedTile && HC.isValidMatchPlacement(this.selectedTile, zone)) {
+
+      if (this.selectedTile) {
+        // Invalid / locked / disabled slots cancel the Pips lift.
+        if (zone.locked || zone.hintDisabled
+            || !HC.isValidMatchPlacement(this.selectedTile, zone)) {
+          this.clearSelection();
+          return;
+        }
         if (zone.placedTileId && zone.placedTileId !== this.selectedTile.id) {
           const existing = this.tileMap[zone.placedTileId];
           if (existing && !existing.locked && this.swapTiles(this.selectedTile, existing)) {
@@ -2677,6 +2689,8 @@
         if (this.tryPlaceTile(this.selectedTile, zone)) this.clearSelection();
         return;
       }
+
+      if (zone.locked || zone.hintDisabled) return;
       if (zone.placedTileId) {
         const placed = this.tileMap[zone.placedTileId];
         if (placed && !placed.locked) this.onTileTap(placed);
@@ -2730,6 +2744,8 @@
         this.onTutorialEvent?.('mergeSlot', { game: this });
         this.pulseLiveAction('move');
         this.notifyTurnLiveChange();
+      } else {
+        this.clearSelection();
       }
     }
 
