@@ -182,7 +182,7 @@
         },
         "l03": {
           "title": "Rotate jamo",
-          "desc": "Some jamo can rotate — a horizontal vowel becomes vertical, or vice versa. Tap a tile to lift it, then tap again to rotate."
+          "desc": "Some jamo can rotate — a horizontal vowel becomes vertical, or vice versa. Select a tile, then tap Rotate to turn it."
         },
         "l04": {
           "title": "Merge vowels",
@@ -220,11 +220,11 @@
         },
         "rotateVowel": {
           "title": "Rotate a vowel",
-          "body": "Tap ㅏ to lift it, tap again until it becomes ㅗ, then drag it into the slot."
+          "body": "Select ㅏ, tap Rotate until it becomes ㅗ, then place it in the slot."
         },
         "rotateConsonant": {
           "title": "Rotate ㄱ and ㄴ",
-          "body": "ㄱ and ㄴ can swap places. Rotate ㄱ into ㄴ, then build 나."
+          "body": "ㄱ and ㄴ can swap places. Select ㄱ, tap Rotate to turn it into ㄴ, then build 나."
         },
         "merge": {
           "title": "Merge vowels",
@@ -421,8 +421,8 @@
       "rotationLabel": "Rotate",
       "mergeLabel": "Merge",
       "splitLabel": "Split",
-      "rotationHint": "Tap a lifted jamo again to rotate, or drag it here",
-      "rotationSelect": "Tap a jamo to lift it, then tap again to rotate",
+      "rotationHint": "Select a jamo, then tap here to rotate",
+      "rotationSelect": "Select a jamo first, then tap Rotate",
       "rotateSuccess": "{{from}} → {{to}}",
       "rotationUnsupported": "\"{{char}}\" cannot be rotated",
       "hints": {
@@ -1711,7 +1711,7 @@
         },
         "l03": {
           "title": "자모 돌리기",
-          "desc": "일부 자모는 돌릴 수 있어요 — 가로·세로 모음이 바뀌죠. 타일을 탭해 들어 올린 뒤, 다시 탭하면 돌아가요."
+          "desc": "일부 자모는 돌릴 수 있어요 — 가로·세로 모음이 바뀌죠. 타일을 선택한 뒤 돌리기를 눌러 돌리세요."
         },
         "l04": {
           "title": "모음 합치기",
@@ -1749,11 +1749,11 @@
         },
         "rotateVowel": {
           "title": "모음 돌리기",
-          "body": "ㅏ를 탭해 들어 올린 뒤, ㅗ가 될 때까지 다시 탭하고 칸에 놓으세요."
+          "body": "ㅏ를 선택한 뒤 돌리기를 눌러 ㅗ로 바꾸고 칸에 놓으세요."
         },
         "rotateConsonant": {
           "title": "ㄱ · ㄴ 돌리기",
-          "body": "ㄱ과 ㄴ은 서로 바뀔 수 있어요. ㄱ을 ㄴ으로 돌린 뒤 나를 만들어 보세요."
+          "body": "ㄱ과 ㄴ은 서로 바뀔 수 있어요. ㄱ을 선택한 뒤 돌리기를 눌러 ㄴ으로 바꾸고 나를 만들어 보세요."
         },
         "merge": {
           "title": "모음 합치기",
@@ -1950,8 +1950,8 @@
       "rotationLabel": "돌리기",
       "mergeLabel": "결합",
       "splitLabel": "분리",
-      "rotationHint": "들어 올린 자모를 다시 탭하면 돌아갑니다. 여기로 끌어다 놓아도 됩니다",
-      "rotationSelect": "자모를 탭해 들어 올린 뒤, 다시 탭하면 돌아갑니다",
+      "rotationHint": "자모를 선택한 뒤 여기를 눌러 돌리세요",
+      "rotationSelect": "먼저 자모를 선택한 뒤 돌리기를 누르세요",
       "rotateSuccess": "{{from}} → {{to}}",
       "rotationUnsupported": "\"{{char}}\"은(는) 돌릴 수 없어요",
       "hints": {

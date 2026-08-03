@@ -521,6 +521,7 @@
       if (step.type === 'guided-rotate') {
         if (step.rotateTarget && !this.rotateDone) {
           const tile = this.findBankTile(step.rotateTarget.from);
+          const dock = game.els.rotationDock;
           if (tile && !tile.locked) {
             game.selectedTile = tile;
             tile.setSelected?.(true);
@@ -528,9 +529,11 @@
             game.updateRotationDockLabel?.();
             game.updateSelectionHighlights?.();
           }
-          // Pips-style: tap the lifted tile again to rotate (dock still works).
-          this.setTutorialFocus([tile?.el]);
-          if (tile?.el) this.coach.pointFinger(tile.el, tile.el);
+          if (dock) dock.classList.add('tap-target');
+          // Hangul-dle style: rotate only via the Rotate control, not the tile.
+          this.setTutorialFocus([tile?.el, dock]);
+          if (tile?.el && dock) this.coach.pointFinger(tile.el, dock);
+          else if (dock) this.coach.pointFinger(dock, dock);
           return;
         }
 

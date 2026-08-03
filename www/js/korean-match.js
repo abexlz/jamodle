@@ -2579,17 +2579,9 @@
     onTileTap(tile) {
       if (this.checkedComplete || this.checking || this.inspectMode || tile.locked) return;
       if (!this.canArrangeTiles()) return;
-      // Pips-style: first tap lifts; second tap on the same lifted tile rotates it.
+      // Rotate only via the Rotate control — re-tapping a lifted tile does not turn it.
       if (this.selectedTile?.id === tile.id) {
-        if (this.canRotateTile(tile)) {
-          if (this.rotateTile(tile)) {
-            tile.setSelected(true);
-            this.selectedTile = tile;
-            this.updateRotationDockLabel();
-            this.updateSelectionHighlights();
-          }
-          return;
-        }
+        if (this.tutorialMode) return;
         this.clearSelection();
         return;
       }
