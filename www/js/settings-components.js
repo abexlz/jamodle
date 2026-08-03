@@ -102,7 +102,6 @@
         <div class="progress-stat"><span class="progress-stat-label" data-i18n="settings.progress.longestStreak">${escapeHtml(t('settings.progress.longestStreak'))}</span><strong>${escapeHtml(String(stats.longestStreak))}</strong></div>
         <div class="progress-stat"><span class="progress-stat-label" data-i18n="settings.progress.wordsLearned">${escapeHtml(t('settings.progress.wordsLearned'))}</span><strong>${escapeHtml(String(stats.wordsLearned))}</strong></div>
         <div class="progress-stat"><span class="progress-stat-label" data-i18n="settings.progress.matchCompleted">${escapeHtml(t('settings.progress.matchCompleted'))}</span><strong>${escapeHtml(String(stats.matchCompleted))}</strong></div>
-        <div class="progress-stat"><span class="progress-stat-label" data-i18n="settings.progress.builderCompleted">${escapeHtml(t('settings.progress.builderCompleted'))}</span><strong>${escapeHtml(String(stats.builderCompleted))}</strong></div>
       </div>
     `;
   }

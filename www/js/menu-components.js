@@ -269,8 +269,8 @@
 
   function getRecommendedModeId() {
     const level = global.UserPreferences?.getLearningLevel?.() || 'beginner';
-    const map = { beginner: 'hangul-builder', intermediate: 'korean-match', advanced: 'vowel-practice' };
-    return map[level] || 'hangul-builder';
+    const map = { beginner: 'tutorial', intermediate: 'vowel-practice', advanced: 'vowel-practice' };
+    return map[level] || 'tutorial';
   }
 
   function renderLearnHangul() {

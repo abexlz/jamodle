@@ -79,14 +79,6 @@
     };
   }
 
-  /** Called when the user completes a Hangul Builder word. */
-  function recordBuilderWord() {
-    const progress = loadProgress();
-    progress.builderWordsCompleted += 1;
-    saveProgress(progress);
-    return progress;
-  }
-
   function t(key, vars) {
     const val = global.I18n?.t(key, vars);
     return val != null && val !== '' ? val : '';
@@ -255,7 +247,6 @@
   global.MenuProgress = {
     loadProgress,
     recordMatchWord,
-    recordBuilderWord,
     getMatchLevelInfo,
     getFeaturedProgress,
     isHardModeUnlocked,

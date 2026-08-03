@@ -62,7 +62,7 @@
 
   function hasAnyGameProgress() {
     const mp = global.MenuProgress?.loadProgress?.();
-    if (mp && (mp.wordsLearned > 0 || mp.builderWordsCompleted > 0)) return true;
+    if (mp && mp.wordsLearned > 0) return true;
     const p = load();
     return p.completedSteps.length > 0 || p.onboardingComplete;
   }

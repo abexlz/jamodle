@@ -1,5 +1,5 @@
 /**
- * Unified Korean word bank — single source for Hangul Builder and Korean Match.
+ * Unified Korean word bank — single source for Korean Match and related modes.
  * Word data lives in learning-words-data.js (imported from data/korean-learning-nouns.xlsx).
  * Regenerate: npm run import-words
  */
@@ -67,19 +67,6 @@
     return LEARNING_WORDS.map((e) => e.word);
   }
 
-  /** Words sorted for Hangul Builder curriculum (entries with difficulty only). */
-  function getBuilderWordList() {
-    const level = global.UserPreferences?.getLearningLevel?.() || 'beginner';
-    const maxDiff = level === 'advanced' ? 5 : level === 'intermediate' ? 3 : 2;
-    return LEARNING_WORDS.filter((w) => w.difficulty != null).slice().sort((a, b) => {
-      const aPref = a.difficulty <= maxDiff ? 0 : 1;
-      const bPref = b.difficulty <= maxDiff ? 0 : 1;
-      if (aPref !== bPref) return aPref - bPref;
-      if (a.difficulty !== b.difficulty) return a.difficulty - b.difficulty;
-      return a.word.length - b.word.length;
-    });
-  }
-
   /** All words for Korean Match modes (syllable-length pools). */
   function getMatchWordList() {
     return getAllWordStrings();
@@ -99,7 +86,6 @@
     LEARNING_WORDS,
     RAW_WORDS,
     getAllWordStrings,
-    getBuilderWordList,
     getMatchWordList,
     findWordEntry,
     getNormalizedWord,

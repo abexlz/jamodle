@@ -1,6 +1,6 @@
 # 자모들 (Jamodeul)
 
-Korean jamo learning games: Hangul Builder, Korean Match, Wordle, and vowel practice.
+Korean jamo learning games: Hangul-dle, Korean Match, Word Chain, and vowel practice.
 
 ## Dictionary integration (Korean Basic Dictionary)
 

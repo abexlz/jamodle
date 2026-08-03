@@ -6,7 +6,7 @@
 
   const BADGES = [
     { id: 'first-step', icon: '🌱', check: (ctx) => ctx.totalActivities >= 1 },
-    { id: 'first-word', icon: '🧩', check: (ctx) => ctx.builderWords >= 1 },
+    { id: 'first-word', icon: '🧩', check: (ctx) => ctx.matchWords >= 1 || ctx.uniqueWords >= 1 },
     { id: 'match-maker', icon: '🎯', check: (ctx) => ctx.matchWords >= 10 },
     { id: 'vowel-pro', icon: 'ㅏ', check: (ctx) => ctx.vowelPracticeDone },
     { id: 'week-warrior', icon: '🔥', check: (ctx) => ctx.longestStreak >= 7 },
@@ -41,7 +41,7 @@
     { id: 'moon', icon: '🌙', check: (ctx) => ctx.earnedBadgeCount >= 3 },
     { id: 'medal', icon: '🏅', check: (ctx) => ctx.earnedBadgeCount >= 5 },
     { id: 'book', icon: '📖', check: (ctx) => ctx.uniqueWords >= 10 },
-    { id: 'pencil', icon: '✏️', check: (ctx) => ctx.builderWords >= 5 },
+    { id: 'pencil', icon: '✏️', check: (ctx) => ctx.matchWords >= 5 || ctx.uniqueWords >= 5 },
     { id: 'puzzle', icon: '🧩', check: (ctx) => ctx.matchWords >= 10 },
     { id: 'frog', icon: '🐸', check: (ctx) => ctx.uniqueWords >= 25 },
     { id: 'music', icon: '🎵', check: (ctx) => ctx.vowelPracticeDone },

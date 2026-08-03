@@ -62,11 +62,6 @@
           "subtitle": "30-step program — rotation, merge, and word building.",
           "subtitleKo": "30단계 · 돌리기 · 합치기 · 단어 만들기"
         },
-        "hangul-builder": {
-          "title": "Hangul Builder",
-          "subtitle": "Learn how Korean syllable blocks are made.",
-          "subtitleKo": "ㄱ + ㅗ = 고"
-        },
         "korean-match": {
           "title": "Korean Match",
           "subtitle": "Drag letters to build Korean words.",
@@ -391,33 +386,6 @@
       "milestone14": "14-day streak! Amazing dedication!",
       "milestone30": "30-day streak! You are a Korean learning champion!"
     },
-    "builder": {
-      "title": "Hangul Builder",
-      "subtitle": "Build the word",
-      "subtitleKo": "단어를 만들어 보세요",
-      "clueHint": "Look at the word, then rebuild it with jamo below",
-      "clueHintKo": "단어를 보고 아래 자모로 다시 만들어 보세요",
-      "buildLabel": "Build the word",
-      "buildLabelKo": "여기에 단어를 만들어요",
-      "jamoLabel": "Jamo pieces",
-      "jamoLabelKo": "자모 조각",
-      "hearIt": "🔊 Hear it",
-      "tryAgain": "🔄 Try again",
-      "nextWord": "⭐ Next word",
-      "feedbackDrag": "Drag or tap jamo into the slots",
-      "feedbackTapSlot": "Now tap a slot",
-      "feedbackWrong": "Not quite — try another slot",
-      "feedbackSuccess": "✓ You built the word!",
-      "winTitle": "Great job!",
-      "winContinue": "Next word →",
-      "dictionary": "📖 Dictionary",
-      "slotInitial": "Initial",
-      "slotVowel": "Vowel",
-      "slotFinal": "Final",
-      "charLabel": "Character {{n}}",
-      "charLabelKo": "글자 {{n}}",
-      "back": "← Home"
-    },
     "match": {
       "title": "Hangul-dle",
       "titleDaily": "Daily Hangul-dle",
@@ -571,7 +539,6 @@
         "longestStreak": "Longest streak",
         "wordsLearned": "Words learned",
         "matchCompleted": "Korean Match words",
-        "builderCompleted": "Hangul Builder words",
         "days": "{{n}} days",
         "viewProgress": "View Progress",
         "resetProgress": "Reset Learning Progress",
@@ -740,7 +707,6 @@
         "hangul-hero": "Hangul Master"
       },
       "xp": {
-        "builderComplete": "Hangul Builder complete!",
         "matchComplete": "Korean Match complete!",
         "wordChainComplete": "Word chain win!",
         "vowelComplete": "Vowel Practice complete!",
@@ -756,7 +722,6 @@
         "totalXp": "Total XP",
         "level": "Current level",
         "wordsLearned": "Unique words",
-        "builder": "Builder words",
         "match": "Match words",
         "daily": "Daily challenges",
         "currentStreak": "Current streak",
@@ -777,7 +742,7 @@
         },
         "first-word": {
           "name": "First Word",
-          "desc": "Complete your first Hangul Builder word"
+          "desc": "Complete your first Hangul-dle word"
         },
         "match-maker": {
           "name": "Match Maker",
@@ -1635,11 +1600,6 @@
           "subtitle": "30단계 프로그램 — 돌리기, 합치기, 단어 만들기.",
           "subtitleKo": "30단계 · 돌리기 · 합치기 · 단어 만들기"
         },
-        "hangul-builder": {
-          "title": "한글 만들기",
-          "subtitle": "한글 음절 블록이 어떻게 만들어지는지 배워요.",
-          "subtitleKo": "ㄱ + ㅗ = 고"
-        },
         "korean-match": {
           "title": "Korean Match",
           "subtitle": "자모를 끌어 한글 단어를 완성해요.",
@@ -1964,33 +1924,6 @@
       "milestone14": "14일 streak! 정말 대단해요!",
       "milestone30": "30일 streak! 한글 학습 챔피언!"
     },
-    "builder": {
-      "title": "한글 만들기",
-      "subtitle": "단어를 만들어 보세요",
-      "subtitleKo": "Build the word",
-      "clueHint": "단어를 보고 아래 자모로 다시 만들어 보세요",
-      "clueHintKo": "Look at the word, then rebuild it with jamo below",
-      "buildLabel": "여기에 단어를 만들어요",
-      "buildLabelKo": "Build the word",
-      "jamoLabel": "자모 조각",
-      "jamoLabelKo": "Jamo pieces",
-      "hearIt": "🔊 들어보기",
-      "tryAgain": "🔄 다시 하기",
-      "nextWord": "⭐ 다음 단어",
-      "feedbackDrag": "자모를 칸에 끌거나 탭하세요",
-      "feedbackTapSlot": "이제 칸을 탭하세요",
-      "feedbackWrong": "아직 맞지 않아요 — 다른 칸을 해보세요",
-      "feedbackSuccess": "✓ 단어를 완성했어요!",
-      "winTitle": "잘했어요!",
-      "winContinue": "다음 단어 →",
-      "dictionary": "📖 사전",
-      "slotInitial": "자음",
-      "slotVowel": "모음",
-      "slotFinal": "받침",
-      "charLabel": "글자 {{n}}",
-      "charLabelKo": "글자 {{n}}",
-      "back": "← 홈"
-    },
     "match": {
       "title": "한글놀이",
       "titleDaily": "오늘의 한글놀이",
@@ -2144,7 +2077,6 @@
         "longestStreak": "최장 streak",
         "wordsLearned": "학습한 단어",
         "matchCompleted": "Korean Match 완료",
-        "builderCompleted": "Hangul Builder 완료",
         "days": "{{n}}일",
         "viewProgress": "진행 보기",
         "resetProgress": "학습 진행 초기화",
@@ -2313,7 +2245,6 @@
         "hangul-hero": "한글의 마스터"
       },
       "xp": {
-        "builderComplete": "한글 만들기 완료!",
         "matchComplete": "Korean Match 완료!",
         "wordChainComplete": "끝말잇기 승리!",
         "vowelComplete": "모음 연습 완료!",
@@ -2329,7 +2260,6 @@
         "totalXp": "총 XP",
         "level": "현재 레벨",
         "wordsLearned": "학습한 단어",
-        "builder": "만들기 완료",
         "match": "Match 완료",
         "daily": "Daily 도전",
         "currentStreak": "현재 streak",
@@ -2350,7 +2280,7 @@
         },
         "first-word": {
           "name": "첫 단어",
-          "desc": "한글 만들기 첫 단어를 완성했어요"
+          "desc": "한글들 첫 단어를 완성했어요"
         },
         "match-maker": {
           "name": "Match Maker",

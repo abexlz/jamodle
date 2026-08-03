@@ -74,16 +74,6 @@
         titleKo: '한글 배우기',
         modes: [
           {
-            id: 'hangul-builder',
-            icon: '🧩',
-            title: 'Hangul Builder',
-            subtitle: 'Learn how Korean syllable blocks are made.',
-            subtitleKo: 'ㄱ + ㅗ = 고',
-            accent: ACCENTS.lavender,
-            href: 'builder.html',
-            recommended: false,
-          },
-          {
             id: 'vowel-practice',
             icon: 'ㅏ',
             title: 'Vowel Practice',

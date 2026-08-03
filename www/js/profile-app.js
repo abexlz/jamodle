@@ -144,7 +144,6 @@
   function renderStats(summary) {
     const hasActivity = summary.totalXp > 0
       || summary.wordsLearned > 0
-      || summary.builderCompleted > 0
       || summary.totalLearningDays > 0;
 
     if (!hasActivity) {
@@ -156,7 +155,6 @@
       { label: t('shop.coins'), value: summary.coins },
       { label: t('profile.stats.level'), value: summary.level },
       { label: t('profile.stats.wordsLearned'), value: summary.uniqueWords },
-      { label: t('profile.stats.builder'), value: summary.builderCompleted },
       { label: t('profile.stats.match'), value: summary.matchCompleted },
       { label: t('profile.stats.daily'), value: summary.dailyChallengesCompleted },
       { label: t('profile.stats.currentStreak'), value: `${summary.currentStreak} 🔥` },
