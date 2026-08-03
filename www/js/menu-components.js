@@ -268,9 +268,7 @@
   }
 
   function getRecommendedModeId() {
-    const level = global.UserPreferences?.getLearningLevel?.() || 'beginner';
-    const map = { beginner: 'tutorial', intermediate: 'vowel-practice', advanced: 'vowel-practice' };
-    return map[level] || 'tutorial';
+    return 'tutorial';
   }
 
   function renderLearnHangul() {

@@ -72,11 +72,6 @@
         "subtitle": "Rotate jamo tiles · discover multiple answers.",
         "subtitleKo": "자모 돌리기 · 여러 단어 찾기"
       },
-      "vowel-practice": {
-        "title": "Vowel Practice",
-        "subtitle": "Learn horizontal, vertical, and compound vowels.",
-        "subtitleKo": "ㅏ · ㅓ · ㅗ · ㅜ · ㅘ"
-      },
       "tutorial": {
         "title": "Tutorial",
         "subtitle": "Learn placement, rotation, merge, and word building.",
@@ -662,11 +657,6 @@
       "example3": "자전거"
     }
   },
-  "vowels": {
-    "title": "Vowel Practice",
-    "subtitle": "Learn horizontal, vertical, and compound vowels",
-    "back": "← Home"
-  },
   "profile": {
     "title": "Profile",
     "defaultName": "Learner",
@@ -746,7 +736,7 @@
       },
       "vowel-pro": {
         "name": "Vowel Pro",
-        "desc": "Complete Vowel Practice"
+        "desc": "Learn your first few Hangul-dle words"
       },
       "week-warrior": {
         "name": "Week Warrior",

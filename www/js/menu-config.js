@@ -74,16 +74,6 @@
         titleKo: '한글 배우기',
         modes: [
           {
-            id: 'vowel-practice',
-            icon: 'ㅏ',
-            title: 'Vowel Practice',
-            subtitle: 'Learn horizontal, vertical, and compound vowels.',
-            subtitleKo: 'ㅏ · ㅓ · ㅗ · ㅜ · ㅘ',
-            accent: ACCENTS.blue,
-            href: 'vowels.html',
-            recommended: false,
-          },
-          {
             id: 'tutorial',
             icon: '📘',
             title: 'Tutorial',

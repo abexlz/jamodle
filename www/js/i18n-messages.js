@@ -76,11 +76,6 @@
           "subtitle": "Rotate jamo tiles · discover multiple answers.",
           "subtitleKo": "자모 돌리기 · 여러 단어 찾기"
         },
-        "vowel-practice": {
-          "title": "Vowel Practice",
-          "subtitle": "Learn horizontal, vertical, and compound vowels.",
-          "subtitleKo": "ㅏ · ㅓ · ㅗ · ㅜ · ㅘ"
-        },
         "tutorial": {
           "title": "Tutorial",
           "subtitle": "Learn placement, rotation, merge, and word building.",
@@ -666,11 +661,6 @@
         "example3": "자전거"
       }
     },
-    "vowels": {
-      "title": "Vowel Practice",
-      "subtitle": "Learn horizontal, vertical, and compound vowels",
-      "back": "← Home"
-    },
     "profile": {
       "title": "Profile",
       "defaultName": "Learner",
@@ -750,7 +740,7 @@
         },
         "vowel-pro": {
           "name": "Vowel Pro",
-          "desc": "Complete Vowel Practice"
+          "desc": "Learn your first few Hangul-dle words"
         },
         "week-warrior": {
           "name": "Week Warrior",
@@ -1614,11 +1604,6 @@
           "subtitle": "자모를 돌려 여러 단어를 찾아보세요.",
           "subtitleKo": "자모 돌리기 · 여러 단어 찾기"
         },
-        "vowel-practice": {
-          "title": "모음 연습",
-          "subtitle": "가로·세로·겹모음을 배워요.",
-          "subtitleKo": "ㅏ · ㅓ · ㅗ · ㅜ · ㅘ"
-        },
         "tutorial": {
           "title": "튜토리얼",
           "subtitle": "배치, 돌리기, 합치기, 단어 만들기를 배워요.",
@@ -2204,11 +2189,6 @@
         "example3": "자전거"
       }
     },
-    "vowels": {
-      "title": "모음 연습",
-      "subtitle": "가로·세로·복합 모음을 배워요",
-      "back": "← 홈"
-    },
     "profile": {
       "title": "프로필",
       "defaultName": "학습자",
@@ -2288,7 +2268,7 @@
         },
         "vowel-pro": {
           "name": "모음 프로",
-          "desc": "모음 연습을 완료했어요"
+          "desc": "한글들 단어를 몇 개 완성했어요"
         },
         "week-warrior": {
           "name": "Week Warrior",

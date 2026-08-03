@@ -8,7 +8,7 @@
     { id: 'first-step', icon: '🌱', check: (ctx) => ctx.totalActivities >= 1 },
     { id: 'first-word', icon: '🧩', check: (ctx) => ctx.matchWords >= 1 || ctx.uniqueWords >= 1 },
     { id: 'match-maker', icon: '🎯', check: (ctx) => ctx.matchWords >= 10 },
-    { id: 'vowel-pro', icon: 'ㅏ', check: (ctx) => ctx.vowelPracticeDone },
+    { id: 'vowel-pro', icon: 'ㅏ', check: (ctx) => ctx.matchWords >= 3 || ctx.uniqueWords >= 3 },
     { id: 'week-warrior', icon: '🔥', check: (ctx) => ctx.longestStreak >= 7 },
     { id: 'two-week-learner', icon: '🏅', check: (ctx) => ctx.longestStreak >= 14 },
     { id: 'hangul-hero', icon: '🎖️', check: (ctx) => ctx.level >= 10 },
@@ -44,7 +44,7 @@
     { id: 'pencil', icon: '✏️', check: (ctx) => ctx.matchWords >= 5 || ctx.uniqueWords >= 5 },
     { id: 'puzzle', icon: '🧩', check: (ctx) => ctx.matchWords >= 10 },
     { id: 'frog', icon: '🐸', check: (ctx) => ctx.uniqueWords >= 25 },
-    { id: 'music', icon: '🎵', check: (ctx) => ctx.vowelPracticeDone },
+    { id: 'music', icon: '🎵', check: (ctx) => ctx.matchWords >= 5 || ctx.uniqueWords >= 5 },
     { id: 'globe', icon: '🌍', check: (ctx) => ctx.uniqueWords >= 50 },
   ];
 
