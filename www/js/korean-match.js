@@ -2320,6 +2320,14 @@
         }
       }
 
+      // Cap width so a huge 1-letter tile size can't shove the bank over the merge tray.
+      if (row) {
+        const rowGap = parseFloat(getComputedStyle(row).gap) || 6;
+        const toolsW = tools?.getBoundingClientRect().width || 0;
+        const availableW = Math.max(tileSize + padX, row.clientWidth - toolsW - rowGap);
+        lockedW = Math.min(lockedW, Math.floor(availableW));
+      }
+
       this._dockFittedMinHeight = lockedH;
       this._dockFittedMinWidth = lockedW;
       bank.style.minHeight = `${lockedH}px`;

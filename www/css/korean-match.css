@@ -2570,14 +2570,15 @@
 
   body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="1"] .syllable-block {
     flex: 0 0 auto;
-    width: min(168px, 78vw);
-    max-width: min(168px, 78vw);
-    min-width: min(140px, 62vw);
+    width: min(120px, 42vw);
+    max-width: min(120px, 42vw);
+    min-width: min(100px, 36vw);
   }
 
   body.match-page:not(.match-race-page) #match-app:has(.syllable-blocks-row[data-syl-count="1"]) {
-    --block-size: min(168px, 78vw);
-    --tile-size: min(72px, 34vw);
+    --block-size: min(120px, 42vw);
+    /* Keep dock tiles compact so merge + bank don't overlap on 1-letter boards. */
+    --tile-size: min(50px, 15vw);
   }
 
   body.match-page:not(.match-race-page) .syllable-blocks-row .syllable-grid {
