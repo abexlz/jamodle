@@ -2391,22 +2391,23 @@
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr;
     flex: 0 0 auto !important;
-    position: relative !important;
-    inset: auto !important;
     --four-gap: clamp(4px, 1.2vw, 8px);
     width: 97%;
     max-width: 97%;
     height: auto;
-    max-height: 97%;
+    max-height: none;
     margin: 0 auto !important;
     gap: var(--four-gap);
-    align-content: stretch;
-    justify-content: stretch;
-    align-items: stretch;
+    align-content: stretch !important;
+    justify-content: stretch !important;
+    align-items: stretch !important;
+    justify-items: stretch !important;
     min-height: 0 !important;
     min-width: 0 !important;
     box-sizing: border-box;
     aspect-ratio: unset !important;
+    /* Tight frame so white slots can fill nearly the whole panel. */
+    padding: clamp(4px, 1vw, 8px) !important;
   }
 
   body.match-race-page .blocks-area:has(.syllable-blocks-row[data-syl-count="4"]) {
@@ -2416,12 +2417,12 @@
     align-self: stretch !important;
     width: 100% !important;
     margin-top: 0 !important;
-    position: relative !important;
+    position: static !important;
     display: flex !important;
     flex-direction: column !important;
-    justify-content: center !important;
-    align-items: center !important;
-    overflow: hidden !important;
+    justify-content: stretch !important;
+    align-items: stretch !important;
+    overflow: visible !important;
   }
 
   body.match-race-page .syllable-blocks-row[data-syl-count="5"],
@@ -3393,23 +3394,23 @@
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr;
     flex: 0 0 auto !important;
-    position: relative !important;
-    inset: auto !important;
     overflow: visible;
     --four-gap: clamp(4px, 1.2vw, 8px);
     width: 97%;
     max-width: 97%;
     height: auto;
-    max-height: 97%;
+    max-height: none;
     margin: 0 auto !important;
     gap: var(--four-gap);
-    align-content: stretch;
-    justify-content: stretch;
-    align-items: stretch;
+    align-content: stretch !important;
+    justify-content: stretch !important;
+    align-items: stretch !important;
+    justify-items: stretch !important;
     min-height: 0 !important;
     min-width: 0 !important;
     box-sizing: border-box;
     aspect-ratio: unset !important;
+    padding: clamp(4px, 1vw, 8px) !important;
   }
 
   body.match-turn-page .blocks-area:has(.syllable-blocks-row[data-syl-count="4"]) {
@@ -3419,12 +3420,12 @@
     align-self: stretch !important;
     width: 100% !important;
     margin-top: 0 !important;
-    position: relative !important;
+    position: static !important;
     display: flex !important;
     flex-direction: column !important;
-    justify-content: center !important;
-    align-items: center !important;
-    overflow: hidden !important;
+    justify-content: stretch !important;
+    align-items: stretch !important;
+    overflow: visible !important;
   }
 
   body.match-turn-page .blocks-area .syllable-block {

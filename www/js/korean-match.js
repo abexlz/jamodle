@@ -1317,8 +1317,9 @@
     }
 
     /**
-     * 4-letter board: fill ~97% of the scoreboard↔dock gap, then stretch
-     * +40% upward and +90% downward (capped so it never covers the dock).
+     * 4-letter board: pin the gray slot panel to 97% of the visible
+     * scoreboard↔dock window. Absolute positioning vs #race-main avoids
+     * flex/% height bugs that left a short centered board.
      */
     syncFourLetterBoardSize() {
       const row = this.els?.blocks;
@@ -1326,16 +1327,15 @@
 
       const area = row.closest('.blocks-area');
       const clearRow = () => {
-        ['height', 'width', 'max-height', 'max-width', 'aspect-ratio', 'top', 'bottom', 'left', 'right', 'position', 'inset', 'margin-top'].forEach((p) => {
+        ['height', 'width', 'max-height', 'max-width', 'aspect-ratio', 'top', 'left', 'right', 'bottom', 'position', 'inset', 'margin', 'margin-top', 'transform', 'z-index'].forEach((p) => {
           row.style.removeProperty(p);
         });
       };
       const clearArea = () => {
         if (!area) return;
-        area.style.removeProperty('height');
-        area.style.removeProperty('min-height');
-        area.style.removeProperty('max-height');
-        area.style.removeProperty('flex');
+        ['height', 'min-height', 'max-height', 'flex', 'position'].forEach((p) => {
+          area.style.removeProperty(p);
+        });
       };
       const clearApp = () => {
         this.root?.style?.removeProperty('min-height');
@@ -1345,57 +1345,66 @@
         clearRow();
         clearArea();
         clearApp();
+        row.removeAttribute('data-four-board-synced');
         return;
       }
 
       const app = this.root;
       const dock = app?.querySelector?.('.bank-section--turn, .bank-section');
       const hud = document.getElementById('race-battle-hud');
-      if (!app || !area || !dock) return;
+      const shell = document.getElementById('race-main') || app?.parentElement || app;
+      if (!app || !area || !dock || !shell || !hud) return;
 
       clearArea();
+      clearApp();
 
-      // Stretch #match-app to its flex parent so the mid-column is real viewport space.
       const mine = app.parentElement;
       const mineH = mine?.clientHeight || 0;
       if (mineH > 80) {
         app.style.setProperty('min-height', `${Math.floor(mineH)}px`);
       }
 
-      row.style.position = 'relative';
-      row.style.setProperty('height', '0px');
-      row.style.setProperty('width', '97%');
-      row.style.removeProperty('margin-top');
+      // In-flow spacer so the dock stays at the bottom while the board is absolute.
+      // Keep area non-positioned so the board anchors to #race-main.
+      area.style.setProperty('flex', '1 1 0');
+      area.style.setProperty('min-height', '0');
+      area.style.removeProperty('position');
+
+      const shellPos = getComputedStyle(shell).position;
+      if (shellPos === 'static') shell.style.position = 'relative';
+
       void app.offsetHeight;
 
+      const shellRect = shell.getBoundingClientRect();
+      const hudBottom = hud.getBoundingClientRect().bottom;
       const dockTop = dock.getBoundingClientRect().top;
-      const hudBottom = hud?.getBoundingClientRect().bottom;
-      void app.offsetHeight;
-      const gapFromHud = hudBottom != null ? Math.floor(dockTop - hudBottom) : 0;
-      const gapFromArea = Math.floor(dockTop - area.getBoundingClientRect().top);
-      const usableH = gapFromHud > 60 ? gapFromHud : gapFromArea;
-      const usableW = Math.floor(area.getBoundingClientRect().width || app.getBoundingClientRect().width);
+      const gap = Math.floor(dockTop - hudBottom);
+      const usableW = Math.floor(
+        area.getBoundingClientRect().width
+        || app.getBoundingClientRect().width
+        || shellRect.width
+      );
 
-      if (usableH < 60 || usableW < 60) return;
+      if (gap < 60 || usableW < 60) return;
 
-      const baseH = Math.max(64, Math.floor(usableH * 0.97));
-      const extendUp = Math.floor(baseH * 0.40);
-      const extendDown = Math.floor(baseH * 0.90);
-      let h = baseH + extendUp + extendDown;
-      let shiftDown = Math.floor((extendDown - extendUp) / 2);
-      if (h > usableH) {
-        const scale = usableH / h;
-        h = usableH;
-        shiftDown = Math.floor(shiftDown * scale);
-      }
+      const h = Math.max(64, Math.floor(gap * 0.97));
       const w = Math.max(64, Math.floor(usableW * 0.97));
+      // Fixed to the live HUD↔dock window so ancestor position:relative cannot shrink it.
+      const top = Math.floor(hudBottom + (gap - h) / 2);
+      const appRect = app.getBoundingClientRect();
+      const left = Math.floor(appRect.left + (appRect.width - w) / 2);
 
+      row.style.setProperty('position', 'fixed', 'important');
+      row.style.setProperty('top', `${top}px`, 'important');
+      row.style.setProperty('left', `${left}px`, 'important');
       row.style.setProperty('width', `${w}px`, 'important');
       row.style.setProperty('height', `${h}px`, 'important');
       row.style.setProperty('max-width', `${w}px`, 'important');
       row.style.setProperty('max-height', `${h}px`, 'important');
+      row.style.setProperty('margin', '0', 'important');
       row.style.setProperty('aspect-ratio', 'unset', 'important');
-      row.style.setProperty('margin-top', `${shiftDown}px`, 'important');
+      row.style.setProperty('z-index', '6', 'important');
+      row.dataset.fourBoardSynced = '1';
     }
 
     applyMeaningPreference() {
