@@ -2577,8 +2577,7 @@
 
   body.match-page:not(.match-race-page) #match-app:has(.syllable-blocks-row[data-syl-count="1"]) {
     --block-size: min(120px, 42vw);
-    /* Keep dock tiles compact so merge + bank don't overlap on 1-letter boards. */
-    --tile-size: min(50px, 15vw);
+    /* Same dock/merge tile scale as 2-letter (do not override --tile-size). */
   }
 
   body.match-page:not(.match-race-page) .syllable-blocks-row .syllable-grid {
