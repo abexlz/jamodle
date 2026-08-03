@@ -42,11 +42,12 @@
 
   /**
    * Columns used for block sizing / wrap.
-   * 5 letters → 3 top + 2 bottom; 6 letters → 3 top + 3 bottom; shorter words stay on one row.
+   * 4 letters → 2×2; 5 → 3+2; 6 → 3+3; shorter words stay on one row.
    */
   function layoutSylColumnCount(syllableCount) {
     const n = Number(syllableCount) || 0;
     if (n >= 5) return 3;
+    if (n === 4) return 2;
     return Math.max(n, 1);
   }
 
@@ -2547,7 +2548,17 @@
     onTileTap(tile) {
       if (this.checkedComplete || this.checking || this.inspectMode || tile.locked) return;
       if (!this.canArrangeTiles()) return;
+      // Pips-style: first tap lifts; second tap on the same lifted tile rotates it.
       if (this.selectedTile?.id === tile.id) {
+        if (this.canRotateTile(tile)) {
+          if (this.rotateTile(tile)) {
+            tile.setSelected(true);
+            this.selectedTile = tile;
+            this.updateRotationDockLabel();
+            this.updateSelectionHighlights();
+          }
+          return;
+        }
         this.clearSelection();
         return;
       }
@@ -3128,6 +3139,7 @@
         this.updateRotationDockLabel();
         this.mergeDock?.updatePreview?.();
         this.updateCheckButton();
+        if (this.selectedTile?.id === tile.id) tile.setSelected(true);
         this.onTutorialEvent?.('rotate', { tile, prev, next, game: this });
         global.SoundEffects?.rotate?.();
         this.pulseLiveAction('rotate', { tileId: tile.id, at: this.serializeTileLiveRef(tile) });
@@ -3190,6 +3202,8 @@
         this.feedback.show('info', t('match.rotateSuccess', { from: prev, to: next }));
       }
       this.updateCheckButton();
+      // Keep Pips lift after zone reparent (setInZone strips .selected).
+      if (this.selectedTile?.id === tile.id) tile.setSelected(true);
       this.onTutorialEvent?.('rotate', { tile, prev, next, game: this });
       global.SoundEffects?.rotate?.();
       this.pulseLiveAction('rotate', { tileId: tile.id, at: this.serializeTileLiveRef(tile) });
