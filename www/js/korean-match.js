@@ -1317,26 +1317,169 @@
     }
 
     /**
-     * 4-letter board: fill 97% of the scoreboard↔dock gap via injected CSS
-     * (beats aspect-ratio / align-content traps that kept slots short).
+     * 4-letter board: force the gray slot panel to ~97% of the scoreboard↔dock
+     * gap. Uses block-count fallback + viewport floor so a missed measure cannot
+     * leave the board unchanged.
      */
     syncFourLetterBoardSize() {
-      const row = this.els?.blocks;
+      const row = this.els?.blocks || this.root?.querySelector?.('#match-blocks');
       if (!row) return;
 
-      const helper = global.FourLetterBoardLayout;
-      if (!helper) return;
+      const blockCount = row.querySelectorAll(':scope > .syllable-block').length;
+      const isFour = String(row.dataset.sylCount) === '4' || blockCount === 4;
+      const styleId = 'jamodle-four-letter-board-style';
 
-      if (String(row.dataset.sylCount) !== '4') {
-        helper.clear();
+      const clear = () => {
+        const el = document.getElementById(styleId);
+        if (el) el.textContent = '';
         row.removeAttribute('data-four-board-synced');
-        ['height', 'width', 'max-height', 'max-width', 'min-height', 'aspect-ratio', 'top', 'left', 'right', 'bottom', 'position', 'inset', 'margin', 'margin-top', 'transform', 'z-index'].forEach((p) => {
+        row.removeAttribute('data-four-h');
+        row.removeAttribute('data-four-gap');
+        ['height', 'width', 'max-height', 'max-width', 'min-height', 'aspect-ratio'].forEach((p) => {
           row.style.removeProperty(p);
         });
+      };
+
+      if (!isFour) {
+        clear();
         return;
       }
 
-      helper.schedule(row, this.root);
+      if (String(row.dataset.sylCount) !== '4') {
+        row.dataset.sylCount = '4';
+      }
+
+      const app = this.root || document.getElementById('match-app');
+      const area = row.closest('.blocks-area');
+      const dock = app?.querySelector?.('.bank-section--turn, .bank-section')
+        || document.querySelector('.bank-section--turn, .bank-section');
+      const hud = document.getElementById('race-battle-hud');
+      const footer = app?.querySelector?.('.match-footer');
+
+      const apply = () => {
+        const dockTop = dock?.getBoundingClientRect?.().top;
+        const hudBottom = hud && !hud.classList.contains('hidden')
+          ? hud.getBoundingClientRect().bottom
+          : null;
+        const areaTop = area?.getBoundingClientRect?.().top;
+        let gap = 0;
+        if (Number.isFinite(dockTop)) {
+          const topEdge = Number.isFinite(hudBottom) && hudBottom > 0
+            ? hudBottom
+            : (Number.isFinite(areaTop) ? areaTop : 0);
+          gap = Math.floor(dockTop - topEdge);
+        }
+
+        // Viewport floor: on phones the mid-column is typically ~45–55% of height.
+        // This guarantees a visible enlarge even when DOM measure is wrong.
+        const viewportFloor = Math.floor(window.innerHeight * 0.48);
+        if (gap < viewportFloor) gap = viewportFloor;
+
+        const widthBox = area?.getBoundingClientRect?.().width
+          || app?.getBoundingClientRect?.().width
+          || window.innerWidth;
+        const w = Math.max(64, Math.floor(widthBox * 0.97));
+        const h = Math.max(64, Math.floor(gap * 0.97));
+
+        // Keep dock from being covered: cap to space above dock if we can measure it.
+        let capH = h;
+        if (Number.isFinite(dockTop) && Number.isFinite(areaTop) && dockTop - areaTop > 80) {
+          capH = Math.min(h, Math.floor((dockTop - areaTop) * 0.97));
+          // If area is still short, prefer the larger HUD gap target and let the
+          // board grow the flex column instead of staying clipped.
+          if (capH < viewportFloor * 0.9) capH = h;
+        }
+
+        let styleEl = document.getElementById(styleId);
+        if (!styleEl) {
+          styleEl = document.createElement('style');
+          styleEl.id = styleId;
+          document.head.appendChild(styleEl);
+        }
+
+        styleEl.textContent = `
+#match-blocks.syllable-blocks-row[data-syl-count="4"],
+.blocks-area .syllable-blocks-row[data-syl-count="4"] {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  grid-template-rows: 1fr 1fr !important;
+  align-content: stretch !important;
+  align-items: stretch !important;
+  justify-items: stretch !important;
+  box-sizing: border-box !important;
+  width: ${w}px !important;
+  max-width: ${w}px !important;
+  height: ${capH}px !important;
+  min-height: ${capH}px !important;
+  max-height: ${capH}px !important;
+  aspect-ratio: auto !important;
+  padding: 4px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+#match-blocks[data-syl-count="4"] > .syllable-block,
+.blocks-area .syllable-blocks-row[data-syl-count="4"] > .syllable-block {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  min-height: 0 !important;
+  aspect-ratio: auto !important;
+  contain: none !important;
+}
+#match-blocks[data-syl-count="4"] .syllable-grid,
+.blocks-area .syllable-blocks-row[data-syl-count="4"] .syllable-grid {
+  width: 100% !important;
+  height: 100% !important;
+  aspect-ratio: auto !important;
+  min-height: 0 !important;
+}
+body.match-turn-page .blocks-area:has([data-syl-count="4"]),
+body.match-race-page .blocks-area:has([data-syl-count="4"]) {
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  overflow: visible !important;
+}
+body.match-turn-page #match-app:has([data-syl-count="4"]),
+body.match-race-page #match-app:has([data-syl-count="4"]) {
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+`;
+
+        row.style.setProperty('height', `${capH}px`, 'important');
+        row.style.setProperty('min-height', `${capH}px`, 'important');
+        row.style.setProperty('max-height', `${capH}px`, 'important');
+        row.style.setProperty('width', `${w}px`, 'important');
+        row.style.setProperty('aspect-ratio', 'auto', 'important');
+        row.dataset.fourBoardSynced = '1';
+        row.dataset.fourH = String(capH);
+        row.dataset.fourGap = String(gap);
+
+        row.querySelectorAll(':scope > .syllable-block').forEach((block) => {
+          block.style.setProperty('height', '100%', 'important');
+          block.style.setProperty('width', '100%', 'important');
+          block.style.setProperty('aspect-ratio', 'auto', 'important');
+        });
+      };
+
+      apply();
+      requestAnimationFrame(() => {
+        apply();
+        requestAnimationFrame(apply);
+      });
+      setTimeout(apply, 50);
+      setTimeout(apply, 250);
+      setTimeout(apply, 700);
     }
 
     applyMeaningPreference() {

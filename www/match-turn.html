@@ -209,6 +209,47 @@
     box-sizing: border-box;
   }
   body.match-race-page.match-turn-page #match-app > .match-header { display: none; }
+
+  /* 4-letter empty slots: CSS floor so the board is visibly tall even before JS runs */
+  body.match-turn-page .blocks-area:has(.syllable-blocks-row[data-syl-count="4"]) {
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    overflow: visible !important;
+  }
+  body.match-turn-page .blocks-area .syllable-blocks-row[data-syl-count="4"] {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    grid-template-rows: 1fr 1fr !important;
+    align-content: stretch !important;
+    align-items: stretch !important;
+    width: 97% !important;
+    max-width: 97% !important;
+    /* ~half the phone viewport — must look taller than the old square board */
+    height: 50dvh !important;
+    min-height: 50dvh !important;
+    max-height: none !important;
+    aspect-ratio: auto !important;
+    padding: 4px !important;
+    box-sizing: border-box !important;
+  }
+  body.match-turn-page .blocks-area .syllable-blocks-row[data-syl-count="4"] > .syllable-block {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    aspect-ratio: auto !important;
+    min-height: 0 !important;
+    contain: none !important;
+  }
+  body.match-turn-page .blocks-area .syllable-blocks-row[data-syl-count="4"] .syllable-grid {
+    width: 100% !important;
+    height: 100% !important;
+    aspect-ratio: auto !important;
+    min-height: 0 !important;
+  }
 </style>
 <link rel="stylesheet" href="css/game-layout.css?v=3">
 <link rel="stylesheet" href="css/home-nav.css?v=12">
@@ -269,8 +310,8 @@
 <script src="js/rw-score-odometer.js"></script>
 <script src="js/match-emotes.js?v=20260707y"></script>
 <script src="js/four-letter-board-layout.js?v=20260804a"></script>
-<script src="js/korean-match.js?v=20260804o"></script>
-<script src="js/match-turn-app.js?v=20260804j"></script>
+<script src="js/korean-match.js?v=20260804p"></script>
+<script src="js/match-turn-app.js?v=20260804k"></script>
 <script src="js/match-turn-bot.js?v=20260804i"></script>
 <script>
 (async function () {
