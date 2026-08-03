@@ -1317,9 +1317,8 @@
     }
 
     /**
-     * 4-letter board: force the gray slot panel to ~97% of the scoreboard↔dock
-     * gap. Uses block-count fallback + viewport floor so a missed measure cannot
-     * leave the board unchanged.
+     * 4-letter board: fill 97% of the scoreboard↔dock gap, never taller than
+     * that window (prevents the top row being clipped under the HUD).
      */
     syncFourLetterBoardSize() {
       const row = this.els?.blocks || this.root?.querySelector?.('#match-blocks');
@@ -1354,41 +1353,37 @@
       const dock = app?.querySelector?.('.bank-section--turn, .bank-section')
         || document.querySelector('.bank-section--turn, .bank-section');
       const hud = document.getElementById('race-battle-hud');
-      const footer = app?.querySelector?.('.match-footer');
 
       const apply = () => {
         const dockTop = dock?.getBoundingClientRect?.().top;
         const hudBottom = hud && !hud.classList.contains('hidden')
           ? hud.getBoundingClientRect().bottom
           : null;
-        const areaTop = area?.getBoundingClientRect?.().top;
+        const areaRect = area?.getBoundingClientRect?.();
+
+        // Hard window: scoreboard bottom → dock top. Never invent a taller gap.
         let gap = 0;
-        if (Number.isFinite(dockTop)) {
-          const topEdge = Number.isFinite(hudBottom) && hudBottom > 0
-            ? hudBottom
-            : (Number.isFinite(areaTop) ? areaTop : 0);
-          gap = Math.floor(dockTop - topEdge);
+        if (Number.isFinite(dockTop) && Number.isFinite(hudBottom) && hudBottom > 0) {
+          gap = Math.floor(dockTop - hudBottom);
+        } else if (Number.isFinite(dockTop) && areaRect) {
+          gap = Math.floor(dockTop - areaRect.top);
+        } else if (area?.clientHeight > 80) {
+          gap = Math.floor(area.clientHeight);
+        } else {
+          gap = Math.floor(window.innerHeight * 0.4);
+        }
+        if (gap < 60) gap = 60;
+
+        // Also never taller than the live blocks-area (keeps top edge under HUD).
+        if (area?.clientHeight > 80) {
+          gap = Math.min(gap, Math.floor(area.clientHeight));
         }
 
-        // Viewport floor: on phones the mid-column is typically ~45–55% of height.
-        // This guarantees a visible enlarge even when DOM measure is wrong.
-        const viewportFloor = Math.floor(window.innerHeight * 0.48);
-        if (gap < viewportFloor) gap = viewportFloor;
-
-        const widthBox = area?.getBoundingClientRect?.().width
+        const widthBox = areaRect?.width
           || app?.getBoundingClientRect?.().width
           || window.innerWidth;
         const w = Math.max(64, Math.floor(widthBox * 0.97));
-        const h = Math.max(64, Math.floor(gap * 0.97));
-
-        // Keep dock from being covered: cap to space above dock if we can measure it.
-        let capH = h;
-        if (Number.isFinite(dockTop) && Number.isFinite(areaTop) && dockTop - areaTop > 80) {
-          capH = Math.min(h, Math.floor((dockTop - areaTop) * 0.97));
-          // If area is still short, prefer the larger HUD gap target and let the
-          // board grow the flex column instead of staying clipped.
-          if (capH < viewportFloor * 0.9) capH = h;
-        }
+        const capH = Math.max(64, Math.floor(gap * 0.97));
 
         let styleEl = document.getElementById(styleId);
         if (!styleEl) {
@@ -1442,7 +1437,7 @@ body.match-race-page .blocks-area:has([data-syl-count="4"]) {
   flex-direction: column !important;
   justify-content: center !important;
   align-items: center !important;
-  overflow: visible !important;
+  overflow: hidden !important;
 }
 body.match-turn-page #match-app:has([data-syl-count="4"]),
 body.match-race-page #match-app:has([data-syl-count="4"]) {
