@@ -677,7 +677,11 @@
       this.game.mount();
       requestAnimationFrame(() => {
         this.game?.syncDockTileSize?.();
-        requestAnimationFrame(() => this.game?.syncDockTileSize?.());
+        this.game?.syncFourLetterBoardSize?.();
+        requestAnimationFrame(() => {
+          this.game?.syncDockTileSize?.();
+          this.game?.syncFourLetterBoardSize?.();
+        });
       });
       this.ensureTurnBar();
       this.mountTurnBarToDock();
@@ -688,6 +692,10 @@
       this.syncTurnState(data);
       this.renderBattleHud(data);
       this.setupEmotes(data);
+      // HUD/dock finish laying out after bar + HUD mount — resize board again.
+      setTimeout(() => this.game?.syncFourLetterBoardSize?.(), 80);
+      setTimeout(() => this.game?.syncFourLetterBoardSize?.(), 300);
+      setTimeout(() => this.game?.syncFourLetterBoardSize?.(), 700);
     }
 
     renderBattleHud(data) {

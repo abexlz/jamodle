@@ -1317,94 +1317,26 @@
     }
 
     /**
-     * 4-letter board: pin the gray slot panel to 97% of the visible
-     * scoreboard↔dock window. Absolute positioning vs #race-main avoids
-     * flex/% height bugs that left a short centered board.
+     * 4-letter board: fill 97% of the scoreboard↔dock gap via injected CSS
+     * (beats aspect-ratio / align-content traps that kept slots short).
      */
     syncFourLetterBoardSize() {
       const row = this.els?.blocks;
       if (!row) return;
 
-      const area = row.closest('.blocks-area');
-      const clearRow = () => {
-        ['height', 'width', 'max-height', 'max-width', 'aspect-ratio', 'top', 'left', 'right', 'bottom', 'position', 'inset', 'margin', 'margin-top', 'transform', 'z-index'].forEach((p) => {
+      const helper = global.FourLetterBoardLayout;
+      if (!helper) return;
+
+      if (String(row.dataset.sylCount) !== '4') {
+        helper.clear();
+        row.removeAttribute('data-four-board-synced');
+        ['height', 'width', 'max-height', 'max-width', 'min-height', 'aspect-ratio', 'top', 'left', 'right', 'bottom', 'position', 'inset', 'margin', 'margin-top', 'transform', 'z-index'].forEach((p) => {
           row.style.removeProperty(p);
         });
-      };
-      const clearArea = () => {
-        if (!area) return;
-        ['height', 'min-height', 'max-height', 'flex', 'position'].forEach((p) => {
-          area.style.removeProperty(p);
-        });
-      };
-      const clearApp = () => {
-        this.root?.style?.removeProperty('min-height');
-      };
-
-      if (row.dataset.sylCount !== '4') {
-        clearRow();
-        clearArea();
-        clearApp();
-        row.removeAttribute('data-four-board-synced');
         return;
       }
 
-      const app = this.root;
-      const dock = app?.querySelector?.('.bank-section--turn, .bank-section');
-      const hud = document.getElementById('race-battle-hud');
-      const shell = document.getElementById('race-main') || app?.parentElement || app;
-      if (!app || !area || !dock || !shell || !hud) return;
-
-      clearArea();
-      clearApp();
-
-      const mine = app.parentElement;
-      const mineH = mine?.clientHeight || 0;
-      if (mineH > 80) {
-        app.style.setProperty('min-height', `${Math.floor(mineH)}px`);
-      }
-
-      // In-flow spacer so the dock stays at the bottom while the board is absolute.
-      // Keep area non-positioned so the board anchors to #race-main.
-      area.style.setProperty('flex', '1 1 0');
-      area.style.setProperty('min-height', '0');
-      area.style.removeProperty('position');
-
-      const shellPos = getComputedStyle(shell).position;
-      if (shellPos === 'static') shell.style.position = 'relative';
-
-      void app.offsetHeight;
-
-      const shellRect = shell.getBoundingClientRect();
-      const hudBottom = hud.getBoundingClientRect().bottom;
-      const dockTop = dock.getBoundingClientRect().top;
-      const gap = Math.floor(dockTop - hudBottom);
-      const usableW = Math.floor(
-        area.getBoundingClientRect().width
-        || app.getBoundingClientRect().width
-        || shellRect.width
-      );
-
-      if (gap < 60 || usableW < 60) return;
-
-      const h = Math.max(64, Math.floor(gap * 0.97));
-      const w = Math.max(64, Math.floor(usableW * 0.97));
-      // Fixed to the live HUD↔dock window so ancestor position:relative cannot shrink it.
-      const top = Math.floor(hudBottom + (gap - h) / 2);
-      const appRect = app.getBoundingClientRect();
-      const left = Math.floor(appRect.left + (appRect.width - w) / 2);
-
-      row.style.setProperty('position', 'fixed', 'important');
-      row.style.setProperty('top', `${top}px`, 'important');
-      row.style.setProperty('left', `${left}px`, 'important');
-      row.style.setProperty('width', `${w}px`, 'important');
-      row.style.setProperty('height', `${h}px`, 'important');
-      row.style.setProperty('max-width', `${w}px`, 'important');
-      row.style.setProperty('max-height', `${h}px`, 'important');
-      row.style.setProperty('margin', '0', 'important');
-      row.style.setProperty('aspect-ratio', 'unset', 'important');
-      row.style.setProperty('z-index', '6', 'important');
-      row.dataset.fourBoardSynced = '1';
+      helper.schedule(row, this.root);
     }
 
     applyMeaningPreference() {
