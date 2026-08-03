@@ -4,8 +4,12 @@
 (function (global) {
   'use strict';
 
-  /** Pause between full-word repeats (half of previous 220ms). */
-  const REPEAT_GAP_MS = 110;
+  /**
+   * Pause between full-word repeats (1st → 2nd reading).
+   * Half of the previous AnswerTTS/default gap (200ms). Kept here as the
+   * fallback when callers omit gapMs; AnswerTTS always passes this value.
+   */
+  const REPEAT_GAP_MS = 100;
   /** Web Speech rate was 0.82 — slowed to 80% to match server TTS. */
   const DEFAULT_RATE = 0.82 * 0.8;
   /**
@@ -317,6 +321,22 @@
     return speakWithWebSpeech(text, { ...options, volume, playbackRate });
   }
 
+  function passOptionsForIndex(i, options, baseSyllableGap) {
+    if (i === 0) {
+      return {
+        ...options,
+        syllablePace: options.syllablePace || 'normal',
+        syllableGapMs: baseSyllableGap,
+      };
+    }
+    // Second+ pass: half the syllable pause for a snappier re-read.
+    return {
+      ...options,
+      syllablePace: 'fast',
+      syllableGapMs: Math.max(0, baseSyllableGap / 2),
+    };
+  }
+
   async function speak(text, options = {}) {
     const word = normalizeWord(text);
     const repeats = Math.max(1, Number(options.repeats) || 1);
@@ -324,6 +344,7 @@
     const baseSyllableGap = Number.isFinite(options.syllableGapMs)
       ? options.syllableGapMs
       : SYLLABLE_GAP_MS;
+    const preferServer = options.preferServer !== false;
 
     if (!word || !pronunciationEnabled()) return false;
 
@@ -331,20 +352,26 @@
     const session = activeSession;
     prime();
 
+    // Start fetching pass 2+ immediately alongside pass 1 playback, so the
+    // audible gap between readings is only gapMs — not a second network round-trip.
+    const warmed = [];
+    if (preferServer) {
+      for (let i = 1; i < repeats; i += 1) {
+        warmed[i] = fetchServerAudio(
+          word,
+          passOptionsForIndex(i, options, baseSyllableGap),
+        ).catch(() => null);
+      }
+    }
+
     for (let i = 0; i < repeats; i += 1) {
       if (session !== activeSession) return false;
-      // Second+ pass: half the syllable pause for a snappier re-read.
-      const passOptions = i === 0
-        ? { ...options, syllablePace: options.syllablePace || 'normal', syllableGapMs: baseSyllableGap }
-        : {
-          ...options,
-          syllablePace: 'fast',
-          syllableGapMs: Math.max(0, baseSyllableGap / 2),
-        };
+      const passOptions = passOptionsForIndex(i, options, baseSyllableGap);
       const ok = await speakOnce(word, passOptions);
       if (!ok) return false;
       if (i < repeats - 1) {
-        await new Promise((r) => setTimeout(r, gapMs));
+        const waitGap = new Promise((r) => setTimeout(r, gapMs));
+        await Promise.all([waitGap, warmed[i + 1] || Promise.resolve()]);
         if (session !== activeSession) return false;
       }
     }
@@ -370,6 +397,7 @@
   syncVoicePreferenceState();
 
   global.KoreanTTS = {
+    REPEAT_GAP_MS,
     prime,
     cancel,
     speak,

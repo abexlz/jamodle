@@ -258,6 +258,7 @@
   installGestureTracking();
 
   global.AnswerTTS = {
+    REPEAT_GAP_MS,
     noteUserGesture,
     armSolveAutoplay,
     primeSpeech,
