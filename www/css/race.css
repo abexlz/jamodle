@@ -36,9 +36,9 @@
 
 .race-header-title-img {
   display: block;
-  height: clamp(226px, 63.4vw, 304px);
-  width: auto;
-  max-width: min(100%, 96vw);
+  width: 80%;
+  max-width: 80%;
+  height: auto;
   margin: 0 auto;
   object-fit: contain;
   pointer-events: none;
