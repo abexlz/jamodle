@@ -1392,7 +1392,12 @@
       const popup = this.els.meaningPopup;
       const popupText = this.els.meaningPopupText;
       if (!popup || !popupText) return;
-      popupText.textContent = text || t('match.hints.noMeaning');
+      const label = text || t('match.hints.noMeaning') || 'No definition found.';
+      popupText.textContent = label;
+      // Keep above game chrome / bottom nav; re-parent if a layout ancestor clips.
+      if (popup.parentElement !== document.body) {
+        document.body.appendChild(popup);
+      }
       popup.classList.remove('hidden', 'is-visible');
       void popup.offsetWidth;
       popup.classList.add('is-visible');

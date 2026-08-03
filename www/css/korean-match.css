@@ -360,7 +360,7 @@
     position: fixed;
     left: 50%;
     bottom: calc(env(safe-area-inset-bottom, 0px) + 168px);
-    z-index: 45;
+    z-index: 120;
     width: min(92vw, 360px);
     transform: translateX(-50%);
     pointer-events: none;
@@ -371,14 +371,18 @@
   }
 
   .meaning-hint-popup-inner {
+    /* Keep readable on the teal theme where --text/--heading are white. */
+    --meaning-ink: #1F3A44;
+    --meaning-label: #5B6BB5;
     padding: 14px 18px;
     border-radius: 16px;
     border: 3px solid var(--lavender-btn, #CFC0F5);
-    background: linear-gradient(165deg, #fff 0%, #f8f4ff 100%);
+    background: linear-gradient(165deg, #ffffff 0%, #f8f4ff 100%);
     box-shadow:
       0 8px 24px rgba(74, 58, 120, 0.18),
       0 3px 0 rgba(140, 70, 0, 0.12);
     text-align: center;
+    color: var(--meaning-ink);
   }
 
   .meaning-hint-popup-label {
@@ -388,7 +392,7 @@
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--heading, #7B8FD4);
+    color: var(--meaning-label) !important;
   }
 
   .meaning-hint-popup-text {
@@ -396,7 +400,9 @@
     font-size: clamp(15px, 4vw, 18px);
     font-weight: 600;
     line-height: 1.4;
-    color: var(--text, #2A4A58);
+    color: var(--meaning-ink) !important;
+    -webkit-text-fill-color: var(--meaning-ink);
+    min-height: 1.4em;
   }
 
   .meaning-hint-popup.is-visible .meaning-hint-popup-inner {
