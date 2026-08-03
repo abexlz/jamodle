@@ -24,8 +24,10 @@
 
 .tutorial-lesson-progress {
   margin: 0 0 6px;
-  font-size: 12px;
+  font-size: 36px;
   font-weight: 700;
+  line-height: 1.15;
+  text-align: left;
   color: #3A8AB5 !important;
   text-shadow: none !important;
 }
@@ -33,10 +35,10 @@
 .tutorial-lesson-title {
   margin: 0;
   font-family: 'Junegull', sans-serif;
-  font-size: clamp(17px, 4.4vw, 21px);
+  font-size: clamp(34px, 8.8vw, 42px);
   color: #1A5A78 !important;
   text-shadow: none !important;
-  line-height: 1.25;
+  line-height: 1.2;
 }
 
 .tutorial-lesson-body {
