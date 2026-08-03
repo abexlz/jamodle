@@ -826,3 +826,61 @@ body.daily-cal-open #menu-screen {
   filter: brightness(0.94) !important;
   box-shadow: none !important;
 }
+
+/*
+ * This modal opens over the home menu, whose dark-mode stylesheet applies
+ * global calendar overrides. Keep the calendar's light game-card palette
+ * isolated even when that menu theme is active.
+ */
+#daily-cal-overlay .daily-cal-modal {
+  background: linear-gradient(180deg, #ffffff 0%, #effafb 100%) !important;
+  border-color: rgba(90, 159, 219, 0.42) !important;
+}
+
+#daily-cal-overlay .daily-cal-header,
+#daily-cal-overlay .daily-cal-footer {
+  background: rgba(255, 255, 255, 0.97) !important;
+  border-color: rgba(90, 159, 219, 0.2) !important;
+}
+
+#daily-cal-overlay .daily-cal-prizes-title,
+#daily-cal-overlay .daily-cal-month-label,
+#daily-cal-overlay .daily-cal-progress-text,
+#daily-cal-overlay .daily-cal-wins-count,
+#daily-cal-overlay .daily-cal-wins-remaining,
+#daily-cal-overlay .daily-cal-weekday,
+#daily-cal-overlay .daily-cal-stat-value,
+#daily-cal-overlay .daily-cal-stat-label,
+#daily-cal-overlay .daily-cal-badge-label {
+  color: #0a3d52 !important;
+  text-shadow: none !important;
+}
+
+#daily-cal-overlay .daily-cal-wins-count {
+  color: #007A8E !important;
+}
+
+#daily-cal-overlay .daily-cal-wins-remaining,
+#daily-cal-overlay .daily-cal-progress-text,
+#daily-cal-overlay .daily-cal-stat-label,
+#daily-cal-overlay .daily-cal-weekday {
+  color: rgba(10, 61, 82, 0.66) !important;
+}
+
+#daily-cal-overlay .daily-cal-tab.is-active {
+  background: linear-gradient(180deg, #34c4d8 0%, #0097B2 100%) !important;
+  border-color: #007A8E !important;
+  color: #ffffff !important;
+  box-shadow: 0 3px 0 #006878 !important;
+}
+
+#daily-cal-overlay .daily-cal-tab:not(.is-active) {
+  color: rgba(10, 61, 82, 0.55) !important;
+}
+
+#daily-cal-overlay .daily-cal-play-btn {
+  background: linear-gradient(180deg, #FFE566 0%, #FFD743 100%) !important;
+  border-color: #E6B800 !important;
+  box-shadow: 0 4px 0 #C9A000 !important;
+  color: #5a4208 !important;
+}

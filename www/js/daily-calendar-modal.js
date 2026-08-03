@@ -42,7 +42,7 @@
       .replace(/"/g, '&quot;');
   }
 
-  const CAL_STYLES_HREF = 'css/daily-calendar.css?v=11';
+  const CAL_STYLES_HREF = 'css/daily-calendar.css?v=12';
 
   function ensureStyles() {
     let link = document.getElementById('daily-cal-styles');
