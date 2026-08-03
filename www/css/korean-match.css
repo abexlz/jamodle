@@ -54,7 +54,7 @@
     --merge-result-scale: 0.78;
     --merge-result-height-scale: 1.24;
     --jamo-merge-glyph-ratio: 0.768;
-    --jamo-merge-result-glyph-ratio: 0.696;
+    --jamo-merge-result-glyph-ratio: 0.974;
     --drop-zone-guide-ratio: 0.6;
     --drop-zone-guide-ratio-en: 0.39;
     --drop-zone-guide-ratio-cho-en: 0.22;
@@ -1660,7 +1660,7 @@
     justify-self: center;
     margin: auto;
     font-family: 'Jua', sans-serif;
-    font-size: min(72cqw, 88cqh);
+    font-size: min(101cqw, 123cqh);
     line-height: 1;
     color: var(--heading);
     opacity: 0.3;
@@ -1686,7 +1686,7 @@
   }
 
   .merge-result .merge-live-glyph {
-    font-size: min(72cqw, 88cqh);
+    font-size: min(101cqw, 123cqh);
   }
 
   .merge-result.filled .merge-preview-glyphs,
