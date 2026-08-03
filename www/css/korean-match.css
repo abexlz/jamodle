@@ -249,7 +249,7 @@
     border: 0;
   }
 
-  /* Dock cells — vacated cells collapse so remaining jamo pack toward the start. */
+  /* Dock cells — empty cells keep their footprint so the bank never shrinks mid-round. */
   .jamo-dock-slot {
     --dock-tile-local: var(--dock-tile-size, var(--tile-size));
     flex: 0 0 var(--dock-tile-local);
@@ -264,10 +264,6 @@
     display: flex;
     align-items: stretch;
     justify-content: stretch;
-  }
-
-  .jamo-dock-slot:not(:has(> .jamo-tile:not(.hidden-in-bank):not(.merge-consumed))) {
-    display: none;
   }
 
   .jamo-bank > .jamo-tile:not(.in-zone),
@@ -1576,26 +1572,6 @@
   .merge-result.filled,
   .merge-result.has-preview {
     overflow: visible;
-  }
-
-  /* Hide the empty result tray — it only appears when previewing or holding a merge. */
-  .merge-result:not(.filled):not(.has-preview):not(.drag-over):not(.tap-target) {
-    height: 0 !important;
-    min-height: 0 !important;
-    max-height: 0 !important;
-    width: 0 !important;
-    min-width: 0 !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    border: none !important;
-    opacity: 0;
-    overflow: hidden;
-    pointer-events: none;
-    box-shadow: none !important;
-  }
-
-  .merge-machine:not(:has(.merge-result.filled)):not(:has(.merge-result.has-preview)):not(:has(.merge-result.drag-over)):not(:has(.merge-result.tap-target)) .merge-arrow {
-    display: none;
   }
 
   .merge-slot.filled,
@@ -3426,10 +3402,6 @@
     max-width: var(--dock-tile-local) !important;
     min-height: var(--dock-tile-local) !important;
     max-height: var(--dock-tile-local) !important;
-  }
-
-  body.match-turn-page .race-turn-dock-stack .jamo-dock-slot:not(:has(> .jamo-tile:not(.hidden-in-bank):not(.merge-consumed))) {
-    display: none !important;
   }
 
   body.match-turn-page .race-turn-dock-stack .jamo-bank > .jamo-tile:not(.in-zone):not(.hidden-in-bank),

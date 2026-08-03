@@ -2181,13 +2181,15 @@
       return cycle[Math.floor(rng() * cycle.length)];
     }
 
-    /** Clear fitted dock height so the next sync can recompute for a new round. */
+    /** Clear fitted dock size so the next sync can recompute for a new round. */
     resetDockLayoutSize() {
       const bank = this.els.bank;
       if (!bank) return;
       bank.style.removeProperty('min-height');
+      bank.style.removeProperty('min-width');
       bank.style.removeProperty('max-height');
       this._dockFittedMinHeight = 0;
+      this._dockFittedMinWidth = 0;
     }
 
     /** True when the live tile node is currently parented under the jamo bank. */
@@ -2242,7 +2244,7 @@
 
     /**
      * Keep dock tiles at the design max size for this viewport and reserve the
-     * full round footprint so the bank does not shrink as letters leave.
+     * full round footprint (width + height) so the bank never shrinks mid-round.
      * On turn layout, also stretch to the Rotate+merge column height.
      */
     syncDockTileSize() {
@@ -2271,6 +2273,8 @@
       bank.style.maxHeight = 'none';
       bank.style.overflowX = 'hidden';
       bank.style.overflowY = this.turnBased ? 'auto' : 'visible';
+      bank.style.justifyContent = 'flex-start';
+      bank.style.alignContent = 'flex-start';
 
       if (!capacity) {
         bank.classList.remove('jamo-bank--wrap12');
@@ -2294,9 +2298,12 @@
       const rows = Math.ceil(capacity / cols);
       bank.classList.toggle('jamo-bank--wrap12', rows > 1);
 
+      const colsUsed = Math.min(cols, capacity);
+      const fittedW = Math.ceil(colsUsed * tileSize + gap * Math.max(colsUsed - 1, 0) + padX);
       const fittedH = Math.ceil(rows * tileSize + gap * Math.max(rows - 1, 0) + padY);
       // Never shrink mid-round as tiles leave the dock.
       let lockedH = Math.max(this._dockFittedMinHeight || 0, fittedH);
+      let lockedW = Math.max(this._dockFittedMinWidth || 0, fittedW);
 
       // Stretch dock up to the Rotate button column when tools are taller.
       const row = bank.closest('.race-turn-bottom, .bank-row');
@@ -2313,7 +2320,9 @@
       }
 
       this._dockFittedMinHeight = lockedH;
+      this._dockFittedMinWidth = lockedW;
       bank.style.minHeight = `${lockedH}px`;
+      bank.style.minWidth = `${lockedW}px`;
       bank.dataset.dockFitted = 'true';
       this.packDockSlots();
     }
