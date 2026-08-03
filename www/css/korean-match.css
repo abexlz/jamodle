@@ -2490,6 +2490,11 @@
     flex-direction: column;
     justify-content: flex-end;
     overflow: visible;
+    width: calc(100% + 20px);
+    max-width: calc(100% + 20px);
+    margin-left: -10px;
+    margin-right: -10px;
+    box-sizing: border-box;
     /* Push the slots+dock cluster up from the bottom half → slightly above dead center. */
     margin-top: auto;
   }
@@ -2506,25 +2511,31 @@
   }
 
   body.match-page .syllable-blocks-row {
-    gap: clamp(6px, 2vw, 12px);
+    gap: 0;
+    padding: 0;
+    border-radius: clamp(12px, 3vw, 18px);
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   /* Scale syllable blocks to fit word length on practice + 1v1 screens */
   body.match-page:not(.match-race-page) .syllable-blocks-row {
     flex-wrap: nowrap;
-    justify-content: center;
-    gap: clamp(3px, 1vw, 10px);
+    justify-content: stretch;
+    gap: 0;
     width: 100%;
+    padding: 0;
   }
 
   /* 4 → 2×2 — keep compact; 5 → 3+2 / 6 → 3+3 — fill available width */
   body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="4"] {
     flex-wrap: wrap;
-    width: max-content;
-    max-width: min(240px, 64vw);
-    margin-inline: auto;
-    gap: clamp(4px, 1.2vw, 8px);
-    justify-content: center;
+    width: 100%;
+    max-width: 100%;
+    margin-inline: 0;
+    gap: 0;
+    justify-content: stretch;
   }
 
   body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="5"],
@@ -2533,46 +2544,43 @@
     width: 100%;
     max-width: 100%;
     margin-inline: 0;
-    gap: clamp(4px, 1.2vw, 8px);
-    justify-content: center;
+    gap: 0;
+    justify-content: stretch;
   }
 
   body.match-page:not(.match-race-page) .syllable-blocks-row .syllable-block {
     flex: 1 1 0;
     min-width: 0;
-    max-width: calc((100% - (var(--syl-count, 4) - 1) * clamp(3px, 1vw, 10px)) / var(--syl-count, 4));
+    max-width: none;
     aspect-ratio: 1 / 1.12;
-    padding: clamp(2px, 0.6vw, 4px);
+    padding: 0;
     background: transparent;
     border: none;
     box-shadow: none;
   }
 
   body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="4"] .syllable-block {
-    --wrap-block: clamp(72px, 24vw, 104px);
-    flex: 0 0 var(--wrap-block);
-    width: var(--wrap-block);
-    max-width: var(--wrap-block);
+    flex: 1 1 calc(50% - 0.5px);
+    width: auto;
+    max-width: none;
   }
 
   body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="5"] .syllable-block,
   body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="6"] .syllable-block {
-    --wrap-gap: clamp(4px, 1.2vw, 8px);
-    --wrap-block: calc((100% - 2 * var(--wrap-gap)) / 3);
-    flex: 0 0 var(--wrap-block);
-    width: var(--wrap-block);
-    max-width: var(--wrap-block);
+    flex: 1 1 calc(33.333% - 0.67px);
+    width: auto;
+    max-width: none;
   }
 
   body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="1"] {
-    justify-content: center;
+    justify-content: stretch;
   }
 
   body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="1"] .syllable-block {
-    flex: 0 0 auto;
-    width: min(120px, 42vw);
-    max-width: min(120px, 42vw);
-    min-width: min(100px, 36vw);
+    flex: 1 1 100%;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
   }
 
   body.match-page:not(.match-race-page) #match-app:has(.syllable-blocks-row[data-syl-count="1"]) {
@@ -2585,10 +2593,27 @@
     width: 100%;
     height: 100%;
     max-width: none;
-    row-gap: clamp(2px, 0.5vw, 3px);
-    column-gap: clamp(2px, 0.8vw, 4px);
+    gap: 1px;
+    background: var(--border);
+    row-gap: 1px;
+    column-gap: 1px;
     grid-template-columns: 1fr var(--syl-grid-col-vowel, 0.461fr);
     grid-template-rows: var(--syl-grid-row-cho) var(--syl-grid-row-jungH) var(--syl-grid-row-jong);
+  }
+
+  body.match-page:not(.match-race-page) .syllable-blocks-row .vowel-column {
+    gap: 1px;
+    background: var(--border);
+  }
+
+  body.match-page:not(.match-race-page) .syllable-blocks-row .drop-zone {
+    border-radius: 0;
+    border-width: 0;
+    margin: 0;
+  }
+
+  body.match-page:not(.match-race-page) .syllable-blocks-row .syllable-block + .syllable-block {
+    border-left: 1px solid var(--border);
   }
 
   body.match-page:not(.match-race-page) .syllable-grid .drop-zone {
@@ -2902,8 +2927,10 @@
   }
 
   body.match-page .syllable-grid {
-    row-gap: clamp(2px, 0.5vw, 3px);
-    column-gap: clamp(2px, 0.8vw, 4px);
+    row-gap: 1px;
+    column-gap: 1px;
+    gap: 1px;
+    background: var(--border);
     width: 100%;
     height: 100%;
     min-height: 0;
@@ -2931,30 +2958,39 @@
   body.match-page .bank-section {
     flex-shrink: 0;
     margin-bottom: 0;
-    /* Stay tight under the syllable slots. */
     margin-top: 8px;
-  }
-
-  body.match-page .bank-section + .match-footer {
-    /* Absorb leftover space so Check can sit lower; slots+dock stay near center. */
-    margin-top: auto;
-    padding-top: clamp(16px, 5vh, 48px);
+    width: calc(100% + 20px);
+    max-width: calc(100% + 20px);
+    margin-left: -10px;
+    margin-right: -10px;
+    box-sizing: border-box;
   }
 
   body.match-page .bank-row {
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
-    gap: 6px;
+    gap: 4px;
     align-items: stretch;
     justify-content: flex-start;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
   }
 
   body.match-page .bank-tools {
     flex: 0 0 auto;
     align-items: stretch;
     gap: 4px;
-    max-width: 34%;
+    max-width: min(112px, 32vw);
+    min-width: 0;
+    flex-shrink: 0;
+  }
+
+  body.match-page .bank-section + .match-footer {
+    margin-top: auto;
+    padding-top: clamp(16px, 5vh, 48px);
   }
 
   body.match-page .rotation-dock {
@@ -2998,16 +3034,23 @@
   }
 
   body.match-page .jamo-bank {
-    padding: 10px 6px;
+    padding: 8px 4px;
     gap: 3px;
-    /* Stretch to tools column height; JS still locks a floor so it never shrinks mid-play. */
-    min-height: calc(var(--dock-tile-size, var(--tile-size)) + 24px);
+    min-height: calc(var(--dock-tile-size, var(--tile-size)) + 16px);
     max-height: none;
+    overflow-x: hidden;
     overflow-y: visible;
     align-self: stretch;
     align-content: flex-start;
     align-items: flex-start;
-    flex: 1 1 auto;
+    flex: 1 1 0;
+    min-width: 0 !important;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  body.match-page .jamo-bank[data-dock-fitted] {
+    min-width: 0 !important;
   }
 
   body.match-page .bank-row--versus .jamo-bank {
@@ -3116,7 +3159,8 @@
   body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="5"],
   body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="6"] {
     border-radius: clamp(12px, 3vw, 18px);
-    padding: clamp(6px, 1.5vw, 10px);
+    padding: 0;
+    gap: 0;
   }
 
   body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="4"] .drop-zone,
