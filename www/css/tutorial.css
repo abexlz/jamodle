@@ -254,6 +254,42 @@ body.tutorial-page .match-footer,
   display: none !important;
 }
 
+/* Tutorial header should read only "TUTORIAL" + "N OF 7". */
+body.tutorial-page #tutorial-lesson-bar {
+  display: none !important;
+}
+
+/* Steps 1..6: make the one-syllable empty slot fill the full play area. */
+body.tutorial-page.tutorial-steps-1-6 .blocks-area {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: stretch !important;
+  min-height: 0 !important;
+}
+
+body.tutorial-page.tutorial-steps-1-6 .blocks-area .syllable-blocks-row[data-syl-count="1"] {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  max-height: 100% !important;
+  justify-content: center !important;
+}
+
+body.tutorial-page.tutorial-steps-1-6 .blocks-area .syllable-blocks-row[data-syl-count="1"] .syllable-block {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  min-height: 0 !important;
+  aspect-ratio: auto !important;
+}
+
+body.tutorial-page.tutorial-steps-1-6 .blocks-area .syllable-blocks-row[data-syl-count="1"] .syllable-grid {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+}
+
 body.tutorial-page .title-block h1 {
   color: #FFD743 !important;
 }

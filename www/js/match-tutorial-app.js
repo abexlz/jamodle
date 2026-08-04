@@ -69,18 +69,14 @@
       const progress = document.getElementById('tutorial-lesson-progress');
       const title = document.getElementById('tutorial-lesson-title');
       const body = document.getElementById('tutorial-lesson-body');
+      const lessonBar = document.getElementById('tutorial-lesson-bar');
       if (progress) {
-        progress.textContent = t('tutorial.progress', { current: this.stepIndex + 1, total });
+        progress.textContent = `${this.stepIndex + 1} OF ${total}`;
       }
-      if (title) {
-        title.textContent = t(step.titleKey);
-        title.dataset.i18n = step.titleKey;
-      }
-      if (body) {
-        const bodyKey = this.solveReady ? 'tutorial.checkPrompt' : step.bodyKey;
-        body.textContent = t(bodyKey);
-        body.dataset.i18n = bodyKey;
-      }
+      // Keep tutorial header minimal: "TUTORIAL" + "N OF 7" only.
+      if (lessonBar) lessonBar.style.display = 'none';
+      if (title) title.textContent = '';
+      if (body) body.textContent = '';
     }
 
     loadStep(index) {
@@ -99,6 +95,8 @@
       this.afterRotatePlaced = false;
       this.mergePlacementDone = false;
       this.solveReady = false;
+      // Steps 1..6 are one-syllable lessons; enlarge that empty-slot board to 100%.
+      document.body.classList.toggle('tutorial-steps-1-6', this.stepIndex <= 5);
       this.clearTutorialFocus();
       this.coach.stopFinger();
       global.AnswerTTS?.cancel?.();
@@ -489,13 +487,10 @@
 
       if (this.solveReady) {
         const checkBtn = game.els.check;
-        const dock = game.els.bank;
         checkBtn?.classList.remove('hidden');
         checkBtn?.classList.add('tap-target');
         this.setTutorialFocus([checkBtn], { checkMode: true });
-        if (checkBtn && dock) {
-          this.coach.pointFinger(dock, checkBtn);
-        }
+        if (checkBtn) this.coach.pointFinger(checkBtn, checkBtn);
         return;
       }
 
