@@ -89,20 +89,30 @@
     const glossary = global.MeaningGlossary?.getEnglish?.(word)
       || global.MatchWordMeanings?.[word]
       || '';
-    if (glossary) return String(glossary).trim();
+    if (glossary && global.MeaningGlossary?.isDisplayableMeaning?.(glossary) !== false) {
+      return String(glossary).trim();
+    }
 
     const curated = String(entry.rawMeaning || entry.meaning || '').trim();
+    const isEtymology = global.MeaningGlossary?.isEtymologyGloss?.(curated)
+      || /^&\s*[가-힣]{1,4}\s*.+/u.test(curated);
     const isHanzi = curated && /^[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]+$/.test(curated);
-    if (curated && !isHanzi) return curated;
+    if (curated && !isEtymology && !isHanzi) return curated;
 
     const dictEn = String(entry.dictionary?.englishWord || '').trim();
-    if (dictEn && !/^[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]+$/.test(dictEn)) return dictEn;
+    if (dictEn && !/^[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]+$/.test(dictEn)
+      && !/^&\s*[가-힣]/.test(dictEn)) {
+      return dictEn;
+    }
     const dictDef = String(entry.dictionary?.definition || '').trim();
-    if (dictDef && /[A-Za-z]/.test(dictDef)) return dictDef;
-    if (dictDef && !/^[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]+$/.test(dictDef)) return dictDef;
+    if (dictDef && /[A-Za-z]/.test(dictDef) && !/^&\s*[가-힣]/.test(dictDef)) return dictDef;
+    if (dictDef && !/^[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]+$/.test(dictDef)
+      && !/^&\s*[가-힣]/.test(dictDef)) {
+      return dictDef;
+    }
 
-    if (curated) return curated;
-    return dictDef || dictEn || '';
+    if (curated && !isEtymology) return curated;
+    return '';
   }
 
   global.LearningWordModel = {

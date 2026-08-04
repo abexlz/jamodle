@@ -74,8 +74,12 @@
   }
 
   function looksLikeEnglishGloss(text) {
-    return global.MeaningGlossary?.looksLikeEnglishGloss?.(text)
-      || (/[A-Za-z]/.test(String(text || '')) && !isHanziGloss(text));
+    if (global.MeaningGlossary?.looksLikeEnglishGloss) {
+      return global.MeaningGlossary.looksLikeEnglishGloss(text);
+    }
+    const s = String(text || '').trim();
+    if (!s || isHanziGloss(s) || /^&\s*[가-힣]/.test(s)) return false;
+    return /[A-Za-z]/.test(s);
   }
 
   function formatEntryMeaning(entry, { allowFallback = true } = {}) {
@@ -83,15 +87,20 @@
     const gloss = String(entry.englishWord || entry.transWord || '').trim();
     const definition = String(entry.definition || entry.transDefinition || '').trim();
     const ko = String(entry.rawDefinitionKo || entry.definitionKo || '').trim();
+    const usable = (text) => text && looksLikeEnglishGloss(text)
+      && !(global.MeaningGlossary?.isEtymologyGloss?.(text));
 
-    if (gloss && looksLikeEnglishGloss(gloss)) return gloss;
-    if (definition && looksLikeEnglishGloss(definition)) return definition;
-    if (gloss && !isHanziGloss(gloss)) return gloss;
-    if (definition && !isHanziGloss(definition)) return definition;
+    if (usable(gloss)) return gloss;
+    if (usable(definition)) return definition;
+    if (gloss && !isHanziGloss(gloss) && !global.MeaningGlossary?.isEtymologyGloss?.(gloss)) {
+      return gloss;
+    }
+    if (definition && !isHanziGloss(definition)
+      && !global.MeaningGlossary?.isEtymologyGloss?.(definition)) {
+      return definition;
+    }
     if (!allowFallback) return '';
-    if (ko) return ko;
-    if (definition) return definition;
-    if (gloss) return gloss;
+    if (ko && !global.MeaningGlossary?.isEtymologyGloss?.(ko)) return ko;
     return '';
   }
 

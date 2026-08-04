@@ -615,6 +615,17 @@
     '창문': 'window',
     '비상구': 'emergency exit',
     '안전벨트': 'seat belt',
+    '아르바이트': 'part-time job',
+    '이데올로기': 'ideology',
+    '라면': 'ramen / instant noodles',
+    '카페': 'cafe',
+    '장르': 'genre',
+    '발레': 'ballet',
+    '자장면': 'jjajangmyeon (black bean noodles)',
+    '레스토랑': 'restaurant',
+    '피망': 'bell pepper',
+    '피자': 'pizza',
+    '마요네즈': 'mayonnaise',
   };
   const base = global.MatchWordMeanings || {};
   global.MatchWordMeanings = Object.assign({}, EXTRA, base);

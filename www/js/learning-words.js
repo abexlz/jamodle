@@ -11,6 +11,19 @@
       || /^[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]+$/.test(String(text || '').trim());
   }
 
+  function isEtymologyGloss(text) {
+    return global.MeaningGlossary?.isEtymologyGloss?.(text)
+      || /^&\s*[가-힣]{1,4}\s*.+/u.test(String(text || '').trim());
+  }
+
+  function isDisplayableMeaning(text) {
+    if (global.MeaningGlossary?.isDisplayableMeaning) {
+      return global.MeaningGlossary.isDisplayableMeaning(text);
+    }
+    const s = String(text || '').trim();
+    return !!(s && !isEtymologyGloss(s));
+  }
+
   function glossaryEnglish(word) {
     return global.MeaningGlossary?.getEnglish?.(word)
       || global.MatchWordMeanings?.[String(word || '').trim()]
@@ -19,18 +32,17 @@
 
   /**
    * Prefer English glossary, then non-hanzi curated text, then hanzi / raw as last resort.
-   * @param {string} word
-   * @param {string} [rawMeaning]
-   * @param {{ allowHanziFallback?: boolean }} [opts]
+   * Etymology tags like &독Arbeit are never shown as meanings.
    */
   function pickEnglishMeaning(word, rawMeaning, opts = {}) {
     const allowHanziFallback = opts.allowHanziFallback !== false;
     const glossary = glossaryEnglish(word);
-    if (glossary) return glossary;
+    if (glossary && isDisplayableMeaning(glossary)) return glossary;
 
     const curated = String(rawMeaning || '').trim();
-    if (curated && !isHanziGloss(curated)) return curated;
-    if (allowHanziFallback && curated) return curated;
+    if (!curated || isEtymologyGloss(curated)) return '';
+    if (!isHanziGloss(curated)) return curated;
+    if (allowHanziFallback) return curated;
     return '';
   }
 
@@ -42,7 +54,7 @@
       const raw = entry.meaning;
       return {
         ...entry,
-        // Keep original spreadsheet gloss for hanzi fallback; expose best display meaning.
+        // Keep original spreadsheet gloss for debugging; expose cleaned display meaning.
         rawMeaning: raw,
         meaning: pickEnglishMeaning(entry.word, raw, { allowHanziFallback: true }),
       };
@@ -70,14 +82,15 @@
     return pickEnglishMeaning(key, raw, opts);
   }
 
-  /** Local gloss including hanzi when no English is available. */
+  /** Local gloss including hanzi when no English is available (never etymology tags). */
   function getLocalMeaningFallback(word) {
     const key = String(word || '').trim();
     if (!key) return '';
     const english = glossaryEnglish(key);
-    if (english) return english;
+    if (english && isDisplayableMeaning(english)) return english;
     const entry = LEARNING_WORDS.find((e) => e.word === key);
     const raw = String(entry?.rawMeaning ?? entry?.meaning ?? '').trim();
+    if (!raw || isEtymologyGloss(raw)) return '';
     return raw;
   }
 

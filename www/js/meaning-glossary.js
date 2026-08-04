@@ -8,17 +8,47 @@
   const LS_KEY = 'jamodeul-meaning-glossary-v1';
   const MAX_LEARNED = 2500;
 
+  /**
+   * Spreadsheet etymology tags: &독Arbeit, &프cafe, &일ramen, &중…, &이…
+   * These are source-language markers, not learner-facing definitions.
+   */
+  const ETYMOLOGY_GLOSS_RE = /^&\s*[가-힣]{1,4}\s*.+/u;
+
   function isHanziGloss(text) {
     const s = String(text || '').trim();
     if (!s) return false;
     return /^[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]+$/.test(s);
   }
 
+  function isEtymologyGloss(text) {
+    const s = String(text || '').trim();
+    if (!s) return false;
+    return ETYMOLOGY_GLOSS_RE.test(s);
+  }
+
+  /**
+   * Strip a leading &독 / &프-style tag. Returns '' when nothing useful remains
+   * (foreign headword alone is not treated as an English gloss).
+   */
+  function stripEtymologyTag(text) {
+    const s = String(text || '').trim();
+    if (!s) return '';
+    if (!isEtymologyGloss(s)) return s;
+    return '';
+  }
+
   /** Prefer strings that look usable as an English / Latin gloss. */
   function looksLikeEnglishGloss(text) {
     const s = String(text || '').trim();
-    if (!s || isHanziGloss(s)) return false;
+    if (!s || isHanziGloss(s) || isEtymologyGloss(s)) return false;
     return /[A-Za-z]/.test(s);
+  }
+
+  /** True when text is safe to show as a meaning (not etymology junk). */
+  function isDisplayableMeaning(text) {
+    const s = String(text || '').trim();
+    if (!s || isEtymologyGloss(s)) return false;
+    return true;
   }
 
   function readLearned() {
@@ -55,7 +85,9 @@
     if (curated && looksLikeEnglishGloss(curated)) return String(curated).trim();
     const learned = readLearned()[q];
     if (learned && looksLikeEnglishGloss(learned)) return String(learned).trim();
-    if (curated && !isHanziGloss(curated)) return String(curated).trim();
+    if (curated && isDisplayableMeaning(curated) && !isHanziGloss(curated)) {
+      return String(curated).trim();
+    }
     return '';
   }
 
@@ -65,9 +97,9 @@
     const english = getEnglish(q);
     if (english) return english;
     const curated = global.MatchWordMeanings?.[q];
-    if (curated) return String(curated).trim();
+    if (curated && isDisplayableMeaning(curated)) return String(curated).trim();
     const learned = readLearned()[q];
-    if (learned) return String(learned).trim();
+    if (learned && isDisplayableMeaning(learned)) return String(learned).trim();
     return '';
   }
 
@@ -85,6 +117,9 @@
 
   global.MeaningGlossary = {
     isHanziGloss,
+    isEtymologyGloss,
+    stripEtymologyTag,
+    isDisplayableMeaning,
     looksLikeEnglishGloss,
     getEnglish,
     getAnyLocal,
