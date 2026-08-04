@@ -1653,8 +1653,12 @@
       this.ensureTurnBar();
       const bar = this.els.turnBar;
       if (!bar) return;
-      const oppName = data.player2Name || this.botName();
-      let label = rt('yourTurn');
+      const currentTurnName = data.currentTurnUid === data.player1Uid
+        ? (data.player1Name || myDisplayName())
+        : data.currentTurnUid === data.player2Uid
+          ? (data.player2Name || this.botName())
+          : (data.player2Name || this.botName());
+      let label = `${currentTurnName}'S TURN`;
       let pct = 100;
       let myTurnStyle = false;
       let timerHtml = '';
@@ -1662,10 +1666,10 @@
       const localPct = Math.round((this.getTurnRemainingMs(data) / duration) * 100);
 
       if (mode === 'waiting') {
-        label = rt('oppTurn', { name: oppName });
+        label = `${currentTurnName}'S TURN`;
         pct = localPct;
       } else if (mode === 'mine') {
-        label = rt('yourTurn');
+        label = `${currentTurnName}'S TURN`;
         pct = localPct;
         myTurnStyle = true;
       }

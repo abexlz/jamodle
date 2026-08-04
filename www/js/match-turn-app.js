@@ -800,7 +800,7 @@
         : data.currentTurnUid === data.player2Uid
           ? (data.player2Name || rt('opponent'))
           : (opp?.name || rt('opponent'));
-      let label = rt('yourTurn');
+      let label = `${currentTurnName}'S TURN`;
       let pct = 100;
       let myTurnStyle = false;
       let timerHtml = '';
