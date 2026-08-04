@@ -6381,54 +6381,75 @@
       card.style.maxWidth = '';
     }
 
+    resetResultsWordFont() {
+      const card = this.els.results?.querySelector?.('.results-card');
+      card?.style.removeProperty('--results-word-font');
+      this.els.resultsWord?.style.removeProperty('font-size');
+    }
+
     syncResultsWordBanner(word) {
       const wordEl = this.els.resultsWord;
-      if (!wordEl) return;
+      const overlay = this.els.results;
+      if (!wordEl || !overlay) return;
+      // Measuring while display:none makes clientWidth=0 and previously forced a ~42px shrink.
+      if (overlay.classList.contains('hidden')) return;
+
       const banner = wordEl.closest('.results-word-banner');
-      const card = wordEl.closest('.results-card') || this.els.results?.querySelector?.('.results-card');
+      const card = wordEl.closest('.results-card') || overlay.querySelector?.('.results-card');
       if (!banner || !card) return;
+
+      if (this._resultsFitRaf) {
+        cancelAnimationFrame(this._resultsFitRaf);
+        this._resultsFitRaf = 0;
+      }
 
       const chars = Array.from(String(word || '').replace(/\s*[·•|]\s*/g, '')).length;
       banner.dataset.chars = String(Math.max(1, Math.min(chars || 1, 12)));
-      wordEl.style.fontSize = '';
+
+      const targetFont = Math.round(Math.min(162, Math.max(120, window.innerWidth * 0.3)));
+      wordEl.style.removeProperty('font-size');
       wordEl.style.whiteSpace = 'nowrap';
       this.resetResultsCardWidth();
+      card.style.setProperty('--results-word-font', `${targetFont}px`);
 
-      const wordFits = () => {
+      const applyWidth = () => {
         const row = wordEl.closest('.answer-tts-row');
         const btn = row?.querySelector('.answer-speak-btn');
-        const gap = row ? (Number.parseFloat(getComputedStyle(row).gap) || 10) : 0;
+        const gap = row ? (Number.parseFloat(getComputedStyle(row).gap) || 12) : 12;
+        const cardPadX = (Number.parseFloat(getComputedStyle(card).paddingLeft) || 0)
+          + (Number.parseFloat(getComputedStyle(card).paddingRight) || 0);
+        const contentW = wordEl.scrollWidth + (btn?.offsetWidth || 52) + gap + 16;
+        // Banner uses ~6% padding each side → ~88% usable of banner width.
+        const needed = Math.ceil(contentW / 0.88 + cardPadX + 12);
+        const maxWidth = Math.min(window.innerWidth - 16, 960);
+        const baseWidth = Math.min(400, maxWidth);
+        const width = Math.min(maxWidth, Math.max(baseWidth, needed));
+
+        card.style.setProperty('--results-card-width', `${width}px`);
+        card.style.width = `${width}px`;
+        card.style.maxWidth = `${width}px`;
+        void card.offsetWidth; // force layout before overflow check
+
+        // Only shrink if still overflowing at the viewport max.
         const available = Math.max(
           40,
           (row || banner).clientWidth - (btn?.offsetWidth || 0) - gap - 8,
         );
-        return wordEl.scrollWidth <= available + 1;
-      };
-
-      const fit = () => {
-        const maxWidth = Math.min(window.innerWidth * 0.96, 920);
-        let width = Math.ceil(card.getBoundingClientRect().width) || 400;
-        let guard = 0;
-        while (!wordFits() && width < maxWidth - 1 && guard < 60) {
-          width = Math.min(maxWidth, width + 24);
-          card.style.setProperty('--results-card-width', `${width}px`);
-          card.style.width = `${width}px`;
-          card.style.maxWidth = `${width}px`;
-          guard += 1;
-        }
-        // Ultra-narrow screens only: keep one line with a modest shrink.
-        if (!wordFits()) {
-          let size = Number.parseFloat(getComputedStyle(wordEl).fontSize) || 84;
-          while (size > 42 && !wordFits()) {
+        if (width >= maxWidth - 1 && wordEl.scrollWidth > available + 1) {
+          let size = targetFont;
+          while (size > 72 && wordEl.scrollWidth > available + 1) {
             size -= 2;
-            wordEl.style.fontSize = `${size}px`;
+            card.style.setProperty('--results-word-font', `${size}px`);
           }
         }
       };
 
-      requestAnimationFrame(() => {
-        fit();
-        requestAnimationFrame(fit);
+      this._resultsFitRaf = requestAnimationFrame(() => {
+        applyWidth();
+        this._resultsFitRaf = requestAnimationFrame(() => {
+          applyWidth();
+          this._resultsFitRaf = 0;
+        });
       });
     }
 
@@ -6437,7 +6458,6 @@
         ? this.multiFoundWords.join(' · ')
         : (this.winningWord || this.getResolvedWord());
       this.els.resultsWord.textContent = word;
-      this.syncResultsWordBanner(word);
       this.updateResultsMeaning(this.multiFindMode ? this.multiFoundWords : word);
       this.els.resultsTime.textContent = formatTime(elapsed);
       this.els.resultsGuesses.textContent = String(this.guessCount);
@@ -6464,8 +6484,12 @@
     }
 
     continuePlaying() {
+      if (this._resultsFitRaf) {
+        cancelAnimationFrame(this._resultsFitRaf);
+        this._resultsFitRaf = 0;
+      }
       this.resetResultsCardWidth();
-      if (this.els.resultsWord) this.els.resultsWord.style.fontSize = '';
+      this.resetResultsWordFont();
       this.els.results.classList.add('hidden');
       if (this.isJamoSoloMode()) clearSoloSession();
       if (this.multiFindMode) {

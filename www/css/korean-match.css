@@ -1817,6 +1817,7 @@
 
   .results-overlay--clear .results-card {
     --results-card-base-width: min(400px, 92vw);
+    --results-word-font: clamp(120px, 30vw, 162px);
     position: relative;
     background: transparent !important;
     border: none !important;
@@ -1827,7 +1828,7 @@
     color: inherit !important;
     padding: clamp(72px, 18vw, 98px) clamp(22px, 5.5vw, 36px) clamp(32px, 8vw, 44px);
     text-align: center;
-    max-width: min(96vw, 920px);
+    max-width: min(96vw, 960px);
     width: var(--results-card-width, var(--results-card-base-width));
     aspect-ratio: auto;
     min-height: min(560px, 86vh);
@@ -1872,7 +1873,7 @@
   .results-overlay--clear .results-word-banner {
     width: 100%;
     max-width: none;
-    min-height: clamp(150px, 38vw, 230px);
+    min-height: clamp(170px, 44vw, 260px);
     height: auto;
     aspect-ratio: auto;
     margin: 6px auto 10px;
@@ -1880,43 +1881,44 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 22px 7% 24px;
+    padding: 28px 6% 30px;
     box-sizing: border-box;
     background: url('../assets/results/match-word-banner.png') center / 100% 100% no-repeat;
     transform: none;
   }
 
   .results-overlay--clear .results-word-banner .answer-tts-row {
-    width: 100%;
+    width: max-content;
     max-width: 100%;
-    gap: 10px;
+    gap: 12px;
     padding: 0 4px;
     box-sizing: border-box;
+    justify-content: center;
   }
 
   .results-overlay--clear .results-word-banner .answer-speak-btn {
-    width: 48px;
-    height: 48px;
+    width: 52px;
+    height: 52px;
     border-radius: 16px;
   }
 
   .results-overlay--clear .results-word-banner .answer-speak-btn svg {
-    width: 24px;
-    height: 24px;
+    width: 26px;
+    height: 26px;
   }
 
   .results-overlay--clear .results-word {
     font-family: 'Jua', 'Noto Sans KR', sans-serif;
-    /* ~3× previous results answer size; popup width expands to fit */
-    font-size: clamp(84px, 24vw, 150px);
+    /* ~3× prior ~40–54px answer size; popup widens to fit */
+    font-size: var(--results-word-font, clamp(120px, 30vw, 162px)) !important;
     color: #fff;
     margin: 0;
     line-height: 1.05;
     text-align: center;
-    flex: 0 1 auto;
+    flex: 0 0 auto;
     min-width: 0;
     max-width: none;
-    white-space: nowrap;
+    white-space: nowrap !important;
     overflow: visible;
     text-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
   }
