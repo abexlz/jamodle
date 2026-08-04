@@ -6,33 +6,45 @@
 (function (global) {
   'use strict';
 
-  function glossaryMeaning(word) {
-    return global.MatchWordMeanings?.[String(word || '').trim()] || '';
-  }
-
-  /** Hanzi-only glosses from the imported spreadsheet — prefer English glossary instead. */
   function isHanziGloss(text) {
-    const s = String(text || '').trim();
-    if (!s) return false;
-    return /^[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]+$/.test(s);
+    return global.MeaningGlossary?.isHanziGloss?.(text)
+      || /^[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]+$/.test(String(text || '').trim());
   }
 
-  function pickEnglishMeaning(word, rawMeaning) {
-    const glossary = glossaryMeaning(word);
+  function glossaryEnglish(word) {
+    return global.MeaningGlossary?.getEnglish?.(word)
+      || global.MatchWordMeanings?.[String(word || '').trim()]
+      || '';
+  }
+
+  /**
+   * Prefer English glossary, then non-hanzi curated text, then hanzi / raw as last resort.
+   * @param {string} word
+   * @param {string} [rawMeaning]
+   * @param {{ allowHanziFallback?: boolean }} [opts]
+   */
+  function pickEnglishMeaning(word, rawMeaning, opts = {}) {
+    const allowHanziFallback = opts.allowHanziFallback !== false;
+    const glossary = glossaryEnglish(word);
+    if (glossary) return glossary;
+
     const curated = String(rawMeaning || '').trim();
     if (curated && !isHanziGloss(curated)) return curated;
-    if (glossary) return glossary;
+    if (allowHanziFallback && curated) return curated;
     return '';
   }
 
   function normalizeEntry(entry) {
     if (typeof entry === 'string') {
-      return { word: entry, meaning: glossaryMeaning(entry) };
+      return { word: entry, meaning: glossaryEnglish(entry) };
     }
     if (entry && typeof entry.word === 'string') {
+      const raw = entry.meaning;
       return {
         ...entry,
-        meaning: pickEnglishMeaning(entry.word, entry.meaning),
+        // Keep original spreadsheet gloss for hanzi fallback; expose best display meaning.
+        rawMeaning: raw,
+        meaning: pickEnglishMeaning(entry.word, raw, { allowHanziFallback: true }),
       };
     }
     return null;
@@ -50,11 +62,23 @@
     return out;
   }
 
-  function getWordMeaning(word) {
+  function getWordMeaning(word, opts = {}) {
     const key = String(word || '').trim();
     if (!key) return '';
     const entry = LEARNING_WORDS.find((e) => e.word === key);
-    return pickEnglishMeaning(key, entry?.meaning);
+    const raw = entry?.rawMeaning ?? entry?.meaning;
+    return pickEnglishMeaning(key, raw, opts);
+  }
+
+  /** Local gloss including hanzi when no English is available. */
+  function getLocalMeaningFallback(word) {
+    const key = String(word || '').trim();
+    if (!key) return '';
+    const english = glossaryEnglish(key);
+    if (english) return english;
+    const entry = LEARNING_WORDS.find((e) => e.word === key);
+    const raw = String(entry?.rawMeaning ?? entry?.meaning ?? '').trim();
+    return raw;
   }
 
   const RAW_WORDS = Array.isArray(global.LEARNING_WORDS_RAW)
@@ -90,5 +114,7 @@
     findWordEntry,
     getNormalizedWord,
     getWordMeaning,
+    getLocalMeaningFallback,
+    pickEnglishMeaning,
   };
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -1538,23 +1538,34 @@
       const q = String(word || '').trim();
       if (!q) return '';
 
-      const glossary = global.MatchWordMeanings?.[q]
-        || global.LearningWords?.getWordMeaning?.(q)
+      const isHanzi = (text) => global.MeaningGlossary?.isHanziGloss?.(text)
+        || /^[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]+$/.test(String(text || '').trim());
+      const isEnglish = (text) => global.MeaningGlossary?.looksLikeEnglishGloss?.(text)
+        || (/[A-Za-z]/.test(String(text || '')) && !isHanzi(text));
+
+      // 1) Local English glossary (curated + learned cache)
+      const localEnglish = global.MeaningGlossary?.getEnglish?.(q)
+        || global.LearningWords?.getWordMeaning?.(q, { allowHanziFallback: false })
         || '';
-      if (glossary) return glossary;
+      if (localEnglish && isEnglish(localEnglish)) return localEnglish;
 
       const entry = global.LearningWords?.findWordEntry?.(q);
       if (entry) {
         const normalized = global.LearningWords?.getNormalizedWord?.(q)
           || global.LearningWordModel?.normalizeLearningWord?.(entry);
         const curated = global.LearningWordModel?.getDisplayMeaning?.(normalized);
-        if (curated) return curated;
+        if (curated && isEnglish(curated)) return curated;
       }
 
+      // 2) Dictionary API / cache (English first; service may soft-fallback)
       const prefetched = this.multiDictionaryEntries?.[q]
         || (q === this.discoveredWord ? this.discoveredDictionaryEntry : null);
       const dictMeaning = await global.DictionaryService?.resolveEnglishMeaning?.(q, prefetched);
       if (dictMeaning) return dictMeaning;
+
+      // 3) Hanzi / Korean spreadsheet gloss as last resort
+      const localFallback = global.LearningWords?.getLocalMeaningFallback?.(q) || '';
+      if (localFallback) return localFallback;
 
       return '';
     }
@@ -1592,8 +1603,10 @@
     getSyncMeaning(word) {
       const q = String(word || '').trim();
       if (!q) return '';
-      return global.MatchWordMeanings?.[q]
-        || global.LearningWords?.getWordMeaning?.(q)
+      return global.MeaningGlossary?.getEnglish?.(q)
+        || global.MatchWordMeanings?.[q]
+        || global.LearningWords?.getWordMeaning?.(q, { allowHanziFallback: false })
+        || global.LearningWords?.getLocalMeaningFallback?.(q)
         || '';
     }
 

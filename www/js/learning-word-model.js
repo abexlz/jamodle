@@ -82,17 +82,27 @@
     };
   }
 
-  /** Display meaning: prefer curated English, fall back to dictionary */
+  /** Display meaning: prefer curated English, then glossary, then dictionary, then hanzi/raw. */
   function getDisplayMeaning(entry) {
     if (!entry) return '';
-    const glossary = global.MatchWordMeanings?.[String(entry.word || '').trim()] || '';
-    const curated = String(entry.meaning || '').trim();
+    const word = String(entry.word || '').trim();
+    const glossary = global.MeaningGlossary?.getEnglish?.(word)
+      || global.MatchWordMeanings?.[word]
+      || '';
+    if (glossary) return String(glossary).trim();
+
+    const curated = String(entry.rawMeaning || entry.meaning || '').trim();
     const isHanzi = curated && /^[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]+$/.test(curated);
     if (curated && !isHanzi) return curated;
-    if (glossary) return glossary;
-    const dictDef = String(entry.dictionary?.definition || entry.dictionary?.englishWord || '').trim();
+
+    const dictEn = String(entry.dictionary?.englishWord || '').trim();
+    if (dictEn && !/^[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]+$/.test(dictEn)) return dictEn;
+    const dictDef = String(entry.dictionary?.definition || '').trim();
+    if (dictDef && /[A-Za-z]/.test(dictDef)) return dictDef;
     if (dictDef && !/^[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]+$/.test(dictDef)) return dictDef;
-    return curated || dictDef;
+
+    if (curated) return curated;
+    return dictDef || dictEn || '';
   }
 
   global.LearningWordModel = {

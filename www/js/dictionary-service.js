@@ -67,68 +67,147 @@
     return typeof navigator === 'undefined' ? true : navigator.onLine !== false;
   }
 
-  /** Short English gloss from a dictionary entry (no local word list needed). */
+  /** Short gloss from a dictionary entry — English first, then usable fallback text. */
   function isHanziGloss(text) {
-    const s = String(text || '').trim();
-    if (!s) return false;
-    return /^[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]+$/.test(s);
+    return global.MeaningGlossary?.isHanziGloss?.(text)
+      || /^[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]+$/.test(String(text || '').trim());
   }
 
-  function formatEntryMeaning(entry) {
+  function looksLikeEnglishGloss(text) {
+    return global.MeaningGlossary?.looksLikeEnglishGloss?.(text)
+      || (/[A-Za-z]/.test(String(text || '')) && !isHanziGloss(text));
+  }
+
+  function formatEntryMeaning(entry, { allowFallback = true } = {}) {
     if (!entry) return '';
-    const gloss = String(entry.englishWord || '').trim();
-    const definition = String(entry.definition || '').trim();
+    const gloss = String(entry.englishWord || entry.transWord || '').trim();
+    const definition = String(entry.definition || entry.transDefinition || '').trim();
+    const ko = String(entry.rawDefinitionKo || entry.definitionKo || '').trim();
+
+    if (gloss && looksLikeEnglishGloss(gloss)) return gloss;
+    if (definition && looksLikeEnglishGloss(definition)) return definition;
     if (gloss && !isHanziGloss(gloss)) return gloss;
     if (definition && !isHanziGloss(definition)) return definition;
+    if (!allowFallback) return '';
+    if (ko) return ko;
+    if (definition) return definition;
+    if (gloss) return gloss;
     return '';
   }
 
-  function meaningFromLookupResult(result, word) {
+  function meaningFromLookupResult(result, word, opts = {}) {
     const q = String(word || '').trim();
-    const direct = formatEntryMeaning(result?.entry);
+    const direct = formatEntryMeaning(result?.entry, opts);
     if (direct) return direct;
 
     const candidates = Array.isArray(result?.candidates) ? result.candidates : [];
     for (const item of candidates) {
       if (!item || String(item.word || '') !== q) continue;
-      const exact = formatEntryMeaning(item);
+      const exact = formatEntryMeaning(item, opts);
       if (exact) return exact;
     }
     for (const item of candidates) {
-      const any = formatEntryMeaning(item);
+      const any = formatEntryMeaning(item, opts);
       if (any) return any;
     }
     return '';
   }
 
+  function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  async function fetchSearchOnce(q) {
+    const url = `${getApiBase()}/api/dictionary/search?word=${encodeURIComponent(q)}`;
+    const res = await fetch(url, { headers: apiFetchHeaders() });
+    const data = await readJsonResponse(res);
+    if (!res.ok) {
+      const err = new Error(data.error || 'Dictionary details are unavailable right now.');
+      err.code = data.code || `HTTP_${res.status}`;
+      err.retryable = res.status === 429 || res.status >= 500;
+      throw err;
+    }
+    return {
+      found: !!data.found && (data.exactMatch === true || matchesExactEntry(data, q)),
+      exactMatch: data.exactMatch === true || matchesExactEntry(data, q),
+      entry: data.entry || null,
+      candidates: data.candidates || [],
+      source: data.source || SOURCE_NAME,
+      sourceHome: data.sourceHome || 'https://krdict.korean.go.kr',
+      cached: !!data.cached,
+    };
+  }
+
   /**
-   * English gloss for any dictionary headword — uses cache, then live API.
-   * @param {string} word
-   * @param {object|null} [prefetchedEntry] validation/search entry already in hand
+   * Best available gloss for a headword — English preferred, then Korean / hanzi fallback.
+   * Retries once on transient API failures and remembers successful English glosses locally.
    */
   async function resolveEnglishMeaning(word, prefetchedEntry = null) {
     const q = String(word || '').trim();
     if (!q) return '';
 
+    const localEnglish = global.MeaningGlossary?.getEnglish?.(q) || '';
+    if (localEnglish) return localEnglish;
+
     if (prefetchedEntry) {
-      const direct = formatEntryMeaning(prefetchedEntry);
-      if (direct) return direct;
+      const direct = formatEntryMeaning(prefetchedEntry, { allowFallback: false });
+      if (direct) {
+        global.MeaningGlossary?.remember?.(q, direct);
+        return direct;
+      }
     }
 
     const cached = readCache(q);
     if (cached) {
-      const fromCache = meaningFromLookupResult(cached, q);
-      if (fromCache) return fromCache;
+      const fromCache = meaningFromLookupResult(cached, q, { allowFallback: false });
+      if (fromCache) {
+        global.MeaningGlossary?.remember?.(q, fromCache);
+        return fromCache;
+      }
     }
 
-    if (!isOnline()) return '';
+    if (isOnline()) {
+      let lastErr = null;
+      for (let attempt = 0; attempt < 2; attempt += 1) {
+        try {
+          if (attempt > 0) await sleep(350);
+          const forceRefresh = !!(cached && !meaningFromLookupResult(cached, q, { allowFallback: false }));
+          const result = forceRefresh
+            ? await fetchSearchOnce(q)
+            : await lookupWord(q, { forceRefresh: attempt > 0 || forceRefresh });
+          if (result?.error && result.retryable && attempt === 0) {
+            lastErr = result;
+            continue;
+          }
+          if (forceRefresh && result.found && (result.entry || result.candidates?.length)) {
+            writeCache(q, result);
+          }
+          const live = meaningFromLookupResult(result, q, { allowFallback: false });
+          if (live) {
+            global.MeaningGlossary?.remember?.(q, live);
+            return live;
+          }
+          const soft = meaningFromLookupResult(result, q, { allowFallback: true });
+          if (soft) return soft;
+          break;
+        } catch (err) {
+          lastErr = err;
+          if (!err?.retryable && attempt === 0) {
+            // still try second pass for unknown network errors
+          }
+        }
+      }
+      void lastErr;
+    }
 
-    try {
-      const forceRefresh = !!(cached && !meaningFromLookupResult(cached, q));
-      const result = await lookupWord(q, { forceRefresh });
-      const live = meaningFromLookupResult(result, q);
-      if (live) return live;
-    } catch { /* offline or API error */ }
+    if (prefetchedEntry) {
+      const softPrefetch = formatEntryMeaning(prefetchedEntry, { allowFallback: true });
+      if (softPrefetch) return softPrefetch;
+    }
+    if (cached) {
+      const softCache = meaningFromLookupResult(cached, q, { allowFallback: true });
+      if (softCache) return softCache;
+    }
 
     return '';
   }
@@ -203,14 +282,24 @@
 
     try {
       const url = `${getApiBase()}/api/dictionary/search?word=${encodeURIComponent(q)}`;
-      const res = await fetch(url, { headers: apiFetchHeaders() });
-      const data = await readJsonResponse(res);
+      let res;
+      let data;
+      try {
+        res = await fetch(url, { headers: apiFetchHeaders() });
+        data = await readJsonResponse(res);
+      } catch (firstErr) {
+        // One retry for network / non-JSON proxy blips.
+        await new Promise((r) => setTimeout(r, 350));
+        res = await fetch(url, { headers: apiFetchHeaders() });
+        data = await readJsonResponse(res);
+      }
 
       if (!res.ok) {
         return {
           found: false,
           error: data.error || 'Dictionary details are unavailable right now.',
           code: data.code,
+          retryable: res.status === 429 || res.status >= 500,
         };
       }
 
@@ -230,6 +319,7 @@
       return {
         found: false,
         offline: true,
+        retryable: true,
         error: err?.code === 'BAD_RESPONSE'
           ? 'Dictionary proxy is not reachable. Tunnel ngrok to port 3000 (npm run dev).'
           : 'Dictionary details are unavailable right now.',
