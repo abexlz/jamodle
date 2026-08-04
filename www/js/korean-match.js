@@ -3509,10 +3509,10 @@
         this.els.tokenCount.textContent = unlimited ? '∞' : String(tokens);
       }
       if (this.els.orientHint) {
-        this.els.orientHint.disabled = blocked || this.orientHintUsed || (!unlimited && tokens < 2);
+        this.els.orientHint.disabled = blocked || (!unlimited && tokens < 2);
       }
       if (this.els.disableHint) {
-        this.els.disableHint.disabled = blocked || this.disableHintUsed || (!unlimited && tokens < 2);
+        this.els.disableHint.disabled = blocked || (!unlimited && tokens < 2);
       }
       if (this.els.meaningBtn) {
         const needsTokens = !this.versus && !this.meaningRevealed;
@@ -3612,7 +3612,7 @@
     }
 
     useOrientHint() {
-      if (this.orientHintUsed || this.checkedComplete || this.checking) return;
+      if (this.checkedComplete || this.checking) return;
       const HT = global.HintTokens;
       if (!HT?.spend(2)) {
         this.feedback.show('info', t('match.hints.noTokens'));
@@ -3708,7 +3708,7 @@
     }
 
     useDisableHint() {
-      if (this.disableHintUsed || this.checkedComplete || this.checking) return;
+      if (this.checkedComplete || this.checking) return;
       const HT = global.HintTokens;
       if (!HT?.spend(2)) {
         this.feedback.show('info', t('match.hints.noTokens'));
