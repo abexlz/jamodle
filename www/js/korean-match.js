@@ -1345,7 +1345,25 @@
         ['height', 'width', 'max-height', 'max-width', 'min-height', 'aspect-ratio'].forEach((p) => {
           row.style.removeProperty(p);
         });
+        // Clear flex-chain overrides left by a previous 4-letter sync.
+        const app = this.root || document.getElementById('match-app');
+        const area = row.closest('.blocks-area');
+        const mine = app?.parentElement;
+        const main = document.getElementById('race-main') || mine?.parentElement;
+        [main, mine, app, area].forEach((el) => {
+          if (!el) return;
+          ['display', 'flex-direction', 'flex', 'min-height', 'max-height', 'height',
+            'overflow', 'justify-content', 'align-items', 'width'].forEach((p) => {
+            el.style.removeProperty(p);
+          });
+        });
       };
+
+      // Battle turn: 4-letter uses single-like CSS wrap (no JS mid-column fill).
+      if (this.turnBased) {
+        clear();
+        return;
+      }
 
       if (!isFour) {
         clear();
@@ -2492,19 +2510,25 @@
       }
       const innerW = Math.max(24, outerW - padX);
 
-      // Prefer Rotate+merge column height so tiles can grow into that dock space.
+      // Prefer the grown dock stack / bank height so tiles fill leftover column space.
       let innerH = 0;
+      const barH = dockStack?.querySelector?.('.race-turn-bar-mount')?.getBoundingClientRect().height || 0;
+      if (dockStack?.clientHeight > 0) {
+        innerH = Math.max(0, dockStack.clientHeight - barH - padY);
+      }
+      if (bank.clientHeight > 0) {
+        innerH = Math.max(innerH, bank.clientHeight - padY);
+      }
       if (tools) {
         const toolsH = tools.getBoundingClientRect().height;
         if (dockStack) {
-          const barH = dockStack.querySelector('.race-turn-bar-mount')?.getBoundingClientRect().height || 0;
-          innerH = Math.max(0, toolsH - barH - padY);
+          innerH = Math.max(innerH, Math.max(0, toolsH - barH - padY));
         } else {
-          innerH = Math.max(0, toolsH - padY);
+          innerH = Math.max(innerH, Math.max(0, toolsH - padY));
         }
       }
       if (innerH < 24) {
-        innerH = Math.max(bank.clientHeight - padY, tileSize);
+        innerH = Math.max(tileSize, 24);
       }
 
       // Largest square that packs `capacity` tiles into the dock box.
@@ -2542,11 +2566,13 @@
       if (tools) {
         const toolsH = tools.getBoundingClientRect().height;
         if (dockStack) {
-          const barH = dockStack.querySelector('.race-turn-bar-mount')?.getBoundingClientRect().height || 0;
           lockedH = Math.max(lockedH, Math.ceil(toolsH - barH));
         } else {
           lockedH = Math.max(lockedH, Math.ceil(toolsH));
         }
+      }
+      if (dockStack?.clientHeight > 0) {
+        lockedH = Math.max(lockedH, Math.ceil(dockStack.clientHeight - barH));
       }
 
       // Keep bank at full remaining width so filled tiles stay edge-to-edge.

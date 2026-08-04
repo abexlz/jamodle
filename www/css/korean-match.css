@@ -2135,8 +2135,8 @@
   }
 
   body.match-race-page #match-app {
-    --block-size: min(84px, calc((100% - (var(--syl-count, 5) - 1) * 6px) / var(--syl-count, 5)));
-    --tile-size: min(46px, calc(var(--block-size) * 0.48));
+    --block-size: min(88px, calc((100% - (var(--syl-count, 4) - 1) * 8px) / var(--syl-count, 4)));
+    --tile-size: min(50px, calc(var(--block-size) * 0.52));
     width: 100%;
     max-width: 100%;
     min-width: 0;
@@ -3402,6 +3402,22 @@
     margin-top: 0;
   }
 
+  /* 2–6 letter: empty board sizes like single; leftover height goes to the dock. */
+  body.match-turn-page .blocks-area:has(.syllable-blocks-row[data-syl-count="2"]),
+  body.match-turn-page .blocks-area:has(.syllable-blocks-row[data-syl-count="3"]),
+  body.match-turn-page .blocks-area:has(.syllable-blocks-row[data-syl-count="4"]),
+  body.match-turn-page .blocks-area:has(.syllable-blocks-row[data-syl-count="5"]),
+  body.match-turn-page .blocks-area:has(.syllable-blocks-row[data-syl-count="6"]) {
+    flex: 0 0 auto !important;
+    margin-top: auto;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    justify-content: flex-end;
+    align-items: center;
+    position: static !important;
+  }
+
   body.match-turn-page .blocks-area::before,
   body.match-turn-page .blocks-area::after {
     content: none !important;
@@ -3410,60 +3426,42 @@
   }
 
   body.match-turn-page .blocks-area .syllable-blocks-row {
-    flex-shrink: 1;
+    flex-shrink: 0;
     width: 100%;
     max-width: 100%;
     min-width: 0;
     flex-wrap: nowrap;
-    gap: clamp(3px, 1vw, 7px);
-    overflow: hidden;
-  }
-
-  body.match-turn-page .blocks-area .syllable-blocks-row[data-syl-count="4"] {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-    flex: 0 0 auto !important;
+    justify-content: center;
+    gap: clamp(3px, 1vw, 10px);
     overflow: visible;
-    --four-gap: clamp(4px, 1.2vw, 8px);
-    width: 97%;
-    max-width: 97%;
-    height: auto;
-    max-height: none;
-    margin: 0 auto !important;
-    gap: var(--four-gap);
-    align-content: stretch !important;
-    justify-content: stretch !important;
-    align-items: stretch !important;
-    justify-items: stretch !important;
-    min-height: 0 !important;
-    min-width: 0 !important;
-    box-sizing: border-box;
-    aspect-ratio: unset !important;
-    padding: clamp(4px, 1vw, 8px) !important;
   }
 
-  body.match-turn-page .blocks-area:has(.syllable-blocks-row[data-syl-count="4"]) {
-    flex: 1 1 0 !important;
-    min-height: 0 !important;
-    max-height: none !important;
-    align-self: stretch !important;
-    width: 100% !important;
-    margin-top: 0 !important;
-    position: static !important;
+  /* 4 → 2×2 like single (not JS mid-column fill) */
+  body.match-turn-page .blocks-area .syllable-blocks-row[data-syl-count="4"] {
     display: flex !important;
-    flex-direction: column !important;
-    justify-content: stretch !important;
-    align-items: stretch !important;
-    overflow: visible !important;
+    flex-wrap: wrap;
+    width: max-content;
+    max-width: min(406px, 100vw);
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    margin-inline: auto;
+    gap: clamp(5px, 1.5vw, 10px);
+    justify-content: center;
+    align-content: center;
+    overflow: visible;
+    aspect-ratio: unset !important;
+    padding: clamp(6px, 1.5vw, 10px) !important;
+    border-radius: clamp(12px, 3vw, 18px);
+    box-sizing: border-box;
   }
 
   body.match-turn-page .blocks-area .syllable-block {
     flex: 1 1 0;
     min-width: 0;
-    max-width: calc((100% - (var(--syl-count, 5) - 1) * clamp(3px, 1vw, 7px)) / var(--syl-count, 5));
+    max-width: calc((100% - (var(--syl-count, 4) - 1) * clamp(3px, 1vw, 10px)) / var(--syl-count, 4));
+    aspect-ratio: 1 / 1.12;
     overflow: hidden;
-    contain: layout style;
     background: transparent;
     border: none;
     box-shadow: none;
@@ -3471,39 +3469,34 @@
   }
 
   body.match-turn-page .blocks-area .syllable-blocks-row[data-syl-count="4"] .syllable-block {
-    width: 100% !important;
-    height: 100% !important;
-    max-width: none !important;
+    --wrap-block: clamp(122px, 40vw, 176px);
+    flex: 0 0 var(--wrap-block) !important;
+    width: var(--wrap-block) !important;
+    max-width: var(--wrap-block) !important;
+    height: auto !important;
     max-height: none !important;
     min-width: 0 !important;
     min-height: 0 !important;
-    flex: unset;
+    aspect-ratio: 1 / 1.12 !important;
     contain: none;
-    aspect-ratio: unset !important;
   }
 
   body.match-turn-page #match-app:has(.syllable-blocks-row[data-syl-count="4"]),
   body.match-race-page #match-app:has(.syllable-blocks-row[data-syl-count="4"]) {
-    --tile-size: min(48px, 14vw);
-    flex: 1 1 0 !important;
-    min-height: 0 !important;
-    height: 100% !important;
-    max-height: none !important;
-    display: flex !important;
-    flex-direction: column !important;
+    --tile-size: min(50px, calc((100vw - 24px - (var(--syl-count, 4) - 1) * 8px) / var(--syl-count, 4) * 0.52));
   }
 
   body.match-turn-page .race-turn-mine:has(.syllable-blocks-row[data-syl-count="4"]) {
-    flex: 1 1 0 !important;
-    min-height: 0 !important;
-    display: flex !important;
-    flex-direction: column !important;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
   }
 
   body.match-turn-page .blocks-area .syllable-blocks-row[data-syl-count="4"] .syllable-grid {
     width: 100%;
     height: 100%;
-    aspect-ratio: unset !important;
+    aspect-ratio: auto;
     min-height: 0;
   }
 
@@ -3514,12 +3507,14 @@
     width: 100%;
     max-width: 100%;
     margin-inline: 0;
-    gap: clamp(3px, 1vw, 6px);
+    gap: clamp(4px, 1.2vw, 8px);
+    padding: clamp(6px, 1.5vw, 10px);
+    border-radius: clamp(12px, 3vw, 18px);
   }
 
   body.match-turn-page .blocks-area .syllable-blocks-row[data-syl-count="5"] .syllable-block,
   body.match-turn-page .blocks-area .syllable-blocks-row[data-syl-count="6"] .syllable-block {
-    --wrap-gap: clamp(3px, 1vw, 6px);
+    --wrap-gap: clamp(4px, 1.2vw, 8px);
     --wrap-block: calc((100% - 2 * var(--wrap-gap)) / 3);
     flex: 0 0 var(--wrap-block);
     width: var(--wrap-block);
@@ -3530,6 +3525,8 @@
     container-type: size;
     justify-content: center;
     align-items: center;
+    flex: 1 1 auto;
+    margin-top: 0;
   }
 
   body.match-turn-page .blocks-area .syllable-blocks-row[data-syl-count="1"] {
@@ -3578,12 +3575,34 @@
     margin-top: 2px;
   }
 
+  /* 2–6 letter: dock absorbs leftover height under the board for larger jamo tiles. */
+  body.match-turn-page #match-app:has(.syllable-blocks-row[data-syl-count="2"]) .bank-section--turn,
+  body.match-turn-page #match-app:has(.syllable-blocks-row[data-syl-count="3"]) .bank-section--turn,
+  body.match-turn-page #match-app:has(.syllable-blocks-row[data-syl-count="4"]) .bank-section--turn,
+  body.match-turn-page #match-app:has(.syllable-blocks-row[data-syl-count="5"]) .bank-section--turn,
+  body.match-turn-page #match-app:has(.syllable-blocks-row[data-syl-count="6"]) .bank-section--turn {
+    flex: 1 1 auto;
+    min-height: clamp(150px, 28dvh, 300px);
+    display: flex;
+    flex-direction: column;
+    margin-top: 8px;
+  }
+
   body.match-turn-page .race-turn-bottom {
     display: flex;
     flex-direction: row;
     align-items: stretch;
     gap: 8px;
     width: 100%;
+  }
+
+  body.match-turn-page #match-app:has(.syllable-blocks-row[data-syl-count="2"]) .race-turn-bottom,
+  body.match-turn-page #match-app:has(.syllable-blocks-row[data-syl-count="3"]) .race-turn-bottom,
+  body.match-turn-page #match-app:has(.syllable-blocks-row[data-syl-count="4"]) .race-turn-bottom,
+  body.match-turn-page #match-app:has(.syllable-blocks-row[data-syl-count="5"]) .race-turn-bottom,
+  body.match-turn-page #match-app:has(.syllable-blocks-row[data-syl-count="6"]) .race-turn-bottom {
+    flex: 1 1 auto;
+    min-height: 0;
   }
 
   body.match-turn-page .race-turn-bottom--versus {
@@ -3659,6 +3678,7 @@
   body.match-turn-page .race-turn-dock-stack {
     flex: 1 1 auto;
     min-width: 0;
+    min-height: 0;
     align-self: stretch;
     display: flex;
     flex-direction: column;
@@ -3706,8 +3726,8 @@
     justify-content: flex-start;
     align-items: flex-start;
     align-content: flex-start;
-    gap: 4px;
-    padding: 8px 10px;
+    gap: 5px;
+    padding: 6px 8px;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     background: transparent;

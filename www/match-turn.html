@@ -28,7 +28,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/app-preferences.css?v=2">
 <link rel="stylesheet" href="css/app-buttons.css?v=13">
-<link rel="stylesheet" href="css/korean-match.css?v=20260804z">
+<link rel="stylesheet" href="css/korean-match.css?v=20260804ad">
 <link rel="stylesheet" href="css/answer-tts.css">
 <link rel="stylesheet" href="css/match-emotes.css">
 <link rel="stylesheet" href="css/profile.css">
@@ -46,8 +46,8 @@
   }
 
   body.match-race-page {
-    --block-size: min(84px, calc((100% - (var(--syl-count, 5) - 1) * 6px) / var(--syl-count, 5)));
-    --tile-size: min(46px, calc(var(--block-size) * 0.48));
+    --block-size: min(88px, calc((100% - (var(--syl-count, 4) - 1) * 8px) / var(--syl-count, 4)));
+    --tile-size: min(50px, calc(var(--block-size) * 0.52));
   }
 
   body.match-race-page.match-turn-page {
@@ -62,14 +62,14 @@
     --turn-dock-tile-size: 44px;
   }
 
-  /* Turn dock jamo bank — square tiles (match-turn.html only) */
+  /* Turn dock jamo bank — grow to fill dock stack so tiles can enlarge */
   body.match-race-page.match-turn-page .jamo-bank--turn {
-    flex: 0 0 auto !important;
-    flex-shrink: 0 !important;
+    flex: 1 1 auto !important;
+    flex-shrink: 1 !important;
     min-height: calc(var(--turn-dock-tile-size, var(--tile-size, 44px)) + 16px) !important;
     height: auto !important;
     max-height: none !important;
-    overflow-y: visible !important;
+    overflow-y: auto !important;
     align-items: flex-start !important;
     align-content: flex-start !important;
     flex-wrap: wrap !important;
@@ -81,7 +81,7 @@
     align-items: flex-start !important;
     min-height: calc(var(--turn-dock-tile-size, var(--tile-size, 44px)) + 16px) !important;
     overflow-x: hidden !important;
-    overflow-y: visible !important;
+    overflow-y: auto !important;
   }
 
   body.match-race-page.match-turn-page .jamo-bank--turn > .jamo-tile:not(.in-zone):not(.hidden-in-bank) {
@@ -210,36 +210,43 @@
   }
   body.match-race-page.match-turn-page #match-app > .match-header { display: none; }
 
-  /* 4-letter empty slots: JS sets pixel height; CSS only prepares the flex mid-column */
-  body.match-turn-page .blocks-area:has(.syllable-blocks-row[data-syl-count="4"]) {
-    flex: 1 1 0 !important;
+  /* 2–6 letter empty slots: single-like content size (CSS in korean-match.css) */
+  body.match-turn-page .blocks-area:has(.syllable-blocks-row[data-syl-count="2"]),
+  body.match-turn-page .blocks-area:has(.syllable-blocks-row[data-syl-count="3"]),
+  body.match-turn-page .blocks-area:has(.syllable-blocks-row[data-syl-count="4"]),
+  body.match-turn-page .blocks-area:has(.syllable-blocks-row[data-syl-count="5"]),
+  body.match-turn-page .blocks-area:has(.syllable-blocks-row[data-syl-count="6"]) {
+    flex: 0 0 auto !important;
+    margin-top: auto !important;
     min-height: 0 !important;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: center !important;
+    overflow: visible !important;
+    justify-content: flex-end !important;
     align-items: center !important;
-    overflow: hidden !important;
   }
   body.match-turn-page .blocks-area .syllable-blocks-row[data-syl-count="4"] {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-    grid-template-rows: 1fr 1fr !important;
-    align-content: stretch !important;
-    align-items: stretch !important;
-    width: 97% !important;
-    max-width: 97% !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    grid-template-columns: unset !important;
+    grid-template-rows: unset !important;
+    width: max-content !important;
+    max-width: min(406px, 100vw) !important;
     height: auto !important;
-    max-height: 100% !important;
+    max-height: none !important;
     min-height: 0 !important;
     aspect-ratio: auto !important;
-    padding: 4px !important;
+    gap: clamp(5px, 1.5vw, 10px) !important;
+    padding: clamp(6px, 1.5vw, 10px) !important;
     box-sizing: border-box !important;
+    margin-inline: auto !important;
+    justify-content: center !important;
   }
   body.match-turn-page .blocks-area .syllable-blocks-row[data-syl-count="4"] > .syllable-block {
-    width: 100% !important;
-    height: 100% !important;
-    max-width: none !important;
-    aspect-ratio: auto !important;
+    --wrap-block: clamp(122px, 40vw, 176px);
+    flex: 0 0 var(--wrap-block) !important;
+    width: var(--wrap-block) !important;
+    max-width: var(--wrap-block) !important;
+    height: auto !important;
+    aspect-ratio: 1 / 1.12 !important;
     min-height: 0 !important;
     contain: none !important;
   }
@@ -309,7 +316,7 @@
 <script src="js/rw-score-odometer.js"></script>
 <script src="js/match-emotes.js?v=20260707y"></script>
 <script src="js/four-letter-board-layout.js?v=20260804a"></script>
-<script src="js/korean-match.js?v=20260804ac"></script>
+<script src="js/korean-match.js?v=20260804ad"></script>
 <script src="js/match-turn-app.js?v=20260804m"></script>
 <script src="js/match-turn-bot.js?v=20260804j"></script>
 <script>
