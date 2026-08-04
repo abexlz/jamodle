@@ -518,7 +518,7 @@
     {"word": "삼월", "category": "noun", "difficulty": 1, "meaning": "三月", "grade": "A"},
     {"word": "선배", "category": "noun", "difficulty": 2, "meaning": "先輩", "grade": "B"},
     {"word": "업체", "category": "noun", "difficulty": 3, "meaning": "業體", "grade": "C"},
-    {"word": "키", "category": "noun", "difficulty": 1, "meaning": "신장", "grade": "A"},
+    {"word": "키", "category": "noun", "difficulty": 1, "meaning": "height", "grade": "A"},
     {"word": "국회", "category": "noun", "difficulty": 3, "meaning": "國會", "grade": "C"},
     {"word": "걱정", "category": "noun", "difficulty": 1, "grade": "A"},
     {"word": "만약", "category": "noun", "difficulty": 2, "meaning": "萬若", "grade": "B"},

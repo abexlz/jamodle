@@ -62,6 +62,7 @@
     '활': 'bow',
     '돌': 'stone',
     '재': 'ash',
+    '키': 'height',
     '사랑': 'love',
     '나무': 'tree',
     '구름': 'cloud',
