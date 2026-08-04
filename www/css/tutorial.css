@@ -259,29 +259,31 @@ body.tutorial-page #tutorial-lesson-bar {
   display: none !important;
 }
 
-/* Steps 1..6: make the one-syllable empty slot fill the full play area. */
+/* Steps 1..6: enlarge the 1-syllable slot while preserving the original shape. */
 body.tutorial-page.tutorial-steps-1-6 .blocks-area {
   display: flex !important;
   justify-content: center !important;
-  align-items: stretch !important;
+  align-items: center !important;
   min-height: 0 !important;
 }
 
 body.tutorial-page.tutorial-steps-1-6 .blocks-area .syllable-blocks-row[data-syl-count="1"] {
   width: 100% !important;
   height: 100% !important;
-  min-height: 100% !important;
   max-height: 100% !important;
   justify-content: center !important;
+  align-items: center !important;
 }
 
 body.tutorial-page.tutorial-steps-1-6 .blocks-area .syllable-blocks-row[data-syl-count="1"] .syllable-block {
-  width: 100% !important;
-  height: 100% !important;
-  max-width: 100% !important;
-  max-height: 100% !important;
-  min-height: 0 !important;
-  aspect-ratio: auto !important;
+  /* About 2x the old tutorial slot size but still constrained to viewport. */
+  width: min(312px, 92vw) !important;
+  height: min(312px, 92vw) !important;
+  max-width: min(312px, 92vw) !important;
+  max-height: min(312px, 92vw) !important;
+  min-width: min(260px, 82vw) !important;
+  min-height: min(260px, 82vw) !important;
+  aspect-ratio: 1 / 1 !important;
 }
 
 body.tutorial-page.tutorial-steps-1-6 .blocks-area .syllable-blocks-row[data-syl-count="1"] .syllable-grid {

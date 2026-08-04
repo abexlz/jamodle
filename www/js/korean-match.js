@@ -1322,6 +1322,13 @@
      * 2) Size the board to 97% of (dock.top - area.top) — fits under the HUD
      */
     syncFourLetterBoardSize() {
+      // Tutorial uses its own 1-syllable lesson board sizing.
+      // Do not run battle 4-letter expansion logic here.
+      if (this.tutorialMode) {
+        const legacy = document.getElementById('jamodle-four-letter-board-style');
+        if (legacy) legacy.textContent = '';
+        return;
+      }
       const row = this.els?.blocks || this.root?.querySelector?.('#match-blocks');
       if (!row) return;
 
