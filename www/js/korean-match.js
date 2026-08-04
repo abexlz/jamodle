@@ -1670,7 +1670,8 @@
       }
       const word = this.currentWord?.word;
       const text = await this.getMeaningForWord(word);
-      this.meaningText = text || t('match.hints.noMeaning');
+      const hintText = global.MeaningGlossary?.toHintMeaning?.(word, text) || text;
+      this.meaningText = hintText || t('match.hints.noMeaning');
       this.meaningRevealed = true;
       this.hintsUsedThisRound = true;
       this.showMeaningPopup(this.meaningText);
