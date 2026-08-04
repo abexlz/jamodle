@@ -1866,26 +1866,77 @@
   }
 
   .results-overlay--clear .results-word-banner {
-    width: 100%;
-    aspect-ratio: 866 / 288;
-    margin: 10px auto 15px;
+    width: 112%;
+    max-width: none;
+    min-height: clamp(104px, 34vw, 148px);
+    height: auto;
+    aspect-ratio: auto;
+    margin: 8px auto 12px;
+    margin-inline: -6%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 0 14%;
+    padding: 18px 5% 20px;
+    box-sizing: border-box;
     background: url('../assets/results/match-word-banner.png') center / 100% 100% no-repeat;
-    transform: scale(1.105);
+    transform: scale(1.12);
     transform-origin: center center;
+  }
+
+  .results-overlay--clear .results-word-banner .answer-tts-row {
+    width: 100%;
+    max-width: 100%;
+    gap: 6px;
+    padding: 0 2px;
+    box-sizing: border-box;
+  }
+
+  .results-overlay--clear .results-word-banner .answer-speak-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+  }
+
+  .results-overlay--clear .results-word-banner .answer-speak-btn svg {
+    width: 17px;
+    height: 17px;
   }
 
   .results-overlay--clear .results-word {
     font-family: 'Jua', 'Noto Sans KR', sans-serif;
-    font-size: clamp(38px, 10.8vw, 54px);
+    font-size: clamp(28px, 8.2vw, 50px);
     color: #fff;
     margin: 0;
-    line-height: 1;
+    line-height: 1.1;
+    text-align: center;
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
     text-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
+  }
+
+  .results-overlay--clear .results-word-banner[data-chars="4"] .results-word {
+    font-size: clamp(26px, 7.4vw, 44px);
+  }
+
+  .results-overlay--clear .results-word-banner[data-chars="5"] .results-word,
+  .results-overlay--clear .results-word-banner[data-chars="6"] .results-word {
+    font-size: clamp(22px, 6vw, 36px);
+  }
+
+  .results-overlay--clear .results-word-banner[data-chars="7"] .results-word,
+  .results-overlay--clear .results-word-banner[data-chars="8"] .results-word,
+  .results-overlay--clear .results-word-banner[data-chars="9"] .results-word {
+    font-size: clamp(18px, 5vw, 30px);
+  }
+
+  .results-overlay--clear .results-word-banner[data-chars="10"] .results-word,
+  .results-overlay--clear .results-word-banner[data-chars="11"] .results-word,
+  .results-overlay--clear .results-word-banner[data-chars="12"] .results-word {
+    font-size: clamp(15px, 4.2vw, 24px);
   }
 
   .results-overlay--clear .results-word-meaning {

@@ -6373,11 +6373,44 @@
       }
     }
 
+    syncResultsWordBanner(word) {
+      const wordEl = this.els.resultsWord;
+      if (!wordEl) return;
+      const banner = wordEl.closest('.results-word-banner');
+      if (!banner) return;
+      const chars = Array.from(String(word || '').replace(/\s*[·•|]\s*/g, '')).length;
+      banner.dataset.chars = String(Math.max(1, Math.min(chars || 1, 12)));
+      wordEl.style.fontSize = '';
+
+      const fit = () => {
+        const row = wordEl.closest('.answer-tts-row');
+        const btn = row?.querySelector('.answer-speak-btn');
+        const gap = row ? (Number.parseFloat(getComputedStyle(row).gap) || 6) : 0;
+        const available = Math.max(
+          40,
+          (row || banner).clientWidth - (btn?.offsetWidth || 0) - gap - 8,
+        );
+        let size = Number.parseFloat(getComputedStyle(wordEl).fontSize) || 40;
+        wordEl.style.whiteSpace = 'nowrap';
+        wordEl.style.fontSize = `${size}px`;
+        while (size > 16 && wordEl.scrollWidth > available) {
+          size -= 1;
+          wordEl.style.fontSize = `${size}px`;
+        }
+      };
+
+      requestAnimationFrame(() => {
+        fit();
+        requestAnimationFrame(fit);
+      });
+    }
+
     showResults(elapsed) {
       const word = this.multiFindMode
         ? this.multiFoundWords.join(' · ')
         : (this.winningWord || this.getResolvedWord());
       this.els.resultsWord.textContent = word;
+      this.syncResultsWordBanner(word);
       this.updateResultsMeaning(this.multiFindMode ? this.multiFoundWords : word);
       this.els.resultsTime.textContent = formatTime(elapsed);
       this.els.resultsGuesses.textContent = String(this.guessCount);
@@ -6400,6 +6433,7 @@
         autoplayRepeats: 2,
         root: this.els.results,
       });
+      this.syncResultsWordBanner(word);
     }
 
     continuePlaying() {

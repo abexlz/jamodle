@@ -413,6 +413,7 @@
       }
       const word = game.currentWord?.word || this.step?.word || '';
       game.els.resultsWord.textContent = word;
+      game.syncResultsWordBanner?.(word);
       game.updateResultsMeaning?.(word);
       if (game.els.resultsTime) game.els.resultsTime.textContent = formatTutorialTime(game.getElapsedMs?.() || 0);
       if (game.els.resultsGuesses) game.els.resultsGuesses.textContent = '1';
@@ -436,6 +437,7 @@
         autoplay: false,
         root: game.els.results,
       });
+      game.syncResultsWordBanner?.(word);
     }
 
     speakTutorialWord(word) {
