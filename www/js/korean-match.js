@@ -2431,13 +2431,14 @@
     }
 
     /**
-     * Keep dock tiles at the design max size for this viewport and reserve the
-     * full round footprint (width + height) so the bank never shrinks mid-round.
-     * On turn layout, also stretch to the Rotate+merge column height.
+     * Size dock jamo tiles to fill the bank as much as possible (any word length).
+     * Packs the round's full slot capacity into the available dock width × height
+     * (tools-column height when present) so single + battle docks stay filled.
+     * Footprint never shrinks mid-round as tiles leave the dock.
      */
     syncDockTileSize() {
       const bank = this.els.bank;
-      if (!bank || (this.versus && !this.turnBased)) return;
+      if (!bank) return;
 
       const tiles = bank.querySelectorAll('.jamo-tile:not(.in-zone):not(.hidden-in-bank)');
       const n = tiles.length;
@@ -2454,10 +2455,6 @@
         slotCount,
         Object.keys(this.tileMap || {}).length,
         n
-      );
-
-      const sylCount = Number(
-        this.root?.querySelector?.('.syllable-blocks-row')?.dataset?.sylCount || 0
       );
 
       bank.style.maxHeight = 'none';
@@ -2479,22 +2476,53 @@
       const padX = (parseFloat(bankStyle.paddingLeft) || 0) + (parseFloat(bankStyle.paddingRight) || 0);
       const padY = (parseFloat(bankStyle.paddingTop) || 0) + (parseFloat(bankStyle.paddingBottom) || 0);
 
-      let innerW = bank.clientWidth - padX;
-      if (innerW < tileSize && this.turnBased) {
-        const dockStack = bank.closest('.race-turn-dock-stack');
-        if (dockStack?.clientWidth > 0) innerW = dockStack.clientWidth - padX;
-      }
-      innerW = Math.max(innerW, tileSize);
+      const row = bank.closest('.race-turn-bottom, .bank-row');
+      const tools = row?.querySelector?.('.bank-tools-core') || row?.querySelector?.('.bank-tools');
+      const dockStack = bank.closest('.race-turn-dock-stack');
 
-      // 1-letter: CSS already +30%; grow further to fill the dock width.
-      if (sylCount === 1) {
-        const target = tileSize;
-        const fillSize = Math.floor(
-          (innerW - gap * Math.max(capacity - 1, 0)) / Math.max(capacity, 1)
-        );
-        if (fillSize > 0) {
-          tileSize = fillSize >= target ? fillSize : Math.min(target, fillSize);
+      let outerW = bank.clientWidth;
+      if (outerW < tileSize + padX && this.turnBased && dockStack?.clientWidth > 0) {
+        outerW = dockStack.clientWidth;
+      }
+      if (row) {
+        const rowGap = parseFloat(getComputedStyle(row).gap) || 6;
+        const toolsW = tools?.getBoundingClientRect().width || 0;
+        const availableOuterW = Math.max(0, row.clientWidth - toolsW - rowGap);
+        if (availableOuterW > 0) outerW = availableOuterW;
+      }
+      const innerW = Math.max(24, outerW - padX);
+
+      // Prefer Rotate+merge column height so tiles can grow into that dock space.
+      let innerH = 0;
+      if (tools) {
+        const toolsH = tools.getBoundingClientRect().height;
+        if (dockStack) {
+          const barH = dockStack.querySelector('.race-turn-bar-mount')?.getBoundingClientRect().height || 0;
+          innerH = Math.max(0, toolsH - barH - padY);
+        } else {
+          innerH = Math.max(0, toolsH - padY);
         }
+      }
+      if (innerH < 24) {
+        innerH = Math.max(bank.clientHeight - padY, tileSize);
+      }
+
+      // Largest square that packs `capacity` tiles into the dock box.
+      const MIN_TILE = 28;
+      let best = 0;
+      for (let rows = 1; rows <= capacity; rows += 1) {
+        const cols = Math.ceil(capacity / rows);
+        const sizeW = Math.floor((innerW - gap * Math.max(cols - 1, 0)) / cols);
+        const sizeH = Math.floor((innerH - gap * Math.max(rows - 1, 0)) / rows);
+        if (sizeW < MIN_TILE || sizeH < MIN_TILE) continue;
+        const size = Math.min(sizeW, sizeH);
+        if (size > best) best = size;
+      }
+      if (best > 0) tileSize = best;
+      else {
+        // Width-only fallback when height isn't ready yet.
+        const fillW = Math.floor((innerW - gap * Math.max(capacity - 1, 0)) / capacity);
+        if (fillW >= MIN_TILE) tileSize = Math.max(tileSize, fillW);
       }
 
       bank.style.setProperty('--dock-tile-size', `${tileSize}px`);
@@ -2511,10 +2539,6 @@
       let lockedH = Math.max(this._dockFittedMinHeight || 0, fittedH);
       let lockedW = Math.max(this._dockFittedMinWidth || 0, fittedW);
 
-      // Stretch dock up to the Rotate button column when tools are taller.
-      const row = bank.closest('.race-turn-bottom, .bank-row');
-      const tools = row?.querySelector?.('.bank-tools-core') || row?.querySelector?.('.bank-tools');
-      const dockStack = bank.closest('.race-turn-dock-stack');
       if (tools) {
         const toolsH = tools.getBoundingClientRect().height;
         if (dockStack) {
@@ -2525,14 +2549,12 @@
         }
       }
 
-      // Cap width so a huge 1-letter tile size can't shove the bank over the merge tray.
+      // Keep bank at full remaining width so filled tiles stay edge-to-edge.
       if (row) {
         const rowGap = parseFloat(getComputedStyle(row).gap) || 6;
         const toolsW = tools?.getBoundingClientRect().width || 0;
         const availableW = Math.max(tileSize + padX, row.clientWidth - toolsW - rowGap);
-        lockedW = Math.min(Math.max(lockedW, fittedW), Math.floor(availableW));
-        // 1-letter: keep bank at full remaining width so filled tiles stay edge-to-edge.
-        if (sylCount === 1) lockedW = Math.floor(availableW);
+        lockedW = Math.floor(availableW);
       }
 
       this._dockFittedMinHeight = lockedH;
