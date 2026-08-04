@@ -962,7 +962,9 @@
       const showEnglish = prefs()?.shouldShowEnglish?.() !== false;
       const meaningBtnHtml = showEnglish
         ? `<button type="button" class="match-hint-btn match-hint-btn--icon match-meaning-btn" id="match-meaning-btn" aria-label="${t('match.hints.meaning')}" title="${t('match.hints.meaning')}">
-            <img class="match-hint-btn-icon" src="assets/hint-meaning.png" alt="" draggable="false">
+            <span class="match-hint-btn-glyph" aria-hidden="true">
+              <img class="match-hint-btn-icon" src="assets/hint-meaning.png" alt="" draggable="false">
+            </span>
           </button>`
         : '';
 
@@ -976,15 +978,30 @@
         ? ''
         : `<section class="match-hint-dock" aria-label="${t('match.hints.label')}">
           <div class="match-token-counter" id="match-token-counter" aria-live="polite">
-            🪙 <span id="match-token-count">${global.HintTokens?.get?.() ?? 5}</span>
+            <span class="match-token-counter-glyph" aria-hidden="true">
+              🪙&nbsp;<span id="match-token-count">${global.HintTokens?.get?.() ?? 5}</span>
+            </span>
           </div>
           <button type="button" class="match-hint-btn match-hint-btn--icon" id="match-orient-hint" aria-label="${t('match.hints.orient')}" title="${t('match.hints.orient')}">
-            <img class="match-hint-btn-icon" src="assets/hint-orient.png" alt="" draggable="false">
+            <span class="match-hint-btn-glyph" aria-hidden="true">
+              <img class="match-hint-btn-icon" src="assets/hint-orient.png" alt="" draggable="false">
+            </span>
+            <span class="match-hint-btn-label">ALIGN</span>
           </button>
           <button type="button" class="match-hint-btn match-hint-btn--icon" id="match-disable-hint" aria-label="${t('match.hints.disable')}" title="${t('match.hints.disable')}">
-            <img class="match-hint-btn-icon" src="assets/hint-disable-empty.png" alt="" draggable="false">
+            <span class="match-hint-btn-glyph" aria-hidden="true">
+              <img class="match-hint-btn-icon" src="assets/hint-disable-empty.png" alt="" draggable="false">
+            </span>
+            <span class="match-hint-btn-label">DELETE</span>
           </button>
-          ${meaningBtnHtml}
+          ${showEnglish
+            ? `<button type="button" class="match-hint-btn match-hint-btn--icon match-meaning-btn" id="match-meaning-btn" aria-label="${t('match.hints.meaning')}" title="${t('match.hints.meaning')}">
+            <span class="match-hint-btn-glyph" aria-hidden="true">
+              <img class="match-hint-btn-icon" src="assets/hint-meaning.png" alt="" draggable="false">
+            </span>
+            <span class="match-hint-btn-label">MEANING</span>
+          </button>`
+            : ''}
           ${devAnswerBtnHtml}
         </section>`;
 

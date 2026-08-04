@@ -1100,7 +1100,7 @@
     /* app-buttons.css */
   }
 </style>
-<link rel="stylesheet" href="css/korean-match.css?v=20260804ad">
+<link rel="stylesheet" href="css/korean-match.css?v=20260804ae">
 <link rel="stylesheet" href="css/answer-tts.css">
 <link rel="stylesheet" href="css/pause-quit.css?v=2">
 <link rel="stylesheet" href="css/app-theme.css?v=25">
@@ -1380,10 +1380,12 @@
 
   body.match-page .match-hint-dock {
     display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    padding: 0;
-    align-items: stretch;
+    flex-wrap: nowrap;
+    justify-content: space-evenly;
+    align-items: flex-start;
+    gap: clamp(6px, 2vw, 14px);
+    width: 100%;
+    padding: 2px 0 6px;
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
@@ -1392,27 +1394,66 @@
 
   body.match-page .match-hint-dock > .match-token-counter {
     grid-column: auto !important;
-    justify-self: stretch;
-    align-self: stretch;
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: none;
+    align-self: flex-start;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 4px;
+    padding: 0;
+    font-family: 'Jua', 'Noto Sans KR', sans-serif;
+    font-size: clamp(14px, 3.8vw, 18px);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    min-height: 0;
+    max-height: none;
+    aspect-ratio: auto;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+
+  body.match-page .match-hint-dock > .match-token-counter .match-token-counter-glyph {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 6px 10px;
-    font-family: 'Jua', 'Noto Sans KR', sans-serif;
-    font-size: clamp(17px, 4.5vw, 20px);
-    font-weight: 400;
-    letter-spacing: 0.02em;
-    min-height: 44px;
-    max-height: 50px;
-    aspect-ratio: auto;
+    width: clamp(52px, 14vw, 64px);
+    height: clamp(52px, 14vw, 64px);
+    border-radius: 50%;
+    background: var(--yellow, #FFF6C8);
+    border: 2px solid var(--yellow-btn, #FFEAA0);
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.35), 0 3px 0 rgba(140, 70, 0, 0.22);
+    font-size: clamp(18px, 4.8vw, 22px);
+    line-height: 1;
+    color: var(--heading, #5D6470);
+    gap: 1px;
+  }
+
+  body.match-page .match-hint-dock > .match-token-counter::after {
+    content: '';
+    display: block;
+    height: clamp(10px, 2.8vw, 12px);
+    margin-top: 4px;
   }
 
   body.match-page .match-hint-dock > .match-hint-btn--icon {
     flex: 1 1 0;
-    min-width: 44px;
-    max-width: 56px;
-    min-height: 44px !important;
-    max-height: 50px !important;
+    min-width: 0;
+    max-width: none;
+    width: auto;
+    min-height: 0 !important;
+    max-height: none !important;
+    aspect-ratio: auto !important;
+  }
+
+  body.match-page .match-hint-dock > .match-hint-btn--icon .match-hint-btn-glyph {
+    width: clamp(52px, 14vw, 64px);
+    height: clamp(52px, 14vw, 64px);
+    flex: 0 0 auto;
   }
 
   body.match-page .match-hint-dock > .match-hint-btn:not(.match-hint-btn--icon) {
@@ -1460,11 +1501,10 @@
       --app-btn-max-h: 46px;
     }
 
-    body.match-page .match-hint-dock > .match-hint-btn--icon {
-      min-width: 40px;
-      max-width: 48px;
-      min-height: 40px !important;
-      max-height: 46px !important;
+    body.match-page .match-hint-dock > .match-hint-btn--icon .match-hint-btn-glyph,
+    body.match-page .match-hint-dock > .match-token-counter .match-token-counter-glyph {
+      width: clamp(48px, 13vw, 56px);
+      height: clamp(48px, 13vw, 56px);
     }
 
     body.match-page .match-actions > .match-action-btn {
@@ -1590,7 +1630,7 @@
 <script src="js/pause-quit-ui.js?v=3"></script>
 <script src="js/answer-tts.js?v=20260803c"></script>
 <script src="js/four-letter-board-layout.js?v=20260804a"></script>
-<script src="js/korean-match.js?v=20260804ad"></script>
+<script src="js/korean-match.js?v=20260804ae"></script>
 <script>
 const isDailyMatch = MatchDaily.isDailyModeFromUrl();
 
