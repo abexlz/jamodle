@@ -1100,7 +1100,7 @@
     /* app-buttons.css */
   }
 </style>
-<link rel="stylesheet" href="css/korean-match.css?v=20260804y">
+<link rel="stylesheet" href="css/korean-match.css?v=20260804aa">
 <link rel="stylesheet" href="css/answer-tts.css">
 <link rel="stylesheet" href="css/pause-quit.css?v=2">
 <link rel="stylesheet" href="css/app-theme.css?v=25">
@@ -1212,6 +1212,17 @@
     justify-content: flex-end;
     overflow: visible;
     margin-top: auto;
+  }
+
+  /* 1-letter: grow mid column so empty block can match battle size (cqh). */
+  body.match-page:not(.match-race-page) .blocks-area.match-play-surface:has(.syllable-blocks-row[data-syl-count="1"]) {
+    flex: 1 1 auto;
+    min-height: 0;
+    margin-top: 0;
+    container-type: size;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
   }
 
   body.match-page .blocks-area::before,

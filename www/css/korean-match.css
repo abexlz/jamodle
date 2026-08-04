@@ -2630,21 +2630,51 @@
     max-width: var(--wrap-block);
   }
 
+  /* 1-letter single: same empty-block scale as battle turn (fill mid column). */
+  body.match-page:not(.match-race-page) .blocks-area.match-play-surface:has(.syllable-blocks-row[data-syl-count="1"]) {
+    flex: 1 1 auto;
+    min-height: 0;
+    margin-top: 0;
+    container-type: size;
+    container-name: blocks-area;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+  }
+
   body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="1"] {
     justify-content: center;
+    align-items: center;
+    flex: 0 1 auto;
+    flex-shrink: 1;
+    width: 100%;
+    height: 95%;
+    max-height: 95%;
+    min-height: 0;
+    overflow: visible;
   }
 
   body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="1"] .syllable-block {
     flex: 0 0 auto;
-    width: min(156px, 55vw);
-    max-width: min(156px, 55vw);
-    min-width: min(130px, 47vw);
-    /* A square guide prevents the one-syllable grid from looking side-squeezed. */
+    flex-shrink: 0;
+    width: min(95cqh, 95%, 90vw);
+    height: min(95cqh, 95%, 90vw);
+    max-width: min(95cqh, 95%, 90vw);
+    max-height: min(95cqh, 95%, 90vw);
+    min-width: 0;
     aspect-ratio: 1 / 1;
   }
 
   body.match-page:not(.match-race-page) #match-app:has(.syllable-blocks-row[data-syl-count="1"]) {
-    --block-size: min(156px, 55vw);
+    /* Keep dock/rotate tiles at normal size; only the board scales up. */
+    --tile-size: min(48px, 14vw);
+  }
+
+  body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="1"] .syllable-grid {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: auto;
+    min-height: 0;
   }
 
   body.match-page:not(.match-race-page) .syllable-blocks-row .syllable-grid {
