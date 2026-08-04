@@ -963,7 +963,7 @@
       const meaningBtnHtml = showEnglish
         ? `<button type="button" class="match-hint-btn match-hint-btn--icon match-meaning-btn" id="match-meaning-btn" aria-label="${t('match.hints.meaning')}" title="${t('match.hints.meaning')}">
             <span class="match-hint-btn-glyph" aria-hidden="true">
-              <img class="match-hint-btn-icon" src="assets/hint-meaning.png" alt="" draggable="false">
+              <img class="match-hint-btn-icon" src="assets/hint-meaning-v2.png" alt="" draggable="false">
             </span>
           </button>`
         : '';
@@ -984,20 +984,20 @@
           </div>
           <button type="button" class="match-hint-btn match-hint-btn--icon" id="match-orient-hint" aria-label="${t('match.hints.orient')}" title="${t('match.hints.orient')}">
             <span class="match-hint-btn-glyph" aria-hidden="true">
-              <img class="match-hint-btn-icon" src="assets/hint-orient.png" alt="" draggable="false">
+              <img class="match-hint-btn-icon" src="assets/hint-align-v2.png" alt="" draggable="false">
             </span>
             <span class="match-hint-btn-label">ALIGN</span>
           </button>
           <button type="button" class="match-hint-btn match-hint-btn--icon" id="match-disable-hint" aria-label="${t('match.hints.disable')}" title="${t('match.hints.disable')}">
             <span class="match-hint-btn-glyph" aria-hidden="true">
-              <img class="match-hint-btn-icon" src="assets/hint-disable-empty.png" alt="" draggable="false">
+              <img class="match-hint-btn-icon" src="assets/hint-delete-v2.png" alt="" draggable="false">
             </span>
             <span class="match-hint-btn-label">DELETE</span>
           </button>
           ${showEnglish
             ? `<button type="button" class="match-hint-btn match-hint-btn--icon match-meaning-btn" id="match-meaning-btn" aria-label="${t('match.hints.meaning')}" title="${t('match.hints.meaning')}">
             <span class="match-hint-btn-glyph" aria-hidden="true">
-              <img class="match-hint-btn-icon" src="assets/hint-meaning.png" alt="" draggable="false">
+              <img class="match-hint-btn-icon" src="assets/hint-meaning-v2.png" alt="" draggable="false">
             </span>
             <span class="match-hint-btn-label">MEANING</span>
           </button>`
@@ -3653,37 +3653,57 @@
       });
     }
 
-    animateTileOrient({ tile, oriented, options, expected }) {
-      const steps = HC.buildOrientAnimationSteps(tile.char, tile.zoneType, expected, options);
-      const path = steps.length ? steps : [oriented];
-      const last = path[path.length - 1];
-      if (last.char !== oriented.char || last.zoneType !== oriented.zoneType) {
-        path.push(oriented);
-      }
-
-      const totalMs = 1000;
-      const stepMs = Math.max(120, totalMs / path.length);
+    animateTileOrient({ tile, oriented }) {
+      const prevChar = tile.char;
+      const prevZoneType = tile.zoneType;
+      const prevZone = tile.zoneRef;
+      const inVowelSlot = !!(prevZone
+        && (prevZone.zoneType === 'jungH' || prevZone.zoneType === 'jungV'));
+      const sourceSyllableIndex = inVowelSlot
+        ? prevZone.syllableIndex
+        : tile.syllableIndex;
 
       return new Promise((resolve) => {
-        tile.el.classList.add('orient-hint-pulse');
-        let i = 0;
+        tile.el.classList.add('orient-hint-shake');
 
-        const advance = () => {
-          if (i >= path.length) {
-            tile.zoneType = oriented.zoneType;
-            tile.setChar(oriented.char);
-            tile.el.classList.remove('orient-hint-pulse');
-            resolve();
-            return;
+        const finish = () => {
+          tile.el.classList.remove('orient-hint-shake');
+          tile.zoneType = oriented.zoneType;
+          if (oriented.zoneType === 'jungH') tile.subIndex = 0;
+          tile.setChar(oriented.char);
+
+          if (inVowelSlot && prevZone && oriented.zoneType !== prevZone.zoneType) {
+            const targetZone = this.findVowelTargetZone(
+              sourceSyllableIndex,
+              oriented.zoneType,
+              oriented.zoneType === 'jungV' ? (tile.subIndex ?? 0) : 0
+            );
+            if (!targetZone
+              || targetZone.syllableIndex !== sourceSyllableIndex
+              || (targetZone.placedTileId && targetZone.placedTileId !== tile.id)) {
+              tile.zoneType = prevZoneType;
+              tile.setChar(prevChar);
+              resolve();
+              return;
+            }
+            prevZone.clear();
+            tile.zoneRef = null;
+            this.attachTileToZone(tile, targetZone);
+            tile.syllableIndex = sourceSyllableIndex;
+            if (oriented.zoneType === 'jungV') {
+              tile.subIndex = targetZone.subIndex ?? 0;
+            }
+            this.syncSyllableVowelLayout(this.blocks[sourceSyllableIndex]);
           }
-          const step = path[i];
-          i += 1;
-          tile.zoneType = step.zoneType;
-          tile.setChar(step.char);
-          setTimeout(advance, stepMs);
+
+          tile.el.classList.add('orient-hint-snap');
+          window.setTimeout(() => {
+            tile.el.classList.remove('orient-hint-snap');
+            resolve();
+          }, 220);
         };
 
-        advance();
+        window.setTimeout(finish, 1000);
       });
     }
 
