@@ -1816,6 +1816,7 @@
   .results-overlay.hidden { display: none; }
 
   .results-overlay--clear .results-card {
+    --results-card-base-width: min(400px, 92vw);
     position: relative;
     background: transparent !important;
     border: none !important;
@@ -1824,11 +1825,13 @@
     -webkit-backdrop-filter: none !important;
     box-shadow: none !important;
     color: inherit !important;
-    padding: clamp(82px, 21vw, 98px) clamp(28px, 7.5vw, 36px) clamp(36px, 9vw, 44px);
+    padding: clamp(72px, 18vw, 98px) clamp(22px, 5.5vw, 36px) clamp(32px, 8vw, 44px);
     text-align: center;
-    max-width: min(400px, 95vw);
-    width: 100%;
-    aspect-ratio: 433 / 577;
+    max-width: min(96vw, 920px);
+    width: var(--results-card-width, var(--results-card-base-width));
+    aspect-ratio: auto;
+    min-height: min(560px, 86vh);
+    height: auto;
     box-shadow: none;
     animation: popIn .45s ease;
     display: flex;
@@ -1837,6 +1840,7 @@
     justify-content: flex-start;
     gap: 0;
     isolation: isolate;
+    box-sizing: border-box;
   }
 
   .results-overlay--clear .results-card::before {
@@ -1844,7 +1848,7 @@
     position: absolute;
     inset: -3%;
     z-index: -1;
-    background: url('../assets/results/match-clear-frame.png') center / 104% 104% no-repeat;
+    background: url('../assets/results/match-clear-frame.png') center / 100% 100% no-repeat;
     pointer-events: none;
   }
 
@@ -1866,77 +1870,55 @@
   }
 
   .results-overlay--clear .results-word-banner {
-    width: 112%;
+    width: 100%;
     max-width: none;
-    min-height: clamp(104px, 34vw, 148px);
+    min-height: clamp(150px, 38vw, 230px);
     height: auto;
     aspect-ratio: auto;
-    margin: 8px auto 12px;
-    margin-inline: -6%;
+    margin: 6px auto 10px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 18px 5% 20px;
+    padding: 22px 7% 24px;
     box-sizing: border-box;
     background: url('../assets/results/match-word-banner.png') center / 100% 100% no-repeat;
-    transform: scale(1.12);
-    transform-origin: center center;
+    transform: none;
   }
 
   .results-overlay--clear .results-word-banner .answer-tts-row {
     width: 100%;
     max-width: 100%;
-    gap: 6px;
-    padding: 0 2px;
+    gap: 10px;
+    padding: 0 4px;
     box-sizing: border-box;
   }
 
   .results-overlay--clear .results-word-banner .answer-speak-btn {
-    width: 34px;
-    height: 34px;
-    border-radius: 12px;
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
   }
 
   .results-overlay--clear .results-word-banner .answer-speak-btn svg {
-    width: 17px;
-    height: 17px;
+    width: 24px;
+    height: 24px;
   }
 
   .results-overlay--clear .results-word {
     font-family: 'Jua', 'Noto Sans KR', sans-serif;
-    font-size: clamp(28px, 8.2vw, 50px);
+    /* ~3× previous results answer size; popup width expands to fit */
+    font-size: clamp(84px, 24vw, 150px);
     color: #fff;
     margin: 0;
-    line-height: 1.1;
+    line-height: 1.05;
     text-align: center;
-    flex: 1 1 auto;
+    flex: 0 1 auto;
     min-width: 0;
-    max-width: 100%;
+    max-width: none;
     white-space: nowrap;
-    overflow: hidden;
+    overflow: visible;
     text-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
-  }
-
-  .results-overlay--clear .results-word-banner[data-chars="4"] .results-word {
-    font-size: clamp(26px, 7.4vw, 44px);
-  }
-
-  .results-overlay--clear .results-word-banner[data-chars="5"] .results-word,
-  .results-overlay--clear .results-word-banner[data-chars="6"] .results-word {
-    font-size: clamp(22px, 6vw, 36px);
-  }
-
-  .results-overlay--clear .results-word-banner[data-chars="7"] .results-word,
-  .results-overlay--clear .results-word-banner[data-chars="8"] .results-word,
-  .results-overlay--clear .results-word-banner[data-chars="9"] .results-word {
-    font-size: clamp(18px, 5vw, 30px);
-  }
-
-  .results-overlay--clear .results-word-banner[data-chars="10"] .results-word,
-  .results-overlay--clear .results-word-banner[data-chars="11"] .results-word,
-  .results-overlay--clear .results-word-banner[data-chars="12"] .results-word {
-    font-size: clamp(15px, 4.2vw, 24px);
   }
 
   .results-overlay--clear .results-word-meaning {

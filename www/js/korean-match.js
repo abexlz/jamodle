@@ -6373,29 +6373,56 @@
       }
     }
 
+    resetResultsCardWidth() {
+      const card = this.els.results?.querySelector?.('.results-card');
+      if (!card) return;
+      card.style.removeProperty('--results-card-width');
+      card.style.width = '';
+      card.style.maxWidth = '';
+    }
+
     syncResultsWordBanner(word) {
       const wordEl = this.els.resultsWord;
       if (!wordEl) return;
       const banner = wordEl.closest('.results-word-banner');
-      if (!banner) return;
+      const card = wordEl.closest('.results-card') || this.els.results?.querySelector?.('.results-card');
+      if (!banner || !card) return;
+
       const chars = Array.from(String(word || '').replace(/\s*[·•|]\s*/g, '')).length;
       banner.dataset.chars = String(Math.max(1, Math.min(chars || 1, 12)));
       wordEl.style.fontSize = '';
+      wordEl.style.whiteSpace = 'nowrap';
+      this.resetResultsCardWidth();
 
-      const fit = () => {
+      const wordFits = () => {
         const row = wordEl.closest('.answer-tts-row');
         const btn = row?.querySelector('.answer-speak-btn');
-        const gap = row ? (Number.parseFloat(getComputedStyle(row).gap) || 6) : 0;
+        const gap = row ? (Number.parseFloat(getComputedStyle(row).gap) || 10) : 0;
         const available = Math.max(
           40,
           (row || banner).clientWidth - (btn?.offsetWidth || 0) - gap - 8,
         );
-        let size = Number.parseFloat(getComputedStyle(wordEl).fontSize) || 40;
-        wordEl.style.whiteSpace = 'nowrap';
-        wordEl.style.fontSize = `${size}px`;
-        while (size > 16 && wordEl.scrollWidth > available) {
-          size -= 1;
-          wordEl.style.fontSize = `${size}px`;
+        return wordEl.scrollWidth <= available + 1;
+      };
+
+      const fit = () => {
+        const maxWidth = Math.min(window.innerWidth * 0.96, 920);
+        let width = Math.ceil(card.getBoundingClientRect().width) || 400;
+        let guard = 0;
+        while (!wordFits() && width < maxWidth - 1 && guard < 60) {
+          width = Math.min(maxWidth, width + 24);
+          card.style.setProperty('--results-card-width', `${width}px`);
+          card.style.width = `${width}px`;
+          card.style.maxWidth = `${width}px`;
+          guard += 1;
+        }
+        // Ultra-narrow screens only: keep one line with a modest shrink.
+        if (!wordFits()) {
+          let size = Number.parseFloat(getComputedStyle(wordEl).fontSize) || 84;
+          while (size > 42 && !wordFits()) {
+            size -= 2;
+            wordEl.style.fontSize = `${size}px`;
+          }
         }
       };
 
@@ -6437,6 +6464,8 @@
     }
 
     continuePlaying() {
+      this.resetResultsCardWidth();
+      if (this.els.resultsWord) this.els.resultsWord.style.fontSize = '';
       this.els.results.classList.add('hidden');
       if (this.isJamoSoloMode()) clearSoloSession();
       if (this.multiFindMode) {
