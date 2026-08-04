@@ -795,6 +795,11 @@
       const bar = this.els.turnBar;
       if (!bar) return;
       const opp = RS().getOpponent(data, this.myUid);
+      const currentTurnName = data.currentTurnUid === data.player1Uid
+        ? (data.player1Name || rt('opponent'))
+        : data.currentTurnUid === data.player2Uid
+          ? (data.player2Name || rt('opponent'))
+          : (opp?.name || rt('opponent'));
       let label = rt('yourTurn');
       let pct = 100;
       let myTurnStyle = false;
@@ -807,10 +812,10 @@
         pct = 100;
         myTurnStyle = true;
       } else if (mode === 'waiting') {
-        label = rt('oppTurn', { name: opp?.name || rt('opponent') });
+        label = `${currentTurnName}'S TURN`;
         pct = localPct;
       } else if (mode === 'mine') {
-        label = rt('yourTurn');
+        label = `${currentTurnName}'S TURN`;
         pct = localPct;
         myTurnStyle = true;
       }

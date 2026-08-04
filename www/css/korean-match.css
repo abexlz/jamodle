@@ -3335,7 +3335,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-size: 13px;
+    font-size: 20px;
   }
 
   body.match-turn-page .race-turn-bar-meta {
@@ -3347,12 +3347,12 @@
 
   body.match-turn-page .race-turn-timer,
   body.match-turn-page .race-turn-round {
-    font-size: 12px;
+    font-size: 18px;
     white-space: nowrap;
   }
 
   body.match-turn-page .race-turn-timer {
-    font-size: 16px;
+    font-size: 24px;
     font-weight: 800;
   }
 
