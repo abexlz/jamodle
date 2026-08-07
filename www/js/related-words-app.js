@@ -367,6 +367,13 @@
               </div>
             </section>
 
+            <section class="rw-answer-photo hidden" id="rw-answer-photo" aria-hidden="true">
+              <div class="rw-answer-photo-frame">
+                <img class="rw-answer-photo-img" id="rw-answer-photo-img" alt="" decoding="async" />
+              </div>
+              <a class="rw-answer-photo-credit" id="rw-answer-photo-credit" href="https://www.pexels.com" target="_blank" rel="noopener noreferrer"></a>
+            </section>
+
             <div class="rw-board" id="rw-board">
             <section class="rw-answer-area">
               <div class="rw-slots" id="rw-slots"></div>
@@ -426,6 +433,9 @@
         trail: this.root.querySelector('#rw-trail'),
         trailTrack: this.root.querySelector('#rw-trail-track'),
         clueMeaning: this.root.querySelector('#rw-clue-meaning'),
+        answerPhoto: this.root.querySelector('#rw-answer-photo'),
+        answerPhotoImg: this.root.querySelector('#rw-answer-photo-img'),
+        answerPhotoCredit: this.root.querySelector('#rw-answer-photo-credit'),
         lives: this.root.querySelector('#rw-lives'),
         slots: this.root.querySelector('#rw-slots'),
         revealSkip: this.root.querySelector('#rw-reveal-skip'),
@@ -675,6 +685,98 @@
       if (this.isSoloMode()) {
         this.updateSoloStreakDisplay();
       }
+      this.loadAnswerPhoto();
+    }
+
+    clearAnswerPhoto() {
+      const wrap = this.els.answerPhoto;
+      const img = this.els.answerPhotoImg;
+      const credit = this.els.answerPhotoCredit;
+      if (wrap) {
+        wrap.classList.add('hidden');
+        wrap.setAttribute('aria-hidden', 'true');
+        wrap.classList.remove('is-loading', 'is-ready');
+      }
+      if (img) {
+        img.removeAttribute('src');
+        img.alt = '';
+      }
+      if (credit) {
+        credit.textContent = '';
+        credit.href = 'https://www.pexels.com';
+        credit.classList.add('hidden');
+      }
+    }
+
+    async loadAnswerPhoto() {
+      const word = String(this.puzzle?.answer || '').trim();
+      const wrap = this.els.answerPhoto;
+      const img = this.els.answerPhotoImg;
+      const credit = this.els.answerPhotoCredit;
+      if (!wrap || !img || !word || !global.PexelsImageService?.photoForWord) {
+        this.clearAnswerPhoto();
+        return;
+      }
+
+      const requestId = (this._answerPhotoRequestId = (this._answerPhotoRequestId || 0) + 1);
+      wrap.classList.remove('hidden', 'is-ready');
+      wrap.classList.add('is-loading');
+      wrap.setAttribute('aria-hidden', 'true');
+      img.removeAttribute('src');
+      if (credit) {
+        credit.textContent = '';
+        credit.classList.add('hidden');
+      }
+
+      let englishHint = '';
+      try {
+        englishHint = global.MatchWordMeanings?.[word]
+          || global.LearningWords?.getWordMeaning?.(word)
+          || '';
+        if (!englishHint && global.DictionaryService?.resolveEnglishMeaning) {
+          englishHint = await global.DictionaryService.resolveEnglishMeaning(word) || '';
+        }
+      } catch {
+        englishHint = '';
+      }
+
+      if (requestId !== this._answerPhotoRequestId) return;
+
+      let photo = null;
+      try {
+        photo = await global.PexelsImageService.photoForWord(word, englishHint);
+      } catch {
+        photo = null;
+      }
+
+      if (requestId !== this._answerPhotoRequestId) return;
+      if (!photo?.imageUrl) {
+        this.clearAnswerPhoto();
+        return;
+      }
+
+      const settle = () => {
+        if (requestId !== this._answerPhotoRequestId) return;
+        wrap.classList.remove('is-loading', 'hidden');
+        wrap.classList.add('is-ready');
+        wrap.setAttribute('aria-hidden', 'false');
+        // Keep alt empty so screen readers don't spoil the English answer.
+        img.alt = '';
+        if (credit) {
+          const name = photo.photographer || 'Pexels';
+          credit.textContent = `Photo by ${name} on Pexels`;
+          credit.href = photo.photographerUrl || photo.pexelsUrl || 'https://www.pexels.com';
+          credit.classList.remove('hidden');
+        }
+      };
+
+      img.onload = settle;
+      img.onerror = () => {
+        if (requestId !== this._answerPhotoRequestId) return;
+        this.clearAnswerPhoto();
+      };
+      img.src = photo.imageUrl;
+      if (img.complete && img.naturalWidth) settle();
     }
 
     isSoloMode() {
@@ -1888,6 +1990,7 @@
       this.updateLives();
       this.renderSlots();
       this.renderDock();
+      this.loadAnswerPhoto();
     }
 
     updateLives() {

@@ -24,10 +24,11 @@ Add:
 
 ```env
 KOREAN_DICTIONARY_API_KEY=your_32_character_hex_key_here
+PEXELS_API_KEY=your_pexels_api_key_here
 ADMIN_IMPORT_TOKEN=optional-dev-token
 ```
 
-**Never** put the dictionary API key in frontend code. The browser calls `/api/dictionary/search` on your server; the server calls `krdict.korean.go.kr`.
+**Never** put API keys in frontend code. The browser calls `/api/dictionary/search` and `/api/image/pexels` on your server; the server calls the upstream APIs.
 
 ### Run locally
 
@@ -40,6 +41,7 @@ Open:
 
 - App: http://localhost:3000
 - Dictionary API: http://localhost:3000/api/dictionary/search?word=고양이
+- Pexels photo API: http://localhost:3000/api/image/pexels?q=apple
 - Word import tool: http://localhost:3000/admin/word-import.html
 
 ### Share on your phone (ngrok)
@@ -70,7 +72,7 @@ For Capacitor mobile builds, deploy the API to Vercel (or similar) and set the b
 
 1. Push the repo to GitHub
 2. Import the project in [Vercel](https://vercel.com)
-3. Add environment variable: `KOREAN_DICTIONARY_API_KEY`
+3. Add environment variables: `KOREAN_DICTIONARY_API_KEY`, and optionally `PEXELS_API_KEY` for Word Chain photos
 4. Optional: `ADMIN_IMPORT_TOKEN` for the import tool
 5. Deploy — static files from `www/` and API routes from `api/` are configured in `vercel.json`
 
@@ -82,6 +84,7 @@ For Capacitor mobile builds, deploy the API to Vercel (or similar) and set the b
 | `www/js/dictionary-service.js` | Frontend lookup + localStorage cache (7 days) |
 | `www/js/dictionary-modal.js` | Dictionary detail modal after completing a word |
 | `api/dictionary/search.js` | Secure proxy, rate limit, server cache |
+| `api/image/pexels.js` | Pexels proxy for Word Chain answer photos |
 | `lib/korean-dictionary.js` | XML parsing + normalization |
 
 ### Word import tool (developer)

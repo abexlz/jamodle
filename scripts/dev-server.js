@@ -33,6 +33,7 @@ const MIME = {
 const searchHandler = require('../api/dictionary/search');
 const validateHandler = require('../api/dictionary/validate');
 const ttsHandler = require('../api/tts/speak');
+const pexelsHandler = require('../api/image/pexels');
 
 function withQuery(req, res, handler) {
   const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
@@ -85,6 +86,11 @@ const server = http.createServer((req, res) => {
     console.log(`[tts] speak → ${text}`);
     return withQuery(req, res, ttsHandler);
   }
+  if (url.pathname === '/api/image/pexels') {
+    const q = url.searchParams.get('q') || url.searchParams.get('query') || '';
+    console.log(`[pexels] search → ${q}`);
+    return withQuery(req, res, pexelsHandler);
+  }
 
   // Common mistake: ngrok/open-from-disk URLs include /www/ but dev-server root is already www/
   if (url.pathname === '/www' || url.pathname.startsWith('/www/')) {
@@ -102,5 +108,8 @@ server.listen(PORT, () => {
   console.log(`Dictionary proxy ready (example: /api/dictionary/validate?word=고양이)`);
   if (!process.env.KOREAN_DICTIONARY_API_KEY) {
     console.warn('Warning: KOREAN_DICTIONARY_API_KEY is not set in .env');
+  }
+  if (!process.env.PEXELS_API_KEY) {
+    console.warn('Warning: PEXELS_API_KEY is not set in .env (Word Chain photos disabled)');
   }
 });
