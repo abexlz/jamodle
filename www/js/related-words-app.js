@@ -730,9 +730,15 @@
 
       let englishHint = '';
       try {
-        englishHint = global.MatchWordMeanings?.[word]
-          || global.LearningWords?.getWordMeaning?.(word)
-          || '';
+        // Same English gloss pipeline as the clue meaning line.
+        if (typeof this.resolveClueMeaning === 'function') {
+          englishHint = await this.resolveClueMeaning(word) || '';
+        }
+        if (!englishHint) {
+          englishHint = global.MatchWordMeanings?.[word]
+            || global.LearningWords?.getWordMeaning?.(word)
+            || '';
+        }
         if (!englishHint && global.DictionaryService?.resolveEnglishMeaning) {
           englishHint = await global.DictionaryService.resolveEnglishMeaning(word) || '';
         }
@@ -741,6 +747,12 @@
       }
 
       if (requestId !== this._answerPhotoRequestId) return;
+
+      if (!global.PexelsImageService.looksLikeEnglish?.(englishHint)
+        && !global.PexelsImageService.toSearchQuery?.(word, englishHint)) {
+        this.clearAnswerPhoto();
+        return;
+      }
 
       let photo = null;
       try {

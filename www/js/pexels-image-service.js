@@ -56,7 +56,15 @@
     }
   }
 
-  /** Prefer a short English noun/phrase for Pexels search. */
+  function looksLikeEnglish(text) {
+    const s = String(text || '').trim();
+    if (!s) return false;
+    // Require mostly Latin letters (reject Hangul-only / mixed junk).
+    const letters = s.replace(/[^A-Za-z]/g, '');
+    return letters.length >= 2 && letters.length >= s.replace(/\s+/g, '').length * 0.5;
+  }
+
+  /** Build a short English noun/phrase for Pexels. Never returns Hangul. */
   function toSearchQuery(koreanWord, englishHint) {
     const hint = String(englishHint || '').trim();
     const fromHint = hint
@@ -66,25 +74,25 @@
       .replace(/\s+/g, ' ')
       .trim();
 
-    if (fromHint) {
+    if (fromHint && looksLikeEnglish(fromHint)) {
       const words = fromHint.split(' ').filter(Boolean);
-      // Keep short queries; long dictionary glosses search poorly.
-      if (words.length <= 4) return fromHint;
-      return words.slice(0, 3).join(' ');
+      return words.length <= 4 ? fromHint : words.slice(0, 3).join(' ');
     }
 
     const local = global.MatchWordMeanings?.[koreanWord]
       || global.LearningWords?.getWordMeaning?.(koreanWord)
       || '';
-    if (local) return toSearchQuery(koreanWord, local);
+    if (local && local !== englishHint) {
+      return toSearchQuery(koreanWord, local);
+    }
 
-    // Last resort: Hangul (usually weak on Pexels).
-    return String(koreanWord || '').trim();
+    // No English gloss — skip Hangul Pexels searches (they are unreliable).
+    return '';
   }
 
   async function searchPhoto(query) {
     const q = String(query || '').trim();
-    if (!q) return null;
+    if (!q || !looksLikeEnglish(q)) return null;
 
     const cached = readCache(q);
     if (cached) return cached;
@@ -126,6 +134,7 @@
   }
 
   global.PexelsImageService = {
+    looksLikeEnglish,
     toSearchQuery,
     searchPhoto,
     photoForWord,
