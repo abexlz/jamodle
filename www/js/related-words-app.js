@@ -26,7 +26,7 @@
   const REVEAL_VANISH_MS = 320;
   const REVEAL_FORM_MS = 520;
   const REVEAL_FORM_HOLD_MS = 140;
-  const HINT_COST = 30;
+  const HINT_COST = 15;
   /** Word Chain pronunciations play 50% faster than the global Korean TTS default. */
   const WORD_CHAIN_TTS_RATE = 1.5;
   const wordChainSpeakOpts = (extra = {}) => ({
@@ -1201,7 +1201,7 @@
       this.hideExtraGuessPrompt();
       this.gameOver = false;
       this.guessCount = 0;
-      this.resetSlots();
+      this.resetSlots({ keepHints: true });
       this.updateLives();
       this.els.feedback.classList.add('hidden');
     }
@@ -1237,15 +1237,21 @@
       return this.getPlayerCoins() >= HINT_COST;
     }
 
+    /** Left-most slot that does not already hold its correct syllable, or -1. */
+    nextHintSlotIndex() {
+      const answer = this.puzzle?.answerSyllables;
+      if (!Array.isArray(answer) || !answer.length) return -1;
+      for (let i = 0; i < answer.length; i++) {
+        if (this.slots?.[i]?.char !== answer[i]) return i;
+      }
+      return -1;
+    }
+
     isHintAvailable() {
       if (!this.isSoloMode() || !this.enabled) return false;
       if (this.gameOver || this.checking || this.roundLocked || this.awaitingExtraGuess) return false;
       if (this.isStunned?.()) return false;
-      if (this.hintUsedThisRound) return false;
-      const first = this.puzzle?.answerSyllables?.[0];
-      if (!first) return false;
-      const slot0 = this.slots?.[0];
-      return !(slot0 && slot0.char === first && slot0.hintLocked);
+      return this.nextHintSlotIndex() !== -1;
     }
 
     renderHintDock() {
@@ -1273,10 +1279,10 @@
         btn.setAttribute('aria-label', t('relatedWords.hintAdAria'));
         btn.title = t('relatedWords.hintAdAria');
       } else {
+        const cost = `🪙 ${HINT_COST}`;
         btn.innerHTML = `
           <span class="rw-hint-btn__icon" aria-hidden="true">💡</span>
-          <span class="rw-hint-btn__label">${escapeHtml(t('relatedWords.hintLabel'))}</span>
-          <span class="rw-hint-btn__cost">${global.CoinIcon?.format?.(t('relatedWords.hintCost', { count: HINT_COST }), 'coin-icon coin-icon--sm') || escapeHtml(t('relatedWords.hintCost', { count: HINT_COST }))}</span>`;
+          <span class="rw-hint-btn__cost">${global.CoinIcon?.format?.(cost, 'coin-icon coin-icon--sm') || escapeHtml(cost)}</span>`;
         btn.setAttribute('aria-label', t('relatedWords.hintAria', { count: HINT_COST }));
         btn.title = t('relatedWords.hintAria', { count: HINT_COST });
       }
@@ -1302,26 +1308,26 @@
       profile.coins -= HINT_COST;
       global.ProfileService?.saveProfile?.(profile);
       global.PlayerHud?.refresh?.();
-      this.applyFirstCharHint();
+      this.applyNextCharHint();
     }
 
     watchHintAd() {
       if (!global.confirm(t('relatedWords.hintAdConfirm'))) return;
-      this.applyFirstCharHint();
+      this.applyNextCharHint();
     }
 
-    applyFirstCharHint() {
+    applyNextCharHint() {
       if (!this.isHintAvailable()) {
         this.renderHintDock();
         return;
       }
 
-      const firstChar = this.puzzle.answerSyllables[0];
-      const SLOT = 0;
+      const SLOT = this.nextHintSlotIndex();
+      const firstChar = this.puzzle.answerSyllables[SLOT];
       this._hintBusy = true;
       this.touchRevealActivity?.();
 
-      // Free slot 0 if occupied by a non-matching tile.
+      // Free the target slot if occupied by a non-matching tile.
       const occupying = this.slots[SLOT];
       if (occupying && occupying.char !== firstChar) {
         occupying.used = false;
@@ -1332,11 +1338,15 @@
 
       let tile = this.slots[SLOT];
       if (!tile || tile.char !== firstChar) {
-        // Prefer an unused dock tile with the answer's first syllable.
+        // Prefer an unused dock tile with the target syllable.
         tile = this.dock.find((item) => !item.used && item.char === firstChar);
         if (!tile) {
-          // Or reclaim one already placed elsewhere.
-          tile = this.dock.find((item) => item.used && item.char === firstChar && item.slotIndex != null);
+          // Or reclaim one placed in a slot it does not belong to, so earlier
+          // revealed letters are never stolen.
+          tile = this.dock.find((item) => item.used
+            && item.char === firstChar
+            && item.slotIndex != null
+            && this.puzzle.answerSyllables[item.slotIndex] !== item.char);
           if (tile && tile.slotIndex !== SLOT) {
             this.slots[tile.slotIndex] = null;
           }
@@ -3422,7 +3432,7 @@
           await this.delay(200);
           await this.showExtraGuessPrompt();
         } else {
-          this.resetSlots();
+          this.resetSlots({ keepHints: true });
           this.hideFeedback();
         }
         this.checking = false;
@@ -3626,14 +3636,21 @@
       });
     }
 
-    resetSlots() {
+    /** `keepHints` preserves purchased reveals so a wrong guess does not waste coins. */
+    resetSlots({ keepHints = false } = {}) {
+      const kept = this.slots || [];
       this.dock.forEach((tile) => {
+        if (keepHints && tile.hintLocked) return;
         tile.used = false;
         tile.slotIndex = null;
         tile.hintLocked = false;
       });
-      this.slots = this.puzzle.answerSyllables.map(() => null);
-      this.hintUsedThisRound = false;
+      this.slots = this.puzzle.answerSyllables.map((char, index) => {
+        if (!keepHints) return null;
+        const tile = kept[index];
+        return tile?.hintLocked ? tile : null;
+      });
+      if (!keepHints) this.hintUsedThisRound = false;
       this._hintBusy = false;
       this.renderSlots();
       this.renderDock();

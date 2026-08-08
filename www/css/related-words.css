@@ -1098,9 +1098,9 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-width: 112px;
+  min-width: 104px;
   min-height: 48px;
-  padding: 8px 16px;
+  padding: 8px 18px;
   border: 2px solid var(--border, #d5d8e0);
   border-radius: 14px;
   background: #fff;
@@ -1129,7 +1129,7 @@
 }
 
 .rw-hint-btn__icon {
-  font-size: 20px;
+  font-size: 22px;
   line-height: 1;
 }
 
@@ -1138,8 +1138,17 @@
 }
 
 .rw-hint-btn__cost {
-  font-size: 14px;
-  color: var(--text-soft, #6b7280);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 17px;
+  font-weight: 700;
+  color: #2a2e3e;
+}
+
+.rw-hint-btn__cost .coin-icon {
+  width: 1.05em;
+  height: 1.05em;
 }
 
 .rw-slot.flip-tile.rw-slot--hinted .rw-slot-front {
@@ -1526,7 +1535,7 @@ html.reduce-motion .rw-heartbeat-icon {
 }
 
 [data-theme="dark"] .rw-hint-btn__cost {
-  color: #a8b0c0;
+  color: #E4E8F0;
 }
 
 [data-theme="dark"] .rw-slot-front {
