@@ -5,7 +5,8 @@
 (function (global) {
   'use strict';
 
-  const CACHE_PREFIX = 'jamodeul-pexels-';
+  // Bump the version when result ranking changes so old picks are re-fetched.
+  const CACHE_PREFIX = 'jamodeul-pexels-v2-';
   const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
   const memory = new Map();
 

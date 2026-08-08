@@ -2,8 +2,11 @@
 
 const cache = require('../../lib/pexels-cache');
 const rateLimit = require('../../lib/rate-limit');
+const rank = require('../../lib/pexels-rank');
 
 const PEXELS_SEARCH = 'https://api.pexels.com/v1/search';
+/** Enough candidates to re-rank without burning the hourly quota. */
+const CANDIDATE_COUNT = 20;
 
 function getClientIp(req) {
   return req.headers['x-forwarded-for']?.split(',')[0]?.trim()
@@ -82,11 +85,12 @@ module.exports = async function handler(req, res) {
     return json(res, 200, { ...cached, cached: true });
   }
 
-  try {
+  const searchPexels = async (term) => {
     const url = new URL(PEXELS_SEARCH);
-    url.searchParams.set('query', query);
-    url.searchParams.set('per_page', '1');
+    url.searchParams.set('query', term);
+    url.searchParams.set('per_page', String(CANDIDATE_COUNT));
     url.searchParams.set('orientation', 'landscape');
+    url.searchParams.set('locale', 'en-US');
 
     const upstream = await fetch(url, {
       headers: {
@@ -98,16 +102,32 @@ module.exports = async function handler(req, res) {
     if (!upstream.ok) {
       const detail = await upstream.text().catch(() => '');
       console.error('[pexels] upstream', upstream.status, detail.slice(0, 200));
-      return json(res, upstream.status === 429 ? 429 : 502, {
-        error: upstream.status === 429
-          ? 'Pexels rate limit reached. Try again later.'
-          : 'Pexels search failed.',
-        code: 'UPSTREAM',
-      });
+      const err = new Error('Pexels search failed.');
+      err.status = upstream.status;
+      throw err;
     }
 
     const data = await upstream.json();
-    const photo = Array.isArray(data?.photos) ? data.photos[0] : null;
+    return Array.isArray(data?.photos) ? data.photos : [];
+  };
+
+  try {
+    let searchTerm = query;
+    let best = rank.pickBestPhoto(await searchPexels(searchTerm), searchTerm);
+
+    // A multi-word gloss can be too narrow ("korean wrestling"); retry on the
+    // head noun so we still land on a photo that depicts the subject.
+    const tokens = rank.tokenize(query);
+    if (best.score === 0 && tokens.length > 1) {
+      const headNoun = tokens[tokens.length - 1];
+      const fallbackBest = rank.pickBestPhoto(await searchPexels(headNoun), headNoun);
+      if (fallbackBest.score > 0) {
+        searchTerm = headNoun;
+        best = fallbackBest;
+      }
+    }
+
+    const photo = best.photo;
     if (!photo?.src) {
       const empty = {
         ok: true,
@@ -126,6 +146,7 @@ module.exports = async function handler(req, res) {
     const payload = {
       ok: true,
       query,
+      searchTerm,
       found: true,
       imageUrl: photo.src.landscape || photo.src.large || photo.src.medium || photo.src.original || null,
       photographer: photo.photographer || null,
@@ -133,13 +154,18 @@ module.exports = async function handler(req, res) {
       pexelsUrl: photo.url || 'https://www.pexels.com',
       alt: photo.alt || null,
       photoId: photo.id || null,
+      matchScore: best.score,
+      matchRank: best.index,
     };
     cache.set(query, payload);
     return json(res, 200, payload);
   } catch (err) {
     console.error('[pexels] search error', err);
-    return json(res, 502, {
-      error: 'Pexels search failed.',
+    const status = err?.status === 429 ? 429 : 502;
+    return json(res, status, {
+      error: status === 429
+        ? 'Pexels rate limit reached. Try again later.'
+        : 'Pexels search failed.',
       code: 'UPSTREAM',
     });
   }
