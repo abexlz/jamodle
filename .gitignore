@@ -11,3 +11,4 @@ android/app/src/main/assets/public/
 local.properties
 *.jks
 *.keystore
+.env*
