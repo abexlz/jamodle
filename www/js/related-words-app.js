@@ -728,22 +728,24 @@
         credit.classList.add('hidden');
       }
 
-      let englishHint = '';
-      try {
-        // Same English gloss pipeline as the clue meaning line.
-        if (typeof this.resolveClueMeaning === 'function') {
-          englishHint = await this.resolveClueMeaning(word) || '';
+      let englishHint = global.WordChainEnglish?.getEnglish?.(word) || '';
+      if (!englishHint) {
+        try {
+          // Same English gloss pipeline as the clue meaning line.
+          if (typeof this.resolveClueMeaning === 'function') {
+            englishHint = await this.resolveClueMeaning(word) || '';
+          }
+          if (!englishHint) {
+            englishHint = global.MatchWordMeanings?.[word]
+              || global.LearningWords?.getWordMeaning?.(word)
+              || '';
+          }
+          if (!englishHint && global.DictionaryService?.resolveEnglishMeaning) {
+            englishHint = await global.DictionaryService.resolveEnglishMeaning(word) || '';
+          }
+        } catch {
+          englishHint = '';
         }
-        if (!englishHint) {
-          englishHint = global.MatchWordMeanings?.[word]
-            || global.LearningWords?.getWordMeaning?.(word)
-            || '';
-        }
-        if (!englishHint && global.DictionaryService?.resolveEnglishMeaning) {
-          englishHint = await global.DictionaryService.resolveEnglishMeaning(word) || '';
-        }
-      } catch {
-        englishHint = '';
       }
 
       if (requestId !== this._answerPhotoRequestId) return;
@@ -1754,8 +1756,17 @@
 
       const candidates = this.collectMeaningCandidates(q, null);
       const picked = WCM?.pickBestCandidate?.(candidates, context);
-      if (picked) return picked;
-      return candidates[0]?.meaning || '';
+      const isEnglish = (s) => global.PexelsImageService?.looksLikeEnglish?.(s) ?? true;
+      if (picked && isEnglish(picked)) return picked;
+
+      const best = candidates.find((c) => isEnglish(c.meaning))?.meaning || '';
+      if (best) return best;
+
+      // Imported meanings can be hanzi or a Korean category label.
+      const chainEnglish = global.WordChainEnglish?.getEnglish?.(q) || '';
+      if (chainEnglish) return chainEnglish;
+
+      return picked || candidates[0]?.meaning || '';
     }
 
     async resolveClueMeaning(word) {

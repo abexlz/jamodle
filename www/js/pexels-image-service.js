@@ -66,6 +66,10 @@
 
   /** Build a short English noun/phrase for Pexels. Never returns Hangul. */
   function toSearchQuery(koreanWord, englishHint) {
+    // Curated glossary wins: imported meanings are often hanzi (호흡 → 呼吸).
+    const curated = global.WordChainEnglish?.getEnglish?.(koreanWord) || '';
+    if (curated) return curated;
+
     const hint = String(englishHint || '').trim();
     const fromHint = hint
       .split(/[;|/·•]/)[0]
