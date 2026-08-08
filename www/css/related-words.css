@@ -79,13 +79,150 @@
   line-height: 1.2;
 }
 
-.rw-feedback.chain-complete {
-  color: var(--heading);
+.rw-chain-recap {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 62;
+  pointer-events: none;
+  background: rgba(18, 20, 32, 0.34);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  animation: rw-chain-recap-veil 0.34s ease forwards;
+}
+
+.rw-chain-recap.hidden {
+  display: none;
+}
+
+.rw-chain-recap--out {
+  animation: rw-chain-recap-veil-out 0.32s ease forwards;
+}
+
+.rw-chain-recap-card {
+  width: min(92vw, 380px);
+  max-height: min(80dvh, 560px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: clamp(18px, 4.5vw, 26px) clamp(16px, 4vw, 24px);
+  border-radius: 22px;
+  /* Opaque, not the translucent --card glass: 15 words need a readable backing. */
+  background: #fff;
+  box-shadow: 0 18px 48px rgba(24, 22, 60, 0.28);
+  text-align: center;
+  animation: rw-chain-recap-pop 0.34s cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
+}
+
+.rw-chain-recap-kicker {
+  margin: 0;
   font-family: 'Jua', sans-serif;
-  font-size: clamp(18px, 5vw, 22px);
-  animation: rw-feedback-pop 0.35s ease;
-  white-space: pre-line;
-  line-height: 1.35;
+  font-size: clamp(20px, 5.6vw, 26px);
+  color: #7c4dff;
+}
+
+.rw-chain-recap-title {
+  margin: 0;
+  font-family: 'Jua', sans-serif;
+  font-size: clamp(17px, 4.4vw, 21px);
+  font-weight: 400;
+  color: #2a2e3e;
+}
+
+.rw-chain-recap-title.hidden,
+.rw-chain-recap-next.hidden {
+  display: none;
+}
+
+.rw-chain-recap-count {
+  margin: 0 0 4px;
+  font-size: clamp(12px, 3.2vw, 14px);
+  font-weight: 600;
+  color: #6b7080;
+}
+
+.rw-chain-recap-words {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+}
+
+.rw-chain-recap-word {
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: rgba(124, 77, 255, 0.1);
+  color: #3a2d63;
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: clamp(14px, 3.8vw, 17px);
+  line-height: 1.15;
+  opacity: 0;
+  animation: rw-chain-recap-word-in 0.32s cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
+}
+
+.rw-chain-recap-next {
+  margin: 8px 0 0;
+  font-family: 'Jua', sans-serif;
+  font-size: clamp(14px, 3.8vw, 16px);
+  color: #2a2e3e;
+}
+
+@keyframes rw-chain-recap-veil {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes rw-chain-recap-veil-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes rw-chain-recap-pop {
+  0% { opacity: 0; transform: translateY(14px) scale(0.92); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes rw-chain-recap-word-in {
+  0% { opacity: 0; transform: translateY(8px) scale(0.85); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+[data-theme="dark"] .rw-chain-recap-card {
+  background: #2b3040;
+}
+
+[data-theme="dark"] .rw-chain-recap-kicker {
+  color: #bda6ff;
+}
+
+[data-theme="dark"] .rw-chain-recap-title,
+[data-theme="dark"] .rw-chain-recap-next {
+  color: #E4E8F0;
+}
+
+[data-theme="dark"] .rw-chain-recap-count {
+  color: #a4abbd;
+}
+
+[data-theme="dark"] .rw-chain-recap-word {
+  background: rgba(160, 130, 255, 0.24);
+  color: #EDEFF6;
+}
+
+html.reduce-motion .rw-chain-recap,
+html.reduce-motion .rw-chain-recap-card,
+html.reduce-motion .rw-chain-recap-word {
+  animation: none !important;
+  opacity: 1;
 }
 
 .rw-chain-title--swap-out {
@@ -297,6 +434,24 @@
   gap: 6px;
   width: 100%;
   flex-shrink: 0;
+}
+
+/* Hint takes the left gutter so the combo badge stays optically centred. */
+.rw-play-top {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 6px;
+  min-height: 0;
+}
+
+.rw-play-top > .rw-hint-row {
+  grid-column: 1;
+  justify-self: start;
+}
+
+.rw-play-top > .rw-combo-row {
+  grid-column: 2;
 }
 
 .rw-combo-row {
@@ -780,6 +935,10 @@
   justify-content: flex-start;
 }
 
+.rw-solo-mode .rw-play-top {
+  flex-shrink: 0;
+}
+
 .rw-solo-mode .rw-combo-row {
   margin-bottom: 0;
   flex-shrink: 0;
@@ -842,16 +1001,6 @@
 }
 
 /* Keep the hint button in flow so it can never be clipped off-screen. */
-.rw-solo-mode .rw-hint-row {
-  position: static;
-  transform: none;
-  top: auto;
-  bottom: auto;
-  width: 100%;
-  max-width: 300px;
-  margin: clamp(8px, 1.6dvh, 14px) auto 0;
-}
-
 .rw-solo-mode .rw-dock {
   margin-top: 0;
 }
@@ -1077,15 +1226,11 @@
 }
 
 .rw-hint-row {
-  position: absolute;
-  left: 50%;
-  bottom: calc(100% + 6px);
-  transform: translateX(-50%);
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   margin: 0;
-  max-width: 300px;
   width: max-content;
+  max-width: 100%;
   z-index: 5;
 }
 
@@ -1097,10 +1242,10 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  min-width: 104px;
-  min-height: 48px;
-  padding: 8px 18px;
+  gap: 6px;
+  min-width: 84px;
+  min-height: 44px;
+  padding: 6px 14px;
   border: 2px solid var(--border, #d5d8e0);
   border-radius: 14px;
   background: #fff;
@@ -1585,8 +1730,7 @@ html.reduce-motion .rw-opp-fail-shake {
   animation: none !important;
 }
 
-html.reduce-motion .rw-feedback.success,
-html.reduce-motion .rw-feedback.chain-complete {
+html.reduce-motion .rw-feedback.success {
   animation: none;
 }
 

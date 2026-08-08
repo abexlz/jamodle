@@ -27,6 +27,12 @@
   const REVEAL_FORM_MS = 520;
   const REVEAL_FORM_HOLD_MS = 140;
   const HINT_COST = 15;
+  /** Chain-complete recap pacing — long enough to read every word that was linked. */
+  const CHAIN_RECAP_IN_MS = 340;
+  const CHAIN_RECAP_WORD_STAGGER_MS = 55;
+  const CHAIN_RECAP_HOLD_MS = 900;
+  const CHAIN_RECAP_OUT_MS = 320;
+  const CHAIN_RECAP_REDUCED_MS = 1600;
   /** Word Chain pronunciations play 50% faster than the global Korean TTS default. */
   const WORD_CHAIN_TTS_RATE = 1.5;
   const wordChainSpeakOpts = (extra = {}) => ({
@@ -345,17 +351,22 @@
 
         <div class="rw-stage">
           <div class="rw-play-cluster">
-            <div class="rw-combo-row">
-              <div class="wc-combo-wrap wc-combo-wrap--hud">
-                <div class="wc-combo-badge wc-combo-badge--zero" id="rw-solo-streak" aria-live="polite" aria-label="">
-                  <span class="wc-combo-badge__glow" aria-hidden="true"></span>
-                  <span class="wc-combo-badge__pill">
-                    <span class="wc-combo-badge__count-stack">
-                      <span class="wc-combo-badge__flame" aria-hidden="true"></span>
-                      <span class="wc-combo-badge__count" id="rw-solo-streak-count">0</span>
+            <div class="rw-play-top">
+              <div class="rw-hint-row" id="rw-hint-row" hidden>
+                <button type="button" class="rw-hint-btn" id="rw-hint-btn"></button>
+              </div>
+              <div class="rw-combo-row">
+                <div class="wc-combo-wrap wc-combo-wrap--hud">
+                  <div class="wc-combo-badge wc-combo-badge--zero" id="rw-solo-streak" aria-live="polite" aria-label="">
+                    <span class="wc-combo-badge__glow" aria-hidden="true"></span>
+                    <span class="wc-combo-badge__pill">
+                      <span class="wc-combo-badge__count-stack">
+                        <span class="wc-combo-badge__flame" aria-hidden="true"></span>
+                        <span class="wc-combo-badge__count" id="rw-solo-streak-count">0</span>
+                      </span>
+                      <span class="wc-combo-badge__label" data-i18n="relatedWords.comboLabel">COMBO</span>
                     </span>
-                    <span class="wc-combo-badge__label" data-i18n="relatedWords.comboLabel">COMBO</span>
-                  </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -383,9 +394,6 @@
 
             <section class="rw-dock-area">
               <div class="rw-dock" id="rw-dock"></div>
-              <div class="rw-hint-row" id="rw-hint-row" hidden>
-                <button type="button" class="rw-hint-btn" id="rw-hint-btn"></button>
-              </div>
               <div class="rw-reveal-skip hidden" id="rw-reveal-skip" aria-live="polite">
                 <button type="button" class="race-btn race-btn--ghost rw-reveal-btn hidden" id="rw-reveal-btn" data-i18n="relatedWordsRace.revealAnswer">${t('relatedWordsRace.revealAnswer')}</button>
                 <p class="rw-reveal-status hidden" id="rw-reveal-status"></p>
@@ -396,6 +404,16 @@
         </div>
 
         <div class="rw-feedback hidden" id="rw-feedback" role="status" aria-live="polite"></div>
+
+        <div class="rw-chain-recap hidden" id="rw-chain-recap" role="status" aria-live="polite">
+          <div class="rw-chain-recap-card">
+            <p class="rw-chain-recap-kicker" id="rw-chain-recap-kicker"></p>
+            <h2 class="rw-chain-recap-title" id="rw-chain-recap-title"></h2>
+            <p class="rw-chain-recap-count" id="rw-chain-recap-count"></p>
+            <ul class="rw-chain-recap-words" id="rw-chain-recap-words"></ul>
+            <p class="rw-chain-recap-next" id="rw-chain-recap-next"></p>
+          </div>
+        </div>
 
         <div class="rw-extra-guess hidden" id="rw-extra-guess" role="dialog" aria-modal="true" aria-labelledby="rw-extra-guess-title">
           <div class="rw-extra-guess-card">
@@ -445,6 +463,12 @@
         hintRow: this.root.querySelector('#rw-hint-row'),
         hintBtn: this.root.querySelector('#rw-hint-btn'),
         feedback: this.root.querySelector('#rw-feedback'),
+        chainRecap: this.root.querySelector('#rw-chain-recap'),
+        chainRecapKicker: this.root.querySelector('#rw-chain-recap-kicker'),
+        chainRecapTitle: this.root.querySelector('#rw-chain-recap-title'),
+        chainRecapCount: this.root.querySelector('#rw-chain-recap-count'),
+        chainRecapWords: this.root.querySelector('#rw-chain-recap-words'),
+        chainRecapNext: this.root.querySelector('#rw-chain-recap-next'),
         extraGuess: this.root.querySelector('#rw-extra-guess'),
         extraGuessTitle: this.root.querySelector('#rw-extra-guess-title'),
         extraGuessActions: this.root.querySelector('#rw-extra-guess-actions'),
@@ -3556,6 +3580,15 @@
 
       await this.delay(reduceMotion() ? 200 : 360);
 
+      // Captured before commitWinProgress() clears solvedInChain for the next chain.
+      const solvedThisChain = [...(this.progress.solvedInChain || []), this.puzzle.answer];
+      const chainWords = RW()?.getChain?.(this.puzzle.chainId, this._puzzleOpts)?.words;
+      // The chain definition is ordered and complete; solved list covers virtual chains.
+      const finishedWords = Array.isArray(chainWords) && chainWords.length
+        ? chainWords
+        : solvedThisChain;
+      const finishedLabel = this.els.chainTitle?.textContent || '';
+
       const advance = this.commitWinProgress();
       this.awardWinXp();
       if (advance.chainDone) {
@@ -3574,6 +3607,8 @@
           solvedInChain: [],
         });
         await this.playChainSwapCeremony({
+          chainLabel: finishedLabel,
+          words: finishedWords,
           linkCount: this.puzzle.linkCount,
           nextChainLabel,
         });
@@ -3760,24 +3795,51 @@
       }, 1100);
     }
 
-    async playChainSwapCeremony({ linkCount, nextChainLabel } = {}) {
-      const title = t('relatedWords.chainCompleteTitle');
-      const sub = t('relatedWords.chainCompleteSub', { count: linkCount });
-      const nextLine = nextChainLabel
+    /** Recap card listing every word the finished chain contained. */
+    renderChainRecap({ chainLabel, words, linkCount, nextChainLabel } = {}) {
+      const recap = this.els.chainRecap;
+      if (!recap) return 0;
+
+      const list = (Array.isArray(words) ? words : []).filter(Boolean);
+      this.els.chainRecapKicker.textContent = t('relatedWords.chainCompleteTitle');
+      this.els.chainRecapTitle.textContent = chainLabel || '';
+      this.els.chainRecapTitle.classList.toggle('hidden', !chainLabel);
+      this.els.chainRecapCount.textContent = t('relatedWords.chainRecapWords', {
+        count: list.length || linkCount || 0,
+      });
+      this.els.chainRecapNext.textContent = nextChainLabel
         ? t('relatedWords.nextChainTitle', { title: nextChainLabel })
         : '';
-      const message = nextLine ? `${title}\n${sub}\n${nextLine}` : `${title}\n${sub}`;
+      this.els.chainRecapNext.classList.toggle('hidden', !nextChainLabel);
 
-      this.showFeedback(message, 'chain-complete');
+      const stagger = reduceMotion() ? 0 : CHAIN_RECAP_WORD_STAGGER_MS;
+      this.els.chainRecapWords.innerHTML = list.map((word, i) => (
+        `<li class="rw-chain-recap-word" style="animation-delay:${i * stagger}ms">${escapeHtml(word)}</li>`
+      )).join('');
+
+      recap.classList.remove('hidden');
+      return list.length * stagger;
+    }
+
+    hideChainRecap() {
+      this.els.chainRecap?.classList.add('hidden');
+      if (this.els.chainRecapWords) this.els.chainRecapWords.innerHTML = '';
+    }
+
+    async playChainSwapCeremony({ chainLabel, words, linkCount, nextChainLabel } = {}) {
+      const revealMs = this.renderChainRecap({ chainLabel, words, linkCount, nextChainLabel });
       global.SoundEffects?.win?.();
       this.spawnConfetti(52);
       this.spawnChainSwapFx();
 
       if (reduceMotion()) {
-        await this.delay(700);
-        this.els.feedback.classList.add('hidden');
+        await this.delay(CHAIN_RECAP_REDUCED_MS);
+        this.hideChainRecap();
         return;
       }
+
+      // Hold the recap on screen, then tear the old chain down behind it.
+      await this.delay(CHAIN_RECAP_IN_MS + revealMs + CHAIN_RECAP_HOLD_MS);
 
       this.els.chainTitle.classList.remove('rw-chain-title--swap-in');
       this.els.chainTitle.classList.add('rw-chain-title--swap-out');
@@ -3785,8 +3847,11 @@
       this.els.board.classList.remove('rw-fade-in-active');
       this.els.board.classList.add('rw-fade-out');
 
-      await this.delay(820);
-      this.els.feedback.classList.add('hidden');
+      await this.delay(520);
+      this.els.chainRecap?.classList.add('rw-chain-recap--out');
+      await this.delay(CHAIN_RECAP_OUT_MS);
+      this.els.chainRecap?.classList.remove('rw-chain-recap--out');
+      this.hideChainRecap();
       await this.delay(120);
     }
 
