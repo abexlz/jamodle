@@ -130,11 +130,21 @@ function looseRank(hits) {
     .map(({ hit }) => hit);
 }
 
+/**
+ * Serve every image through our own origin. Some browsers (ad/privacy
+ * blockers, corporate content filters) block direct `pixabay.com/get/...`
+ * requests, which collapses the grid. Same-origin URLs sidestep that.
+ */
+function proxied(url) {
+  if (!url) return null;
+  return `/api/image/proxy?url=${encodeURIComponent(url)}`;
+}
+
 function toImage(hit, type) {
   return {
     type,
-    url: hit.largeImageURL || hit.webformatURL,
-    previewUrl: hit.webformatURL || hit.previewURL || null,
+    url: proxied(hit.largeImageURL || hit.webformatURL),
+    previewUrl: proxied(hit.webformatURL || hit.previewURL || null),
     id: hit.id,
     tags: hit.tags || '',
     creditName: hit.user || null,

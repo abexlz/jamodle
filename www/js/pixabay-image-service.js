@@ -8,7 +8,8 @@
 (function (global) {
   'use strict';
 
-  const CACHE_PREFIX = 'jamodeul-pixabay-v2-image-set-';
+  // v3: URLs are now same-origin proxy paths (/api/image/proxy?url=...).
+  const CACHE_PREFIX = 'jamodeul-pixabay-v3-proxied-';
   const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
   const memory = new Map();
 

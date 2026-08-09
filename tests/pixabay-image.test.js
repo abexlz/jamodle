@@ -79,7 +79,11 @@ function hit(id, tags) {
     assert.strictEqual(res.body.imageSet.length, 4);
     assert.deepStrictEqual(res.body.imageSet.map((image) => image.requestedType), ['photo', 'illustration', 'illustration', 'vector']);
     assert.deepStrictEqual(res.body.imageSet.map((image) => image.type), ['photo', 'illustration', 'illustration', 'vector']);
-    assert.strictEqual(res.body.imageSet[0].url, 'https://images.example/1-large.jpg');
+    // Images are served through our same-origin proxy so blockers can't hide them.
+    assert.strictEqual(
+      res.body.imageSet[0].url,
+      `/api/image/proxy?url=${encodeURIComponent('https://images.example/1-large.jpg')}`,
+    );
   }
 
   // Excluded/compound-tag images are removed, and another category fills slots.
