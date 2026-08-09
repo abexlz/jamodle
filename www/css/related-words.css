@@ -842,6 +842,12 @@ html.reduce-motion .rw-chain-recap-word {
   margin: 0;
 }
 
+/* Image mode: dots sit under the picture grid, just above the answer slots. */
+.rw-lives--image {
+  width: 100%;
+  margin: 10px 0 12px;
+}
+
 .rw-life {
   display: inline-flex;
   align-items: center;

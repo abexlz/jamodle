@@ -505,6 +505,13 @@
         overlayBtn: this.root.querySelector('#rw-overlay-btn'),
       };
 
+      // Image mode: relocate the wrong-guess dots from the top bar to directly
+      // under the picture grid (just above the answer slots).
+      if (this.imageMode && this.els.lives && this.els.answerPhoto) {
+        this.els.answerPhoto.insertAdjacentElement('afterend', this.els.lives);
+        this.els.lives.classList.add('rw-lives--image');
+      }
+
       this.els.slots.addEventListener('click', (e) => {
         const slot = e.target.closest('[data-slot-index]');
         if (!slot || slot.classList.contains('revealing') || this.gameOver || this.checking || this.roundLocked || this.awaitingExtraGuess) return;
