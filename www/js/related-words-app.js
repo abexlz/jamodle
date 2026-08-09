@@ -758,9 +758,9 @@
       }
     }
 
-    /** Word Chain uses fixed local SVG illustrations, never searched photos. */
+    /** Word Chain clues are fetched as four-image Pixabay sets. */
     imageServices() {
-      return [global.LocalWordIllustrations]
+      return [global.PixabayImageService]
         .filter((svc) => svc && typeof svc.photoForWord === 'function');
     }
 

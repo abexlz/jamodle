@@ -1,9 +1,9 @@
 /**
- * Pixabay vector-image proxy for Word Chain answer illustrations.
+ * Pixabay four-image-set proxy for Word Chain answer illustrations.
  *
  * The object's English name is the search term (e.g. "apple"); the game answer
- * stays the Korean translation. Only vector images are requested so the board
- * shows clean illustrations rather than photos. The API key stays server-side.
+ * stays the Korean translation. A photo, two illustrations, and a vector are
+ * selected server-side so every clue renders as a consistent 2×2 set.
  */
 'use strict';
 
@@ -12,9 +12,16 @@ const rateLimit = require('../../lib/rate-limit');
 
 const PIXABAY_SEARCH = 'https://pixabay.com/api/';
 /** A few candidates so we can prefer a hit whose tags match the search term. */
-const CANDIDATE_COUNT = 20;
+const CANDIDATE_COUNT = 100;
 /** Cache namespace so Pixabay and Pexels entries never collide in-process. */
-const CACHE_NS = 'pixabay:vector:';
+const CACHE_NS = 'pixabay:image-set:';
+const IMAGE_SLOTS = ['photo', 'illustration', 'illustration', 'vector'];
+const EXCLUDED_TAGS = new Set([
+  'table', 'background', 'group', 'people', 'person', 'holding', 'hand', 'hands',
+  'crowd', 'woman', 'man', 'child', 'children', 'restaurant', 'room', 'kitchen',
+  'landscape', 'collage', 'collection', 'set',
+]);
+const PREFERRED_TAGS = new Set(['isolated', 'white background', 'white']);
 
 function getClientIp(req) {
   return req.headers['x-forwarded-for']?.split(',')[0]?.trim()
@@ -78,25 +85,54 @@ async function fetchWithRetry(url, { retries = 1, backoffMs = 300 } = {}) {
   throw lastErr;
 }
 
-/** Prefer a hit whose comma-separated tags contain the search term. */
-function pickBestHit(hits, term) {
-  const list = Array.isArray(hits) ? hits.filter((h) => h && (h.largeImageURL || h.webformatURL)) : [];
-  if (!list.length) return null;
+function splitTags(tags) {
+  return String(tags || '').toLowerCase().split(',').map((tag) => tag.trim()).filter(Boolean);
+}
 
-  const needle = String(term || '').trim().toLowerCase();
-  if (needle) {
-    const exact = list.find((h) => String(h.tags || '')
-      .toLowerCase()
-      .split(',')
-      .map((s) => s.trim())
-      .includes(needle));
-    if (exact) return exact;
+/** Keep simple single-object results, ranking isolated / white-background hits first. */
+function filterAndRank(hits) {
+  return (Array.isArray(hits) ? hits : [])
+    .filter((hit) => hit && (hit.largeImageURL || hit.webformatURL))
+    .map((hit) => {
+      const tags = splitTags(hit.tags);
+      return {
+        hit,
+        tags,
+        excluded: tags.some((tag) => EXCLUDED_TAGS.has(tag)),
+        preferred: tags.filter((tag) => PREFERRED_TAGS.has(tag)).length,
+      };
+    })
+    .filter(({ tags, excluded }) => tags.length > 0 && tags.length <= 3 && !excluded)
+    .sort((a, b) => b.preferred - a.preferred || a.tags.length - b.tags.length || a.hit.id - b.hit.id)
+    .map(({ hit }) => hit);
+}
 
-    const partial = list.find((h) => String(h.tags || '').toLowerCase().includes(needle));
-    if (partial) return partial;
-  }
-  // Pixabay orders by popularity — a decent default when tags don't match.
-  return list[0];
+function toImage(hit, type) {
+  return {
+    type,
+    url: hit.largeImageURL || hit.webformatURL,
+    previewUrl: hit.webformatURL || hit.previewURL || null,
+    id: hit.id,
+    tags: hit.tags || '',
+    creditName: hit.user || null,
+    creditUrl: hit.pageURL || null,
+  };
+}
+
+function selectImageSet(byType) {
+  const usedIds = new Set();
+  const all = ['photo', 'illustration', 'vector']
+    .flatMap((type) => byType[type].map((hit) => ({ hit, type })));
+  return IMAGE_SLOTS.map((requestedType) => {
+    const preferred = byType[requestedType].find((hit) => !usedIds.has(hit.id));
+    const fallback = all.find(({ hit }) => !usedIds.has(hit.id))
+      || (byType[requestedType][0] && { hit: byType[requestedType][0], type: requestedType })
+      || all[0];
+    if (!fallback && !preferred) return null;
+    const selected = preferred ? { hit: preferred, type: requestedType } : fallback;
+    usedIds.add(selected.hit.id);
+    return { ...toImage(selected.hit, selected.type), requestedType };
+  }).filter(Boolean);
 }
 
 module.exports = async function handler(req, res) {
@@ -145,11 +181,11 @@ module.exports = async function handler(req, res) {
     return json(res, 200, { ...cached, cached: true });
   }
 
-  const searchPixabay = async (term) => {
+  const searchPixabay = async (term, imageType) => {
     const url = new URL(PIXABAY_SEARCH);
     url.searchParams.set('key', apiKey);
     url.searchParams.set('q', term);
-    url.searchParams.set('image_type', 'vector');
+    url.searchParams.set('image_type', imageType);
     url.searchParams.set('per_page', String(CANDIDATE_COUNT));
     url.searchParams.set('safesearch', 'true');
     url.searchParams.set('lang', 'en');
@@ -168,21 +204,25 @@ module.exports = async function handler(req, res) {
   };
 
   try {
-    // Multi-word gloss can be too specific; retry on the head noun if empty.
-    let searchTerm = query;
-    let hit = pickBestHit(await searchPixabay(searchTerm), searchTerm);
-
-    const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
-    if (!hit && tokens.length > 1) {
-      const headNoun = tokens[tokens.length - 1];
-      const fallbackHit = pickBestHit(await searchPixabay(headNoun), headNoun);
-      if (fallbackHit) {
-        searchTerm = headNoun;
-        hit = fallbackHit;
+    const findImageSet = async (term) => {
+      const byType = {};
+      for (const type of ['photo', 'illustration', 'vector']) {
+        byType[type] = filterAndRank(await searchPixabay(term, type));
+        // Avoid bursting three upstream API calls at once.
+        if (type !== 'vector') await delay(500);
       }
+      return { byType, imageSet: selectImageSet(byType) };
+    };
+
+    let searchTerm = query;
+    let result = await findImageSet(searchTerm);
+    const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
+    if (!result.imageSet.length && tokens.length > 1) {
+      searchTerm = tokens[tokens.length - 1];
+      result = await findImageSet(searchTerm);
     }
 
-    if (!hit) {
+    if (!result.imageSet.length) {
       const empty = {
         ok: true,
         provider: 'pixabay',
@@ -195,21 +235,23 @@ module.exports = async function handler(req, res) {
       return json(res, 200, empty);
     }
 
+    const firstImage = result.imageSet[0];
     const payload = {
       ok: true,
       provider: 'pixabay',
       query,
       searchTerm,
       found: true,
-      // Point 3: prefer largeImageURL, fall back to webformatURL.
-      imageUrl: hit.largeImageURL || hit.webformatURL || null,
-      previewUrl: hit.webformatURL || hit.previewURL || null,
-      creditName: hit.user || null,
-      creditUrl: hit.pageURL || null,
+      imageSet: result.imageSet,
+      // Compatibility for clients expecting one image.
+      imageUrl: firstImage.url,
+      previewUrl: firstImage.previewUrl,
+      creditName: firstImage.creditName,
+      creditUrl: firstImage.creditUrl,
       sourceName: 'Pixabay',
       sourceUrl: 'https://pixabay.com',
-      tags: hit.tags || null,
-      imageId: hit.id || null,
+      tags: firstImage.tags,
+      imageId: firstImage.id,
     };
     cache.set(CACHE_NS + query, payload);
     return json(res, 200, payload);

@@ -2,13 +2,13 @@
  * Client helper for Word Chain answer illustrations via /api/image/pixabay.
  *
  * The object's English name is the search term; the answer the player types is
- * the Korean translation (handled by the game). Only vector images are fetched.
- * Never calls Pixabay directly — the API key stays on the server.
+ * the Korean translation (handled by the game). The server returns a 2×2 set:
+ * photo, illustration, illustration, vector. The API key stays on the server.
  */
 (function (global) {
   'use strict';
 
-  const CACHE_PREFIX = 'jamodeul-pixabay-v1-';
+  const CACHE_PREFIX = 'jamodeul-pixabay-v2-image-set-';
   const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
   const memory = new Map();
 
@@ -133,7 +133,7 @@
     const query = toSearchQuery(koreanWord, englishHint);
     if (!query) return null;
     const result = await searchPhoto(query);
-    if (!result || result.found === false || !result.imageUrl) return null;
+    if (!result || result.found === false || (!result.imageUrl && !result.imageSet?.length)) return null;
     return {
       ...result,
       searchQuery: query,
