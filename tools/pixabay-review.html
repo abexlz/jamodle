@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pixabay 후보 이미지 검수</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
+      background: #f4f7f8;
+      color: #17222b;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-width: 960px; }
+    button, input { font: inherit; }
+    .app { min-height: 100vh; display: grid; grid-template-rows: auto 1fr; }
+    header {
+      display: flex; align-items: center; gap: 14px; padding: 14px 22px;
+      background: #fff; border-bottom: 1px solid #dce5e8; position: sticky; top: 0; z-index: 2;
+    }
+    h1 { font-size: 19px; margin: 0 auto 0 0; }
+    .progress { font-variant-numeric: tabular-nums; font-weight: 700; color: #0d6973; }
+    .hint { color: #617078; font-size: 13px; }
+    .workspace { display: grid; grid-template-columns: 285px 1fr; min-height: 0; }
+    aside { background: #fff; border-right: 1px solid #dce5e8; overflow: auto; padding: 14px; }
+    .search { width: 100%; padding: 9px 10px; border: 1px solid #c9d5d9; border-radius: 8px; margin-bottom: 10px; }
+    .word-list { display: grid; gap: 5px; }
+    .word-item {
+      width: 100%; text-align: left; border: 1px solid transparent; background: #f3f6f7;
+      border-radius: 8px; padding: 10px; cursor: pointer; display: flex; justify-content: space-between; gap: 8px;
+    }
+    .word-item:hover { background: #e5f2f3; }
+    .word-item.active { background: #d8f2ec; border-color: #26a17b; }
+    .word-item.done::after { content: "✓"; color: #168361; font-weight: 800; }
+    .word-item.skipped::after { content: "—"; color: #9b6500; font-weight: 800; }
+    main { padding: 26px; overflow: auto; }
+    .empty { max-width: 680px; margin: 70px auto; text-align: center; color: #53636b; }
+    .empty h2 { color: #17222b; }
+    .word-header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 20px; }
+    .word-header h2 { margin: 0; font-size: 34px; }
+    .keyword { color: #617078; }
+    .candidate-grid { display: grid; grid-template-columns: repeat(5, minmax(130px, 1fr)); gap: 15px; }
+    .candidate {
+      position: relative; aspect-ratio: 4 / 3; overflow: hidden; border: 4px solid transparent;
+      background: #dfe8eb; border-radius: 12px; cursor: pointer; padding: 0;
+    }
+    .candidate:hover { border-color: #6ba7af; }
+    .candidate.selected { border-color: #22a06b; box-shadow: 0 0 0 3px rgba(34, 160, 107, .22); }
+    .candidate.selected::after {
+      content: "선택됨"; position: absolute; right: 7px; top: 7px; background: #168361; color: #fff;
+      padding: 4px 7px; border-radius: 5px; font-weight: 700; font-size: 12px;
+    }
+    .candidate img { display: block; height: 100%; width: 100%; object-fit: cover; }
+    .candidate .id { position: absolute; left: 7px; bottom: 7px; background: rgba(0, 0, 0, .67); color: #fff; border-radius: 5px; padding: 3px 6px; font-size: 11px; }
+    .tooltip {
+      visibility: hidden; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+      width: max-content; max-width: 280px; z-index: 1; padding: 8px 10px; border-radius: 7px; background: #17222b; color: #fff;
+      font-size: 12px; line-height: 1.35; text-align: left; pointer-events: none;
+    }
+    .candidate:hover .tooltip, .candidate:focus-visible .tooltip { visibility: visible; }
+    .controls { display: flex; align-items: center; gap: 10px; margin-top: 28px; }
+    .controls .spacer { flex: 1; }
+    .button { padding: 10px 15px; border-radius: 8px; border: 1px solid #b9c8cc; background: #fff; cursor: pointer; font-weight: 650; }
+    .button:hover { background: #edf6f5; }
+    .button.primary { background: #087d77; color: #fff; border-color: #087d77; }
+    .button.skip { color: #8d5d08; border-color: #d6b168; }
+    .button:disabled { opacity: .5; cursor: not-allowed; }
+    .load { display: inline-flex; align-items: center; gap: 9px; background: #087d77; color: #fff; padding: 10px 14px; border-radius: 8px; cursor: pointer; font-weight: 700; }
+    .load input { display: none; }
+    .status { min-height: 20px; color: #53636b; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>Pixabay 후보 이미지 검수</h1>
+      <span class="progress" id="progress">0 / 3265</span>
+      <label class="load">candidates.json 열기 <input id="file-input" type="file" accept="application/json,.json"></label>
+      <button class="button" id="save-button" disabled>approved.json / skipped.json 저장</button>
+    </header>
+    <div class="workspace">
+      <aside>
+        <input class="search" id="search" type="search" placeholder="단어 검색">
+        <div class="word-list" id="word-list"></div>
+      </aside>
+      <main id="main">
+        <section class="empty">
+          <h2>검수할 후보 파일을 선택하세요</h2>
+          <p><code>data/pixabay/candidates.json</code>을 열면 단어별 최대 5개 후보를 검수할 수 있습니다.</p>
+          <p>이미지를 클릭해 선택하고, 맞는 이미지가 없으면 <strong>건너뛰기</strong>를 누르세요.</p>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      'use strict';
+      const TOTAL_LEARNING_WORDS = 3265;
+      const state = { words: [], data: {}, approved: {}, skipped: new Set(), current: -1, query: '' };
+      const els = {
+        file: document.querySelector('#file-input'),
+        save: document.querySelector('#save-button'),
+        progress: document.querySelector('#progress'),
+        list: document.querySelector('#word-list'),
+        main: document.querySelector('#main'),
+        search: document.querySelector('#search'),
+      };
+
+      const esc = (value) => String(value).replace(/[&<>"']/g, (char) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+      }[char]));
+
+      function reviewedCount() {
+        return Object.keys(state.approved).length + state.skipped.size;
+      }
+
+      function visibleWords() {
+        const query = state.query.trim().toLowerCase();
+        return query ? state.words.filter((word) => word.toLowerCase().includes(query)) : state.words;
+      }
+
+      function renderProgress() {
+        const suffix = state.words.length ? ` (후보 ${state.words.length})` : '';
+        els.progress.textContent = `${reviewedCount()} / ${TOTAL_LEARNING_WORDS}${suffix}`;
+      }
+
+      function renderList() {
+        const visible = visibleWords();
+        els.list.innerHTML = visible.map((word) => {
+          const selected = state.approved[word];
+          const classes = [
+            'word-item',
+            state.current >= 0 && state.words[state.current] === word ? 'active' : '',
+            selected ? 'done' : '',
+            state.skipped.has(word) ? 'skipped' : '',
+          ].filter(Boolean).join(' ');
+          return `<button class="${classes}" data-word="${esc(word)}"><span>${esc(word)}</span></button>`;
+        }).join('');
+      }
+
+      function selectCandidate(word, candidate) {
+        state.approved[word] = { imageUrl: candidate.webformatURL || candidate.previewURL, word };
+        state.skipped.delete(word);
+        render();
+      }
+
+      function skipCurrent() {
+        const word = state.words[state.current];
+        if (!word) return;
+        delete state.approved[word];
+        state.skipped.add(word);
+        render();
+      }
+
+      function move(delta) {
+        const next = state.current + delta;
+        if (next >= 0 && next < state.words.length) {
+          state.current = next;
+          render();
+        }
+      }
+
+      function renderMain() {
+        const word = state.words[state.current];
+        if (!word) {
+          els.main.innerHTML = '<section class="empty"><h2>후보가 없습니다</h2><p>candidates.json에 검수 가능한 항목이 없습니다.</p></section>';
+          return;
+        }
+        const entry = state.data[word];
+        const selectedUrl = state.approved[word]?.imageUrl || '';
+        const cards = (entry.candidates || []).map((candidate) => {
+          const imageUrl = candidate.webformatURL || candidate.previewURL;
+          const isSelected = imageUrl === selectedUrl;
+          return `<button class="candidate ${isSelected ? 'selected' : ''}" data-image-url="${esc(imageUrl)}" aria-label="${esc(word)} 후보 ${candidate.id}">
+            <img src="${esc(candidate.previewURL || imageUrl)}" alt="${esc(word)} 후보 이미지" loading="lazy">
+            <span class="id">#${esc(candidate.id)}</span>
+            <span class="tooltip">${esc(candidate.tags || '태그 없음')}</span>
+          </button>`;
+        }).join('') || '<p>후보 이미지가 없습니다. 건너뛰기를 선택하세요.</p>';
+        els.main.innerHTML = `<section>
+          <div class="word-header"><h2>${esc(word)}</h2><span class="keyword">검색어: ${esc(entry.translatedKeyword || '')}</span></div>
+          <div class="candidate-grid">${cards}</div>
+          <div class="controls">
+            <button class="button" data-action="previous" ${state.current === 0 ? 'disabled' : ''}>이전 단어</button>
+            <button class="button skip" data-action="skip">건너뛰기</button>
+            <span class="spacer"></span>
+            <span class="status">${state.approved[word] ? '후보가 선택되었습니다.' : state.skipped.has(word) ? '재수집 대상으로 표시했습니다.' : '후보를 하나 선택하거나 건너뛰세요.'}</span>
+            <button class="button primary" data-action="next" ${state.current === state.words.length - 1 ? 'disabled' : ''}>다음 단어</button>
+          </div>
+        </section>`;
+      }
+
+      function render() {
+        renderProgress();
+        renderList();
+        renderMain();
+        els.save.disabled = !state.words.length || reviewedCount() !== state.words.length;
+      }
+
+      function outputData() {
+        const skipped = [...state.skipped].sort();
+        return {
+          approved: state.approved,
+          skipped,
+        };
+      }
+
+      function downloadJson(filename, value) {
+        const blob = new Blob([`${JSON.stringify(value, null, 2)}\n`], { type: 'application/json' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(link.href), 0);
+      }
+
+      async function saveResults() {
+        const { approved, skipped } = outputData();
+        if ('showDirectoryPicker' in window) {
+          try {
+            const directory = await window.showDirectoryPicker({ mode: 'readwrite' });
+            for (const [name, data] of Object.entries({ 'approved.json': approved, 'skipped.json': skipped })) {
+              const handle = await directory.getFileHandle(name, { create: true });
+              const writer = await handle.createWritable();
+              await writer.write(`${JSON.stringify(data, null, 2)}\n`);
+              await writer.close();
+            }
+            alert('approved.json과 skipped.json을 선택한 폴더에 저장했습니다.');
+            return;
+          } catch (error) {
+            if (error.name === 'AbortError') return;
+            console.warn('Directory save unavailable; downloading instead.', error);
+          }
+        }
+        downloadJson('approved.json', approved);
+        downloadJson('skipped.json', skipped);
+        alert('브라우저 다운로드 폴더에 approved.json과 skipped.json을 저장했습니다.');
+      }
+
+      els.file.addEventListener('change', async () => {
+        const file = els.file.files[0];
+        if (!file) return;
+        try {
+          const parsed = JSON.parse(await file.text());
+          if (!parsed || Array.isArray(parsed) || typeof parsed !== 'object') throw new Error('객체 형식이 아닙니다.');
+          state.data = parsed;
+          state.words = Object.keys(parsed).sort((a, b) => a.localeCompare(b, 'ko'));
+          state.approved = {};
+          state.skipped = new Set();
+          state.current = state.words.length ? 0 : -1;
+          render();
+        } catch (error) {
+          alert(`candidates.json을 읽을 수 없습니다: ${error.message}`);
+        }
+      });
+
+      els.list.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-word]');
+        if (!button) return;
+        state.current = state.words.indexOf(button.dataset.word);
+        render();
+      });
+      els.main.addEventListener('click', (event) => {
+        const candidate = event.target.closest('[data-image-url]');
+        if (candidate) {
+          const word = state.words[state.current];
+          const entry = state.data[word];
+          const selected = (entry.candidates || []).find((item) => (item.webformatURL || item.previewURL) === candidate.dataset.imageUrl);
+          if (selected) selectCandidate(word, selected);
+          return;
+        }
+        const action = event.target.closest('[data-action]')?.dataset.action;
+        if (action === 'previous') move(-1);
+        if (action === 'next') move(1);
+        if (action === 'skip') skipCurrent();
+      });
+      els.search.addEventListener('input', () => {
+        state.query = els.search.value;
+        renderList();
+      });
+      els.save.addEventListener('click', saveResults);
+    })();
+  </script>
+</body>
+</html>
