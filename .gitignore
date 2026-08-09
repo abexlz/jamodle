@@ -12,3 +12,5 @@ local.properties
 *.jks
 *.keystore
 .env*
+data/pixabay/candidates.json
+data/pixabay/untranslated.json
