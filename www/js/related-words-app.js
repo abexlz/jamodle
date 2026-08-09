@@ -1569,6 +1569,15 @@
       }
 
       const solvedWord = this.puzzle?.answer;
+      // When the opponent (including the bot) solves the round in image mode,
+      // pronounce the answer and reveal its English gloss for ~1s — the same
+      // reveal the local player gets — so TTS always plays on a correct answer.
+      if (this.imageMode && opts.opponentWon && solvedWord) {
+        this.showAnswerEnglish(this.puzzle?.englishHint);
+        await this.speakSolvedWordImageQuick();
+        await this.delay(1000);
+        this.hideAnswerEnglish();
+      }
       const skipTrailAnim = opts.skipTrail === true || opts.chainSwap === true
         || this._animatedTrailLinkIndex === linkIndex;
       const skipSlotFlip = opts.skipSlotFlip === true || opts.chainSwap === true;
