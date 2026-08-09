@@ -1,5 +1,5 @@
 /**
- * Related Words 1v1 — syllable-based round scoring.
+ * Related Words 1v1 — flat round scoring (1 point per solved word).
  */
 'use strict';
 
@@ -18,11 +18,12 @@ function loadRoundPoints() {
 
 const roundPoints = loadRoundPoints();
 
+// Battle scoring is a flat 1 point per solved word, regardless of length.
 assert.strictEqual(roundPoints('해'), 1);
-assert.strictEqual(roundPoints('사과'), 2);
-assert.strictEqual(roundPoints('바나나'), 3);
-assert.strictEqual(roundPoints('자전거'), 3);
-assert.strictEqual(roundPoints('파인애플'), 3);
+assert.strictEqual(roundPoints('사과'), 1);
+assert.strictEqual(roundPoints('바나나'), 1);
+assert.strictEqual(roundPoints('자전거'), 1);
+assert.strictEqual(roundPoints('파인애플'), 1);
 assert.strictEqual(roundPoints(''), 1);
 
 console.log('related-words-round-points.test.js: ok');
