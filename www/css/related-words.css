@@ -908,7 +908,7 @@ html.reduce-motion .rw-chain-recap-word {
   font-weight: 800;
   font-size: clamp(16px, 4.6vw, 22px);
   line-height: 1.2;
-  color: #1a1a1a;
+  color: #000;
   letter-spacing: 0.2px;
   text-transform: capitalize;
   animation: rwAnswerEnglishIn 180ms ease-out both;
@@ -919,7 +919,7 @@ html.reduce-motion .rw-chain-recap-word {
 }
 
 [data-theme="dark"] .rw-answer-english {
-  color: #f4f7f8;
+  color: #000;
 }
 
 @keyframes rwAnswerEnglishIn {
