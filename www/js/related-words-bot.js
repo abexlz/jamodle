@@ -99,6 +99,9 @@
       const params = new URLSearchParams(global.location.search);
       this.source = String(params.get('source') || '');
       this.isMatchmakingBot = this.source === 'matchmaking';
+      // Fresh seed each bot match so the image battle doesn't replay the same
+      // slice of the word pool every time.
+      this.matchSeed = `bot-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
       this.botProfile = parseBotProfileFromParams(params);
       const wr = Number(params.get('winrate'));
       // Bot's target win rate as a fraction (0 = always loses, 1 = nearly unbeatable).
@@ -494,6 +497,7 @@
         initialLinkIndex: this.linkIndex,
         playerName: myName,
         opponentName: this.botName(),
+        matchSeed: this.matchSeed,
         onRoundWin: (payload) => this.onPlayerRoundWin(payload),
         onRevealSkip: (payload) => this.onPlayerRevealSkip(payload),
         onLiveHudUpdate: (state) => {
@@ -553,7 +557,10 @@
      */
     currentLink() {
       if (this.isImageMode()) {
-        return global.RelatedWordsImageMode.getPuzzleByIndex(this.linkIndex) || null;
+        const img = global.RelatedWordsImageMode;
+        return (typeof img.getPuzzleForMatch === 'function'
+          ? img.getPuzzleForMatch(this.matchSeed, this.linkIndex)
+          : img.getPuzzleByIndex(this.linkIndex)) || null;
       }
       return RWC()?.getRaceLink?.(this.chainId, this.linkIndex)
         || RWC()?.getLink?.(this.chainId, this.linkIndex)

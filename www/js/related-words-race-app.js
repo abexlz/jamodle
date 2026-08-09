@@ -890,6 +890,9 @@
         initialLinkIndex: Number(shared.linkIndex) || 0,
         playerName: (isP1 ? data.player1Name : data.player2Name) || '',
         opponentName: (isP1 ? data.player2Name : data.player1Name) || '',
+        // Shared match id seeds the image-pool offset so both racers get the
+        // same words, but each match draws a different slice.
+        matchSeed: this.matchId || '',
         onRoundWin: async (payload) => {
           const result = await RS().submitRelatedWordsRound(this.matchId, this.myUid, payload);
           if (result.applied) {

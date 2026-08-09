@@ -247,6 +247,9 @@
       // generic "You"/"Enemy" when the host supplies them.
       this.playerName = String(this.options.playerName || '').trim();
       this.opponentName = String(this.options.opponentName || '').trim();
+      // Per-match seed for versus image battles so each match draws a different
+      // slice of the word pool (both racers share the same matchId → same words).
+      this.matchSeed = String(this.options.matchSeed || '').trim();
       this.onRoundWin = typeof this.options.onRoundWin === 'function' ? this.options.onRoundWin : null;
       this.onRevealSkip = typeof this.options.onRevealSkip === 'function' ? this.options.onRevealSkip : null;
       this.onSlotsChange = typeof this.options.onSlotsChange === 'function' ? this.options.onSlotsChange : null;
@@ -650,6 +653,20 @@
       this.applyLinkState(chainId, linkIndex, opts);
     }
 
+    /**
+     * Resolve an image puzzle for the given index. Solo (theme rotation) walks
+     * the pool by absolute global index; versus battles offset by the shared
+     * match seed so each match uses a fresh slice while `index` stays the round.
+     */
+    imagePuzzle(index) {
+      const img = global.RelatedWordsImageMode;
+      if (!img) return null;
+      if (this.useThemeRotation || !this.matchSeed || typeof img.getPuzzleForMatch !== 'function') {
+        return img.getPuzzleByIndex(index);
+      }
+      return img.getPuzzleForMatch(this.matchSeed, index);
+    }
+
     applyLinkState(chainIdOrGlobal, linkIndexOrOpts, maybeOpts = {}) {
       let chainId;
       let linkIndex;
@@ -670,9 +687,7 @@
       const skipTrail = opts.skipTrail === true;
       const skipDockRender = opts.skipDockRender === true;
       this.puzzle = this.imageMode
-        ? global.RelatedWordsImageMode.getPuzzleByIndex(
-          this.useThemeRotation ? globalIdx : linkIndex,
-        )
+        ? this.imagePuzzle(this.useThemeRotation ? globalIdx : linkIndex)
         : RW().getPuzzle(chainId, linkIndex, this._puzzleOpts);
       if (!this.puzzle) {
         if (this.raceMode) {
@@ -1531,7 +1546,7 @@
         opts = maybeOpts;
       }
       const nextPuzzle = this.imageMode
-        ? global.RelatedWordsImageMode.getPuzzleByIndex(linkIndex)
+        ? this.imagePuzzle(linkIndex)
         : RW().getPuzzle(chainId, linkIndex, this._puzzleOpts);
       const linkCount = this.imageMode
         ? Number.POSITIVE_INFINITY

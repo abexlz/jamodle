@@ -343,10 +343,47 @@
     };
   }
 
+  /**
+   * Battle puzzle for round `roundIndex`, offset by a per-match seed so every
+   * match starts at a different slice of the pool (otherwise every battle would
+   * replay pool positions 0..raceTarget in lap-0 order — the same words each
+   * time). Both racers pass the shared matchId, so they stay in lock-step, while
+   * the returned `linkIndex` stays the round number to keep scoring/sync intact.
+   */
+  function getPuzzleForMatch(matchSeed, roundIndex) {
+    const len = POOL_KO.length;
+    if (!len) return null;
+    const round = Math.max(0, Math.floor(Number(roundIndex) || 0));
+    const offset = hashSeed(String(matchSeed || '')) % len;
+    const pos = offset + round;
+    const lap = Math.floor(pos / len);
+    const order = orderForLap(lap);
+    const answer = order[pos % len];
+    const english = POOL[answer] || '';
+    const chains = global.RelatedWordsChains;
+    const dockTiles = (chains && typeof chains.buildImageDock === 'function')
+      ? chains.buildImageDock(answer, POOL_KO, pos)
+      : fallbackDock(answer, pos);
+    return {
+      chainId: 'image',
+      chainTitleKey: null,
+      linkIndex: round,
+      linkCount: len,
+      clue: '',
+      answer,
+      answerSyllables: [...answer],
+      dockTiles,
+      recentClues: [],
+      imageMode: true,
+      englishHint: english,
+    };
+  }
+
   global.HangulDleImageWords = { POOL, POOL_KO };
   global.RelatedWordsImageMode = {
     count: () => POOL_KO.length,
     getPuzzleByIndex,
+    getPuzzleForMatch,
     getEnglish: (word) => POOL[String(word || '').trim()] || '',
   };
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -1158,14 +1158,20 @@
     });
   }
 
-  function verifyRelatedWordsAnswer(chainId, linkIndex, answer) {
+  function verifyRelatedWordsAnswer(matchId, chainId, linkIndex, answer) {
     const guess = String(answer || '').trim();
     if (!guess) return false;
     // Word Chain battles are image-guessing races: both players see the same
     // deterministic image puzzle for the shared linkIndex and assemble its
-    // Korean answer. Verify against that pool when it's available (battle page).
-    const imageAnswer = global.RelatedWordsImageMode?.getPuzzleByIndex?.(linkIndex)?.answer;
-    if (imageAnswer) return guess === String(imageAnswer).trim();
+    // Korean answer. Each match offsets into the pool by its matchId, so verify
+    // must use the same per-match mapping the clients render.
+    const img = global.RelatedWordsImageMode;
+    if (img) {
+      const imageAnswer = (matchId && typeof img.getPuzzleForMatch === 'function'
+        ? img.getPuzzleForMatch(matchId, linkIndex)?.answer
+        : null) || img.getPuzzleByIndex?.(linkIndex)?.answer;
+      if (imageAnswer) return guess === String(imageAnswer).trim();
+    }
     // Fallback: legacy themed-chain verification (image pool not loaded).
     const link = global.RelatedWordsChains?.getRaceLink?.(chainId, linkIndex)
       || global.RelatedWordsChains?.getLink?.(chainId, linkIndex);
@@ -1176,7 +1182,7 @@
   function verifyRelatedWordsRound(globalLinkIndex, answer) {
     const resolved = global.RelatedWordsChains?.resolveRoundPuzzle?.(globalLinkIndex);
     if (!resolved) return false;
-    return verifyRelatedWordsAnswer(resolved.chainId, resolved.linkIndex, answer);
+    return verifyRelatedWordsAnswer(null, resolved.chainId, resolved.linkIndex, answer);
   }
 
   async function submitRelatedWordsRound(matchId, myUid, payload, attempt = 0) {
@@ -1201,7 +1207,7 @@
         const shared = data.sharedState || defaultRelatedWordsSharedState();
         const currentLink = Number(shared.linkIndex) || 0;
         if (currentLink !== linkIndex) return;
-        if (!verifyRelatedWordsAnswer(data.chainId, linkIndex, answer)) return;
+        if (!verifyRelatedWordsAnswer(matchId, data.chainId, linkIndex, answer)) return;
 
         const roundPoints = global.RelatedWordsChains?.relatedWordsRoundPoints?.(answer) ?? 1;
         const isP1 = data.player1Uid === myUid;
