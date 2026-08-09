@@ -799,6 +799,40 @@
         credit.href = 'https://www.pexels.com';
         credit.classList.add('hidden');
       }
+      // Nothing left to load — release anyone waiting on the clue grid.
+      this.markAnswerPhotoReady();
+    }
+
+    /**
+     * Image-clue readiness signalling. The versus bot must not answer before
+     * the 4-image clue has finished loading, or the human never gets to see the
+     * pictures. `resetAnswerPhotoReady()` runs when a new round's grid starts
+     * loading; `markAnswerPhotoReady()` fires once the images settle (or fail);
+     * `whenAnswerPhotoReady()` lets the bot await that moment.
+     */
+    resetAnswerPhotoReady() {
+      this._answerPhotoReady = false;
+    }
+
+    markAnswerPhotoReady() {
+      this._answerPhotoReady = true;
+      const waiters = this._answerPhotoReadyWaiters;
+      this._answerPhotoReadyWaiters = [];
+      if (waiters && waiters.length) {
+        waiters.forEach((fn) => { try { fn(true); } catch { /* ignore */ } });
+      }
+    }
+
+    whenAnswerPhotoReady(maxWaitMs = 4500) {
+      if (!this.imageMode || this._answerPhotoReady) return Promise.resolve(true);
+      return new Promise((resolve) => {
+        let settled = false;
+        const finish = (value) => { if (!settled) { settled = true; resolve(value); } };
+        this._answerPhotoReadyWaiters = this._answerPhotoReadyWaiters || [];
+        this._answerPhotoReadyWaiters.push(finish);
+        // Safety valve: never let a stalled/failed image fetch hang the bot.
+        global.setTimeout(() => finish(false), Math.max(0, maxWaitMs));
+      });
     }
 
     /** Word Chain clues are fetched as four-image Pixabay sets. */
@@ -814,6 +848,8 @@
         this.clearAnswerPhoto();
         return;
       }
+      // New round's clue grid is loading — the bot must wait for it.
+      this.resetAnswerPhotoReady();
       const word = String(this.puzzle?.answer || '').trim();
       const wrap = this.els.answerPhoto;
       const imgs = this.els.answerPhotoImgs || [];
@@ -922,7 +958,11 @@
       if (requestId !== this._answerPhotoRequestId) return;
       if (!results.some(Boolean)) {
         this.clearAnswerPhoto();
+        return;
       }
+      // All four cells have finished loading (or failed individually) — the
+      // clue is now fully visible, so the bot may start solving.
+      this.markAnswerPhotoReady();
     }
 
     isSoloMode() {

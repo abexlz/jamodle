@@ -765,6 +765,21 @@
     scheduleBotRound() {
       if (this.matchOver) return;
       const roundId = this.roundId;
+      // Don't let the bot start solving until the 4-image clue has finished
+      // loading — otherwise it can answer before the player even sees the
+      // pictures. Falls back immediately if the readiness hook is unavailable.
+      const ready = this.game?.whenAnswerPhotoReady?.();
+      const start = () => {
+        if (this.matchOver || roundId !== this.roundId) return;
+        this.runBotRound();
+      };
+      if (ready && typeof ready.then === 'function') ready.then(start);
+      else start();
+    }
+
+    runBotRound() {
+      if (this.matchOver) return;
+      const roundId = this.roundId;
       const link = this.currentLink();
       if (!link?.answer) return;
 
