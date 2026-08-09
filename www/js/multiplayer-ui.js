@@ -280,7 +280,7 @@
   }
 
   function getBotFallbackMs() {
-    return global.BotProfileService?.BOT_FALLBACK_MS ?? 10_000;
+    return global.BotProfileService?.BOT_FALLBACK_MS ?? 5_000;
   }
 
   function stopMatchmakingCountdown() {

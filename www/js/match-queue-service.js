@@ -7,7 +7,7 @@
   const QUEUE_STATUS = { searching: 'searching', matched: 'matched', cancelled: 'cancelled' };
   const QUEUE_STALE_MS = 3 * 60 * 1000;
   const PAIR_RETRY_MS = 1500;
-  const BOT_FALLBACK_MS = global.BotProfileService?.BOT_FALLBACK_MS ?? 10_000;
+  const BOT_FALLBACK_MS = global.BotProfileService?.BOT_FALLBACK_MS ?? 5_000;
 
   let activeSession = null;
 

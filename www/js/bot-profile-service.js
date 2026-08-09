@@ -4,7 +4,7 @@
 (function (global) {
   'use strict';
 
-  const BOT_FALLBACK_MS = 10_000;
+  const BOT_FALLBACK_MS = 5_000;
 
   const BOT_NAMES = [
     '민지', '서준', '하은', '도윤', '지우', '예린', '수아', '태양', '유나', '현우',
