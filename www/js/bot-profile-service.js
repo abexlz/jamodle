@@ -95,6 +95,11 @@
 
   function buildBotMatchUrl(game, profile, options = {}) {
     const difficulty = randomBotDifficulty();
+    // Word Chain battles use an evenly matched bot — ~45–55% skill relative to
+    // the player — so races stay competitive. Other games keep the weaker bot.
+    const defaultWinrate = game === 'word-chain'
+      ? 45 + Math.floor(Math.random() * 11) // 45–55
+      : difficulty.winrate;
     const params = new URLSearchParams({
       bot: '1',
       source: 'matchmaking',
@@ -102,7 +107,7 @@
       avatarId: profile.avatarId,
       frameId: profile.frameId,
       level: String(profile.level),
-      winrate: String(options.winrate ?? difficulty.winrate),
+      winrate: String(options.winrate ?? defaultWinrate),
       speed: options.speed || difficulty.speed,
     });
     if (game === 'jamodle' && options.wordLength) {
