@@ -49,16 +49,19 @@
     return PALETTES[Math.abs(hash) % PALETTES.length];
   }
 
-  function svgFor(word, english) {
-    const [bg, accent, ink] = paletteFor(word);
+  function svgFor(word, english, variant = 0) {
+    const [bg, accent, ink] = paletteFor(`${word}:${variant}`);
     const icon = iconFor(english);
+    const iconSizes = [284, 252, 316, 268];
+    const iconOffsets = [[0, 0], [-38, 12], [36, -8], [0, 20]];
+    const [iconX, iconY] = iconOffsets[variant % iconOffsets.length];
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="960" height="720" viewBox="0 0 960 720" role="img" aria-label="">
       <rect width="960" height="720" rx="48" fill="${bg}"/>
       <circle cx="132" cy="132" r="90" fill="${accent}" opacity=".16"/>
       <circle cx="828" cy="588" r="126" fill="${accent}" opacity=".13"/>
       <path d="M180 550c120-72 222-72 300 0s180 72 300 0" fill="none" stroke="${accent}" stroke-width="20" stroke-linecap="round" opacity=".24"/>
       <rect x="196" y="120" width="568" height="480" rx="72" fill="#fff" stroke="${ink}" stroke-opacity=".13" stroke-width="12"/>
-      <text x="480" y="454" text-anchor="middle" font-size="284" font-family="Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif">${icon}</text>
+      <text x="${480 + iconX}" y="${454 + iconY}" text-anchor="middle" font-size="${iconSizes[variant % iconSizes.length]}" font-family="Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif">${icon}</text>
       <circle cx="262" cy="520" r="14" fill="${accent}"/><circle cx="698" cy="520" r="14" fill="${accent}"/>
     </svg>`;
     return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
@@ -76,10 +79,16 @@
     const word = String(koreanWord || '').trim();
     const english = toSearchQuery(word, englishHint);
     if (!word) return null;
+    const imageSet = ['photo', 'illustration', 'illustration', 'vector'].map((type, index) => ({
+      type,
+      requestedType: type,
+      url: svgFor(word, english, index),
+    }));
     return {
       provider: 'local-illustration',
       local: true,
-      imageUrl: svgFor(word, english),
+      imageUrl: imageSet[0].url,
+      imageSet,
       sourceName: 'Jamodeul illustration',
     };
   }

@@ -389,8 +389,12 @@
             </section>
 
             <section class="rw-answer-photo hidden" id="rw-answer-photo" aria-hidden="true">
-              <div class="rw-answer-photo-frame">
-                <img class="rw-answer-photo-img" id="rw-answer-photo-img" alt="" decoding="async" />
+              <div class="rw-answer-photo-grid" id="rw-answer-photo-grid">
+                ${Array.from({ length: 4 }, (_, index) => `
+                  <div class="rw-answer-photo-frame">
+                    <img class="rw-answer-photo-img" data-image-slot="${index}" alt="" decoding="async" />
+                  </div>
+                `).join('')}
               </div>
               <a class="rw-answer-photo-credit" id="rw-answer-photo-credit" href="https://www.pexels.com" target="_blank" rel="noopener noreferrer"></a>
             </section>
@@ -464,7 +468,7 @@
         trailTrack: this.root.querySelector('#rw-trail-track'),
         clueMeaning: this.root.querySelector('#rw-clue-meaning'),
         answerPhoto: this.root.querySelector('#rw-answer-photo'),
-        answerPhotoImg: this.root.querySelector('#rw-answer-photo-img'),
+        answerPhotoImgs: [...this.root.querySelectorAll('.rw-answer-photo-img')],
         answerPhotoCredit: this.root.querySelector('#rw-answer-photo-credit'),
         lives: this.root.querySelector('#rw-lives'),
         slots: this.root.querySelector('#rw-slots'),
@@ -736,17 +740,17 @@
 
     clearAnswerPhoto() {
       const wrap = this.els.answerPhoto;
-      const img = this.els.answerPhotoImg;
+      const imgs = this.els.answerPhotoImgs || [];
       const credit = this.els.answerPhotoCredit;
       if (wrap) {
         wrap.classList.add('hidden');
         wrap.setAttribute('aria-hidden', 'true');
         wrap.classList.remove('is-loading', 'is-ready');
       }
-      if (img) {
+      imgs.forEach((img) => {
         img.removeAttribute('src');
         img.alt = '';
-      }
+      });
       if (credit) {
         credit.textContent = '';
         credit.href = 'https://www.pexels.com';
@@ -763,10 +767,10 @@
     async loadAnswerPhoto() {
       const word = String(this.puzzle?.answer || '').trim();
       const wrap = this.els.answerPhoto;
-      const img = this.els.answerPhotoImg;
+      const imgs = this.els.answerPhotoImgs || [];
       const credit = this.els.answerPhotoCredit;
       const services = this.imageServices();
-      if (!wrap || !img || !word || !services.length) {
+      if (!wrap || imgs.length !== 4 || !word || !services.length) {
         this.clearAnswerPhoto();
         return;
       }
@@ -775,7 +779,7 @@
       wrap.classList.remove('hidden', 'is-ready');
       wrap.classList.add('is-loading');
       wrap.setAttribute('aria-hidden', 'true');
-      img.removeAttribute('src');
+      imgs.forEach((img) => img.removeAttribute('src'));
       if (credit) {
         credit.textContent = '';
         credit.classList.add('hidden');
@@ -819,14 +823,25 @@
           photo = null;
         }
         if (requestId !== this._answerPhotoRequestId) return;
-        if (photo?.imageUrl) break;
+        if (photo?.imageUrl || photo?.imageSet?.length) break;
       }
 
       if (requestId !== this._answerPhotoRequestId) return;
-      if (!photo?.imageUrl) {
+      const imageSet = Array.isArray(photo?.imageSet) ? photo.imageSet : [];
+      const imageUrls = imageSet
+        .map((image) => image?.url || image?.imageUrl)
+        .filter(Boolean);
+      if (!imageUrls.length && photo?.imageUrl) imageUrls.push(photo.imageUrl);
+      if (!imageUrls.length) {
         this.clearAnswerPhoto();
         return;
       }
+
+      // A reviewed Pixabay set supplies four unique images. Local/offline
+      // illustrations may supply fewer, so repeat the available source rather
+      // than leaving a question-grid cell empty.
+      while (imageUrls.length < 4) imageUrls.push(imageUrls[imageUrls.length - 1]);
+      imageUrls.length = 4;
 
       const settle = () => {
         if (requestId !== this._answerPhotoRequestId) return;
@@ -834,7 +849,7 @@
         wrap.classList.add('is-ready');
         wrap.setAttribute('aria-hidden', 'false');
         // Keep alt empty so screen readers don't spoil the English answer.
-        img.alt = '';
+        imgs.forEach((img) => { img.alt = ''; });
         if (credit) {
           // Provider-aware attribution (Pixabay or Pexels).
           const sourceName = photo.sourceName || 'Pexels';
@@ -855,13 +870,19 @@
         }
       };
 
-      img.onload = settle;
-      img.onerror = () => {
-        if (requestId !== this._answerPhotoRequestId) return;
-        this.clearAnswerPhoto();
-      };
-      img.src = photo.imageUrl;
-      if (img.complete && img.naturalWidth) settle();
+      const loadImage = (img, url) => new Promise((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = () => reject(new Error('Image failed to load.'));
+        img.src = url;
+        if (img.complete && img.naturalWidth) resolve();
+      });
+      try {
+        await Promise.all(imgs.map((img, index) => loadImage(img, imageUrls[index])));
+      } catch {
+        if (requestId === this._answerPhotoRequestId) this.clearAnswerPhoto();
+        return;
+      }
+      settle();
     }
 
     isSoloMode() {

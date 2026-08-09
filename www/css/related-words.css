@@ -506,9 +506,15 @@ html.reduce-motion .rw-chain-recap-word {
   opacity: 0.45;
 }
 
+.rw-answer-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+}
+
 .rw-answer-photo-frame {
   width: 100%;
-  max-height: min(42dvh, 280px);
   aspect-ratio: 3 / 2;
   border-radius: 18px;
   overflow: hidden;
@@ -566,7 +572,7 @@ html.reduce-motion .rw-chain-recap-word {
 }
 
 .rw-solo-mode .rw-answer-photo-frame {
-  max-height: min(26dvh, 200px);
+  min-height: 0;
 }
 
 .rw-topbar-start {
