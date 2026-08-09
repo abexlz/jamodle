@@ -732,9 +732,13 @@
       }
     }
 
-    /** Image providers in priority order: Pixabay vectors first, Pexels as fallback. */
+    /**
+     * Word Chain answer images come only from Pixabay vector illustrations.
+     * No realistic-photo fallback — if Pixabay has nothing, show no image
+     * rather than reverting to a Pexels photo.
+     */
     imageServices() {
-      return [global.PixabayImageService, global.PexelsImageService]
+      return [global.PixabayImageService]
         .filter((svc) => svc && typeof svc.photoForWord === 'function');
     }
 
