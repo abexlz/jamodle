@@ -24,11 +24,14 @@ Add:
 
 ```env
 KOREAN_DICTIONARY_API_KEY=your_32_character_hex_key_here
+PIXABAY_API_KEY=your_pixabay_api_key_here
 PEXELS_API_KEY=your_pexels_api_key_here
 ADMIN_IMPORT_TOKEN=optional-dev-token
 ```
 
-**Never** put API keys in frontend code. The browser calls `/api/dictionary/search` and `/api/image/pexels` on your server; the server calls the upstream APIs.
+Word Chain illustrations come from Pixabay vector images (searched by the object's English name); Pexels is an optional fallback.
+
+**Never** put API keys in frontend code. The browser calls `/api/dictionary/search` and `/api/image/pixabay` on your server; the server calls the upstream APIs.
 
 ### Run locally
 
@@ -41,7 +44,8 @@ Open:
 
 - App: http://localhost:3000
 - Dictionary API: http://localhost:3000/api/dictionary/search?word=고양이
-- Pexels photo API: http://localhost:3000/api/image/pexels?q=apple
+- Pixabay vector API: http://localhost:3000/api/image/pixabay?q=apple
+- Pexels photo API (fallback): http://localhost:3000/api/image/pexels?q=apple
 - Word import tool: http://localhost:3000/admin/word-import.html
 
 ### Share on your phone (ngrok)
@@ -84,7 +88,8 @@ For Capacitor mobile builds, deploy the API to Vercel (or similar) and set the b
 | `www/js/dictionary-service.js` | Frontend lookup + localStorage cache (7 days) |
 | `www/js/dictionary-modal.js` | Dictionary detail modal after completing a word |
 | `api/dictionary/search.js` | Secure proxy, rate limit, server cache |
-| `api/image/pexels.js` | Pexels proxy for Word Chain answer photos |
+| `api/image/pixabay.js` | Pixabay vector proxy for Word Chain answer illustrations |
+| `api/image/pexels.js` | Pexels proxy (optional fallback) for Word Chain photos |
 | `lib/korean-dictionary.js` | XML parsing + normalization |
 
 ### Word import tool (developer)

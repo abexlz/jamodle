@@ -34,6 +34,7 @@ const searchHandler = require('../api/dictionary/search');
 const validateHandler = require('../api/dictionary/validate');
 const ttsHandler = require('../api/tts/speak');
 const pexelsHandler = require('../api/image/pexels');
+const pixabayHandler = require('../api/image/pixabay');
 
 function withQuery(req, res, handler) {
   const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
@@ -90,6 +91,11 @@ const server = http.createServer((req, res) => {
     const q = url.searchParams.get('q') || url.searchParams.get('query') || '';
     console.log(`[pexels] search → ${q}`);
     return withQuery(req, res, pexelsHandler);
+  }
+  if (url.pathname === '/api/image/pixabay') {
+    const q = url.searchParams.get('q') || url.searchParams.get('query') || '';
+    console.log(`[pixabay] search → ${q}`);
+    return withQuery(req, res, pixabayHandler);
   }
 
   // Common mistake: ngrok/open-from-disk URLs include /www/ but dev-server root is already www/

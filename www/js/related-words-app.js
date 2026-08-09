@@ -732,12 +732,19 @@
       }
     }
 
+    /** Image providers in priority order: Pixabay vectors first, Pexels as fallback. */
+    imageServices() {
+      return [global.PixabayImageService, global.PexelsImageService]
+        .filter((svc) => svc && typeof svc.photoForWord === 'function');
+    }
+
     async loadAnswerPhoto() {
       const word = String(this.puzzle?.answer || '').trim();
       const wrap = this.els.answerPhoto;
       const img = this.els.answerPhotoImg;
       const credit = this.els.answerPhotoCredit;
-      if (!wrap || !img || !word || !global.PexelsImageService?.photoForWord) {
+      const services = this.imageServices();
+      if (!wrap || !img || !word || !services.length) {
         this.clearAnswerPhoto();
         return;
       }
@@ -774,17 +781,23 @@
 
       if (requestId !== this._answerPhotoRequestId) return;
 
-      if (!global.PexelsImageService.looksLikeEnglish?.(englishHint)
-        && !global.PexelsImageService.toSearchQuery?.(word, englishHint)) {
+      const probe = services[0];
+      if (!probe.looksLikeEnglish?.(englishHint)
+        && !probe.toSearchQuery?.(word, englishHint)) {
         this.clearAnswerPhoto();
         return;
       }
 
+      // Try each provider in turn; the first with a usable image wins (point 6).
       let photo = null;
-      try {
-        photo = await global.PexelsImageService.photoForWord(word, englishHint);
-      } catch {
-        photo = null;
+      for (const svc of services) {
+        try {
+          photo = await svc.photoForWord(word, englishHint);
+        } catch {
+          photo = null;
+        }
+        if (requestId !== this._answerPhotoRequestId) return;
+        if (photo?.imageUrl) break;
       }
 
       if (requestId !== this._answerPhotoRequestId) return;
@@ -801,9 +814,16 @@
         // Keep alt empty so screen readers don't spoil the English answer.
         img.alt = '';
         if (credit) {
-          const name = photo.photographer || 'Pexels';
-          credit.textContent = `Photo by ${name} on Pexels`;
-          credit.href = photo.photographerUrl || photo.pexelsUrl || 'https://www.pexels.com';
+          // Provider-aware attribution (Pixabay or Pexels).
+          const sourceName = photo.sourceName || 'Pexels';
+          const sourceUrl = photo.sourceUrl
+            || (photo.provider === 'pixabay' ? 'https://pixabay.com' : 'https://www.pexels.com');
+          const authorName = photo.creditName || photo.photographer || '';
+          const authorUrl = photo.creditUrl || photo.photographerUrl || photo.pexelsUrl || '';
+          credit.textContent = authorName
+            ? `Image by ${authorName} on ${sourceName}`
+            : `Image from ${sourceName}`;
+          credit.href = authorUrl || sourceUrl;
           credit.classList.remove('hidden');
         }
       };
@@ -1790,7 +1810,8 @@
 
       const candidates = this.collectMeaningCandidates(q, null);
       const picked = WCM?.pickBestCandidate?.(candidates, context);
-      const isEnglish = (s) => global.PexelsImageService?.looksLikeEnglish?.(s) ?? true;
+      const imgSvc = global.PixabayImageService || global.PexelsImageService;
+      const isEnglish = (s) => imgSvc?.looksLikeEnglish?.(s) ?? true;
       if (picked && isEnglish(picked)) return picked;
 
       const best = candidates.find((c) => isEnglish(c.meaning))?.meaning || '';
