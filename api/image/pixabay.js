@@ -11,8 +11,12 @@ const cache = require('../../lib/pexels-cache');
 const rateLimit = require('../../lib/rate-limit');
 
 const PIXABAY_SEARCH = 'https://pixabay.com/api/';
-/** A few candidates so we can prefer a hit whose tags match the search term. */
-const CANDIDATE_COUNT = 100;
+/**
+ * A handful of candidates so we can prefer a hit whose tags match the search
+ * term. Kept small (was 100) so Pixabay's JSON payload stays light and parses
+ * fast — the 2×2 grid only needs four images.
+ */
+const CANDIDATE_COUNT = 30;
 /** Cache namespace so Pixabay and Pexels entries never collide in-process. */
 const CACHE_NS = 'pixabay:image-set:';
 const IMAGE_SLOTS = ['photo', 'illustration', 'illustration', 'vector'];
@@ -242,16 +246,19 @@ module.exports = async function handler(req, res) {
 
   try {
     const findImageSet = async (term) => {
+      // Fetch all three image types concurrently. These used to run serially
+      // with a 500 ms gap between them, which added ~1 s of latency per word on
+      // a cache miss; three parallel requests are well within Pixabay's limit.
+      const types = ['photo', 'illustration', 'vector'];
+      const hitsByType = await Promise.all(types.map((type) => searchPixabay(term, type)));
       const byType = {};
-      for (const type of ['photo', 'illustration', 'vector']) {
-        const hits = await searchPixabay(term, type);
+      types.forEach((type, i) => {
+        const hits = hitsByType[i];
         // Prefer strict single-object matches, but fall back to any Pixabay
         // result so a valid search never leaves the grid empty.
         const strict = filterAndRank(hits);
         byType[type] = strict.length ? strict : looseRank(hits);
-        // Avoid bursting three upstream API calls at once.
-        if (type !== 'vector') await delay(500);
-      }
+      });
       return { byType, imageSet: selectImageSet(byType) };
     };
 

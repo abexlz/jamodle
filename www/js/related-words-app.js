@@ -913,10 +913,15 @@
 
       if (requestId !== this._answerPhotoRequestId) return;
       const imageSet = Array.isArray(photo?.imageSet) ? photo.imageSet : [];
+      // Prefer the smaller webformat ("previewUrl", ~640px) over the full-size
+      // largeImageURL. The 2×2 cells are small, so the preview is visually
+      // identical but downloads in a fraction of the time.
       const imageUrls = imageSet
-        .map((image) => image?.url || image?.imageUrl)
+        .map((image) => image?.previewUrl || image?.url || image?.imageUrl)
         .filter(Boolean);
-      if (!imageUrls.length && photo?.imageUrl) imageUrls.push(photo.imageUrl);
+      if (!imageUrls.length && (photo?.previewUrl || photo?.imageUrl)) {
+        imageUrls.push(photo.previewUrl || photo.imageUrl);
+      }
       if (!imageUrls.length) {
         this.clearAnswerPhoto();
         return;
@@ -963,6 +968,50 @@
       // All four cells have finished loading (or failed individually) — the
       // clue is now fully visible, so the bot may start solving.
       this.markAnswerPhotoReady();
+      // Warm the next round's images so the switch feels instant.
+      this.prefetchNextAnswerPhoto();
+    }
+
+    /**
+     * Warm the *next* round's image set while the player is still solving the
+     * current one, so advancing feels instant. Best-effort: it seeds the
+     * PixabayImageService cache (localStorage) and the browser's image cache,
+     * and silently no-ops on any error.
+     */
+    prefetchNextAnswerPhoto() {
+      if (!this.imageMode) return;
+      const svc = global.PixabayImageService;
+      if (!svc || typeof svc.photoForWord !== 'function') return;
+      const currentIndex = this.useThemeRotation
+        ? (this.globalLinkIndex || 0)
+        : (Number(this.puzzle?.linkIndex) || 0);
+      const nextIndex = currentIndex + 1;
+      if (this._prefetchedPhotoIndex === nextIndex) return;
+      this._prefetchedPhotoIndex = nextIndex;
+      let next;
+      try {
+        next = this.imagePuzzle(nextIndex);
+      } catch {
+        return;
+      }
+      const word = String(next?.answer || '').trim();
+      if (!word) return;
+      const hint = next.englishHint || global.WordChainEnglish?.getEnglish?.(word) || '';
+      const ImageCtor = global.Image;
+      Promise.resolve()
+        .then(() => svc.photoForWord(word, hint))
+        .then((photo) => {
+          if (!ImageCtor) return;
+          const set = Array.isArray(photo?.imageSet) ? photo.imageSet : [];
+          set.slice(0, 4).forEach((image) => {
+            const url = image?.previewUrl || image?.url || image?.imageUrl;
+            if (!url) return;
+            const pre = new ImageCtor();
+            pre.decoding = 'async';
+            pre.src = url; // kicks off the download into the browser cache
+          });
+        })
+        .catch(() => { /* best-effort prefetch */ });
     }
 
     isSoloMode() {
