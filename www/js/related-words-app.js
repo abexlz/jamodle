@@ -227,10 +227,13 @@
       // Solo Word Chain is now an endless "image chain": no themed chains, the
       // Pixabay vector is the clue, answers come from the Hangul-dle pool. Race
       // (versus) keeps the themed-chain flow untouched.
-      this.imageMode = !this.versus
-        && this.options.imageMode !== false
+      // Both solo and versus Word Chain now show a 4-image clue and ask the
+      // player to assemble the Korean answer. Solo is endless; versus races
+      // through the shared linkIndex, so only solo drives the global-index
+      // rotation (versus keeps the race's chainId/linkIndex plumbing).
+      this.imageMode = this.options.imageMode !== false
         && !!(global.RelatedWordsImageMode && typeof global.RelatedWordsImageMode.getPuzzleByIndex === 'function');
-      if (this.imageMode) {
+      if (this.imageMode && !this.versus) {
         // Endless mode advances by a single global index (no per-chain boundary).
         this.useThemeRotation = true;
       }
@@ -345,8 +348,10 @@
         return;
       }
 
-      // Image mode keeps the top bar clean — no pause or settings icons.
-      const headerNav = this.imageMode
+      // Solo image mode keeps the top bar clean — no pause or settings icons.
+      // Versus keeps its normal navigation.
+      const imageSolo = this.imageMode && this.isSoloMode();
+      const headerNav = imageSolo
         ? ''
         : this.isSoloMode()
           ? global.PauseQuitUI?.pauseButtonHtml('rw-pause-btn') || ''
@@ -363,7 +368,7 @@
           </div>
           <div class="rw-topbar-end rw-hud-cluster">
             <div class="rw-lives" id="rw-lives" aria-label="${t('relatedWords.livesLabel')}"></div>
-            ${this.imageMode ? '' : '<a class="top-nav-btn rw-settings-btn" href="settings.html" id="rw-settings-btn" data-i18n-aria="nav.settings">⚙️</a>'}
+            ${imageSolo ? '' : '<a class="top-nav-btn rw-settings-btn" href="settings.html" id="rw-settings-btn" data-i18n-aria="nav.settings">⚙️</a>'}
           </div>
         </header>
 
@@ -508,9 +513,10 @@
         overlayBtn: this.root.querySelector('#rw-overlay-btn'),
       };
 
-      // Image mode: relocate the wrong-guess dots from the top bar to directly
-      // under the picture grid (just above the answer slots).
-      if (this.imageMode && this.els.lives && this.els.answerPhoto) {
+      // Solo image mode: relocate the wrong-guess dots from the top bar to
+      // directly under the picture grid (just above the answer slots). Versus
+      // keeps its own HUD layout untouched.
+      if (this.imageMode && this.isSoloMode() && this.els.lives && this.els.answerPhoto) {
         this.els.answerPhoto.insertAdjacentElement('afterend', this.els.lives);
         this.els.lives.classList.add('rw-lives--image');
       }
@@ -661,7 +667,9 @@
       const skipTrail = opts.skipTrail === true;
       const skipDockRender = opts.skipDockRender === true;
       this.puzzle = this.imageMode
-        ? global.RelatedWordsImageMode.getPuzzleByIndex(globalIdx)
+        ? global.RelatedWordsImageMode.getPuzzleByIndex(
+          this.useThemeRotation ? globalIdx : linkIndex,
+        )
         : RW().getPuzzle(chainId, linkIndex, this._puzzleOpts);
       if (!this.puzzle) {
         if (this.raceMode) {
@@ -782,8 +790,8 @@
     }
 
     async loadAnswerPhoto() {
-      // The answer-image grid is a solo image-mode clue only. In versus/race it
-      // would spoil the answer and, when empty, pushes the tile dock off-screen.
+      // The 4-image grid is the clue in image mode (both solo and versus). In a
+      // themed/non-image game it stays hidden so it can't spoil the answer.
       if (!this.imageMode) {
         this.clearAnswerPhoto();
         return;
@@ -1646,17 +1654,21 @@
     }
 
     renderChainMeta() {
-      if (this.imageMode) {
-        // Endless image chain — no chain title or "link X of Y" progress.
+      if (this.imageMode && this.isSoloMode()) {
+        // Solo endless image chain — no chain title or "link X of Y" progress.
         if (this.els.chainTitle) this.els.chainTitle.textContent = '';
         if (this.els.chainProgress) this.els.chainProgress.textContent = '';
         return;
       }
-      const chain = RW()?.getChain?.(this.puzzle.chainId, this._puzzleOpts);
-      const titled = this.puzzle.chainTitleKey ? t(this.puzzle.chainTitleKey) : '';
-      const label = (titled && titled !== this.puzzle.chainTitleKey)
-        ? titled
-        : (global.RelatedWordsChains?.chainLabel?.(chain) || titled || '');
+      // Versus image battles keep the shared race progress but drop the theme
+      // title (there's no theme to name).
+      const chain = this.imageMode ? null : RW()?.getChain?.(this.puzzle.chainId, this._puzzleOpts);
+      const titled = (!this.imageMode && this.puzzle.chainTitleKey) ? t(this.puzzle.chainTitleKey) : '';
+      const label = this.imageMode
+        ? ''
+        : ((titled && titled !== this.puzzle.chainTitleKey)
+          ? titled
+          : (global.RelatedWordsChains?.chainLabel?.(chain) || titled || ''));
       this.els.chainTitle.textContent = label;
       if (this.raceMode) {
         this.els.chainProgress.textContent = t('relatedWordsRace.wordsProgress', {

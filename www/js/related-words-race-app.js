@@ -572,7 +572,9 @@
 
       const chainTitleEl = this.root.querySelector('#rw-race-chain-title');
       const chainProgressEl = this.root.querySelector('#rw-race-chain-progress');
-      if (chainTitleEl) chainTitleEl.textContent = chainLabel(data);
+      // Image-guessing battles have no theme, so drop the chain label.
+      const isImageBattle = typeof global.RelatedWordsImageMode?.getPuzzleByIndex === 'function';
+      if (chainTitleEl) chainTitleEl.textContent = isImageBattle ? '' : chainLabel(data);
       if (chainProgressEl) {
         const shared = data.sharedState || RS().defaultRelatedWordsSharedState();
         const linkCount = RS().getRelatedWordsLinkCount?.(data)

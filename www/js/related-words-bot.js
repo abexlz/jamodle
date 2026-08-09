@@ -538,8 +538,20 @@
       global.setTimeout(() => this.showResults(winner), 900);
     }
 
-    /** Current link within the selected chain. */
+    /** Whether Word Chain battles run in image-guessing mode. */
+    isImageMode() {
+      return typeof global.RelatedWordsImageMode?.getPuzzleByIndex === 'function';
+    }
+
+    /**
+     * The current round's puzzle. In image mode the bot mirrors the exact
+     * image puzzle the human sees (by shared linkIndex) so its answer length,
+     * syllables, and dock tiles line up; otherwise it uses the themed chain.
+     */
     currentLink() {
+      if (this.isImageMode()) {
+        return global.RelatedWordsImageMode.getPuzzleByIndex(this.linkIndex) || null;
+      }
       return RWC()?.getRaceLink?.(this.chainId, this.linkIndex)
         || RWC()?.getLink?.(this.chainId, this.linkIndex)
         || null;

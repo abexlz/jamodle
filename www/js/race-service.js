@@ -1159,10 +1159,18 @@
   }
 
   function verifyRelatedWordsAnswer(chainId, linkIndex, answer) {
+    const guess = String(answer || '').trim();
+    if (!guess) return false;
+    // Word Chain battles are image-guessing races: both players see the same
+    // deterministic image puzzle for the shared linkIndex and assemble its
+    // Korean answer. Verify against that pool when it's available (battle page).
+    const imageAnswer = global.RelatedWordsImageMode?.getPuzzleByIndex?.(linkIndex)?.answer;
+    if (imageAnswer) return guess === String(imageAnswer).trim();
+    // Fallback: legacy themed-chain verification (image pool not loaded).
     const link = global.RelatedWordsChains?.getRaceLink?.(chainId, linkIndex)
       || global.RelatedWordsChains?.getLink?.(chainId, linkIndex);
     if (!link?.answer) return false;
-    return String(answer || '').trim() === link.answer;
+    return guess === link.answer;
   }
 
   function verifyRelatedWordsRound(globalLinkIndex, answer) {
