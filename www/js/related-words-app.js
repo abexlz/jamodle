@@ -754,13 +754,9 @@
       }
     }
 
-    /**
-     * Word Chain answer images come only from Pixabay vector illustrations.
-     * No realistic-photo fallback — if Pixabay has nothing, show no image
-     * rather than reverting to a Pexels photo.
-     */
+    /** Word Chain uses fixed local SVG illustrations, never searched photos. */
     imageServices() {
-      return [global.PixabayImageService]
+      return [global.LocalWordIllustrations]
         .filter((svc) => svc && typeof svc.photoForWord === 'function');
     }
 
@@ -846,11 +842,16 @@
             || (photo.provider === 'pixabay' ? 'https://pixabay.com' : 'https://www.pexels.com');
           const authorName = photo.creditName || photo.photographer || '';
           const authorUrl = photo.creditUrl || photo.photographerUrl || photo.pexelsUrl || '';
-          credit.textContent = authorName
-            ? `Image by ${authorName} on ${sourceName}`
-            : `Image from ${sourceName}`;
-          credit.href = authorUrl || sourceUrl;
-          credit.classList.remove('hidden');
+          if (photo.local) {
+            credit.textContent = '';
+            credit.classList.add('hidden');
+          } else {
+            credit.textContent = authorName
+              ? `Image by ${authorName} on ${sourceName}`
+              : `Image from ${sourceName}`;
+            credit.href = authorUrl || sourceUrl;
+            credit.classList.remove('hidden');
+          }
         }
       };
 
