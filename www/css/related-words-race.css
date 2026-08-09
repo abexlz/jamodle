@@ -827,6 +827,10 @@ html.reduce-motion .rw-reveal-letter {
   justify-content: center;
   align-items: center;
   gap: clamp(6px, 2vw, 10px);
+  /* Stretch to the panel (half-viewport) width so tile `max-width: …%` sizes
+   * against a definite width and long answers always fit. */
+  width: 100%;
+  box-sizing: border-box;
   min-height: clamp(64px, 17.6vw, 84px);
   perspective: 900px;
   overflow: visible;
@@ -842,16 +846,40 @@ html.reduce-motion .rw-reveal-letter {
   aspect-ratio: auto;
 }
 
+/*
+ * Battle panels are only ~half the viewport wide, so answer tiles must shrink
+ * as the syllable count grows. Without this, 4–5 syllable answers (e.g. 후춧가루)
+ * overflow the half-width panel — the first tile clips off the screen edge and
+ * the rest overlap. `--rw-vs-tile-max` caps each tile at its equal slice of the
+ * usable panel width (~40vw), falling back to the normal large size for short
+ * words. Applied on the panel-specific selectors below, which win the cascade.
+ */
+.rw-vs-slots {
+  --rw-vs-tile-cap: clamp(64px, 17.6vw, 84px);
+  /* Equal slice of the panel-slots (half-viewport) container, capped at the
+   * normal large size for short words. `100%` resolves against .rw-vs-panel-slots
+   * so this auto-fits any device width without vw guesswork. */
+  --rw-vs-tile-max: min(
+    var(--rw-vs-tile-cap),
+    calc((100% - (var(--rw-slot-count, 3) - 1) * clamp(6px, 2vw, 10px)) / var(--rw-slot-count, 3))
+  );
+  --rw-vs-face: min(clamp(20px, 8.25vw, 40px), calc(40px * 3 / var(--rw-slot-count, 3)));
+}
+
 .rw-vs-slots.rw-slots--3 {
   gap: clamp(4px, 1.6vw, 6px);
 }
 
 .rw-vs-slots.rw-slots--3 .rw-slot.flip-tile,
 .rw-vs-slots.rw-slots--3 .rw-opp-slot.flip-tile {
+  flex: 0 1 auto;
+  min-width: 0;
   width: clamp(53px, 14.85vw, 68px);
-  height: clamp(53px, 14.85vw, 68px);
-  max-width: clamp(53px, 14.85vw, 68px);
-  flex: 0 0 auto;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  /* Share the panel width like the other counts so 3-syllable answers can't
+   * overflow the half-width panel on narrow phones either. */
+  max-width: var(--rw-vs-tile-max, clamp(53px, 14.85vw, 68px));
 }
 
 .rw-vs-slots.rw-slots--3 .rw-opp-slot {
@@ -911,10 +939,12 @@ html.reduce-motion .rw-reveal-letter {
   position: relative;
   padding: 0;
   border: none;
+  flex: 0 1 auto;
+  min-width: 0;
   width: clamp(64px, 17.6vw, 84px);
-  height: clamp(64px, 17.6vw, 84px);
-  max-width: clamp(64px, 17.6vw, 84px);
-  flex: 0 0 auto;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  max-width: var(--rw-vs-tile-max, clamp(64px, 17.6vw, 84px));
   transform-style: preserve-3d;
   transform: rotateX(0deg);
   transform-origin: center center;
@@ -940,9 +970,11 @@ html.reduce-motion .rw-reveal-letter {
 
 .rw-vs-panel--enemy .rw-opp-slot {
   width: clamp(64px, 17.6vw, 84px);
-  height: clamp(64px, 17.6vw, 84px);
+  height: auto;
+  aspect-ratio: 1 / 1;
+  max-width: var(--rw-vs-tile-max, clamp(64px, 17.6vw, 84px));
   border-radius: 14px;
-  font-size: clamp(29px, 8.25vw, 40px);
+  font-size: var(--rw-vs-face, clamp(29px, 8.25vw, 40px));
 }
 
 .rw-vs-panel--enemy .rw-opp-slot-front {
@@ -1015,14 +1047,16 @@ html.reduce-motion .rw-reveal-letter {
 }
 
 .rw-vs-panel--you .rw-slot.flip-tile {
+  flex: 0 1 auto;
+  min-width: 0;
   width: clamp(64px, 17.6vw, 84px);
-  height: clamp(64px, 17.6vw, 84px);
-  max-width: clamp(64px, 17.6vw, 84px);
-  flex: 0 0 auto;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  max-width: var(--rw-vs-tile-max, clamp(64px, 17.6vw, 84px));
 }
 
 .rw-vs-panel--you .rw-slot-face {
-  font-size: clamp(29px, 8.25vw, 40px);
+  font-size: var(--rw-vs-face, clamp(29px, 8.25vw, 40px));
   border-radius: 14px;
 }
 
@@ -1159,6 +1193,12 @@ html.reduce-motion .rw-reveal-letter {
     font-size: clamp(28px, 8vw, 36px);
   }
 
+  /* Short screens use smaller tiles; shrink the per-syllable cap to match so
+   * long answers still fit the half-width panel. */
+  .rw-vs-slots {
+    --rw-vs-tile-cap: clamp(44px, 12vw, 56px);
+  }
+
   .rw-vs-slots .rw-slot.flip-tile,
   .rw-vs-slots .rw-opp-slot.flip-tile,
   .rw-vs-slots.rw-slots--3 .rw-slot.flip-tile,
@@ -1166,8 +1206,9 @@ html.reduce-motion .rw-reveal-letter {
   .rw-vs-panel--you .rw-slot.flip-tile,
   .rw-vs-panel--enemy .rw-opp-slot.flip-tile {
     width: clamp(44px, 12vw, 56px);
-    height: clamp(44px, 12vw, 56px);
-    max-width: clamp(44px, 12vw, 56px);
+    height: auto;
+    aspect-ratio: 1 / 1;
+    max-width: var(--rw-vs-tile-max, clamp(44px, 12vw, 56px));
   }
 
   .rw-vs-panel-slots {
