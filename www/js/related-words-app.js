@@ -870,19 +870,23 @@
         }
       };
 
-      const loadImage = (img, url) => new Promise((resolve, reject) => {
-        img.onload = () => resolve();
-        img.onerror = () => reject(new Error('Image failed to load.'));
+      // Load each cell independently so one broken image never removes the
+      // whole 2×2 grid. The grid is revealed as soon as any image loads.
+      const loadImage = (img, url) => new Promise((resolve) => {
+        img.onload = () => resolve(true);
+        img.onerror = () => {
+          img.removeAttribute('src');
+          resolve(false);
+        };
         img.src = url;
-        if (img.complete && img.naturalWidth) resolve();
+        if (img.complete && img.naturalWidth) resolve(true);
       });
-      try {
-        await Promise.all(imgs.map((img, index) => loadImage(img, imageUrls[index])));
-      } catch {
-        if (requestId === this._answerPhotoRequestId) this.clearAnswerPhoto();
-        return;
-      }
       settle();
+      const results = await Promise.all(imgs.map((img, index) => loadImage(img, imageUrls[index])));
+      if (requestId !== this._answerPhotoRequestId) return;
+      if (!results.some(Boolean)) {
+        this.clearAnswerPhoto();
+      }
     }
 
     isSoloMode() {

@@ -107,6 +107,29 @@ function filterAndRank(hits) {
     .map(({ hit }) => hit);
 }
 
+/**
+ * Looser fallback ranking. Used when the strict single-object filter removes
+ * every candidate, so the 2×2 grid still gets filled with Pixabay results
+ * rather than collapsing to an empty space.
+ */
+function looseRank(hits) {
+  return (Array.isArray(hits) ? hits : [])
+    .filter((hit) => hit && (hit.largeImageURL || hit.webformatURL))
+    .map((hit) => {
+      const tags = splitTags(hit.tags);
+      return {
+        hit,
+        excluded: tags.some((tag) => EXCLUDED_TAGS.has(tag)),
+        preferred: tags.filter((tag) => PREFERRED_TAGS.has(tag)).length,
+      };
+    })
+    // Still honor the excluded-tag blocklist; only relax the strict tag-count
+    // limit so more words end up with usable imagery.
+    .filter(({ excluded }) => !excluded)
+    .sort((a, b) => b.preferred - a.preferred || a.hit.id - b.hit.id)
+    .map(({ hit }) => hit);
+}
+
 function toImage(hit, type) {
   return {
     type,
@@ -207,7 +230,11 @@ module.exports = async function handler(req, res) {
     const findImageSet = async (term) => {
       const byType = {};
       for (const type of ['photo', 'illustration', 'vector']) {
-        byType[type] = filterAndRank(await searchPixabay(term, type));
+        const hits = await searchPixabay(term, type);
+        // Prefer strict single-object matches, but fall back to any Pixabay
+        // result so a valid search never leaves the grid empty.
+        const strict = filterAndRank(hits);
+        byType[type] = strict.length ? strict : looseRank(hits);
         // Avoid bursting three upstream API calls at once.
         if (type !== 'vector') await delay(500);
       }
