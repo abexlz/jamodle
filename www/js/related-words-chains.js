@@ -790,11 +790,12 @@
     .map(normalizeRaceChain)
     .filter(Boolean);
 
-  /** 1v1 score for a correct answer: 1–3 pts by syllable length (4+ capped at 3). */
-  function relatedWordsRoundPoints(word) {
-    const n = splitSyllables(String(word || '').trim()).length;
-    if (n <= 0) return 1;
-    return Math.min(3, n);
+  /**
+   * 1v1 score for a correct answer: a flat 1 point per solved word, regardless
+   * of syllable length. (Battle scoring only — solo doesn't use this.)
+   */
+  function relatedWordsRoundPoints() {
+    return 1;
   }
 
   function hashSeed(str) {
