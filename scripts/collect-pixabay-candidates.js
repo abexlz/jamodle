@@ -24,6 +24,14 @@ const WORD_DATA_PATH = path.join(ROOT, 'www/js/learning-words-data.js');
 const DEFAULT_DIR = path.join(ROOT, 'data/pixabay');
 const REQUEST_DELAY_MS = 500;
 const TOP_CANDIDATES = 5;
+const SEARCH_CANDIDATES = 100;
+const IMAGE_SLOTS = ['photo', 'illustration', 'illustration', 'vector'];
+const EXCLUDED_TAGS = new Set([
+  'table', 'background', 'group', 'people', 'person', 'holding', 'hand', 'hands',
+  'crowd', 'woman', 'man', 'child', 'children', 'restaurant', 'room', 'kitchen',
+  'landscape', 'collage', 'collection', 'set',
+]);
+const PREFERRED_TAGS = new Set(['isolated', 'white background', 'white']);
 
 // These are nouns but do not have a reliably depictable object image. Keep this
 // conservative: add any domain-specific exclusions to excluded.json instead.
@@ -102,16 +110,19 @@ function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function searchPixabay(apiKey, keyword, imageType) {
+async function searchPixabay(apiKey, keyword, imageType, requestState) {
+  const waitMs = Math.max(0, REQUEST_DELAY_MS - (Date.now() - requestState.lastRequestAt));
+  if (waitMs) await delay(waitMs);
   const url = new URL('https://pixabay.com/api/');
   url.searchParams.set('key', apiKey);
   url.searchParams.set('q', keyword);
   url.searchParams.set('image_type', imageType);
   url.searchParams.set('safesearch', 'true');
   url.searchParams.set('lang', 'en');
-  url.searchParams.set('per_page', String(TOP_CANDIDATES));
+  url.searchParams.set('per_page', String(SEARCH_CANDIDATES));
 
   const response = await fetch(url);
+  requestState.lastRequestAt = Date.now();
   if (!response.ok) {
     throw new Error(`Pixabay ${imageType} request failed (${response.status}) for "${keyword}".`);
   }
@@ -119,13 +130,62 @@ async function searchPixabay(apiKey, keyword, imageType) {
   return Array.isArray(body.hits) ? body.hits : [];
 }
 
-function compactCandidates(hits) {
+function splitTags(tags) {
+  return String(tags || '').toLowerCase().split(',').map((tag) => tag.trim()).filter(Boolean);
+}
+
+function filterAndRank(hits) {
+  return hits
+    .map((hit) => {
+      const tags = splitTags(hit.tags);
+      const hasExcludedTag = tags.some((tag) => EXCLUDED_TAGS.has(tag));
+      const preferredCount = tags.filter((tag) => PREFERRED_TAGS.has(tag)).length;
+      return { hit, tags, hasExcludedTag, preferredCount };
+    })
+    .filter(({ tags, hasExcludedTag }) => tags.length > 0 && tags.length <= 3 && !hasExcludedTag)
+    .sort((a, b) => (
+      b.preferredCount - a.preferredCount
+      || a.tags.length - b.tags.length
+      || Number(a.hit.id) - Number(b.hit.id)
+    ))
+    .map(({ hit }) => hit);
+}
+
+function compactCandidates(hits, type) {
   return hits.slice(0, TOP_CANDIDATES).map((hit) => ({
     id: hit.id,
     tags: hit.tags || '',
     previewURL: hit.previewURL || '',
     webformatURL: hit.webformatURL || '',
+    type,
   }));
+}
+
+function selectImageSet(byType) {
+  const usedIds = new Set();
+  const allCandidates = ['photo', 'illustration', 'vector']
+    .flatMap((type) => byType[type].map((candidate) => ({ ...candidate, type })));
+
+  return IMAGE_SLOTS.map((requestedType) => {
+    const preferred = byType[requestedType].find((candidate) => !usedIds.has(candidate.id));
+    const fallback = allCandidates.find((candidate) => !usedIds.has(candidate.id))
+      || byType[requestedType][0]
+      || allCandidates[0];
+    const chosen = preferred || fallback;
+    if (!chosen) return null;
+    usedIds.add(chosen.id);
+    return {
+      type: chosen.type,
+      requestedType,
+      url: chosen.webformatURL || chosen.previewURL,
+      id: chosen.id,
+      tags: chosen.tags,
+    };
+  }).filter(Boolean);
+}
+
+function hasCompleteImageSet(entry) {
+  return Array.isArray(entry?.imageSet) && entry.imageSet.length === IMAGE_SLOTS.length;
 }
 
 async function main() {
@@ -154,9 +214,10 @@ async function main() {
   let requested = 0;
   let skippedExisting = 0;
   let skippedUntranslated = 0;
+  const requestState = { lastRequestAt: 0 };
   for (const entry of targetWords) {
     if (requested >= options.limit) break;
-    if (candidates[entry.word]) {
+    if (hasCompleteImageSet(candidates[entry.word])) {
       skippedExisting += 1;
       continue;
     }
@@ -174,20 +235,23 @@ async function main() {
       continue;
     }
 
-    let hits = await searchPixabay(apiKey, keyword, 'vector');
-    if (!hits.length) {
-      await delay(REQUEST_DELAY_MS);
-      hits = await searchPixabay(apiKey, keyword, 'photo');
+    const byType = {};
+    for (const type of ['photo', 'illustration', 'vector']) {
+      const hits = await searchPixabay(apiKey, keyword, type, requestState);
+      byType[type] = compactCandidates(filterAndRank(hits), type);
     }
+    const imageSet = selectImageSet(byType);
 
     candidates[entry.word] = {
       translatedKeyword: keyword,
-      candidates: compactCandidates(hits),
+      // Retain per-type choices for review and put the final 2×2 slot order
+      // directly in imageSet: photo, illustration, illustration, vector.
+      candidatesByType: byType,
+      imageSet,
     };
     writeJson(candidatesPath, candidates); // checkpoint every request for safe resume
     requested += 1;
-    console.log(`[${requested}] ${entry.word} → ${keyword}: ${hits.length} ${hits.length === 1 ? 'candidate' : 'candidates'}`);
-    await delay(REQUEST_DELAY_MS);
+    console.log(`[${requested}] ${entry.word} → ${keyword}: photo ${byType.photo.length}, illustration ${byType.illustration.length}, vector ${byType.vector.length}; grid ${imageSet.length}/4`);
   }
 
   writeJson(untranslatedPath, untranslated);
@@ -196,7 +260,11 @@ async function main() {
   console.log(`Translations needed: ${path.relative(ROOT, untranslatedPath)}`);
 }
 
-main().catch((error) => {
-  console.error(`Collection failed: ${error.message}`);
-  process.exitCode = 1;
-});
+if (require.main === module) {
+  main().catch((error) => {
+    console.error(`Collection failed: ${error.message}`);
+    process.exitCode = 1;
+  });
+}
+
+module.exports = { filterAndRank, selectImageSet, splitTags };
