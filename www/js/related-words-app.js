@@ -345,9 +345,12 @@
         return;
       }
 
-      const headerNav = this.isSoloMode()
-        ? global.PauseQuitUI?.pauseButtonHtml('rw-pause-btn') || ''
-        : `<a class="back-link" href="index.html" data-i18n="relatedWords.back">${t('relatedWords.back')}</a>`;
+      // Image mode keeps the top bar clean — no pause or settings icons.
+      const headerNav = this.imageMode
+        ? ''
+        : this.isSoloMode()
+          ? global.PauseQuitUI?.pauseButtonHtml('rw-pause-btn') || ''
+          : `<a class="back-link" href="index.html" data-i18n="relatedWords.back">${t('relatedWords.back')}</a>`;
 
       this.root.innerHTML = `
         <header class="rw-topbar">
@@ -360,7 +363,7 @@
           </div>
           <div class="rw-topbar-end rw-hud-cluster">
             <div class="rw-lives" id="rw-lives" aria-label="${t('relatedWords.livesLabel')}"></div>
-            <a class="top-nav-btn rw-settings-btn" href="settings.html" id="rw-settings-btn" data-i18n-aria="nav.settings">⚙️</a>
+            ${this.imageMode ? '' : '<a class="top-nav-btn rw-settings-btn" href="settings.html" id="rw-settings-btn" data-i18n-aria="nav.settings">⚙️</a>'}
           </div>
         </header>
 
