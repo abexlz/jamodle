@@ -782,6 +782,12 @@
     }
 
     async loadAnswerPhoto() {
+      // The answer-image grid is a solo image-mode clue only. In versus/race it
+      // would spoil the answer and, when empty, pushes the tile dock off-screen.
+      if (!this.imageMode) {
+        this.clearAnswerPhoto();
+        return;
+      }
       const word = String(this.puzzle?.answer || '').trim();
       const wrap = this.els.answerPhoto;
       const imgs = this.els.answerPhotoImgs || [];
