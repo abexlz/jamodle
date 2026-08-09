@@ -20,6 +20,10 @@ const EXCLUDED_TAGS = new Set([
   'table', 'background', 'group', 'people', 'person', 'holding', 'hand', 'hands',
   'crowd', 'woman', 'man', 'child', 'children', 'restaurant', 'room', 'kitchen',
   'landscape', 'collage', 'collection', 'set',
+  // Never surface tobacco/smoking imagery (e.g. a cigarette pack slipping into a
+  // "lunch box" search). This keeps every word's clue kid-appropriate.
+  'cigarette', 'cigarettes', 'cigar', 'cigars', 'smoking', 'smoke', 'tobacco',
+  'nicotine', 'ashtray', 'lighter', 'vape', 'vaping', 'e-cigarette',
 ]);
 const PREFERRED_TAGS = new Set(['isolated', 'white background', 'white']);
 
