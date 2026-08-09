@@ -150,10 +150,8 @@
 
     renderShell() {
       this.root.innerHTML = `
-        <header class="race-header">
-          <a class="race-back" href="index.html">${escapeHtml(rt('backProfile'))}</a>
+        <header class="race-header race-header--bare">
           <h1>${escapeHtml(rt('title'))}</h1>
-          <a class="race-settings-link" href="settings.html" aria-label="${escapeHtml(global.I18n?.t('nav.settings') || 'Settings')}">⚙️</a>
         </header>
         <div id="race-battle-hud" class="rw-race-battle-hud hidden" aria-live="polite">
           <div class="rw-race-battle-mid">
@@ -890,6 +888,8 @@
         chainId: data.chainId,
         raceTarget,
         initialLinkIndex: Number(shared.linkIndex) || 0,
+        playerName: (isP1 ? data.player1Name : data.player2Name) || '',
+        opponentName: (isP1 ? data.player2Name : data.player1Name) || '',
         onRoundWin: async (payload) => {
           const result = await RS().submitRelatedWordsRound(this.matchId, this.myUid, payload);
           if (result.applied) {

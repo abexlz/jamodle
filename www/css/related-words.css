@@ -1412,6 +1412,11 @@ html.reduce-motion .rw-answer-english {
   transform: rotateX(0deg);
 }
 
+/* Battle mode: enlarge the 9 Korean choice glyphs ~30% for readability. */
+body.rw-race-active .rw-dock-face {
+  font-size: clamp(44px, 13vw, 57px);
+}
+
 .rw-dock-back {
   background: #fff;
   box-shadow: 0 4px 0 rgba(93, 100, 112, 0.15);

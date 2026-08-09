@@ -243,6 +243,10 @@
       this.raceControlled = this.options.raceControlled === true;
       this.sharedRace = this.raceMode && this.options.sharedRace !== false;
       this.initialLinkIndex = Number(this.options.initialLinkIndex) || 0;
+      // Versus panels label each side with the real player name/ID instead of
+      // generic "You"/"Enemy" when the host supplies them.
+      this.playerName = String(this.options.playerName || '').trim();
+      this.opponentName = String(this.options.opponentName || '').trim();
       this.onRoundWin = typeof this.options.onRoundWin === 'function' ? this.options.onRoundWin : null;
       this.onRevealSkip = typeof this.options.onRevealSkip === 'function' ? this.options.onRevealSkip : null;
       this.onSlotsChange = typeof this.options.onSlotsChange === 'function' ? this.options.onSlotsChange : null;
@@ -348,10 +352,9 @@
         return;
       }
 
-      // Solo image mode keeps the top bar clean — no pause or settings icons.
-      // Versus keeps its normal navigation.
-      const imageSolo = this.imageMode && this.isSoloMode();
-      const headerNav = imageSolo
+      // Image mode (solo + versus) keeps the top bar clean — no home/back link,
+      // no pause, no settings gear.
+      const headerNav = this.imageMode
         ? ''
         : this.isSoloMode()
           ? global.PauseQuitUI?.pauseButtonHtml('rw-pause-btn') || ''
@@ -368,7 +371,7 @@
           </div>
           <div class="rw-topbar-end rw-hud-cluster">
             <div class="rw-lives" id="rw-lives" aria-label="${t('relatedWords.livesLabel')}"></div>
-            ${imageSolo ? '' : '<a class="top-nav-btn rw-settings-btn" href="settings.html" id="rw-settings-btn" data-i18n-aria="nav.settings">⚙️</a>'}
+            ${this.imageMode ? '' : '<a class="top-nav-btn rw-settings-btn" href="settings.html" id="rw-settings-btn" data-i18n-aria="nav.settings">⚙️</a>'}
           </div>
         </header>
 
@@ -2424,8 +2427,8 @@
     renderSlots(opts = {}) {
       const skipEmit = opts.skipEmit === true;
       if (this.showOppPreview) {
-        const enemyLabel = t('relatedWordsRace.enemy');
-        const youLabel = t('relatedWordsRace.you');
+        const enemyLabel = this.opponentName || t('relatedWordsRace.enemy');
+        const youLabel = this.playerName || t('relatedWordsRace.you');
         const oppSlotsHtml = this.slots.map((_, index) => {
           const oppChar = this.oppSlotChars[index] || '';
           const oppFilled = !!oppChar;
@@ -2515,6 +2518,9 @@
 
     startRevealIdleTimer() {
       this.clearRevealIdleTimer();
+      // Image battles don't offer a "reveal answer" shortcut — the picture is
+      // the whole puzzle, so never surface the reveal button.
+      if (this.imageMode) return;
       if (!this.showOppPreview || this.gameOver || this.roundLocked) return;
       this._revealIdleTimer = setTimeout(() => {
         this._revealIdleTimer = null;
@@ -3609,6 +3615,16 @@
           return;
         }
 
+        // Battle image mode: mirror solo's win reveal. With the answer tiles still
+        // green, show the English gloss underneath, read the word once with the
+        // snappy (tightened-syllable) cadence, and hold ~1s before it flies off.
+        if (this.imageMode) {
+          this.showAnswerEnglish(this.puzzle?.englishHint);
+          await this.speakSolvedWordImageQuick();
+          await this.delay(1000);
+          this.hideAnswerEnglish();
+        }
+
         let slotFlipPromise = null;
         await this.playScoreFly({
           side: 'my',
@@ -3923,6 +3939,24 @@
       // 1st read — current style.
       await Promise.resolve(tts.speak(word, wordChainSpeakOpts()));
       // 2nd read — syllables ~1/3 of the normal gap for a snappier repeat.
+      await Promise.resolve(tts.speak(word, wordChainSpeakOpts({
+        syllablePace: 'quick',
+        syllableGapMs: WORD_CHAIN_SYLLABLE_GAP_TIGHT_MS,
+      })));
+    }
+
+    /**
+     * Versus image-mode win pronunciation: a single read with the syllable
+     * spacing tightened to ~1/3 (matches solo's snappier 2nd read).
+     */
+    async speakSolvedWordImageQuick() {
+      const word = this.puzzle?.answer;
+      if (!word) return;
+      if (global.UserPreferences?.get?.().pronunciation === false) return;
+      const tts = global.KoreanTTS;
+      if (!tts?.speak) return;
+      tts.prime?.();
+      global.DictionaryService?.prefetchWord?.(word);
       await Promise.resolve(tts.speak(word, wordChainSpeakOpts({
         syllablePace: 'quick',
         syllableGapMs: WORD_CHAIN_SYLLABLE_GAP_TIGHT_MS,

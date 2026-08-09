@@ -233,10 +233,8 @@
 
     renderShell() {
       this.root.innerHTML = `
-        <header class="race-header">
-          <a class="race-back" href="index.html">${escapeHtml(rt('backProfile'))}</a>
+        <header class="race-header race-header--bare">
           <h1>${escapeHtml(rt('title'))}</h1>
-          <a class="race-settings-link" href="settings.html" aria-label="Settings">⚙️</a>
         </header>
         <div id="race-battle-hud" class="rw-race-battle-hud hidden" aria-live="polite">
           <div class="rw-race-battle-mid">
@@ -484,6 +482,9 @@
       this.renderMain('<div id="rw-race-game" class="rw-race-game"></div>');
       const gameRoot = this.root.querySelector('#rw-race-game');
 
+      const myName = global.FirebaseSocial?.getPublicName?.(global.ProfileService?.loadProfile?.())
+        || global.MatchEmotes?.buildLocalPlayerSummary?.()?.name
+        || rt('me');
       this.game = new global.RelatedWordsGame(gameRoot, {
         versus: true,
         raceControlled: true,
@@ -491,6 +492,8 @@
         chainId: this.chainId,
         raceTarget: this.raceTarget,
         initialLinkIndex: this.linkIndex,
+        playerName: myName,
+        opponentName: this.botName(),
         onRoundWin: (payload) => this.onPlayerRoundWin(payload),
         onRevealSkip: (payload) => this.onPlayerRevealSkip(payload),
         onLiveHudUpdate: (state) => {
