@@ -851,22 +851,9 @@
         // Keep alt empty so screen readers don't spoil the English answer.
         imgs.forEach((img) => { img.alt = ''; });
         if (credit) {
-          // Provider-aware attribution (Pixabay or Pexels).
-          const sourceName = photo.sourceName || 'Pexels';
-          const sourceUrl = photo.sourceUrl
-            || (photo.provider === 'pixabay' ? 'https://pixabay.com' : 'https://www.pexels.com');
-          const authorName = photo.creditName || photo.photographer || '';
-          const authorUrl = photo.creditUrl || photo.photographerUrl || photo.pexelsUrl || '';
-          if (photo.local) {
-            credit.textContent = '';
-            credit.classList.add('hidden');
-          } else {
-            credit.textContent = authorName
-              ? `Image by ${authorName} on ${sourceName}`
-              : `Image from ${sourceName}`;
-            credit.href = authorUrl || sourceUrl;
-            credit.classList.remove('hidden');
-          }
+          // Attribution line is intentionally hidden per product request.
+          credit.textContent = '';
+          credit.classList.add('hidden');
         }
       };
 
