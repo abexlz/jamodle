@@ -475,6 +475,16 @@ html.reduce-motion .rw-chain-recap-word {
   width: 100%;
 }
 
+/* Endless image mode: the Pixabay vector is the only clue — hide the word trail
+   and the empty chain-progress line so the photo sits closer to the top. */
+.rw-image-mode .rw-clue-area {
+  display: none;
+}
+
+.rw-image-mode .rw-chain-progress {
+  display: none;
+}
+
 .rw-answer-photo {
   flex: 0 0 auto;
   min-height: 0;

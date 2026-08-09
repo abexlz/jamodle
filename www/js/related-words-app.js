@@ -219,6 +219,16 @@
       this.fixedChainId = this.options.chainId || null;
       this._puzzleOpts = this.raceMode ? { race: true } : undefined;
       this.useThemeRotation = this.options.useThemeRotation === true;
+      // Solo Word Chain is now an endless "image chain": no themed chains, the
+      // Pixabay vector is the clue, answers come from the Hangul-dle pool. Race
+      // (versus) keeps the themed-chain flow untouched.
+      this.imageMode = !this.versus
+        && this.options.imageMode !== false
+        && !!(global.RelatedWordsImageMode && typeof global.RelatedWordsImageMode.getPuzzleByIndex === 'function');
+      if (this.imageMode) {
+        // Endless mode advances by a single global index (no per-chain boundary).
+        this.useThemeRotation = true;
+      }
       this.globalLinkIndex = 0;
       this.onProgress = typeof this.options.onProgress === 'function' ? this.options.onProgress : null;
       this.onFinished = typeof this.options.onFinished === 'function' ? this.options.onFinished : null;
@@ -441,6 +451,8 @@
         </div>
       `;
 
+      this.root.classList.toggle('rw-image-mode', !!this.imageMode);
+
       this.els = {
         board: this.root.querySelector('#rw-board'),
         chainTitle: document.getElementById('rw-race-chain-title') || this.root.querySelector('#rw-chain-title'),
@@ -562,6 +574,8 @@
     }
 
     getTrailWords(linkIndex, chainId) {
+      // Image mode has no previous-word clue trail — the vector is the only clue.
+      if (this.imageMode) return [];
       if (this.useThemeRotation) {
         const resolved = global.RelatedWordsChains?.resolveRoundPuzzle?.(linkIndex);
         if (!resolved) return [];
@@ -575,6 +589,10 @@
     }
 
     puzzleLocation(globalLinkIndex) {
+      if (this.imageMode) {
+        const idx = Math.max(0, Number(globalLinkIndex) || 0);
+        return { chainId: 'image', linkIndex: idx, globalLinkIndex: idx };
+      }
       if (this.useThemeRotation) {
         return global.RelatedWordsChains.resolveRoundPuzzle(globalLinkIndex);
       }
@@ -606,8 +624,9 @@
       let chainId;
       let linkIndex;
       let opts;
+      let globalIdx = null;
       if (this.useThemeRotation) {
-        const globalIdx = Math.max(0, Number(chainIdOrGlobal) || 0);
+        globalIdx = Math.max(0, Number(chainIdOrGlobal) || 0);
         opts = linkIndexOrOpts || {};
         this.globalLinkIndex = globalIdx;
         const resolved = this.puzzleLocation(globalIdx);
@@ -620,7 +639,9 @@
       }
       const skipTrail = opts.skipTrail === true;
       const skipDockRender = opts.skipDockRender === true;
-      this.puzzle = RW().getPuzzle(chainId, linkIndex, this._puzzleOpts);
+      this.puzzle = this.imageMode
+        ? global.RelatedWordsImageMode.getPuzzleByIndex(globalIdx)
+        : RW().getPuzzle(chainId, linkIndex, this._puzzleOpts);
       if (!this.puzzle) {
         if (this.raceMode) {
           this.setSharedWordsDone(linkIndex);
@@ -657,6 +678,7 @@
         this.progress = saveProgress({
           chainId: this.puzzle.chainId,
           linkIndex: this.puzzle.linkIndex,
+          ...(this.imageMode ? { globalLinkIndex: globalIdx } : {}),
         });
       }
       this.guessCount = 0;
@@ -1104,6 +1126,7 @@
         ...base,
         chainId: this.puzzle.chainId,
         linkIndex: this.puzzle.linkIndex,
+        ...(this.imageMode ? { globalLinkIndex: this.globalLinkIndex || 0 } : {}),
         soloStreak: this.getSoloStreak(),
         solvedInChain: Array.isArray(this.progress?.solvedInChain)
           ? [...this.progress.solvedInChain]
@@ -1459,8 +1482,12 @@
         linkIndex = linkIndexOrOpts;
         opts = maybeOpts;
       }
-      const nextPuzzle = RW().getPuzzle(chainId, linkIndex, this._puzzleOpts);
-      const linkCount = RW().getPuzzleCount(chainId, this._puzzleOpts);
+      const nextPuzzle = this.imageMode
+        ? global.RelatedWordsImageMode.getPuzzleByIndex(linkIndex)
+        : RW().getPuzzle(chainId, linkIndex, this._puzzleOpts);
+      const linkCount = this.imageMode
+        ? Number.POSITIVE_INFINITY
+        : RW().getPuzzleCount(chainId, this._puzzleOpts);
       const pastRaceTarget = this.raceMode && linkIndex >= this.raceTarget;
       const pastChainEnd = this.raceMode && linkIndex >= linkCount;
       if (!nextPuzzle || pastChainEnd || pastRaceTarget) {
@@ -1582,6 +1609,12 @@
     }
 
     renderChainMeta() {
+      if (this.imageMode) {
+        // Endless image chain — no chain title or "link X of Y" progress.
+        if (this.els.chainTitle) this.els.chainTitle.textContent = '';
+        if (this.els.chainProgress) this.els.chainProgress.textContent = '';
+        return;
+      }
       const chain = RW()?.getChain?.(this.puzzle.chainId, this._puzzleOpts);
       const titled = this.puzzle.chainTitleKey ? t(this.puzzle.chainTitleKey) : '';
       const label = (titled && titled !== this.puzzle.chainTitleKey)
@@ -3604,6 +3637,25 @@
       this.gameOver = true;
 
       await this.delay(reduceMotion() ? 200 : 360);
+
+      // Endless image chain: no chain-complete recap — just advance to the next
+      // Pixabay word from the Hangul-dle pool.
+      if (this.imageMode) {
+        this.awardWinXp();
+        try {
+          global.QuestService?.recordActivity?.('relatedWordsChain');
+        } catch (err) {
+          console.warn('[Jamodeul] Chain quest progress failed.', err);
+        }
+        const nextIndex = (this.globalLinkIndex || 0) + 1;
+        this.progress = saveProgress({ globalLinkIndex: nextIndex });
+        await this.loadLink(nextIndex, null, {
+          useTileFlipTransition: true,
+          skipTrail: true,
+        });
+        this.checking = false;
+        return;
+      }
 
       // Captured before commitWinProgress() clears solvedInChain for the next chain.
       const solvedThisChain = [...(this.progress.solvedInChain || []), this.puzzle.answer];

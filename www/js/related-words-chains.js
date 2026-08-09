@@ -183,7 +183,7 @@
       id: 'rw-art-sweet', label: '그림 · 미술',
       words: [
         '그림', '물감', '붓', '캔버스', '팔레트',
-        '스케치', '크레용', '파스텔', '조소', '도자기',
+        '스케치', '크레용', '파스텔', '조각', '도자기',
         '판화', '디자인', '회화', '건축', '공예',
       ],
     },
@@ -956,6 +956,12 @@
     }));
   }
 
+  /** Dock builder for the endless image mode (no themed chain context). */
+  function buildImageDock(answer, poolWords, index) {
+    const words = Array.isArray(poolWords) && poolWords.length ? poolWords : [answer];
+    return buildDock(answer, words, 'image', Number(index) || 0);
+  }
+
   function getChain(chainId) {
     return NORMALIZED_CHAINS.find((c) => c.id === chainId) || NORMALIZED_CHAINS[0];
   }
@@ -1110,6 +1116,7 @@
     pickRaceChain,
     pickRandomRaceChain,
     isRaceExcludedWord,
+    buildImageDock,
     splitSyllables,
     relatedWordsRoundPoints,
   };

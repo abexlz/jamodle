@@ -149,7 +149,7 @@
     스케치: 'sketch',
     크레용: 'crayon',
     파스텔: 'pastel',
-    조소: 'sculpture',
+    조각: 'sculpture',
     도자기: 'pottery',
     판화: 'printmaking',
     건축: 'architecture',
