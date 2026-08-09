@@ -35,6 +35,11 @@
   const CHAIN_RECAP_REDUCED_MS = 1600;
   /** Word Chain pronunciations play 50% faster than the global Korean TTS default. */
   const WORD_CHAIN_TTS_RATE = 1.5;
+  /**
+   * Second-read syllable gap for the image-mode win pronunciation: ~1/3 of the
+   * default 200ms Web-Speech syllable pause (the server voice uses 'quick' pace).
+   */
+  const WORD_CHAIN_SYLLABLE_GAP_TIGHT_MS = 67;
   const wordChainSpeakOpts = (extra = {}) => ({
     repeats: 1,
     playbackRate: WORD_CHAIN_TTS_RATE,
@@ -402,6 +407,7 @@
             <div class="rw-board" id="rw-board">
             <section class="rw-answer-area">
               <div class="rw-slots" id="rw-slots"></div>
+              <p class="rw-answer-english hidden" id="rw-answer-english" aria-live="polite" aria-hidden="true"></p>
             </section>
 
             <div class="rw-divider" role="presentation"></div>
@@ -472,6 +478,7 @@
         answerPhotoCredit: this.root.querySelector('#rw-answer-photo-credit'),
         lives: this.root.querySelector('#rw-lives'),
         slots: this.root.querySelector('#rw-slots'),
+        answerEnglish: this.root.querySelector('#rw-answer-english'),
         revealSkip: this.root.querySelector('#rw-reveal-skip'),
         revealBtn: this.root.querySelector('#rw-reveal-btn'),
         revealStatus: this.root.querySelector('#rw-reveal-status'),
@@ -3542,8 +3549,9 @@
       const sharedRace = this.raceMode && this.sharedRace;
 
       global.SoundEffects?.win?.();
-      // 1v1 pronounces the new clue via renderTrail; solo speaks the solved word here.
-      if (!this.raceMode) {
+      // 1v1 pronounces the new clue via renderTrail; solo speaks the solved word
+      // here. Image mode runs its own two-read sequence in the branch below.
+      if (!this.raceMode && !this.imageMode) {
         this.speakCorrectWord();
       }
 
@@ -3660,6 +3668,12 @@
         } catch (err) {
           console.warn('[Jamodeul] Chain quest progress failed.', err);
         }
+        // Reveal the English translation under the Korean answer, read the word
+        // twice (2nd pass with tightened syllable spacing), hold ~1s, then move on.
+        this.showAnswerEnglish(this.puzzle?.englishHint);
+        await this.speakSolvedWordImageMode();
+        await this.delay(1000);
+        this.hideAnswerEnglish();
         const nextIndex = (this.globalLinkIndex || 0) + 1;
         this.progress = saveProgress({ globalLinkIndex: nextIndex });
         await this.loadLink(nextIndex, null, {
@@ -3862,6 +3876,51 @@
       global.DictionaryService?.prefetchWord?.(word);
       // In 1v1, trail render will pronounce the next clue — speak the solved word here.
       return Promise.resolve(global.KoreanTTS?.speak?.(word, wordChainSpeakOpts()) ?? false);
+    }
+
+    /**
+     * Image-mode win pronunciation: read the answer once at the normal Word Chain
+     * cadence, then a second time with the syllable spacing tightened to ~1/3
+     * ('quick' pace = no inter-syllable pause on the server voice).
+     */
+    async speakSolvedWordImageMode() {
+      const word = this.puzzle?.answer;
+      if (!word) return;
+      if (global.UserPreferences?.get?.().pronunciation === false) return;
+      const tts = global.KoreanTTS;
+      if (!tts?.speak) return;
+      tts.prime?.();
+      global.DictionaryService?.prefetchWord?.(word);
+      // 1st read — current style.
+      await Promise.resolve(tts.speak(word, wordChainSpeakOpts()));
+      // 2nd read — syllables ~1/3 of the normal gap for a snappier repeat.
+      await Promise.resolve(tts.speak(word, wordChainSpeakOpts({
+        syllablePace: 'quick',
+        syllableGapMs: WORD_CHAIN_SYLLABLE_GAP_TIGHT_MS,
+      })));
+    }
+
+    /** Show the English translation beneath the Korean answer (image mode). */
+    showAnswerEnglish(text) {
+      const el = this.els.answerEnglish;
+      if (!el) return;
+      const label = String(text || '').trim();
+      if (!label) {
+        this.hideAnswerEnglish();
+        return;
+      }
+      el.textContent = label;
+      el.classList.remove('hidden');
+      el.setAttribute('aria-hidden', 'false');
+    }
+
+    /** Clear the English translation reveal. */
+    hideAnswerEnglish() {
+      const el = this.els.answerEnglish;
+      if (!el) return;
+      el.textContent = '';
+      el.classList.add('hidden');
+      el.setAttribute('aria-hidden', 'true');
     }
 
     getChainLabel(chain) {

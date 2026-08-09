@@ -895,8 +895,40 @@ html.reduce-motion .rw-chain-recap-word {
 
 .rw-answer-area {
   display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
   margin-bottom: 20px;
+}
+
+/* English translation revealed under the Korean answer on an image-mode win. */
+.rw-answer-english {
+  margin: 10px 0 0;
+  text-align: center;
+  font-weight: 800;
+  font-size: clamp(16px, 4.6vw, 22px);
+  line-height: 1.2;
+  color: #1a1a1a;
+  letter-spacing: 0.2px;
+  text-transform: capitalize;
+  animation: rwAnswerEnglishIn 180ms ease-out both;
+}
+
+.rw-answer-english.hidden {
+  display: none;
+}
+
+[data-theme="dark"] .rw-answer-english {
+  color: #f4f7f8;
+}
+
+@keyframes rwAnswerEnglishIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+html.reduce-motion .rw-answer-english {
+  animation: none;
 }
 
 .rw-slots {
