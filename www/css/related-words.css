@@ -1300,17 +1300,17 @@ html.reduce-motion .rw-answer-english {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  min-width: 84px;
-  min-height: 44px;
-  padding: 6px 14px;
+  gap: 8px;
+  min-width: 109px;
+  min-height: 57px;
+  padding: 8px 18px;
   border: 2px solid var(--border, #d5d8e0);
-  border-radius: 14px;
+  border-radius: 16px;
   background: #fff;
   box-shadow: 0 3px 0 rgba(93, 100, 112, 0.12);
   color: #2a2e3e;
   font-family: 'Jua', 'Noto Sans KR', sans-serif;
-  font-size: 16px;
+  font-size: 21px;
   line-height: 1;
   cursor: pointer;
   transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.15s ease;
@@ -1332,19 +1332,28 @@ html.reduce-motion .rw-answer-english {
 }
 
 .rw-hint-btn__icon {
-  font-size: 22px;
+  font-size: 29px;
   line-height: 1;
 }
 
 .rw-hint-btn__label {
-  font-size: 16px;
+  font-size: 21px;
+}
+
+/* "hint!!" call-out beside the bulb. */
+.rw-hint-btn__tag {
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  color: #e8890c;
+  text-transform: lowercase;
 }
 
 .rw-hint-btn__cost {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 17px;
+  font-size: 22px;
   font-weight: 700;
   color: #2a2e3e;
 }
