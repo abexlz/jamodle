@@ -1887,7 +1887,7 @@
     padding: clamp(38px, 11vw, 56px) 14% clamp(40px, 11vw, 58px);
     box-sizing: border-box;
     overflow: hidden;
-    background: url('../assets/results/match-word-banner.png?v=nodiamond') center / 100% 100% no-repeat;
+    background: url('../assets/results/match-word-banner.png?v=nodiamond3') center / 100% 100% no-repeat;
     transform: none;
   }
 
