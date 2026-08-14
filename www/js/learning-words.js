@@ -40,8 +40,11 @@
     if (glossary && isDisplayableMeaning(glossary)) return glossary;
 
     const curated = String(rawMeaning || '').trim();
-    if (!curated || isEtymologyGloss(curated) || isHanziGloss(curated)) {
-      return allowHanziFallback && isHanziGloss(curated) ? curated : '';
+    if (!curated || isEtymologyGloss(curated) || isHanziGloss(curated)
+        || (global.MeaningGlossary?.containsHanzi?.(curated))) {
+      const hanziLike = isHanziGloss(curated)
+        || global.MeaningGlossary?.containsHanzi?.(curated);
+      return allowHanziFallback && hanziLike ? curated : '';
     }
     return curated;
   }

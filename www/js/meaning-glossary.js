@@ -14,6 +14,10 @@
    */
   const ETYMOLOGY_GLOSS_RE = /^&\s*[가-힣]{1,4}\s*.+/u;
 
+  function containsHanzi(text) {
+    return /[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]/.test(String(text || ''));
+  }
+
   function isHanziGloss(text) {
     const s = String(text || '').trim();
     if (!s) return false;
@@ -43,10 +47,7 @@
   /** Prefer strings that look usable as an English / Latin gloss. */
   function looksLikeEnglishGloss(text) {
     const s = String(text || '').trim();
-    if (!s || isHanziGloss(s) || isEtymologyGloss(s)) return false;
-    if (/[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]/.test(s) && !/[A-Za-z]{2,}/.test(s)) {
-      return false;
-    }
+    if (!s || isHanziGloss(s) || containsHanzi(s) || isEtymologyGloss(s)) return false;
     return /[A-Za-z]/.test(s);
   }
 
@@ -104,9 +105,6 @@
     const learned = readLearned()[q];
     const english = firstEnglishGloss(curated, chain, learned);
     if (english) return english;
-    if (curated && isDisplayableMeaning(curated) && !isHanziGloss(curated)) {
-      return String(curated).trim();
-    }
     return '';
   }
 
@@ -346,6 +344,7 @@
 
   global.MeaningGlossary = {
     isHanziGloss,
+    containsHanzi,
     isEtymologyGloss,
     stripEtymologyTag,
     isDisplayableMeaning,
