@@ -200,13 +200,9 @@
     setHintDisabled(on) {
       this.hintDisabled = !!on;
       this.el.classList.toggle('hint-disabled', this.hintDisabled);
-      if (this.hintDisabled) {
-        this.el.setAttribute('aria-disabled', 'true');
-        this.el.tabIndex = -1;
-      } else {
-        this.el.removeAttribute('aria-disabled');
-        this.el.tabIndex = 0;
-      }
+      // Unused slots stay dimmed but remain droppable/movable.
+      this.el.removeAttribute('aria-disabled');
+      this.el.tabIndex = 0;
     }
 
     setLocked(correct) {
