@@ -3678,14 +3678,10 @@
     }
 
     animateTileOrient({ tile, oriented }) {
-      const prevChar = tile.char;
-      const prevZoneType = tile.zoneType;
       const prevZone = tile.zoneRef;
-      const inVowelSlot = !!(prevZone
-        && (prevZone.zoneType === 'jungH' || prevZone.zoneType === 'jungV'));
-      const sourceSyllableIndex = inVowelSlot
-        ? prevZone.syllableIndex
-        : tile.syllableIndex;
+      const wasOnBoard = !!prevZone;
+      const wasInMergeSlot = tile.mergeDockRef === 'slot';
+      const sourceSyllableIndex = prevZone?.syllableIndex ?? tile.syllableIndex;
 
       return new Promise((resolve) => {
         tile.el.classList.add('orient-hint-shake');
@@ -3696,28 +3692,14 @@
           if (oriented.zoneType === 'jungH') tile.subIndex = 0;
           tile.setChar(oriented.char);
 
-          if (inVowelSlot && prevZone && oriented.zoneType !== prevZone.zoneType) {
-            const targetZone = this.findVowelTargetZone(
-              sourceSyllableIndex,
-              oriented.zoneType,
-              oriented.zoneType === 'jungV' ? (tile.subIndex ?? 0) : 0
-            );
-            if (!targetZone
-              || targetZone.syllableIndex !== sourceSyllableIndex
-              || (targetZone.placedTileId && targetZone.placedTileId !== tile.id)) {
-              tile.zoneType = prevZoneType;
-              tile.setChar(prevChar);
-              resolve();
-              return;
+          // ALIGN must not snap tiles into empty board slots (they look locked).
+          // Send every influenced tile that was on the board or in a merge slot
+          // back to the jamo dock with its new orientation.
+          if (wasOnBoard || wasInMergeSlot) {
+            this.returnTileToBank(tile);
+            if (wasOnBoard && sourceSyllableIndex != null) {
+              this.syncSyllableVowelLayout(this.blocks[sourceSyllableIndex]);
             }
-            prevZone.clear();
-            tile.zoneRef = null;
-            this.attachTileToZone(tile, targetZone);
-            tile.syllableIndex = sourceSyllableIndex;
-            if (oriented.zoneType === 'jungV') {
-              tile.subIndex = targetZone.subIndex ?? 0;
-            }
-            this.syncSyllableVowelLayout(this.blocks[sourceSyllableIndex]);
           }
 
           tile.el.classList.add('orient-hint-snap');
