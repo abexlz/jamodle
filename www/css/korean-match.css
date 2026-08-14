@@ -800,9 +800,14 @@
 
   .drop-zone.hint-disabled {
     opacity: 0.35;
-    pointer-events: none;
     border-style: dotted;
     background: var(--border-soft);
+  }
+
+  .drop-zone.hint-disabled.filled {
+    opacity: 1;
+    border-style: solid;
+    background: var(--card);
   }
 
   .drop-zone.hint-disabled::after {
@@ -811,6 +816,10 @@
     font-size: 18px;
     color: var(--text-soft);
     pointer-events: none;
+  }
+
+  .drop-zone.hint-disabled.filled::after {
+    content: none;
   }
 
   /* ── Hint dock ── */
