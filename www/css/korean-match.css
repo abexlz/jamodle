@@ -2280,8 +2280,9 @@
   body.match-page .match-chrome-title-img,
   .hangul-dle-title-img {
     display: block;
-    width: 95vw;
-    max-width: 95vw;
+    width: min(52vw, 200px);
+    max-width: min(52vw, 200px);
+    max-height: clamp(28px, 5.5dvh, 40px);
     height: auto;
     object-fit: contain;
     margin: 0 auto;
