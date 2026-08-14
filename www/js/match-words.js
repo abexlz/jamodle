@@ -17,35 +17,13 @@
   };
 
   /**
-   * Supplemental pools for lengths sparse/missing in the learning noun list.
-   * Learning data currently tops out at 5 syllables — 6-letter mode needs these.
+   * Supplemental pools for 5–6 syllable Hangul-dle (learning list is mostly 1–4).
    */
+  const LONG = global.MatchLongWords || {};
   const EXTRA_WORDS_BY_LENGTH = {
+    5: [...(LONG[5] || [])],
     6: [
-      '어린이도서관',
-      '인스턴트커피',
-      '텔레비전방송',
-      '아파트관리비',
-      '초등학교동창',
-      '정보통신기술',
-      '사회복지센터',
-      '환경보호운동',
-      '건강보조식품',
-      '신용카드결제',
-      '온라인쇼핑몰',
-      '휴대전화번호',
-      '자동차보험료',
-      '건강보험공단',
-      '대학교도서관',
-      '프라이드치킨',
-      '초콜릿케이크',
-      '문화체육관광',
-      '전자상거래법',
-      '슈퍼마켓가게',
-      '외국어학원비',
-      '우리나라사람',
-      '중학교선생님',
-      '인터넷쇼핑몰',
+      ...(LONG[6] || []),
     ],
   };
 
