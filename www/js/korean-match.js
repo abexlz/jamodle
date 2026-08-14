@@ -14,6 +14,7 @@
   const SOLO_SESSION_KEY = 'jamodeul-match-solo-session';
   const FLIP_MS = 420;
   const FLIP_STAGGER = 90;
+  const MEANING_POPUP_MS = 5000;
 
   const t = (key, vars) => global.I18n?.t(key, vars) ?? '';
   const prefs = () => global.UserPreferences;
@@ -1620,6 +1621,10 @@
     }
 
     hideMeaningPopup() {
+      if (this._meaningPopupTimer) {
+        clearTimeout(this._meaningPopupTimer);
+        this._meaningPopupTimer = 0;
+      }
       const popup = this.els.meaningPopup;
       if (!popup) return;
       popup.classList.remove('is-visible');
@@ -1651,6 +1656,11 @@
       popup.classList.remove('hidden', 'is-visible');
       void popup.offsetWidth;
       popup.classList.add('is-visible');
+      if (this._meaningPopupTimer) clearTimeout(this._meaningPopupTimer);
+      this._meaningPopupTimer = setTimeout(() => {
+        this._meaningPopupTimer = 0;
+        this.hideMeaningPopup();
+      }, MEANING_POPUP_MS);
     }
 
     async useMeaningHint() {
