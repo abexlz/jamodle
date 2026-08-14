@@ -418,6 +418,10 @@
           dayBtn.classList.toggle('is-selected', picked);
           dayBtn.setAttribute('aria-pressed', picked ? 'true' : 'false');
         });
+        if (SVC().isToday(dateKey) && SVC().canPlayDate(dateKey)) {
+          onPlay();
+          return;
+        }
         const footer = overlayEl.querySelector('.daily-cal-footer');
         if (footer && activeTab === 'puzzles') {
           footer.innerHTML = buildFooterHtml();
