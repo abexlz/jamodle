@@ -6426,20 +6426,29 @@
           + (Number.parseFloat(cs.paddingRight) || 0);
         const padY = (Number.parseFloat(cs.paddingTop) || 0)
           + (Number.parseFloat(cs.paddingBottom) || 0);
-        const innerW = Math.max(40, banner.clientWidth - padX);
-        const innerH = Math.max(40, banner.clientHeight - padY);
-        // Fill ~80% of the answer box; never overflow that band.
+        // Gold frame / scalloped ends are inside the PNG, so keep extra inset.
+        const frameX = banner.clientWidth * 0.08;
+        const frameY = banner.clientHeight * 0.16;
+        const innerW = Math.max(40, banner.clientWidth - padX - frameX);
+        const innerH = Math.max(40, banner.clientHeight - padY - frameY);
         const targetW = innerW * 0.8;
-        const maxFont = Math.max(40, Math.floor(innerH * 0.8));
+        const targetH = innerH * 0.72;
+        // Jua Hangul glyphs sit taller than font-size; keep a headroom cap.
+        const maxFont = Math.max(32, Math.floor(targetH * 0.82));
 
-        let lo = 28;
+        const fits = (size) => {
+          card.style.setProperty('--results-word-font', `${size}px`);
+          void wordEl.offsetWidth;
+          const box = wordEl.getBoundingClientRect();
+          return wordEl.scrollWidth <= targetW + 1 && box.height <= targetH + 1;
+        };
+
+        let lo = 24;
         let hi = maxFont;
-        let best = 28;
+        let best = 24;
         while (lo <= hi) {
           const mid = Math.round((lo + hi) / 2);
-          card.style.setProperty('--results-word-font', `${mid}px`);
-          void wordEl.offsetWidth;
-          if (wordEl.scrollWidth <= targetW + 1) {
+          if (fits(mid)) {
             best = mid;
             lo = mid + 1;
           } else {

@@ -1819,7 +1819,7 @@
 
   .results-overlay--clear .results-card {
     --results-card-base-width: min(520px, 99vw);
-    --results-word-font: clamp(64px, 16vw, 130px);
+    --results-word-font: clamp(48px, 12vw, 96px);
     position: relative;
     background: transparent !important;
     border: none !important;
@@ -1884,8 +1884,9 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 26px 12% 29px;
+    padding: clamp(38px, 11vw, 56px) 14% clamp(40px, 11vw, 58px);
     box-sizing: border-box;
+    overflow: hidden;
     background: url('../assets/results/match-word-banner.png?v=nodiamond') center / 100% 100% no-repeat;
     transform: none;
   }
@@ -1932,12 +1933,12 @@
   .results-overlay--clear .results-word {
     font-family: 'Jua', 'Noto Sans KR', sans-serif;
     /* ~3× prior ~40–54px answer size; popup widens to fit */
-    font-size: var(--results-word-font, clamp(64px, 16vw, 130px)) !important;
+    font-size: var(--results-word-font, clamp(48px, 12vw, 96px)) !important;
     color: #fff;
     margin: 0;
-    line-height: 1.05;
+    line-height: 1;
     text-align: center;
-    flex: 1 1 auto;
+    flex: 0 0 auto;
     min-width: 0;
     max-width: 100%;
     white-space: nowrap !important;
