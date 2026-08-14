@@ -6406,7 +6406,7 @@
       const chars = Array.from(String(word || '').replace(/\s*[·•|]\s*/g, '')).length;
       banner.dataset.chars = String(Math.max(1, Math.min(chars || 1, 12)));
 
-      const targetFont = Math.round(Math.min(130, Math.max(96, window.innerWidth * 0.24)));
+      const targetFont = Math.round(Math.min(117, Math.max(86, window.innerWidth * 0.216)));
       wordEl.style.removeProperty('font-size');
       wordEl.style.whiteSpace = 'nowrap';
       this.resetResultsCardWidth();
