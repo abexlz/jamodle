@@ -1539,10 +1539,7 @@
       const q = String(word || '').trim().normalize('NFC');
       if (!q) return '';
 
-      const isHanzi = (text) => global.MeaningGlossary?.isHanziGloss?.(text)
-        || /^[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]+$/.test(String(text || '').trim());
-      const isEnglish = (text) => global.MeaningGlossary?.looksLikeEnglishGloss?.(text)
-        || (/[A-Za-z]/.test(String(text || '')) && !isHanzi(text));
+      const isEnglish = (text) => !!global.MeaningGlossary?.looksLikeEnglishGloss?.(text);
 
       const localEnglish = this.getSyncMeaning(q);
       if (localEnglish && isEnglish(localEnglish)) return localEnglish;
@@ -1562,6 +1559,13 @@
         if (dictMeaning && isEnglish(dictMeaning)) return dictMeaning;
       } catch {
         /* dictionary / translator optional */
+      }
+
+      try {
+        const rough = await global.DictionaryService?.translateKoToEn?.(q);
+        if (rough && isEnglish(rough)) return rough;
+      } catch {
+        /* rough translation optional */
       }
 
       return '';
@@ -1680,6 +1684,13 @@
       if (!global.MeaningGlossary?.looksLikeEnglishGloss?.(text)) {
         try {
           text = await this.getMeaningForWord(word);
+        } catch {
+          text = '';
+        }
+      }
+      if (!global.MeaningGlossary?.looksLikeEnglishGloss?.(text)) {
+        try {
+          text = await global.DictionaryService?.translateKoToEn?.(word) || '';
         } catch {
           text = '';
         }

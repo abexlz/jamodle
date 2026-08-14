@@ -160,7 +160,7 @@
 
     if (prefetchedEntry) {
       const direct = formatEntryMeaning(prefetchedEntry, { allowFallback: false });
-      if (direct) {
+      if (direct && looksLikeEnglishGloss(direct)) {
         global.MeaningGlossary?.remember?.(q, direct);
         return direct;
       }
@@ -169,7 +169,7 @@
     const cached = readCache(q);
     if (cached) {
       const fromCache = meaningFromLookupResult(cached, q, { allowFallback: false });
-      if (fromCache) {
+      if (fromCache && looksLikeEnglishGloss(fromCache)) {
         global.MeaningGlossary?.remember?.(q, fromCache);
         return fromCache;
       }
@@ -192,12 +192,10 @@
             writeCache(q, result);
           }
           const live = meaningFromLookupResult(result, q, { allowFallback: false });
-          if (live) {
+          if (live && looksLikeEnglishGloss(live)) {
             global.MeaningGlossary?.remember?.(q, live);
             return live;
           }
-          const soft = meaningFromLookupResult(result, q, { allowFallback: true });
-          if (soft) return soft;
           break;
         } catch (err) {
           lastErr = err;
@@ -210,12 +208,12 @@
     }
 
     if (prefetchedEntry) {
-      const softPrefetch = formatEntryMeaning(prefetchedEntry, { allowFallback: true });
-      if (softPrefetch) return softPrefetch;
+      const softPrefetch = formatEntryMeaning(prefetchedEntry, { allowFallback: false });
+      if (softPrefetch && looksLikeEnglishGloss(softPrefetch)) return softPrefetch;
     }
     if (cached) {
-      const softCache = meaningFromLookupResult(cached, q, { allowFallback: true });
-      if (softCache) return softCache;
+      const softCache = meaningFromLookupResult(cached, q, { allowFallback: false });
+      if (softCache && looksLikeEnglishGloss(softCache)) return softCache;
     }
 
     const translated = await translateKoToEn(q);
@@ -237,20 +235,39 @@
     return false;
   }
 
+  async function translateViaMyMemory(q) {
+    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(q)}&langpair=ko|en`;
+    const res = await fetch(url);
+    if (!res.ok) return '';
+    const data = await res.json();
+    const text = String(data?.responseData?.translatedText || '').trim();
+    if (isJunkTranslation(text, q) || !looksLikeEnglishGloss(text)) return '';
+    return text;
+  }
+
+  async function translateViaGtx(q) {
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=ko&tl=en&dt=t&q=${encodeURIComponent(q)}`;
+    const res = await fetch(url);
+    if (!res.ok) return '';
+    const data = await res.json();
+    const chunks = Array.isArray(data?.[0]) ? data[0] : [];
+    const text = chunks.map((part) => (Array.isArray(part) ? part[0] : '')).join('').trim();
+    if (isJunkTranslation(text, q) || !looksLikeEnglishGloss(text)) return '';
+    return text;
+  }
+
   async function translateKoToEn(word) {
-    const q = String(word || '').trim();
+    const q = String(word || '').trim().normalize('NFC');
     if (!q || !isOnline()) return '';
     try {
-      const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(q)}&langpair=ko|en`;
-      const res = await fetch(url);
-      if (!res.ok) return '';
-      const data = await res.json();
-      const text = String(data?.responseData?.translatedText || '').trim();
-      if (isJunkTranslation(text, q) || !looksLikeEnglishGloss(text)) return '';
-      return text;
-    } catch {
-      return '';
-    }
+      const memory = await translateViaMyMemory(q);
+      if (memory) return memory;
+    } catch { /* try next */ }
+    try {
+      const gtx = await translateViaGtx(q);
+      if (gtx) return gtx;
+    } catch { /* ignore */ }
+    return '';
   }
 
   function matchesExactEntry(data, word) {
@@ -431,6 +448,7 @@
     matchesExactEntry,
     formatEntryMeaning,
     resolveEnglishMeaning,
+    translateKoToEn,
     prefetchWord,
     readCache,
     getApiBase,
