@@ -532,9 +532,9 @@
   .match-hint-btn-label {
     display: block;
     font-family: 'Jua', 'Noto Sans KR', sans-serif;
-    font-size: clamp(20px, 5.6vw, 24px);
+    font-size: clamp(18px, 5vw, 22px);
     font-weight: 400;
-    letter-spacing: 0.02em;
+    letter-spacing: 0;
     line-height: 1.1;
     color: #ffffff;
     text-shadow: 0 1px 2px rgba(0, 40, 50, 0.45);
@@ -3230,15 +3230,16 @@
   }
 
   body.match-page .match-hint-dock {
-    --hint-icon-size: clamp(52px, 14vw, 64px);
-    --hint-col-size: var(--hint-icon-size);
+    --hint-icon-h: clamp(56px, 15vw, 72px);
+    --hint-gap: clamp(6px, 1.6vw, 10px);
+    --hint-icon-size: var(--hint-icon-h);
     display: flex;
     flex-wrap: nowrap;
     justify-content: center;
     align-items: flex-start;
-    gap: clamp(10px, 3vw, 18px);
+    gap: var(--hint-gap);
     width: 100%;
-    padding: 10px 8px 12px;
+    padding: 10px 4px 12px;
     box-sizing: border-box;
     overflow: visible;
     background: transparent !important;
@@ -3298,10 +3299,10 @@
   }
 
   body.match-page .match-hint-dock > .match-hint-btn--icon {
-    flex: 0 0 var(--hint-col-size);
-    width: var(--hint-col-size);
-    max-width: var(--hint-col-size);
-    min-width: var(--hint-col-size);
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+    max-width: 132px;
     flex-direction: column !important;
     align-items: center !important;
     justify-content: flex-start !important;
@@ -3312,16 +3313,18 @@
   }
 
   body.match-page .match-hint-dock > .match-hint-btn--icon .match-hint-btn-glyph {
-    width: var(--hint-icon-size) !important;
-    height: var(--hint-icon-size) !important;
-    flex: 0 0 var(--hint-icon-size) !important;
-    max-width: var(--hint-icon-size);
-    max-height: var(--hint-icon-size);
+    width: 100% !important;
+    height: var(--hint-icon-h) !important;
+    flex: 0 0 var(--hint-icon-h) !important;
+    max-width: none;
+    max-height: var(--hint-icon-h);
+    aspect-ratio: auto;
   }
 
   body.match-page .match-hint-dock > .match-hint-btn--icon .match-hint-btn-label {
     width: 100%;
     overflow: visible;
+    letter-spacing: 0;
   }
 
   body.match-page .match-hint-dock > .match-hint-btn:not(.match-hint-btn--icon) {
@@ -3358,8 +3361,8 @@
     }
 
     body.match-page .match-hint-dock {
-      --hint-icon-size: clamp(48px, 13vw, 56px);
-      --hint-col-size: var(--hint-icon-size);
+      --hint-icon-h: clamp(50px, 14vw, 64px);
+      --hint-icon-size: var(--hint-icon-h);
     }
 
     body.match-page .match-actions > .match-action-btn {
