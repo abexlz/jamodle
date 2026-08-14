@@ -1536,7 +1536,7 @@
     }
 
     async resolveWordMeaning(word) {
-      const q = String(word || '').trim();
+      const q = String(word || '').trim().normalize('NFC');
       if (!q) return '';
 
       const isHanzi = (text) => global.MeaningGlossary?.isHanziGloss?.(text)
@@ -1544,10 +1544,7 @@
       const isEnglish = (text) => global.MeaningGlossary?.looksLikeEnglishGloss?.(text)
         || (/[A-Za-z]/.test(String(text || '')) && !isHanzi(text));
 
-      // 1) Local English glossary (curated + learned cache)
-      const localEnglish = global.MeaningGlossary?.getEnglish?.(q)
-        || global.LearningWords?.getWordMeaning?.(q, { allowHanziFallback: false })
-        || '';
+      const localEnglish = this.getSyncMeaning(q);
       if (localEnglish && isEnglish(localEnglish)) return localEnglish;
 
       const entry = global.LearningWords?.findWordEntry?.(q);
@@ -1558,15 +1555,14 @@
         if (curated && isEnglish(curated)) return curated;
       }
 
-      // 2) Dictionary API / cache (English first; service may soft-fallback)
-      const prefetched = this.multiDictionaryEntries?.[q]
-        || (q === this.discoveredWord ? this.discoveredDictionaryEntry : null);
-      const dictMeaning = await global.DictionaryService?.resolveEnglishMeaning?.(q, prefetched);
-      if (dictMeaning) return dictMeaning;
-
-      // 3) Hanzi / Korean spreadsheet gloss as last resort
-      const localFallback = global.LearningWords?.getLocalMeaningFallback?.(q) || '';
-      if (localFallback) return localFallback;
+      try {
+        const prefetched = this.multiDictionaryEntries?.[q]
+          || (q === this.discoveredWord ? this.discoveredDictionaryEntry : null);
+        const dictMeaning = await global.DictionaryService?.resolveEnglishMeaning?.(q, prefetched);
+        if (dictMeaning && isEnglish(dictMeaning)) return dictMeaning;
+      } catch {
+        /* dictionary / translator optional */
+      }
 
       return '';
     }
@@ -1602,12 +1598,12 @@
     }
 
     getSyncMeaning(word) {
-      const q = String(word || '').trim();
+      const q = String(word || '').trim().normalize('NFC');
       if (!q) return '';
       return global.MeaningGlossary?.getEnglish?.(q)
         || global.MatchWordMeanings?.[q]
+        || global.WordChainEnglish?.getEnglish?.(q)
         || global.LearningWords?.getWordMeaning?.(q, { allowHanziFallback: false })
-        || global.LearningWords?.getLocalMeaningFallback?.(q)
         || '';
     }
 
@@ -1678,8 +1674,15 @@
           return;
         }
       }
-      const word = this.currentWord?.word;
-      const text = await this.getMeaningForWord(word);
+      const word = String(this.currentWord?.word || this.winningWord || '').trim().normalize('NFC');
+      let text = this.getSyncMeaning(word);
+      if (!text) {
+        try {
+          text = await this.getMeaningForWord(word);
+        } catch {
+          text = '';
+        }
+      }
       const hintText = global.MeaningGlossary?.toHintMeaning?.(word, text) || text;
       this.meaningText = hintText || t('match.hints.noMeaning');
       this.meaningRevealed = true;

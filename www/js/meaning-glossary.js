@@ -78,13 +78,26 @@
     }
   }
 
+  function headword(word) {
+    return String(word || '').trim().normalize('NFC');
+  }
+
+  function firstEnglishGloss(...candidates) {
+    for (const raw of candidates) {
+      const text = String(raw || '').trim();
+      if (text && looksLikeEnglishGloss(text)) return text;
+    }
+    return '';
+  }
+
   function getEnglish(word) {
-    const q = String(word || '').trim();
+    const q = headword(word);
     if (!q) return '';
     const curated = global.MatchWordMeanings?.[q];
-    if (curated && looksLikeEnglishGloss(curated)) return String(curated).trim();
+    const chain = global.WordChainEnglish?.getEnglish?.(q);
     const learned = readLearned()[q];
-    if (learned && looksLikeEnglishGloss(learned)) return String(learned).trim();
+    const english = firstEnglishGloss(curated, chain, learned);
+    if (english) return english;
     if (curated && isDisplayableMeaning(curated) && !isHanziGloss(curated)) {
       return String(curated).trim();
     }
@@ -92,7 +105,7 @@
   }
 
   function getAnyLocal(word) {
-    const q = String(word || '').trim();
+    const q = headword(word);
     if (!q) return '';
     const english = getEnglish(q);
     if (english) return english;
@@ -104,7 +117,7 @@
   }
 
   function remember(word, meaning) {
-    const q = String(word || '').trim();
+    const q = headword(word);
     const text = String(meaning || '').trim();
     if (!q || !text || !looksLikeEnglishGloss(text)) return false;
     if (global.MatchWordMeanings?.[q]) return false;

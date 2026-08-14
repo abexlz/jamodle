@@ -218,7 +218,39 @@
       if (softCache) return softCache;
     }
 
+    const translated = await translateKoToEn(q);
+    if (translated) {
+      global.MeaningGlossary?.remember?.(q, translated);
+      return translated;
+    }
+
     return '';
+  }
+
+  function isJunkTranslation(text, sourceWord) {
+    const s = String(text || '').trim();
+    const q = String(sourceWord || '').trim();
+    if (!s) return true;
+    if (/please select two distinct languages/i.test(s)) return true;
+    if (/invalid/i.test(s) && s.length < 40) return true;
+    if (s === q) return true;
+    return false;
+  }
+
+  async function translateKoToEn(word) {
+    const q = String(word || '').trim();
+    if (!q || !isOnline()) return '';
+    try {
+      const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(q)}&langpair=ko|en`;
+      const res = await fetch(url);
+      if (!res.ok) return '';
+      const data = await res.json();
+      const text = String(data?.responseData?.translatedText || '').trim();
+      if (isJunkTranslation(text, q) || !looksLikeEnglishGloss(text)) return '';
+      return text;
+    } catch {
+      return '';
+    }
   }
 
   function matchesExactEntry(data, word) {
