@@ -139,6 +139,21 @@
   function ensureSpeakerRow(anchorEl) {
     if (!anchorEl) return null;
 
+    const resultsBanner = anchorEl.closest('.results-word-banner');
+    if (resultsBanner?.parentNode) {
+      let btn = resultsBanner.parentNode.querySelector(':scope > .answer-speak-btn');
+      if (!btn && showSpeakerButton()) {
+        btn = createSpeakerButton();
+        btn.classList.add('answer-speak-btn--below');
+        resultsBanner.insertAdjacentElement('afterend', btn);
+      }
+      if (btn && !showSpeakerButton()) {
+        btn.remove();
+        btn = null;
+      }
+      return { row: resultsBanner.parentNode, btn, anchorEl };
+    }
+
     let row = anchorEl.closest('.answer-tts-row');
     if (!row) {
       row = document.createElement('div');

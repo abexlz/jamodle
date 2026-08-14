@@ -1865,7 +1865,7 @@
     font-size: clamp(33px, 9.3vw, 42px);
     font-weight: 400;
     color: #fff;
-    margin: 0 0 10px;
+    margin: 0 0 5px;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     line-height: 1.1;
@@ -1879,7 +1879,7 @@
     min-height: clamp(163px, 42vw, 250px);
     height: auto;
     aspect-ratio: auto;
-    margin: 6px auto 10px;
+    margin: 0 auto 8px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1900,25 +1900,33 @@
     justify-content: center;
   }
 
-  .results-overlay--clear .results-word-banner .answer-speak-btn {
-    position: absolute;
-    right: 4.5%;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 2;
-    width: 52px;
-    height: 52px;
-    border-radius: 16px;
+  .results-overlay--clear .answer-speak-btn--below,
+  .results-overlay--clear .results-card > .answer-speak-btn {
+    position: static;
+    display: flex;
+    width: 44px;
+    height: 44px;
+    margin: 2px auto 10px;
+    border-radius: 14px;
+    transform: none !important;
+    box-shadow: 0 3px 0 rgba(0, 0, 0, 0.22);
   }
 
-  .results-overlay--clear .results-word-banner .answer-speak-btn:active,
-  .results-overlay--clear .results-word-banner .answer-speak-btn.is-pressed {
-    transform: translateY(calc(-50% + 2px));
+  .results-overlay--clear .answer-speak-btn--below:hover,
+  .results-overlay--clear .answer-speak-btn--below:active,
+  .results-overlay--clear .answer-speak-btn--below.is-pressed,
+  .results-overlay--clear .results-card > .answer-speak-btn:hover,
+  .results-overlay--clear .results-card > .answer-speak-btn:active,
+  .results-overlay--clear .results-card > .answer-speak-btn.is-pressed {
+    transform: none !important;
+    box-shadow: 0 3px 0 rgba(0, 0, 0, 0.22);
+    filter: none;
   }
 
-  .results-overlay--clear .results-word-banner .answer-speak-btn svg {
-    width: 26px;
-    height: 26px;
+  .results-overlay--clear .answer-speak-btn--below svg,
+  .results-overlay--clear .results-card > .answer-speak-btn svg {
+    width: 22px;
+    height: 22px;
   }
 
   .results-overlay--clear .results-word {
