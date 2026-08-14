@@ -472,6 +472,15 @@ button.ghost,
   padding: 8px 12px !important;
 }
 
+.match-hint-btn.match-hint-btn--icon {
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 4px !important;
+  text-align: center !important;
+  padding: 0 !important;
+}
+
 .match-hint-btn .app-btn-title {
   flex: 1;
   min-width: 0;
