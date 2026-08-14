@@ -6416,39 +6416,30 @@
       const chars = Array.from(String(word || '').replace(/\s*[·•|]\s*/g, '')).length;
       banner.dataset.chars = String(Math.max(1, Math.min(chars || 1, 12)));
 
-      const baseFont = Math.round(Math.min(117, Math.max(86, window.innerWidth * 0.216)));
-      const startFont = chars <= 2
-        ? baseFont
-        : chars === 3
-          ? Math.round(baseFont * 0.86)
-          : chars === 4
-            ? Math.round(baseFont * 0.72)
-            : Math.round(baseFont * Math.max(0.42, 2.2 / chars));
-
       wordEl.style.removeProperty('font-size');
       wordEl.style.whiteSpace = 'nowrap';
       this.resetResultsCardWidth();
-      card.style.setProperty('--results-word-font', `${startFont}px`);
 
       const fitToBanner = () => {
-        const row = wordEl.closest('.answer-tts-row');
-        const btn = row?.querySelector('.answer-speak-btn');
-        const gap = row ? (Number.parseFloat(getComputedStyle(row).gap) || 12) : 12;
-        const bannerPad = (Number.parseFloat(getComputedStyle(banner).paddingLeft) || 0)
-          + (Number.parseFloat(getComputedStyle(banner).paddingRight) || 0);
-        const available = Math.max(
-          40,
-          banner.clientWidth - bannerPad - (btn?.offsetWidth || 52) - gap - 12,
-        );
+        const cs = getComputedStyle(banner);
+        const padX = (Number.parseFloat(cs.paddingLeft) || 0)
+          + (Number.parseFloat(cs.paddingRight) || 0);
+        const padY = (Number.parseFloat(cs.paddingTop) || 0)
+          + (Number.parseFloat(cs.paddingBottom) || 0);
+        const innerW = Math.max(40, banner.clientWidth - padX);
+        const innerH = Math.max(40, banner.clientHeight - padY);
+        // Fill ~80% of the answer box; never overflow that band.
+        const targetW = innerW * 0.8;
+        const maxFont = Math.max(40, Math.floor(innerH * 0.8));
 
-        let lo = 36;
-        let hi = startFont;
-        let best = 36;
+        let lo = 28;
+        let hi = maxFont;
+        let best = 28;
         while (lo <= hi) {
           const mid = Math.round((lo + hi) / 2);
           card.style.setProperty('--results-word-font', `${mid}px`);
           void wordEl.offsetWidth;
-          if (wordEl.scrollWidth <= available + 1) {
+          if (wordEl.scrollWidth <= targetW + 1) {
             best = mid;
             lo = mid + 1;
           } else {
