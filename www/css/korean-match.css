@@ -1890,8 +1890,9 @@
   }
 
   .results-overlay--clear .results-word-banner .answer-tts-row {
-    width: max-content;
+    width: 100%;
     max-width: 100%;
+    min-width: 0;
     gap: 12px;
     padding: 0 4px;
     box-sizing: border-box;
@@ -1917,11 +1918,11 @@
     margin: 0;
     line-height: 1.05;
     text-align: center;
-    flex: 0 0 auto;
+    flex: 1 1 auto;
     min-width: 0;
-    max-width: none;
+    max-width: 100%;
     white-space: nowrap !important;
-    overflow: visible;
+    overflow: hidden;
     text-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
   }
 

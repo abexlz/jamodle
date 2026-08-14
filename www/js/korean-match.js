@@ -6416,48 +6416,52 @@
       const chars = Array.from(String(word || '').replace(/\s*[·•|]\s*/g, '')).length;
       banner.dataset.chars = String(Math.max(1, Math.min(chars || 1, 12)));
 
-      const targetFont = Math.round(Math.min(117, Math.max(86, window.innerWidth * 0.216)));
+      const baseFont = Math.round(Math.min(117, Math.max(86, window.innerWidth * 0.216)));
+      const startFont = chars <= 2
+        ? baseFont
+        : chars === 3
+          ? Math.round(baseFont * 0.86)
+          : chars === 4
+            ? Math.round(baseFont * 0.72)
+            : Math.round(baseFont * Math.max(0.42, 2.2 / chars));
+
       wordEl.style.removeProperty('font-size');
       wordEl.style.whiteSpace = 'nowrap';
       this.resetResultsCardWidth();
-      card.style.setProperty('--results-word-font', `${targetFont}px`);
+      card.style.setProperty('--results-word-font', `${startFont}px`);
 
-      const applyWidth = () => {
+      const fitToBanner = () => {
         const row = wordEl.closest('.answer-tts-row');
         const btn = row?.querySelector('.answer-speak-btn');
         const gap = row ? (Number.parseFloat(getComputedStyle(row).gap) || 12) : 12;
-        const cardPadX = (Number.parseFloat(getComputedStyle(card).paddingLeft) || 0)
-          + (Number.parseFloat(getComputedStyle(card).paddingRight) || 0);
-        const contentW = wordEl.scrollWidth + (btn?.offsetWidth || 52) + gap + 16;
-        // Banner uses ~6% padding each side → ~88% usable of banner width.
-        const needed = Math.ceil(contentW / 0.88 + cardPadX + 12);
-        const maxWidth = Math.min(window.innerWidth - 16, 960);
-        const baseWidth = Math.min(400, maxWidth);
-        const width = Math.min(maxWidth, Math.max(baseWidth, needed));
-
-        card.style.setProperty('--results-card-width', `${width}px`);
-        card.style.width = `${width}px`;
-        card.style.maxWidth = `${width}px`;
-        void card.offsetWidth; // force layout before overflow check
-
-        // Only shrink if still overflowing at the viewport max.
+        const bannerPad = (Number.parseFloat(getComputedStyle(banner).paddingLeft) || 0)
+          + (Number.parseFloat(getComputedStyle(banner).paddingRight) || 0);
         const available = Math.max(
           40,
-          (row || banner).clientWidth - (btn?.offsetWidth || 0) - gap - 8,
+          banner.clientWidth - bannerPad - (btn?.offsetWidth || 52) - gap - 12,
         );
-        if (width >= maxWidth - 1 && wordEl.scrollWidth > available + 1) {
-          let size = targetFont;
-          while (size > 58 && wordEl.scrollWidth > available + 1) {
-            size -= 2;
-            card.style.setProperty('--results-word-font', `${size}px`);
+
+        let lo = 36;
+        let hi = startFont;
+        let best = 36;
+        while (lo <= hi) {
+          const mid = Math.round((lo + hi) / 2);
+          card.style.setProperty('--results-word-font', `${mid}px`);
+          void wordEl.offsetWidth;
+          if (wordEl.scrollWidth <= available + 1) {
+            best = mid;
+            lo = mid + 1;
+          } else {
+            hi = mid - 1;
           }
         }
+        card.style.setProperty('--results-word-font', `${best}px`);
       };
 
       this._resultsFitRaf = requestAnimationFrame(() => {
-        applyWidth();
+        fitToBanner();
         this._resultsFitRaf = requestAnimationFrame(() => {
-          applyWidth();
+          fitToBanner();
           this._resultsFitRaf = 0;
         });
       });
