@@ -200,9 +200,13 @@
     setHintDisabled(on) {
       this.hintDisabled = !!on;
       this.el.classList.toggle('hint-disabled', this.hintDisabled);
-      // Unused slots stay dimmed but remain droppable/movable.
-      this.el.removeAttribute('aria-disabled');
-      this.el.tabIndex = 0;
+      if (this.hintDisabled) {
+        this.el.setAttribute('aria-disabled', 'true');
+        this.el.tabIndex = -1;
+      } else {
+        this.el.removeAttribute('aria-disabled');
+        this.el.tabIndex = 0;
+      }
     }
 
     setLocked(correct) {
@@ -211,7 +215,7 @@
     }
 
     accepts() {
-      return !this.locked;
+      return !this.locked && !this.hintDisabled;
     }
   }
 
@@ -690,7 +694,7 @@
           return;
         }
       }
-      if (src?.type === 'zone' && src.zone && !src.zone.locked) {
+      if (src?.type === 'zone' && src.zone && !src.zone.locked && !src.zone.hintDisabled) {
         if (game.tryPlaceTile(tile, src.zone)) return;
         game.attachTileToZone(tile, src.zone);
         game.updateCheckButton?.();
@@ -712,7 +716,7 @@
       let hit = null;
       for (const block of game.blocks) {
         for (const zone of block.getAllZones()) {
-          if (zone.locked) continue;
+          if (zone.locked || zone.hintDisabled) continue;
           const r = zone.el.getBoundingClientRect();
           if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) {
             hit = zone;
@@ -727,7 +731,7 @@
       const ignore = this.active ? [this.ghost, this.tile?.el] : [];
       const el = global.DragHitTest?.elementAtPoint(x, y, ignore)
         ?? document.elementFromPoint(x, y);
-      const zoneEl = el?.closest('.drop-zone:not(.locked)');
+      const zoneEl = el?.closest('.drop-zone:not(.locked):not(.hint-disabled)');
       if (!zoneEl) return null;
       const sylIdx = parseInt(zoneEl.dataset.syllable, 10);
       if (!Number.isFinite(sylIdx)) return null;
@@ -735,7 +739,7 @@
         ? `jungV-${zoneEl.dataset.subIndex || '0'}`
         : zoneEl.dataset.zone;
       const zone = game.blocks[sylIdx]?.zones[zoneKey];
-      if (zone && !zone.locked) return zone;
+      if (zone && !zone.locked && !zone.hintDisabled) return zone;
       return null;
     },
 
@@ -2930,7 +2934,7 @@
 
       this.blocks.forEach((block) => {
         block.getAllZones().forEach((zone) => {
-          if (zone.locked) return;
+          if (zone.locked || zone.hintDisabled) return;
           if (HC.isValidMatchPlacement(tile, zone)) {
             zone.el.classList.add('tap-target');
           }
@@ -2968,7 +2972,7 @@
 
       if (this.selectedTile) {
         // Invalid / locked / disabled slots cancel the Pips lift.
-        if (zone.locked
+        if (zone.locked || zone.hintDisabled
             || !HC.isValidMatchPlacement(this.selectedTile, zone)) {
           this.clearSelection();
           return;
@@ -2984,7 +2988,7 @@
         return;
       }
 
-      if (zone.locked) return;
+      if (zone.locked || zone.hintDisabled) return;
       if (zone.placedTileId) {
         const placed = this.tileMap[zone.placedTileId];
         if (placed && !placed.locked) this.onTileTap(placed);
@@ -3079,6 +3083,10 @@
     }
 
     attachTileToZone(tile, zone) {
+      if (zone?.hintDisabled) {
+        this.returnTileToBank(tile);
+        return;
+      }
       const tileEl = tile.el;
       tileEl.classList.remove('dragging', 'hidden-in-bank', 'revealing', 'revealed', 'revealing-wrong', 'selected');
       tileEl.style.cssText = '';
@@ -3281,7 +3289,7 @@
           return true;
         case 'zone': {
           const zone = loc.zone;
-          if (!zone || zone.locked) return false;
+          if (!zone || zone.locked || zone.hintDisabled) return false;
           this.attachTileToZone(tile, zone);
           return true;
         }
@@ -3719,13 +3727,21 @@
       }
 
       let count = 0;
+      const touchedSyl = new Set();
       this.blocks.forEach((block) => {
         block.getAllZones().forEach((zone) => {
           if (zone.locked || zone.hintDisabled || zone.expected !== null) return;
+          if (zone.placedTileId) {
+            const tile = this.tileMap[zone.placedTileId];
+            if (tile && !tile.locked) this.returnTileToBank(tile);
+          }
+          if (zone.placedTileId) zone.clear();
           zone.setHintDisabled(true);
+          touchedSyl.add(zone.syllableIndex);
           count += 1;
         });
       });
+      touchedSyl.forEach((idx) => this.syncSyllableVowelLayout(this.blocks[idx]));
 
       this.disableHintUsed = true;
       this.hintsUsedThisRound = true;
@@ -3739,7 +3755,7 @@
 
     tryPlaceTile(tile, zone, fromZone = null) {
       if (!this.canArrangeTiles()) return false;
-      if (tile.locked || zone.locked || this.checking) return false;
+      if (tile.locked || zone.locked || zone.hintDisabled || this.checking) return false;
       if (!HC.isValidMatchPlacement(tile, zone)) return false;
       if (this.tutorialValidator && !this.tutorialValidator('place', { tile, zone, game: this })) {
         return false;
