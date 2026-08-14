@@ -2250,6 +2250,7 @@
     align-items: flex-start;
     justify-content: center;
     gap: 8px;
+    width: 100%;
     min-height: 0;
     margin: 0 0 2px;
     padding: 0;
@@ -2275,14 +2276,16 @@
     padding: 0;
     line-height: 0;
     text-shadow: none;
+    width: 100%;
+    max-width: 100%;
   }
 
   body.match-page .match-chrome-title-img,
   .hangul-dle-title-img {
     display: block;
-    width: min(52vw, 200px);
-    max-width: min(52vw, 200px);
-    max-height: clamp(28px, 5.5dvh, 40px);
+    /* Same column as the empty syllable block (#match-app is 100% minus page padding). */
+    width: 100%;
+    max-width: 100%;
     height: auto;
     object-fit: contain;
     margin: 0 auto;
