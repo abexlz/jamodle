@@ -6406,7 +6406,7 @@
       const chars = Array.from(String(word || '').replace(/\s*[·•|]\s*/g, '')).length;
       banner.dataset.chars = String(Math.max(1, Math.min(chars || 1, 12)));
 
-      const targetFont = Math.round(Math.min(162, Math.max(120, window.innerWidth * 0.3)));
+      const targetFont = Math.round(Math.min(130, Math.max(96, window.innerWidth * 0.24)));
       wordEl.style.removeProperty('font-size');
       wordEl.style.whiteSpace = 'nowrap';
       this.resetResultsCardWidth();
@@ -6437,7 +6437,7 @@
         );
         if (width >= maxWidth - 1 && wordEl.scrollWidth > available + 1) {
           let size = targetFont;
-          while (size > 72 && wordEl.scrollWidth > available + 1) {
+          while (size > 58 && wordEl.scrollWidth > available + 1) {
             size -= 2;
             card.style.setProperty('--results-word-font', `${size}px`);
           }

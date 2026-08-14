@@ -1819,7 +1819,7 @@
 
   .results-overlay--clear .results-card {
     --results-card-base-width: min(400px, 92vw);
-    --results-word-font: clamp(120px, 30vw, 162px);
+    --results-word-font: clamp(96px, 24vw, 130px);
     position: relative;
     background: transparent !important;
     border: none !important;
@@ -1875,7 +1875,7 @@
   .results-overlay--clear .results-word-banner {
     width: 100%;
     max-width: none;
-    min-height: clamp(170px, 44vw, 260px);
+    min-height: clamp(136px, 35vw, 208px);
     height: auto;
     aspect-ratio: auto;
     margin: 6px auto 10px;
@@ -1883,7 +1883,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 28px 6% 30px;
+    padding: 22px 6% 24px;
     box-sizing: border-box;
     background: url('../assets/results/match-word-banner.png') center / 100% 100% no-repeat;
     transform: none;
@@ -1912,7 +1912,7 @@
   .results-overlay--clear .results-word {
     font-family: 'Jua', 'Noto Sans KR', sans-serif;
     /* ~3× prior ~40–54px answer size; popup widens to fit */
-    font-size: var(--results-word-font, clamp(120px, 30vw, 162px)) !important;
+    font-size: var(--results-word-font, clamp(96px, 24vw, 130px)) !important;
     color: #fff;
     margin: 0;
     line-height: 1.05;
