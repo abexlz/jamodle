@@ -1600,10 +1600,11 @@
     getSyncMeaning(word) {
       const q = String(word || '').trim().normalize('NFC');
       if (!q) return '';
-      return global.MeaningGlossary?.getEnglish?.(q)
-        || global.MatchWordMeanings?.[q]
-        || global.WordChainEnglish?.getEnglish?.(q)
-        || global.LearningWords?.getWordMeaning?.(q, { allowHanziFallback: false })
+      const english = (text) => global.MeaningGlossary?.looksLikeEnglishGloss?.(text) ? String(text).trim() : '';
+      return english(global.MeaningGlossary?.getEnglish?.(q))
+        || english(global.MatchWordMeanings?.[q])
+        || english(global.WordChainEnglish?.getEnglish?.(q))
+        || english(global.LearningWords?.getWordMeaning?.(q, { allowHanziFallback: false }))
         || '';
     }
 
@@ -1676,7 +1677,7 @@
       }
       const word = String(this.currentWord?.word || this.winningWord || '').trim().normalize('NFC');
       let text = this.getSyncMeaning(word);
-      if (!text) {
+      if (!global.MeaningGlossary?.looksLikeEnglishGloss?.(text)) {
         try {
           text = await this.getMeaningForWord(word);
         } catch {
@@ -1684,7 +1685,9 @@
         }
       }
       const hintText = global.MeaningGlossary?.toHintMeaning?.(word, text) || text;
-      this.meaningText = hintText || t('match.hints.noMeaning');
+      this.meaningText = global.MeaningGlossary?.looksLikeEnglishGloss?.(hintText)
+        ? hintText
+        : (t('match.hints.noMeaning'));
       this.meaningRevealed = true;
       this.hintsUsedThisRound = true;
       this.showMeaningPopup(this.meaningText);

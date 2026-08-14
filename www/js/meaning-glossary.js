@@ -17,7 +17,10 @@
   function isHanziGloss(text) {
     const s = String(text || '').trim();
     if (!s) return false;
-    return /^[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]+$/.test(s);
+    const letters = s.replace(/[\s\-–—_·.,/\\()[\]~'"`]+/g, '');
+    if (!letters) return false;
+    const withoutHanzi = letters.replace(/[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]/g, '');
+    return withoutHanzi.length === 0;
   }
 
   function isEtymologyGloss(text) {
@@ -41,6 +44,9 @@
   function looksLikeEnglishGloss(text) {
     const s = String(text || '').trim();
     if (!s || isHanziGloss(s) || isEtymologyGloss(s)) return false;
+    if (/[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]/.test(s) && !/[A-Za-z]{2,}/.test(s)) {
+      return false;
+    }
     return /[A-Za-z]/.test(s);
   }
 

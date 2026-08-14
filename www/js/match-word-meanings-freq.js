@@ -124,6 +124,8 @@
     '노동자': 'worker',
     '동네': 'neighborhood',
     '한마디': 'a word / a remark',
+    '수도꼭지': 'faucet / tap',
+    '수돗물': 'tap water',
     '어린이도서관': 'children\'s library',
     '인스턴트커피': 'instant coffee',
     '텔레비전방송': 'television broadcast',

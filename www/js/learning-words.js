@@ -40,10 +40,10 @@
     if (glossary && isDisplayableMeaning(glossary)) return glossary;
 
     const curated = String(rawMeaning || '').trim();
-    if (!curated || isEtymologyGloss(curated)) return '';
-    if (!isHanziGloss(curated)) return curated;
-    if (allowHanziFallback) return curated;
-    return '';
+    if (!curated || isEtymologyGloss(curated) || isHanziGloss(curated)) {
+      return allowHanziFallback && isHanziGloss(curated) ? curated : '';
+    }
+    return curated;
   }
 
   function normalizeEntry(entry) {

@@ -96,7 +96,8 @@
     const curated = String(entry.rawMeaning || entry.meaning || '').trim();
     const isEtymology = global.MeaningGlossary?.isEtymologyGloss?.(curated)
       || /^&\s*[가-힣]{1,4}\s*.+/u.test(curated);
-    const isHanzi = curated && /^[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]+$/.test(curated);
+    const isHanzi = curated && (global.MeaningGlossary?.isHanziGloss?.(curated)
+      || /^[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]+$/.test(curated));
     if (curated && !isEtymology && !isHanzi) return curated;
 
     const dictEn = String(entry.dictionary?.englishWord || '').trim();
