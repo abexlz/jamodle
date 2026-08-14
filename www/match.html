@@ -1100,7 +1100,7 @@
     /* app-buttons.css */
   }
 </style>
-<link rel="stylesheet" href="css/korean-match.css?v=20260814c">
+<link rel="stylesheet" href="css/korean-match.css?v=20260814d">
 <link rel="stylesheet" href="css/answer-tts.css">
 <link rel="stylesheet" href="css/pause-quit.css?v=2">
 <link rel="stylesheet" href="css/app-theme.css?v=26">
@@ -1380,13 +1380,15 @@
   }
 
   body.match-page .match-hint-dock {
+    --hint-icon-size: clamp(52px, 14vw, 64px);
+    --hint-col-size: var(--hint-icon-size);
     display: flex;
     flex-wrap: nowrap;
-    justify-content: flex-start;
+    justify-content: center;
     align-items: flex-start;
-    gap: clamp(8px, 2.4vw, 16px);
+    gap: clamp(10px, 3vw, 18px);
     width: 100%;
-    padding: 2px 4px 6px 2px;
+    padding: 10px 8px 12px;
     overflow: visible;
     background: transparent !important;
     border: none !important;
@@ -1423,8 +1425,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: clamp(52px, 14vw, 64px);
-    height: clamp(52px, 14vw, 64px);
+    width: var(--hint-icon-size);
+    height: var(--hint-icon-size);
     border-radius: 50%;
     background: var(--yellow, #FFF6C8);
     border: 2px solid var(--yellow-btn, #FFEAA0);
@@ -1443,22 +1445,30 @@
   }
 
   body.match-page .match-hint-dock > .match-hint-btn--icon {
-    flex: 0 0 auto;
+    flex: 0 0 var(--hint-col-size);
+    width: var(--hint-col-size);
+    max-width: var(--hint-col-size);
+    min-width: var(--hint-col-size);
     flex-direction: column !important;
     align-items: center !important;
     justify-content: flex-start !important;
-    min-width: 0;
-    max-width: none;
-    width: auto;
     min-height: 0 !important;
     max-height: none !important;
     aspect-ratio: auto !important;
+    overflow: visible;
   }
 
   body.match-page .match-hint-dock > .match-hint-btn--icon .match-hint-btn-glyph {
-    width: clamp(52px, 14vw, 64px);
-    height: clamp(52px, 14vw, 64px);
-    flex: 0 0 auto;
+    width: var(--hint-icon-size) !important;
+    height: var(--hint-icon-size) !important;
+    flex: 0 0 var(--hint-icon-size) !important;
+    max-width: var(--hint-icon-size);
+    max-height: var(--hint-icon-size);
+  }
+
+  body.match-page .match-hint-dock > .match-hint-btn--icon .match-hint-btn-label {
+    width: 100%;
+    overflow: visible;
   }
 
   body.match-page .match-hint-dock > .match-hint-btn:not(.match-hint-btn--icon) {
@@ -1506,10 +1516,9 @@
       --app-btn-max-h: 46px;
     }
 
-    body.match-page .match-hint-dock > .match-hint-btn--icon .match-hint-btn-glyph,
-    body.match-page .match-hint-dock > .match-token-counter .match-token-counter-glyph {
-      width: clamp(48px, 13vw, 56px);
-      height: clamp(48px, 13vw, 56px);
+    body.match-page .match-hint-dock {
+      --hint-icon-size: clamp(48px, 13vw, 56px);
+      --hint-col-size: var(--hint-icon-size);
     }
 
     body.match-page .match-actions > .match-action-btn {
