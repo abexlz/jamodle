@@ -115,6 +115,26 @@
     `;
   }
 
+  function renderHomePreview() {
+    const snap = QS()?.getQuestSnapshot?.() || { daily: [] };
+    const open = (snap.daily || []).filter((q) => !q.claimed).slice(0, 2);
+    if (!open.length) {
+      return `<p class="dq-quest-idle">${escapeHtml(t('dailyStreak.questsIdle'))}</p>`;
+    }
+    const cards = open.map((entry) => {
+      const def = entry.def || QS()?.getQuestDef?.(entry.questId);
+      const desc = questDesc(entry.questId, entry.target);
+      const pct = Math.min(100, Math.round((entry.progress / entry.target) * 100));
+      return `
+        <div class="dq-quest-mini">
+          <span class="dq-quest-mini-icon">${def?.icon || '🎯'}</span>
+          <span class="dq-quest-mini-text">${escapeHtml(desc)}</span>
+          <span class="dq-quest-mini-pct">${pct}%</span>
+        </div>`;
+    }).join('');
+    return `<a class="dq-quest-preview" href="#quests" data-home-tab="quests">${cards}</a>`;
+  }
+
   function renderSection() {
     const snap = QS()?.getQuestSnapshot?.() || { daily: [], weekly: [], dailyWheelClaimed: false };
     const dailyCards = snap.daily.map(renderQuestCard).join('');
@@ -430,6 +450,7 @@
 
   global.QuestUI = {
     renderSection,
+    renderHomePreview,
     bindSection,
     refreshSection,
     updateTabBadge,

@@ -45,6 +45,7 @@
       purchasedTitleIds: [],
       selectedCosmeticTheme: 'default',
       extraGuessTokens: 0,
+      streakFreezeTokens: 0,
       activeBuffs: {
         dailyUnlockUntil: 0,
         xp2xUntil: 0,
@@ -118,6 +119,7 @@
         ? raw.selectedCosmeticTheme
         : 'default',
       extraGuessTokens: Math.max(0, parseInt(raw.extraGuessTokens, 10) || 0),
+      streakFreezeTokens: Math.max(0, parseInt(raw.streakFreezeTokens, 10) || 0),
       activeBuffs: global.BuffService?.normalizeActiveBuffs?.(raw.activeBuffs)
         || {
           dailyUnlockUntil: Math.max(0, parseInt(raw.activeBuffs?.dailyUnlockUntil, 10) || 0),

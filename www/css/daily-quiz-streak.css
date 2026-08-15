@@ -1,0 +1,149 @@
+.dq-streak-hero {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  gap: 4px 12px;
+  align-items: center;
+  margin: 8px 0 14px;
+  padding: 16px 18px 14px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(255, 245, 210, 0.95) 0%, rgba(255, 220, 150, 0.92) 100%);
+  border: 3px solid rgba(255, 180, 40, 0.55);
+  box-shadow: 0 6px 0 rgba(180, 90, 0, 0.22);
+  color: #5c2e00;
+}
+
+.dq-streak-hero-main {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  grid-column: 1;
+}
+
+.dq-streak-fire {
+  font-size: clamp(36px, 10vw, 48px);
+  line-height: 1;
+}
+
+.dq-streak-count {
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: clamp(42px, 12vw, 56px);
+  line-height: 0.9;
+  font-weight: 400;
+}
+
+.dq-streak-label {
+  font-family: 'Jua', sans-serif;
+  font-size: 16px;
+  opacity: 0.8;
+}
+
+.dq-streak-freeze {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.7);
+  font-weight: 800;
+  font-size: 16px;
+}
+
+.dq-streak-status {
+  grid-column: 1;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.dq-friend-card {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 2px solid rgba(0, 120, 140, 0.22);
+}
+
+.dq-friend-title {
+  margin: 0 0 6px;
+  font-family: 'Jua', sans-serif;
+  font-size: 16px;
+  color: #0a3d52;
+}
+
+.dq-friend-hint,
+.dq-friend-row {
+  margin: 0;
+  font-size: 13px;
+  color: #0a3d52;
+}
+
+.dq-friend-nudge {
+  margin: 4px 0 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: #b45309;
+}
+
+.dq-friend-link {
+  display: inline-block;
+  margin-top: 6px;
+  font-weight: 700;
+  color: #007A8E;
+}
+
+.dq-home-quests {
+  margin: 0 0 14px;
+}
+
+.dq-quest-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-decoration: none;
+}
+
+.dq-quest-mini {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(0, 120, 140, 0.18);
+  color: #0a3d52;
+  font-size: 13px;
+}
+
+.dq-quest-idle {
+  margin: 0;
+  font-size: 12px;
+  color: rgba(10, 61, 82, 0.65);
+}
+
+.daily-streak-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%) translateY(12px);
+  z-index: 2147483600;
+  max-width: min(92vw, 360px);
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: #0a3d52;
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.daily-streak-toast.is-visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}

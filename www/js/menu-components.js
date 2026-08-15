@@ -281,9 +281,66 @@
     `;
   }
 
+  function renderStreakHero() {
+    const snap = global.DailyQuizStreak?.getSnapshot?.() || {
+      currentStreak: 0, freezeCount: 0, clearedToday: false,
+    };
+    const n = snap.currentStreak || 0;
+    return `
+      <section class="dq-streak-hero" aria-label="${escapeHtml(t('dailyStreak.title'))}">
+        <div class="dq-streak-hero-main">
+          <span class="dq-streak-fire" aria-hidden="true">🔥</span>
+          <span class="dq-streak-count">${n}</span>
+          <span class="dq-streak-label">${escapeHtml(t('dailyStreak.daysLabel'))}</span>
+        </div>
+        <div class="dq-streak-freeze" title="${escapeHtml(t('dailyStreak.freezeHeld', { count: snap.freezeCount }))}">
+          <span aria-hidden="true">❄️</span>
+          <span>${snap.freezeCount || 0}</span>
+        </div>
+        <p class="dq-streak-status">${escapeHtml(snap.clearedToday ? t('dailyStreak.savedToday') : t('dailyStreak.keepStreak'))}</p>
+      </section>
+    `;
+  }
+
+  function renderFriendStreakCard() {
+    const rows = global.FriendStreak?.getCachedRows?.() || [];
+    if (!rows.length) {
+      return `
+        <section class="dq-friend-card dq-friend-card--empty">
+          <p class="dq-friend-title">${escapeHtml(t('dailyStreak.friendTitle'))}</p>
+          <p class="dq-friend-hint">${escapeHtml(t('dailyStreak.friendEmpty'))}</p>
+          <a class="dq-friend-link" href="profile.html">${escapeHtml(t('dailyStreak.addFriendCta'))}</a>
+        </section>
+      `;
+    }
+    const body = rows.map((row) => {
+      const nudge = row.nudge
+        ? `<p class="dq-friend-nudge">${escapeHtml(t('dailyStreak.friendNudge', { name: row.name }))}</p>`
+        : '';
+      const me = row.meCleared ? '✓' : '…';
+      const them = row.friendCleared ? '✓' : '…';
+      return `
+        <div class="dq-friend-row">
+          <span class="dq-friend-streak">🔥 ${row.streak}</span>
+          <span class="dq-friend-names">${escapeHtml(row.name)} ${them} · ${escapeHtml(t('dailyStreak.you'))} ${me}</span>
+          ${nudge}
+        </div>`;
+    }).join('');
+    return `<section class="dq-friend-card"><p class="dq-friend-title">${escapeHtml(t('dailyStreak.friendTitle'))}</p>${body}</section>`;
+  }
+
+  function renderHomeQuests() {
+    const html = global.QuestUI?.renderHomePreview?.() || '';
+    if (!html) return '';
+    return `<section class="dq-home-quests" aria-label="${escapeHtml(t('quests.title'))}">${html}</section>`;
+  }
+
   function renderMainMenu() {
     return `
       <div class="menu-sections">
+        ${renderStreakHero()}
+        ${renderFriendStreakCard()}
+        ${renderHomeQuests()}
         ${renderMenuTop()}
         ${renderSinglePlayerSection()}
         ${renderMenuBottom()}

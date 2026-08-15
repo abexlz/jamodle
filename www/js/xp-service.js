@@ -9,7 +9,7 @@
     koreanMatch: 15,
     wordChain: 20,
     vowelPractice: 10,
-    dailyMatch: 25,
+    dailyMatch: 20,
     dailyWordle: 15,
     tutorial: 12,
     relatedWords: 12,
@@ -123,20 +123,27 @@
       && mode !== 'vowelPractice'
       && mode !== 'tutorial';
     if (isNewWord) {
-      xpEarned += XP_REWARDS.newWordBonus;
-      breakdown.push({ type: 'newWord', amount: XP_REWARDS.newWordBonus });
+      if (mode !== 'dailyMatch' && mode !== 'dailyWordle') {
+        xpEarned += XP_REWARDS.newWordBonus;
+        breakdown.push({ type: 'newWord', amount: XP_REWARDS.newWordBonus });
+      }
       profile.completedWordsEver.push(wordId);
     }
 
-    if (!safe.usedHint && mode !== 'vowelPractice' && mode !== 'hangulBuilder' && mode !== 'tutorial' && mode !== 'relatedWords') {
+    if (!safe.usedHint && mode !== 'vowelPractice' && mode !== 'hangulBuilder' && mode !== 'tutorial' && mode !== 'relatedWords' && mode !== 'dailyMatch' && mode !== 'dailyWordle') {
       xpEarned += XP_REWARDS.noHintBonus;
       breakdown.push({ type: 'noHint', amount: XP_REWARDS.noHintBonus });
     }
 
-    const streak = global.LearningStreak?.loadStreak?.() || {};
+    const streak = global.DailyQuizStreak?.getSnapshot?.()
+      || global.LearningStreak?.loadStreak?.()
+      || {};
+    const streakDays = streak.currentStreak || 0;
+    const streakToday = streak.clearedToday || streak.todayCompleted;
     if (
-      streak.currentStreak >= 1
-      && streak.todayCompleted
+      mode !== 'dailyMatch' && mode !== 'dailyWordle'
+      && streakDays >= 1
+      && streakToday
       && !hasDailyAward(profile, dayKey, 'streak-bonus')
     ) {
       xpEarned += XP_REWARDS.streakBonus;

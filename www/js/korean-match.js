@@ -1707,19 +1707,30 @@
     }
 
     updateLearningStreakDisplay() {
-      if (!LS || !this.els.streakHeadline) return;
-      const info = LS.getDisplayInfo();
-      this.els.streakHeadline.textContent = info.headline;
-      this.els.streakProgress.textContent = info.progressMessage;
-      this.els.streakProgress.classList.toggle('saved', info.savedToday);
+      const info = global.DailyQuizStreak?.getSnapshot?.();
+      if (!this.els.streakHeadline) return;
+      if (!info) return;
+      const headline = info.currentStreak > 0
+        ? (global.I18n?.t('dailyStreak.headline', { days: info.currentStreak }) || `🔥 ${info.currentStreak}`)
+        : (global.I18n?.t('dailyStreak.headlineStart') || '🔥 Daily quiz streak');
+      this.els.streakHeadline.textContent = headline;
+      if (this.els.streakProgress) {
+        const msg = info.clearedToday
+          ? (global.I18n?.t('dailyStreak.savedToday') || '')
+          : (global.I18n?.t('dailyStreak.keepStreak') || '');
+        this.els.streakProgress.textContent = msg;
+        this.els.streakProgress.classList.toggle('saved', !!info.clearedToday);
+      }
     }
 
     recordLearningStreakActivity() {
-      if (!LS) return null;
-      const activityType = this.isDaily ? 'daily-match' : 'match';
-      const result = LS.recordActivity(activityType);
+      if (this.isDaily) {
+        const snap = global.DailyQuizStreak?.getSnapshot?.();
+        this.updateLearningStreakDisplay();
+        return snap ? { streakDays: snap.currentStreak, newMilestone: null, savedToday: snap.clearedToday } : null;
+      }
       this.updateLearningStreakDisplay();
-      return result;
+      return null;
     }
 
     refillPool() {
@@ -6175,6 +6186,7 @@
         } else {
           this.saveDailyProgress(true, true);
           global.DailyCalendarService?.onDailyWin?.(MD.getActiveDateKey());
+          global.DailyQuizStreak?.recordClear?.(MD.getActiveDateKey());
           global.FirebaseSocial?.onDailyMatchEnd?.(true, elapsed, this.guessCount);
         }
         const streakResult = this.recordLearningStreakActivity();

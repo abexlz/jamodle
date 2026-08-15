@@ -29,6 +29,7 @@
   const ITEMS = {
     hintToken: { id: 'hintToken', price: 15, icon: '🪙', useHintTokens: true },
     extraGuess: { id: 'extraGuess', field: 'extraGuessTokens', price: 40, icon: '❤️' },
+    streakFreeze: { id: 'streakFreeze', field: 'streakFreezeTokens', price: 200, icon: '❄️' },
     dailyUnlock7: {
       id: 'dailyUnlock7',
       price: 250,
@@ -74,7 +75,8 @@
     }
     return {
       coins: p.coins || 0,
-      extraGuessTokens: p.extraGuessTokens || 0,
+        extraGuessTokens: p.extraGuessTokens || 0,
+        streakFreezeTokens: p.streakFreezeTokens || 0,
       ownedThemes: [...(p.ownedThemes || [])],
       purchasedTitleIds: [...(p.purchasedTitleIds || [])],
       unlockedFrameIds: [...(p.unlockedFrameIds || [])],
@@ -260,6 +262,7 @@
 
     profile[item.field] = (profile[item.field] || 0) + 1;
     saveProfile(profile);
+    if (item.id === 'streakFreeze') global.DailyQuizStreak?.syncFreezeFromProfile?.();
     global.PlayerHud?.refresh?.();
     return { ok: true, count: profile[item.field], coins: profile.coins };
   }

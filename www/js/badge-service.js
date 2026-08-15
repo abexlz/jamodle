@@ -9,8 +9,10 @@
     { id: 'first-word', icon: '🧩', check: (ctx) => ctx.matchWords >= 1 || ctx.uniqueWords >= 1 },
     { id: 'match-maker', icon: '🎯', check: (ctx) => ctx.matchWords >= 10 },
     { id: 'vowel-pro', icon: 'ㅏ', check: (ctx) => ctx.matchWords >= 3 || ctx.uniqueWords >= 3 },
-    { id: 'week-warrior', icon: '🔥', check: (ctx) => ctx.longestStreak >= 7 },
-    { id: 'two-week-learner', icon: '🏅', check: (ctx) => ctx.longestStreak >= 14 },
+    { id: 'week-warrior', icon: '🔥', check: () => false },
+    { id: 'two-week-learner', icon: '🏅', check: () => false },
+    { id: 'streak-fire', icon: '🔥', check: () => false },
+    { id: 'streak-gold', icon: '🏆', check: () => false },
     { id: 'hangul-hero', icon: '🎖️', check: (ctx) => ctx.level >= 10 },
     { id: 'word-collector', icon: '📚', check: (ctx) => ctx.uniqueWords >= 50 },
   ];
@@ -35,9 +37,6 @@
     { id: 'trophy', icon: '🏆', check: (ctx) => ctx.level >= 20 },
     { id: 'seedling', icon: '🌱', check: (ctx) => ctx.totalActivities >= 1 },
     { id: 'star', icon: '⭐', check: (ctx) => ctx.earnedBadgeCount >= 1 },
-    { id: 'clover', icon: '🍀', check: (ctx) => ctx.longestStreak >= 3 },
-    { id: 'flame', icon: '🔥', check: (ctx) => ctx.longestStreak >= 7 },
-    { id: 'heart', icon: '💗', check: (ctx) => ctx.longestStreak >= 14 },
     { id: 'moon', icon: '🌙', check: (ctx) => ctx.earnedBadgeCount >= 3 },
     { id: 'medal', icon: '🏅', check: (ctx) => ctx.earnedBadgeCount >= 5 },
     { id: 'book', icon: '📖', check: (ctx) => ctx.uniqueWords >= 10 },
@@ -56,7 +55,7 @@
     { id: 'ruby', check: (ctx) => ctx.level >= 20 },
     { id: 'diamond', check: (ctx) => ctx.level >= 25 },
     { id: 'emerald', check: (ctx) => ctx.earnedBadgeCount >= 3 },
-    { id: 'amethyst', check: (ctx) => ctx.longestStreak >= 14 },
+    { id: 'amethyst', shopOnly: true },
     { id: 'obsidian', check: (ctx) => ctx.level >= 30 },
     { id: 'pink', check: (ctx) => ctx.level >= 35 },
     { id: 'sakura', shopOnly: true },
@@ -67,7 +66,10 @@
 
   function buildContext(profile, extras) {
     const progress = global.MenuProgress?.loadProgress?.() || {};
-    const streak = global.LearningStreak?.loadStreak?.() || {};
+    const quizStreak = global.DailyQuizStreak?.getSnapshot?.();
+    const streak = quizStreak
+      ? { longestStreak: quizStreak.longestStreak, currentStreak: quizStreak.currentStreak }
+      : (global.LearningStreak?.loadStreak?.() || {});
     const levelInfo = global.LevelUtils?.getLevelFromTotalXp(profile.totalXp) || { level: 1 };
     return {
       totalActivities: profile.stats?.totalActivities || 0,

@@ -156,10 +156,14 @@
     global.MultiplayerUI?.mount?.();
     global.QuestUI?.updateTabBadge?.();
     global.WheelUI?.updateMenuWheelNav?.();
+    global.DailyQuizStreak?.ensureRollover?.();
     global.DailyCalendarModal?.updateMenuCalendarNav?.();
     global.DailyGiftUI?.updateMenuDailyGiftNav?.();
     bindMenuTopBar();
     global.QuestUI?.tryShowPendingChests?.();
+    global.FriendStreak?.refresh?.().then(() => {
+      if (activeHomeTab === 'menu') global.MenuComponents?.rerenderMenu?.();
+    }).catch(() => {});
   }
 
   function refreshMenu() {
@@ -204,6 +208,12 @@
     root.dataset.actionsBound = '1';
 
     root.addEventListener('click', (e) => {
+      const tabEl = e.target.closest('[data-home-tab]');
+      if (tabEl && tabEl.dataset.homeTab) {
+        e.preventDefault();
+        setHomeTab(tabEl.dataset.homeTab);
+        return;
+      }
       const el = e.target.closest('[data-menu-action]');
       if (!el) return;
 

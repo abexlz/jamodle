@@ -221,6 +221,7 @@
     const exact = [
       PROGRESS_KEY,
       'jamodeul-korean-learning-streak',
+      'jamodeul-daily-quiz-streak',
       'jamodeul-builder-progress',
       'jamodeul-match-best-streak',
       'jamodeul-tokens',

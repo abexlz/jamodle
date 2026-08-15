@@ -122,44 +122,15 @@
   }
 
   function buildBadgesHtml() {
-    const badges = SVC().getBadgeState(viewYear, viewMonth);
-    const wins = SVC().getMonthWinCount(viewYear, viewMonth);
-    const next = SVC().getNextBadgeThreshold(viewYear, viewMonth);
-    const maxThreshold = SVC().BADGE_THRESHOLDS[SVC().BADGE_THRESHOLDS.length - 1];
-    const progressPct = Math.min(100, (wins / maxThreshold) * 100);
-    const winsUntilNext = wins >= maxThreshold ? 0 : Math.max(0, next - wins);
-
-    const badgesHtml = badges.map((b) => {
-      const state = milestoneClass(b, badges);
-      return `
-      <div class="daily-cal-badge${state}" title="${escapeHtml(t('dailyCalendar.badgeAt', { count: b.threshold }))}">
-        ${badgeArtHtml(b, state)}
-        <span class="daily-cal-badge-label">${escapeHtml(t('dailyCalendar.badgeAt', { count: b.threshold }))}</span>
-      </div>
-    `;
-    }).join('');
-
-    const markerPcts = SVC().BADGE_THRESHOLDS.map((threshold) => (threshold / maxThreshold) * 100);
-    const markersHtml = markerPcts.map((pct) => `
-      <span class="daily-cal-progress-marker" style="left:${pct}%"></span>
-    `).join('');
-
-    const remainingText = wins >= maxThreshold
-      ? t('dailyCalendar.allBadgesEarned', { count: wins })
-      : t('dailyCalendar.winsUntilNext', { count: winsUntilNext });
-
+    const snap = global.DailyQuizStreak?.getSnapshot?.() || {
+      currentStreak: 0, freezeCount: 0, clearedToday: false, longestStreak: 0,
+    };
     return `
-      <section class="daily-cal-prizes" aria-label="${escapeHtml(t('dailyCalendar.monthlyPrizes'))}">
-        <h3 class="daily-cal-prizes-title">${escapeHtml(t('dailyCalendar.monthlyPrizes'))}</h3>
-        <div class="daily-cal-wins-summary">
-          <p class="daily-cal-wins-count">${escapeHtml(t('dailyCalendar.winsCount', { current: wins, max: maxThreshold }))}</p>
-          <p class="daily-cal-wins-remaining">${escapeHtml(remainingText)}</p>
-        </div>
-        <div class="daily-cal-badges">${badgesHtml}</div>
-        <div class="daily-cal-progress-wrap" role="progressbar" aria-valuenow="${wins}" aria-valuemin="0" aria-valuemax="${maxThreshold}" aria-label="${escapeHtml(t('dailyCalendar.winsCount', { current: wins, max: maxThreshold }))}">
-          <div class="daily-cal-progress-bar" style="width:${progressPct}%"></div>
-          ${markersHtml}
-        </div>
+      <section class="daily-cal-prizes daily-cal-streak-panel" aria-label="${escapeHtml(t('dailyStreak.title'))}">
+        <h3 class="daily-cal-prizes-title">${escapeHtml(t('dailyStreak.title'))}</h3>
+        <p class="daily-cal-wins-count">🔥 ${snap.currentStreak}</p>
+        <p class="daily-cal-wins-remaining">${escapeHtml(t('dailyStreak.freezeHeld', { count: snap.freezeCount }))}</p>
+        <p class="daily-cal-progress-text">${escapeHtml(t('dailyStreak.milestonesHint'))}</p>
       </section>
     `;
   }
@@ -247,18 +218,20 @@
   }
 
   function buildTrophiesHtml() {
-    const badges = SVC().getBadgeState(viewYear, viewMonth);
-    const cards = badges.map((b) => `
-      <div class="daily-cal-trophy-card${b.earned ? ' is-earned' : ' is-locked'}">
-        ${badgeArtHtml(b, b.earned ? ' is-earned' : ' is-locked')}
-        <div class="daily-cal-badge-label">${escapeHtml(t('dailyCalendar.badgeAt', { count: b.threshold }))}</div>
-      </div>
-    `).join('');
+    const snap = global.DailyQuizStreak?.getSnapshot?.() || { currentStreak: 0, milestonesAwarded: [] };
+    const awarded = new Set(global.DailyQuizStreak?.loadState?.()?.milestonesAwarded || []);
+    const items = (global.DailyQuizStreak?.MILESTONES || []).map((m) => {
+      const earned = awarded.has(m.days) || snap.currentStreak >= m.days;
+      return `
+        <div class="daily-cal-trophy-card${earned ? ' is-earned' : ' is-locked'}">
+          <div class="daily-cal-badge-label">${escapeHtml(t(`dailyStreak.milestone.${m.days}`))}</div>
+        </div>`;
+    }).join('');
     return `
       <div class="daily-cal-trophies">
-        <h3 class="daily-cal-prizes-title">${escapeHtml(t('dailyCalendar.trophiesTitle'))}</h3>
-        <p class="daily-cal-progress-text">${escapeHtml(t('dailyCalendar.trophiesHint'))}</p>
-        <div class="daily-cal-trophy-grid">${cards}</div>
+        <h3 class="daily-cal-prizes-title">${escapeHtml(t('dailyStreak.milestonesTitle'))}</h3>
+        <p class="daily-cal-progress-text">${escapeHtml(t('dailyStreak.milestonesHint'))}</p>
+        <div class="daily-cal-trophy-grid">${items}</div>
       </div>
     `;
   }

@@ -13,6 +13,8 @@
     'jamodeul-learning-progress',
     'jamodeul-related-words-progress',
     'jamodeul-korean-learning-streak',
+    'jamodeul-daily-quiz-streak',
+    'jamodeul-friend-streaks',
     'jamodeul-builder-progress',
     'jamodeul-tutorial-progress',
     'jamodeul-tokens',

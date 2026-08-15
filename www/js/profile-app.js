@@ -68,7 +68,8 @@
     const selected = summary.titleId || global.ProfileService?.getDisplayTitleId?.(profile) || 'hangul-starter';
     const levelTitles = global.LevelUtils?.TITLE_RANGES?.map((r) => r.id).reverse() || [];
     const shopTitleIds = Object.keys(global.ShopService?.TITLES || {});
-    const allTitles = [...levelTitles, ...shopTitleIds.filter((id) => !levelTitles.includes(id))];
+    const extra = (profile.purchasedTitleIds || []).filter((id) => !levelTitles.includes(id) && !shopTitleIds.includes(id));
+    const allTitles = [...levelTitles, ...shopTitleIds.filter((id) => !levelTitles.includes(id)), ...extra];
     return allTitles.map((titleId) => {
       const isUnlocked = global.ProfileService?.isTitleUnlocked?.(profile, titleId) ?? false;
       const isSelected = selected === titleId;

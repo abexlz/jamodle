@@ -81,64 +81,56 @@
    * @returns {{ streakDays: number, newMilestone: object|null, savedToday: boolean }}
    */
   function recordActivity(activityType) {
-    const today = getTodayKey();
-    let data = syncTodayState(loadStreak());
-    let newMilestone = null;
-
-    if (!data.todayCompleted) {
-      const yesterday = getYesterdayKey();
-      if (data.lastActivityDate === yesterday) {
-        data.currentStreak += 1;
-      } else if (data.lastActivityDate !== today) {
-        data.currentStreak = 1;
-      }
-      data.lastActivityDate = today;
-      data.todayCompleted = true;
-      data.todayDate = today;
-      if (data.currentStreak > data.longestStreak) {
-        data.longestStreak = data.currentStreak;
-      }
-
-      for (const m of MILESTONES) {
-        if (data.currentStreak >= m.days && !data.milestonesEarned.includes(m.days)) {
-          data.milestonesEarned.push(m.days);
-          newMilestone = { ...m, message: getMilestoneMessage(m.days) || m.message };
-        }
-      }
+    if (activityType === 'daily-match') {
+      const snap = global.DailyQuizStreak?.getSnapshot?.();
+      return {
+        streakDays: snap?.currentStreak || 0,
+        newMilestone: null,
+        savedToday: !!snap?.clearedToday,
+        activityType,
+      };
     }
-
+    const data = syncTodayState(loadStreak());
     saveStreak(data);
     return {
-      streakDays: data.currentStreak,
-      newMilestone,
+      streakDays: global.DailyQuizStreak?.getSnapshot?.().currentStreak || data.currentStreak,
+      newMilestone: null,
       savedToday: data.todayCompleted,
       activityType,
     };
   }
 
   function getDisplayInfo() {
+    const snap = global.DailyQuizStreak?.getSnapshot?.();
+    if (snap) {
+      const tFn = (key, vars) => global.I18n?.t(key, vars) ?? '';
+      return {
+        streakDays: snap.currentStreak,
+        longestStreak: snap.longestStreak,
+        savedToday: snap.clearedToday,
+        progressMessage: snap.clearedToday ? tFn('dailyStreak.savedToday') : tFn('dailyStreak.keepStreak'),
+        headline: snap.currentStreak > 0
+          ? tFn('dailyStreak.headline', { days: snap.currentStreak })
+          : tFn('dailyStreak.headlineStart'),
+        milestonesEarned: [],
+      };
+    }
     const data = syncTodayState(loadStreak());
     const streakDays = data.currentStreak;
     const savedToday = data.todayCompleted;
-    const t = (key, vars) => global.I18n?.t(key, vars) ?? '';
-
+    const tFn = (key, vars) => global.I18n?.t(key, vars) ?? '';
     let progressMessage;
-    if (savedToday) {
-      progressMessage = t('streak.savedToday');
-    } else if (streakDays > 0) {
-      progressMessage = t('streak.keepStreak');
-    } else {
-      progressMessage = t('streak.startStreak');
-    }
-
+    if (savedToday) progressMessage = tFn('streak.savedToday');
+    else if (streakDays > 0) progressMessage = tFn('streak.keepStreak');
+    else progressMessage = tFn('streak.startStreak');
     return {
       streakDays,
       longestStreak: data.longestStreak,
       savedToday,
       progressMessage,
       headline: streakDays > 0
-        ? t('streak.headline', { days: streakDays })
-        : t('streak.headlineStart'),
+        ? tFn('streak.headline', { days: streakDays })
+        : tFn('streak.headlineStart'),
       milestonesEarned: data.milestonesEarned,
     };
   }

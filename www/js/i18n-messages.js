@@ -705,7 +705,8 @@
         "syllable-builder": "Syllable leader",
         "word-explorer": "Word Expert",
         "korean-pathfinder": "Korean Pro",
-        "hangul-hero": "Hangul Master"
+        "hangul-hero": "Hangul Master",
+        "hangul-master": "한글 마스터"
       },
       "xp": {
         "matchComplete": "Korean Match complete!",
@@ -768,6 +769,14 @@
         "word-collector": {
           "name": "Word Collector",
           "desc": "Learn 50 unique words"
+        },
+        "streak-fire": {
+          "name": "On Fire",
+          "desc": "Reach a 3-day daily quiz streak"
+        },
+        "streak-gold": {
+          "name": "Gold Streak",
+          "desc": "Reach a 30-day daily quiz streak"
         }
       },
       "avatars": {
@@ -1454,7 +1463,9 @@
         "coinBoost2x15": "Coins 2× (15 min)",
         "coinBoost2x15Desc": "Double coin rewards for 15 minutes",
         "coinBoost2x15Short": "Coins ×2",
-        "coinBoost2x15Tag": "15 MIN"
+        "coinBoost2x15Tag": "15 MIN",
+        "streakFreeze": "Streak Freeze",
+        "streakFreezeDesc": "Protects your daily quiz streak if you miss exactly one day"
       },
       "titles": {
         "wordsmith": "Word smith",
@@ -1539,6 +1550,32 @@
       "notEnoughCoins": "Not enough coins. You need {{count}} coins.",
       "trophiesTitle": "Monthly Trophies",
       "trophiesHint": "Win daily puzzles to earn bronze (3), silver (10), and gold (30) trophies each month."
+    },
+    "dailyStreak": {
+      "title": "Daily quiz streak",
+      "headline": "🔥 {{days}}-day daily quiz streak",
+      "headlineStart": "🔥 Start your daily quiz streak",
+      "daysLabel": "days",
+      "savedToday": "Today's quiz is locked in ✓",
+      "keepStreak": "Clear today's daily quiz to keep your streak",
+      "freezeHeld": "{{count}} streak freeze",
+      "freezeUsed": "Your streak was protected! 1 Streak Freeze used.",
+      "friendTitle": "Friend streak",
+      "friendEmpty": "Add a friend with a friend code to share a streak.",
+      "addFriendCta": "Add friend",
+      "friendNudge": "{{name}} already kept your friend streak alive today — don't break it!",
+      "you": "You",
+      "friendFallback": "Friend",
+      "questsIdle": "No extra quests right now",
+      "milestonesTitle": "Streak rewards",
+      "milestonesHint": "3🔥 · 7 frame + freeze · 14 avatar · 30 gold + freeze · 100 title",
+      "milestone": {
+        "3": "3 days · fire badge",
+        "7": "7 days · gold frame + freeze",
+        "14": "14 days · crown avatar",
+        "30": "30 days · gold trophy + freeze",
+        "100": "100 days · 한글 마스터"
+      }
     }
   },
   "ko": {
@@ -2244,7 +2281,8 @@
         "syllable-builder": "음절 학살자",
         "word-explorer": "단어의 왕",
         "korean-pathfinder": "한국어 전문가",
-        "hangul-hero": "한글의 마스터"
+        "hangul-hero": "한글의 마스터",
+        "hangul-master": "한글 마스터"
       },
       "xp": {
         "matchComplete": "Korean Match 완료!",
@@ -2307,6 +2345,14 @@
         "word-collector": {
           "name": "Word Collector",
           "desc": "50개의 서로 다른 단어 학습"
+        },
+        "streak-fire": {
+          "name": "불꽃",
+          "desc": "데일리 퀴즈 3일 연속"
+        },
+        "streak-gold": {
+          "name": "골드 스트릭",
+          "desc": "데일리 퀴즈 30일 연속"
         }
       },
       "avatars": {
@@ -2993,7 +3039,9 @@
         "coinBoost2x15": "코인 2배 (15분)",
         "coinBoost2x15Desc": "15분 동안 코인 보상 2배",
         "coinBoost2x15Short": "코인 ×2",
-        "coinBoost2x15Tag": "15분"
+        "coinBoost2x15Tag": "15분",
+        "streakFreeze": "스트릭 프리즈",
+        "streakFreezeDesc": "데일리 퀴즈를 하루 빠지면 스트릭을 지켜 줍니다"
       },
       "titles": {
         "wordsmith": "단어 장인",
@@ -3078,6 +3126,32 @@
       "notEnoughCoins": "코인이 부족해요. {{count}} 코인이 필요해요.",
       "trophiesTitle": "월간 트로피",
       "trophiesHint": "Daily 퍼즐을 완료하면 매달 브론즈(3), 실버(10), 골드(30) 트로피를 받을 수 있어요."
+    },
+    "dailyStreak": {
+      "title": "데일리 퀴즈 스트릭",
+      "headline": "🔥 데일리 퀴즈 {{days}}일 연속",
+      "headlineStart": "🔥 데일리 퀴즈 스트릭을 시작하세요",
+      "daysLabel": "일",
+      "savedToday": "오늘 퀴즈 기록 완료 ✓",
+      "keepStreak": "오늘 데일리 퀴즈를 깨서 스트릭을 이어 가세요",
+      "freezeHeld": "스트릭 프리즈 {{count}}개",
+      "freezeUsed": "스트릭이 보호됐어요! 스트릭 프리즈 1개를 사용했습니다.",
+      "friendTitle": "친구 스트릭",
+      "friendEmpty": "친구 코드로 친구를 추가하면 함께 스트릭을 쌓을 수 있어요.",
+      "addFriendCta": "친구 추가",
+      "friendNudge": "{{name}}님이 오늘 친구 스트릭을 지켜 뒀어요 — 끊지 마세요!",
+      "you": "나",
+      "friendFallback": "친구",
+      "questsIdle": "지금은 추가 퀘스트가 없어요",
+      "milestonesTitle": "스트릭 보상",
+      "milestonesHint": "3일🔥 · 7일 프레임+프리즈 · 14일 아바타 · 30일 골드+프리즈 · 100일 칭호",
+      "milestone": {
+        "3": "3일 · 불꽃 배지",
+        "7": "7일 · 골드 프레임 + 프리즈",
+        "14": "14일 · 왕관 아바타",
+        "30": "30일 · 골드 트로피 + 프리즈",
+        "100": "100일 · 한글 마스터"
+      }
     }
   }
 };
