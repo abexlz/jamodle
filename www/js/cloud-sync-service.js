@@ -126,6 +126,7 @@
       })(),
       coinsUpdatedAt: maxInt(left.coinsUpdatedAt, right.coinsUpdatedAt),
       extraGuessTokens: maxInt(left.extraGuessTokens, right.extraGuessTokens),
+      streakFreezeTokens: maxInt(left.streakFreezeTokens, right.streakFreezeTokens),
       activeBuffs: {
         dailyUnlockUntil: maxInt(
           left.activeBuffs?.dailyUnlockUntil,
@@ -176,6 +177,23 @@
     return {
       wordsLearned: maxInt(a?.wordsLearned, b?.wordsLearned),
       builderWordsCompleted: maxInt(a?.builderWordsCompleted, b?.builderWordsCompleted),
+    };
+  }
+
+  function mergeDailyQuizStreak(a, b) {
+    const leftDate = a?.lastClearedDate || '';
+    const rightDate = b?.lastClearedDate || '';
+    const newer = leftDate >= rightDate ? a : b;
+    const older = newer === a ? b : a;
+    return {
+      currentStreak: newer?.currentStreak || 0,
+      longestStreak: maxInt(a?.longestStreak, b?.longestStreak),
+      lastClearedDate: newer?.lastClearedDate || older?.lastClearedDate || null,
+      freezeCount: maxInt(a?.freezeCount, b?.freezeCount),
+      freezeMilestonesGranted: unionStrings(a?.freezeMilestonesGranted, b?.freezeMilestonesGranted),
+      milestonesAwarded: unionStrings(a?.milestonesAwarded, b?.milestonesAwarded).map(Number).filter((n) => n > 0),
+      lastFreezeUsedDate: [a?.lastFreezeUsedDate, b?.lastFreezeUsedDate].filter(Boolean).sort().pop() || null,
+      pendingNotice: newer?.pendingNotice || older?.pendingNotice || null,
     };
   }
 
@@ -245,6 +263,7 @@
     if (key === PROFILE_KEY) return mergeProfiles(left, right);
     if (key === 'jamodeul-learning-progress') return mergeLearningProgress(left, right);
     if (key === 'jamodeul-korean-learning-streak') return mergeStreak(left, right);
+    if (key === 'jamodeul-daily-quiz-streak') return mergeDailyQuizStreak(left, right);
     if (key === 'jamodeul-related-words-progress') return mergeRwProgress(left, right);
     if (key === 'jamodeul-tutorial-progress') return mergeTutorial(left, right);
     if (key === 'jamodeul-tokens' || key === 'jamodeul-match-best-streak') {
