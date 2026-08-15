@@ -34,7 +34,7 @@
 
 .dq-streak-label {
   font-family: 'Jua', sans-serif;
-  font-size: 16px;
+  font-size: 32px;
   opacity: 0.8;
 }
 
@@ -48,14 +48,13 @@
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.7);
   font-weight: 800;
-  font-size: 16px;
+  font-size: 32px;
 }
 
 .dq-streak-status {
   grid-column: 1;
   margin: 0;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 26px;
 }
 
 .dq-friend-card {
@@ -69,28 +68,25 @@
 .dq-friend-title {
   margin: 0 0 6px;
   font-family: 'Jua', sans-serif;
-  font-size: 16px;
-  color: #0a3d52;
+  font-size: 32px;
 }
 
 .dq-friend-hint,
 .dq-friend-row {
   margin: 0;
-  font-size: 13px;
-  color: #0a3d52;
+  font-size: 26px;
 }
 
 .dq-friend-nudge {
   margin: 4px 0 0;
-  font-size: 12px;
-  font-weight: 700;
-  color: #b45309;
+  font-size: 24px;
 }
 
 .dq-friend-link {
   display: inline-block;
   margin-top: 6px;
   font-weight: 700;
+  font-size: 26px;
   color: #007A8E;
 }
 
