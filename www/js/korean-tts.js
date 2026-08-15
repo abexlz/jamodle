@@ -329,11 +329,16 @@
         syllableGapMs: baseSyllableGap,
       };
     }
-    // Second+ pass: half the syllable pause for a snappier re-read.
+    // Second+ pass: half the syllable pause for a snappier re-read,
+    // unless the caller sets an explicit repeat cadence.
+    const repeatPace = options.repeatSyllablePace || 'fast';
+    const repeatGap = Number.isFinite(options.repeatSyllableGapMs)
+      ? options.repeatSyllableGapMs
+      : Math.max(0, baseSyllableGap / 2);
     return {
       ...options,
-      syllablePace: 'fast',
-      syllableGapMs: Math.max(0, baseSyllableGap / 2),
+      syllablePace: repeatPace,
+      syllableGapMs: repeatGap,
     };
   }
 

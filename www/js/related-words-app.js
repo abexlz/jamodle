@@ -40,6 +40,8 @@
    * default 200ms Web-Speech syllable pause (the server voice uses 'quick' pace).
    */
   const WORD_CHAIN_SYLLABLE_GAP_TIGHT_MS = 67;
+  /** Pause between the two win readings: 20% of KoreanTTS.REPEAT_GAP_MS (100ms). */
+  const WORD_CHAIN_WIN_REPEAT_GAP_MS = 20;
   const wordChainSpeakOpts = (extra = {}) => ({
     repeats: 1,
     playbackRate: WORD_CHAIN_TTS_RATE,
@@ -4057,6 +4059,8 @@
      * Image-mode win pronunciation: read the answer once at the normal Word Chain
      * cadence, then a second time with the syllable spacing tightened to ~1/3
      * ('quick' pace = no inter-syllable pause on the server voice).
+     * The pause between the two full-word readings is 20% of the default TTS
+     * repeat gap; pass 2 is prefetched during pass 1 so the wait is only that gap.
      */
     async speakSolvedWordImageMode() {
       const word = this.puzzle?.answer;
@@ -4066,12 +4070,11 @@
       if (!tts?.speak) return;
       tts.prime?.();
       global.DictionaryService?.prefetchWord?.(word);
-      // 1st read — current style.
-      await Promise.resolve(tts.speak(word, wordChainSpeakOpts()));
-      // 2nd read — syllables ~1/3 of the normal gap for a snappier repeat.
       await Promise.resolve(tts.speak(word, wordChainSpeakOpts({
-        syllablePace: 'quick',
-        syllableGapMs: WORD_CHAIN_SYLLABLE_GAP_TIGHT_MS,
+        repeats: 2,
+        gapMs: WORD_CHAIN_WIN_REPEAT_GAP_MS,
+        repeatSyllablePace: 'quick',
+        repeatSyllableGapMs: WORD_CHAIN_SYLLABLE_GAP_TIGHT_MS,
       })));
     }
 
