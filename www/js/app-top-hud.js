@@ -7,8 +7,8 @@
   'use strict';
 
   const HUD_ID = 'app-top-hud';
-  const STYLE_HREF = 'css/menu-hud.css?v=20260815y';
-  const CHROME_HREF = 'css/app-chrome.css?v=20260815p';
+  const STYLE_HREF = 'css/menu-hud.css?v=20260815z';
+  const CHROME_HREF = 'css/app-chrome.css?v=20260815q';
   const PROFILE_STYLE_HREF = 'css/profile.css?v=20260815l';
 
   const DEPS = [
@@ -154,15 +154,8 @@
   function syncPageTitle(bar) {
     const el = (bar || document.getElementById(HUD_ID))?.querySelector('#app-hud-page-title');
     if (!el) return;
-    const isSettings = document.body?.classList.contains('settings-page');
-    if (!isSettings) {
-      el.hidden = true;
-      el.textContent = '';
-      return;
-    }
-    const text = global.I18n?.t?.('settings.title') || '세팅';
-    el.textContent = text;
-    el.hidden = false;
+    el.hidden = true;
+    el.textContent = '';
   }
 
   function refresh() {

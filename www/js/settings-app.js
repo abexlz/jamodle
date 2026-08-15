@@ -152,14 +152,6 @@
 
     bindEvents(root);
     I18n().applyToDocument(root);
-    const label = I18n().t('settings.title');
-    const heading = document.querySelector('.settings-page-heading');
-    if (heading) heading.textContent = label;
-    const hudTitle = document.getElementById('app-hud-page-title');
-    if (hudTitle) {
-      hudTitle.hidden = false;
-      hudTitle.textContent = label;
-    }
   }
 
   function bindEvents(root) {

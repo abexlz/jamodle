@@ -817,7 +817,17 @@ body.match-turn-page .rotation-dock-label {
   color: #ffffff !important;
 }
 
-body.settings-page #app-top-hud .app-hud-page-title,
+body.settings-page .settings-page-heading {
+  color: #ffffff !important;
+  text-shadow:
+    -1px -1px 0 rgba(0, 45, 58, 0.55),
+    1px -1px 0 rgba(0, 45, 58, 0.55),
+    -1px 1px 0 rgba(0, 45, 58, 0.55),
+    1px 1px 0 rgba(0, 45, 58, 0.55),
+    0 2px 0 rgba(0, 50, 65, 0.5),
+    0 4px 10px rgba(0, 35, 48, 0.4) !important;
+}
+
 body.settings-page .settings-section,
 body.settings-page .settings-section-title,
 body.settings-page .settings-row-label,

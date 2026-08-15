@@ -193,10 +193,9 @@ body.game-active #game-screen .app {
   white-space: nowrap;
 }
 
-/* Settings: HUD height (icons + 세팅 title) is measured into --app-top-hud-offset. */
 html.viewport-fit-lock body.settings-page.has-app-top-hud:not(.home-menu-active),
 body.settings-page.has-app-top-hud:not(.home-menu-active) {
-  padding-top: calc(12px + var(--app-top-hud-offset)) !important;
+  padding-top: calc(8px + var(--app-top-hud-offset)) !important;
   padding-bottom: calc(12px + var(--home-nav-section-h, 32px) + env(safe-area-inset-bottom, 0px)) !important;
 }
 
