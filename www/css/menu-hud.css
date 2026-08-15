@@ -14,11 +14,11 @@ html {
   --menu-hud-icon-w: clamp(43px, 11.4vw, 50px);
   --menu-hud-stat-h: calc(var(--menu-hud-profile-art) / 2.75);
   --menu-hud-pad-bottom: 18px;
-  --menu-hud-title-gap: 10px;
+  --menu-hud-title-gap: 0px;
   --menu-bar-h: calc(var(--menu-hud-profile-art) + var(--menu-hud-stat-h));
   --menu-profile-size: 34px;
   --app-top-hud-offset: calc(
-    var(--menu-bar-h) + var(--menu-hud-pad-bottom) + var(--menu-hud-title-gap) + var(--safe-top, env(safe-area-inset-top, 0px))
+    var(--menu-bar-h) + var(--menu-hud-pad-bottom) + var(--safe-top, env(safe-area-inset-top, 0px))
   );
 }
 

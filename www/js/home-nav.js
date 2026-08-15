@@ -5,7 +5,7 @@
   'use strict';
 
   const BAR_ID = 'home-bottom-bar';
-  const CHROME_HREF = 'css/app-chrome.css?v=20260815q';
+  const CHROME_HREF = 'css/app-chrome.css?v=20260816a';
   const HOME_TAB_KEY = 'jamodeul-home-tab';
   const ACTIVE_GAME_KEY = 'jamodeul-active-game';
   /** Learn tab skips its landing screen and opens tutorial step 1. */
