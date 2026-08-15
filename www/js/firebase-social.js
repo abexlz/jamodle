@@ -1777,7 +1777,12 @@
       overlay.remove();
       overlay = null;
     }
-    if (overlay) return overlay;
+    if (overlay) {
+      if (overlay.parentNode !== document.documentElement) {
+        document.documentElement.appendChild(overlay);
+      }
+      return overlay;
+    }
 
     overlay = document.createElement('div');
     overlay.id = 'multiplayer-overlay';
@@ -1831,7 +1836,7 @@
         </section>
       </div>
     `;
-    document.body.appendChild(overlay);
+    document.documentElement.appendChild(overlay);
     overlay.addEventListener('click', (e) => {
       if (e.target === overlay) closeMultiplayerPicker();
     });
