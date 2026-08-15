@@ -455,12 +455,12 @@ body.has-app-top-hud .menu-top-bar-spacer {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex: 0 0 calc(var(--menu-hud-stat-h) * 1.1);
-  height: calc(var(--menu-hud-stat-h) * 1.1);
-  min-height: calc(var(--menu-hud-stat-h) * 1.1);
+  flex: 0 0 calc(var(--menu-hud-stat-h) * 1.21);
+  height: calc(var(--menu-hud-stat-h) * 1.21);
+  min-height: calc(var(--menu-hud-stat-h) * 1.21);
   padding: 0;
   font-family: 'Junegull', 'Jua', sans-serif;
-  font-size: calc(var(--menu-hud-stat-h) * 1.1);
+  font-size: calc(var(--menu-hud-stat-h) * 1.21);
   line-height: 1;
   letter-spacing: 0.01em;
   color: #fff;
