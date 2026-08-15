@@ -23,7 +23,6 @@
 
     root.innerHTML = `
       <header class="settings-header">
-        <a class="settings-back" href="${global.AppNav?.getSettingsReturnUrl?.() || 'index.html'}" data-i18n="nav.back">${I18n().t('nav.back')}</a>
         <h1 data-i18n="settings.title">${I18n().t('settings.title')}</h1>
       </header>
 
