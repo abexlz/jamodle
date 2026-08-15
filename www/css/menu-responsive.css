@@ -160,9 +160,21 @@ body.home-menu-active.home-tab-menu #menu-screen .menu-word-chain-bar,
 body.home-menu-active.home-tab-menu #menu-screen .menu-battle-game-bar,
 body.home-menu-active.home-tab-menu #menu-screen .menu-mode-panel .menu-battle-game-btn,
 body.home-menu-active.home-tab-menu #menu-screen .menu-mode-panel .menu-single-player-game-btn {
-  min-height: 0 !important;
+  min-height: var(--app-btn-min-h) !important;
   max-height: none !important;
+  height: auto !important;
   aspect-ratio: auto !important;
+}
+
+body.home-menu-active.home-tab-menu #menu-screen .menu-mode-panel .menu-battle-game-btn,
+body.home-menu-active.home-tab-menu #menu-screen .menu-mode-panel .menu-single-player-game-btn {
+  min-height: var(--menu-game-btn-min-h, clamp(60px, 16vw, 80px)) !important;
+}
+
+body.home-menu-active.home-tab-menu #menu-screen .menu-top-daily-row,
+body.home-menu-active.home-tab-menu #menu-screen .menu-top-daily-row .menu-daily-puzzle-bar {
+  min-height: clamp(58px, calc(15vw + 0.4dvh), 80px) !important;
+  height: auto;
 }
 
 #menu-screen .daily-challenge-card,
@@ -175,12 +187,6 @@ body.home-menu-active.home-tab-menu #menu-screen .menu-mode-panel .menu-single-p
   min-height: var(--app-btn-min-h) !important;
   max-height: var(--app-btn-max-h);
   border-radius: var(--app-btn-radius);
-}
-
-body.home-menu-active.home-tab-menu #menu-screen .menu-top-daily-row,
-body.home-menu-active.home-tab-menu #menu-screen .menu-top-daily-row .menu-daily-puzzle-bar {
-  min-height: 0 !important;
-  height: 100%;
 }
 
 #menu-screen .menu-top-daily-row,
