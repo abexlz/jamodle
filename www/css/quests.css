@@ -23,6 +23,14 @@ body.home-menu-active.home-tab-quests .menu-brand {
 
 body.home-menu-active.home-tab-quests .menu-quests-page-title {
   display: block;
+  color: #ffffff !important;
+  text-shadow:
+    -1px -1px 0 rgba(0, 45, 58, 0.55),
+    1px -1px 0 rgba(0, 45, 58, 0.55),
+    -1px 1px 0 rgba(0, 45, 58, 0.55),
+    1px 1px 0 rgba(0, 45, 58, 0.55),
+    0 2px 0 rgba(0, 50, 65, 0.5),
+    0 4px 10px rgba(0, 35, 48, 0.4) !important;
 }
 
 .quest-tab-section {
