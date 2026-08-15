@@ -64,20 +64,39 @@ body.tutorial-page .match-chrome--tutorial .tutorial-lesson-progress {
   letter-spacing: 0.02em;
   line-height: 1.1;
   text-align: right;
-  color: #FFD743 !important;
-  text-shadow: 0 2px 0 rgba(0, 55, 68, 0.35) !important;
+  color: #ffffff !important;
+  text-shadow:
+    -1px -1px 0 rgba(0, 45, 58, 0.55),
+    1px -1px 0 rgba(0, 45, 58, 0.55),
+    -1px 1px 0 rgba(0, 45, 58, 0.55),
+    1px 1px 0 rgba(0, 45, 58, 0.55),
+    0 2px 0 rgba(0, 50, 65, 0.5),
+    0 4px 10px rgba(0, 35, 48, 0.4) !important;
   flex: 0 0 auto;
   white-space: nowrap;
 }
 
-/* Tutorial chrome title */
+/* Tutorial chrome title — same white + outline as QUEST / Settings */
 body.tutorial-page .match-chrome-title {
-  color: #FFD743 !important;
-  text-shadow: 0 2px 0 rgba(0, 55, 68, 0.35) !important;
+  color: #ffffff !important;
+  text-shadow:
+    -1px -1px 0 rgba(0, 45, 58, 0.55),
+    1px -1px 0 rgba(0, 45, 58, 0.55),
+    -1px 1px 0 rgba(0, 45, 58, 0.55),
+    1px 1px 0 rgba(0, 45, 58, 0.55),
+    0 2px 0 rgba(0, 50, 65, 0.5),
+    0 4px 10px rgba(0, 35, 48, 0.4) !important;
 }
 
 body.tutorial-page .title-block h1 {
-  color: #FFD743 !important;
+  color: #ffffff !important;
+  text-shadow:
+    -1px -1px 0 rgba(0, 45, 58, 0.55),
+    1px -1px 0 rgba(0, 45, 58, 0.55),
+    -1px 1px 0 rgba(0, 45, 58, 0.55),
+    1px 1px 0 rgba(0, 45, 58, 0.55),
+    0 2px 0 rgba(0, 50, 65, 0.5),
+    0 4px 10px rgba(0, 35, 48, 0.4) !important;
 }
 
 /* Explicit dim / focus — only targeted elements stay bright */
@@ -293,7 +312,7 @@ body.tutorial-page.tutorial-steps-1-6 .blocks-area .syllable-blocks-row[data-syl
 }
 
 body.tutorial-page .title-block h1 {
-  color: #FFD743 !important;
+  color: #ffffff !important;
 }
 
 html.reduce-motion .tutorial-coach-finger {
