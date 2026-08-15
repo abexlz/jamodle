@@ -985,9 +985,9 @@
         tryNext();
       });
       settle();
-      const results = await Promise.all(imgs.map((img, index) => loadImage(img, slotSources[index])));
+      const results = await Promise.all(imgs.map((img, index) => loadImage(img, slotSources[index] || [])));
       if (requestId !== this._answerPhotoRequestId) return;
-      if (!results.some(Boolean)) {
+      if (!results.some(Boolean) && !slotSources.length) {
         this.clearAnswerPhoto();
         return;
       }

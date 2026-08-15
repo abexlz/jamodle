@@ -302,16 +302,22 @@ module.exports = async function handler(req, res) {
     url.searchParams.set('lang', 'en');
     url.searchParams.set('order', 'popular');
 
-    const upstream = await fetchWithRetry(url);
-    if (!upstream.ok) {
-      const detail = await upstream.text().catch(() => '');
-      console.error('[pixabay] upstream', upstream.status, detail.slice(0, 200));
-      const err = new Error('Pixabay search failed.');
-      err.status = upstream.status;
+    try {
+      const upstream = await fetchWithRetry(url);
+      if (!upstream.ok) {
+        if (page > 1) return [];
+        const detail = await upstream.text().catch(() => '');
+        console.error('[pixabay] upstream', upstream.status, detail.slice(0, 200));
+        const err = new Error('Pixabay search failed.');
+        err.status = upstream.status;
+        throw err;
+      }
+      const data = await upstream.json();
+      return Array.isArray(data?.hits) ? data.hits : [];
+    } catch (err) {
+      if (page > 1) return [];
       throw err;
     }
-    const data = await upstream.json();
-    return Array.isArray(data?.hits) ? data.hits : [];
   };
 
   try {
@@ -329,11 +335,15 @@ module.exports = async function handler(req, res) {
       });
       let imageSet = selectImageSet(byType);
       if (uniqueImageCount(imageSet) < 4) {
-        const extraHits = await Promise.all(types.map((type) => searchPixabay(term, type, 2)));
-        types.forEach((type, i) => {
-          byType[type] = mergeUniqueHits(byType[type], rankHits(extraHits[i]));
-        });
-        imageSet = selectImageSet(byType);
+        try {
+          const extraHits = await Promise.all(types.map((type) => searchPixabay(term, type, 2)));
+          types.forEach((type, i) => {
+            byType[type] = mergeUniqueHits(byType[type], rankHits(extraHits[i]));
+          });
+          imageSet = selectImageSet(byType);
+        } catch {
+          /* Keep the unique page-1 set rather than failing the whole clue. */
+        }
       }
       return { byType, imageSet };
     };

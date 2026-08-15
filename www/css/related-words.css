@@ -1336,6 +1336,11 @@ body.has-home-bottom-bar .rw-solo-mode .rw-dock-area {
   padding-bottom: 2px;
 }
 
+body.has-home-bottom-bar .rw-solo-mode.rw-image-mode .rw-dock-area {
+  margin-bottom: 0;
+  padding-bottom: 12px;
+}
+
 .rw-hint-btn {
   display: inline-flex;
   align-items: center;
@@ -1977,16 +1982,30 @@ html.reduce-motion .rw-confetti-piece {
 }
 
 .rw-solo-mode.rw-image-mode .rw-answer-photo {
-  flex: 0 1 auto;
-  min-height: 0;
+  flex: 1 1 auto;
+  min-height: 120px;
+  max-height: min(32dvh, 240px);
   justify-content: flex-start;
   margin-top: 0;
   margin-bottom: 4px;
 }
 
 .rw-solo-mode.rw-image-mode .rw-answer-photo-grid {
-  flex: 0 1 auto;
-  height: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+}
+
+.rw-solo-mode.rw-image-mode .rw-answer-photo-frame {
+  height: 100%;
+  min-height: 64px;
+  aspect-ratio: auto;
+}
+
+.rw-solo-mode.rw-image-mode .rw-board,
+.rw-solo-mode.rw-image-mode .rw-dock-area,
+.rw-solo-mode.rw-image-mode .rw-play-top {
+  flex-shrink: 0;
 }
 
 #related-words-app {

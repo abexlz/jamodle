@@ -279,13 +279,20 @@ body:has(#related-words-app) .rw-solo-mode.rw-image-mode .rw-stage {
 
 body:has(#related-words-app) .rw-solo-mode.rw-image-mode .rw-play-cluster {
   justify-content: flex-start;
+  overflow: hidden;
 }
 
 body:has(#related-words-app) .rw-solo-mode.rw-image-mode .rw-answer-photo {
-  flex: 0 1 auto;
-  min-height: 0;
-  max-height: min(36dvh, 280px);
+  flex: 1 1 auto;
+  min-height: 120px;
+  max-height: min(32dvh, 240px);
   justify-content: flex-start;
+}
+
+body:has(#related-words-app) .rw-solo-mode.rw-image-mode .rw-board,
+body:has(#related-words-app) .rw-solo-mode.rw-image-mode .rw-dock-area {
+  flex: 0 0 auto;
+  overflow: visible;
 }
 
 body:has(#related-words-app) .rw-solo-mode .rw-board {
