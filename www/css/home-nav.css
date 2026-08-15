@@ -2,9 +2,9 @@
 
 :root {
   /* Tight to icon size; home-indicator lives in padding-bottom only */
-  --home-nav-section-h: 36px;
+  --home-nav-section-h: 32px;
   --home-nav-offset: calc(
-    var(--home-nav-section-h) + var(--safe-bottom, env(safe-area-inset-bottom, 0px))
+    var(--home-nav-section-h) + env(safe-area-inset-bottom, 0px)
   );
   --home-nav-bg: rgba(6, 90, 104, 0.72);
   --home-nav-bg-tint: linear-gradient(
@@ -17,7 +17,7 @@
   --home-nav-border: rgba(123, 207, 255, 0.42);
   --home-nav-divider: rgba(255, 255, 255, 0.2);
   --home-nav-active-accent: #ffe566;
-  --home-nav-icon-size: 30px;
+  --home-nav-icon-size: 28px;
 }
 
 @media (min-width: 600px) {
@@ -28,11 +28,11 @@
 }
 
 html.large-text {
-  --home-nav-section-h: 40px;
+  --home-nav-section-h: 36px;
   --home-nav-offset: calc(
-    var(--home-nav-section-h) + var(--safe-bottom, env(safe-area-inset-bottom, 0px))
+    var(--home-nav-section-h) + env(safe-area-inset-bottom, 0px)
   );
-  --home-nav-icon-size: 32px;
+  --home-nav-icon-size: 30px;
 }
 
 /* ── Bottom bar shell ── */
@@ -88,8 +88,8 @@ body > #home-bottom-bar.home-bottom-bar,
 .home-bottom-bar-inner.home-bottom-bar-inner--5 {
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 0;
-  min-height: calc(var(--home-nav-section-h) + var(--safe-bottom, env(safe-area-inset-bottom, 0px)));
-  padding-bottom: var(--safe-bottom, env(safe-area-inset-bottom, 0px));
+  min-height: calc(var(--home-nav-section-h) + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 .home-bottom-bar-inner.home-bottom-bar-inner--4 {

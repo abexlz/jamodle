@@ -22,10 +22,6 @@
     const SCmp = SC();
 
     root.innerHTML = `
-      <header class="settings-header">
-        <h1 data-i18n="settings.title">${I18n().t('settings.title')}</h1>
-      </header>
-
       ${SCmp.SettingsSection({
         icon: '🌐',
         titleKey: 'settings.language.title',
@@ -156,6 +152,8 @@
 
     bindEvents(root);
     I18n().applyToDocument(root);
+    const heading = document.querySelector('.settings-page-heading');
+    if (heading) heading.textContent = I18n().t('settings.title');
   }
 
   function bindEvents(root) {

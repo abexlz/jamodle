@@ -5,7 +5,7 @@
   'use strict';
 
   const BAR_ID = 'home-bottom-bar';
-  const CHROME_HREF = 'css/app-chrome.css?v=20260815i';
+  const CHROME_HREF = 'css/app-chrome.css?v=20260815k';
   const HOME_TAB_KEY = 'jamodeul-home-tab';
   const ACTIVE_GAME_KEY = 'jamodeul-active-game';
   /** Learn tab skips its landing screen and opens tutorial step 1. */
@@ -118,11 +118,10 @@
     const missing = insets.top + insets.right + insets.bottom + insets.left <= 0;
     if (isAppleTouch()) {
       const fb = fallbackSafeInsets();
-      /* env(safe-area-inset-*, 0px) is 0 when unsupported OR when the
-         inset is actually 0. CSS env() fallbacks do not run for a 0 value,
-         so invent notch/home-indicator padding only when the probe is ~0. */
       if (insets.top < 12) insets.top = fb.top;
-      if (insets.bottom < 8) insets.bottom = Math.max(insets.bottom, fb.bottom);
+      /* Do not invent a 34px home-indicator; that doubles the tab bar
+         when the webview is already inset. Keep a small cushion only. */
+      if (insets.bottom < 8) insets.bottom = 10;
       if (insets.left < 1 && fb.left) insets.left = fb.left;
       if (insets.right < 1 && fb.right) insets.right = fb.right;
     } else if (missing) {

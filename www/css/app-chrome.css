@@ -183,3 +183,16 @@ body.game-active #game-screen .app {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* Settings: keep HUD below the notch and leave room for the page title. */
+html.viewport-fit-lock body.settings-page.has-app-top-hud:not(.home-menu-active),
+body.settings-page.has-app-top-hud:not(.home-menu-active) {
+  padding-top: calc(16px + var(--menu-bar-h) + max(50px, var(--safe-top))) !important;
+  padding-bottom: calc(12px + var(--home-nav-section-h, 32px) + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+body.settings-page #app-top-hud.menu-top-bar,
+body.settings-page #app-top-hud.menu-top-bar.menu-hud-bar {
+  padding-top: max(50px, var(--safe-top), env(safe-area-inset-top, 0px)) !important;
+  min-height: calc(var(--menu-bar-h) + max(50px, var(--safe-top), env(safe-area-inset-top, 0px))) !important;
+}
