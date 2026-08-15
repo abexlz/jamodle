@@ -1,8 +1,8 @@
 /* Home bottom tab bar — fixed segmented nav on menu screens */
 
 :root {
-  /* Tight to icon size; home-indicator lives in padding-bottom only */
-  --home-nav-section-h: 32px;
+  /* Five full-width tabs: each cell is a square (width = 1/5 of the bar). */
+  --home-nav-section-h: calc(min(100vw, 56rem) / 5);
   --home-nav-offset: calc(
     var(--home-nav-section-h) + env(safe-area-inset-bottom, 0px)
   );
@@ -17,22 +17,20 @@
   --home-nav-border: rgba(123, 207, 255, 0.42);
   --home-nav-divider: rgba(255, 255, 255, 0.2);
   --home-nav-active-accent: #ffe566;
-  --home-nav-icon-size: 28px;
+  --home-nav-icon-size: clamp(32px, 9vw, 44px);
 }
 
 @media (min-width: 600px) {
   :root {
-    --home-nav-section-h: 40px;
-    --home-nav-icon-size: 32px;
+    --home-nav-icon-size: 36px;
   }
 }
 
 html.large-text {
-  --home-nav-section-h: 36px;
   --home-nav-offset: calc(
     var(--home-nav-section-h) + env(safe-area-inset-bottom, 0px)
   );
-  --home-nav-icon-size: 30px;
+  --home-nav-icon-size: 32px;
 }
 
 /* ── Bottom bar shell ── */
@@ -88,8 +86,15 @@ body > #home-bottom-bar.home-bottom-bar,
 .home-bottom-bar-inner.home-bottom-bar-inner--5 {
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 0;
-  min-height: calc(var(--home-nav-section-h) + env(safe-area-inset-bottom, 0px));
+  min-height: 0;
   padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.home-bottom-bar-inner--5 .home-tab-btn {
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  height: auto;
+  min-height: 0;
 }
 
 .home-bottom-bar-inner.home-bottom-bar-inner--4 {

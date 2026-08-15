@@ -669,7 +669,6 @@ body.home-menu-active.home-tab-learn .section-header {
   body.home-menu-active {
     --menu-header-gap: 4px;
     --menu-profile-size: 34px;
-    --home-nav-section-h: clamp(38px, 6.3dvh, 48px);
   }
 
 }
