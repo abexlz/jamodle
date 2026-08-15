@@ -12,6 +12,7 @@
   const PROFILE_STYLE_HREF = 'css/profile.css?v=20260815l';
 
   const DEPS = [
+    ['LevelUtils', 'js/level-utils.js'],
     ['ProfileService', 'js/profile-service.js?v=20260815a'],
     ['CoinIcon', 'js/coin-icon.js'],
     ['BadgeService', 'js/badge-service.js'],
