@@ -80,6 +80,8 @@
         bonusAmount: display.bonusAmount || 0,
         prizeLabel: prizeLabel(result.prize),
         coinsBefore: result.coinsBefore,
+        xpBefore: result.xpBefore,
+        xpAfter: result.xpAfter,
         chestTier: result.tierId || 'mega',
         closedSrc: tier?.closedImg,
         openSrc: tier?.openImg,

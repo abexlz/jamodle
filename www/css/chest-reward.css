@@ -487,6 +487,9 @@
 }
 
 .chest-reward-xp {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-family: 'Jua', sans-serif;
   font-size: 1.05rem;
   color: #fff;
@@ -560,6 +563,49 @@
   pointer-events: none;
   will-change: transform, opacity;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.35));
+}
+
+.chest-fly-xp {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1200;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  box-sizing: border-box;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #9be7ff 0%, #2f9ae0 55%, #1a6fb8 100%);
+  border: 2px solid #fff;
+  box-shadow: 0 2px 0 #0d4a80, 0 4px 10px rgba(0, 0, 0, 0.35);
+  color: #fff;
+  font-family: 'Junegull', 'Jua', sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-shadow: 0 1px 0 #0d3a7a;
+  will-change: transform, opacity;
+}
+
+.chest-reel-xp-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.1em;
+  height: 1.55em;
+  padding: 0 0.35em;
+  border-radius: 0.45em;
+  background: linear-gradient(180deg, #9be7ff 0%, #2f9ae0 55%, #1a6fb8 100%);
+  border: 2px solid #fff;
+  box-shadow: 0 2px 0 #0d4a80;
+  color: #fff;
+  font-family: 'Junegull', 'Jua', sans-serif;
+  font-size: 0.72em;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  text-shadow: 0 1px 0 #0d3a7a;
 }
 
 .chest-fly-trail {

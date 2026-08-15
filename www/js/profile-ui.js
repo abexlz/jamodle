@@ -321,11 +321,17 @@
       <div class="profile-badge-card ${sizeClass}">
         <div class="profile-battle-card">
           <img class="profile-battle-card-img" src="assets/battle-cards/${escapeHtml(tier)}.png?v=4" alt="" width="200" height="200" decoding="async">
-          <div class="profile-battle-card-level" aria-label="${escapeHtml(t('profile.levelShort', { level: summary.level }))}">${summary.level || 1}</div>
-          <div class="profile-battle-card-xp" role="progressbar"
-            aria-valuemin="0" aria-valuemax="${summary.xpToNext}" aria-valuenow="${summary.xpInLevel}"
-            aria-label="${escapeHtml(t('profile.xpProgress', { current: summary.xpInLevel, total: summary.xpToNext }))}">
-            <div class="profile-battle-card-xp-fill" style="width:${pct}%"></div>
+          <div class="profile-battle-card-level" aria-label="${escapeHtml(t('profile.levelShort', { level: summary.level }))}">
+            <span class="profile-battle-card-lv">${escapeHtml(t('profile.levelAbbrev'))}</span>
+            <span class="profile-battle-card-level-num">${summary.level || 1}</span>
+          </div>
+          <div class="profile-battle-card-xp-row">
+            <span class="profile-battle-card-xp-label">${escapeHtml(t('profile.xpAbbrev'))} <span data-xp-now>${summary.xpInLevel || 0}</span></span>
+            <div class="profile-battle-card-xp" role="progressbar"
+              aria-valuemin="0" aria-valuemax="${summary.xpToNext}" aria-valuenow="${summary.xpInLevel}"
+              aria-label="${escapeHtml(t('profile.xpProgress', { current: summary.xpInLevel, total: summary.xpToNext }))}">
+              <div class="profile-battle-card-xp-fill" data-xp-fill style="width:${pct}%"></div>
+            </div>
           </div>
           <div class="profile-battle-card-body">
             <span class="profile-battle-card-icon" aria-hidden="true">${summary.avatarIcon || '🌸'}</span>
@@ -378,6 +384,88 @@
     `;
   }
 
+  function xpView(totalXp) {
+    const info = global.LevelUtils?.getLevelFromTotalXp(totalXp) || {
+      level: 1, xpInLevel: 0, xpToNext: 100,
+    };
+    const pct = info.xpToNext > 0
+      ? Math.min(100, (info.xpInLevel / info.xpToNext) * 100)
+      : 0;
+    return { ...info, pct };
+  }
+
+  function applyBattleCardXp(totalXp) {
+    const view = xpView(totalXp);
+    document.querySelectorAll('.profile-battle-card').forEach((card) => {
+      const num = card.querySelector('.profile-battle-card-level-num');
+      const lv = card.querySelector('.profile-battle-card-level');
+      const now = card.querySelector('[data-xp-now]');
+      const fill = card.querySelector('[data-xp-fill], .profile-battle-card-xp-fill');
+      const bar = card.querySelector('.profile-battle-card-xp');
+      if (num) num.textContent = String(view.level);
+      if (lv) lv.setAttribute('aria-label', t('profile.levelShort', { level: view.level }));
+      if (now) now.textContent = String(view.xpInLevel);
+      if (fill) {
+        fill.style.transition = 'none';
+        fill.style.width = `${view.pct}%`;
+        void fill.offsetWidth;
+        fill.style.transition = '';
+      }
+      if (bar) {
+        bar.setAttribute('aria-valuenow', String(view.xpInLevel));
+        bar.setAttribute('aria-valuemax', String(view.xpToNext));
+        bar.setAttribute('aria-label', t('profile.xpProgress', {
+          current: view.xpInLevel,
+          total: view.xpToNext,
+        }));
+      }
+      card.classList.toggle('is-xp-gain', false);
+    });
+  }
+
+  function animateBattleCardXp(fromTotal, toTotal, { duration = 720 } = {}) {
+    const from = Math.max(0, parseInt(fromTotal, 10) || 0);
+    const to = Math.max(from, parseInt(toTotal, 10) || from);
+    applyBattleCardXp(from);
+    const cards = [...document.querySelectorAll('.profile-battle-card')];
+    cards.forEach((card) => card.classList.add('is-xp-gain'));
+
+    if (from === to || window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches) {
+      applyBattleCardXp(to);
+      cards.forEach((card) => card.classList.remove('is-xp-gain'));
+      return Promise.resolve();
+    }
+
+    return new Promise((resolve) => {
+      const start = performance.now();
+      function frame(now) {
+        const tNorm = Math.min(1, (now - start) / duration);
+        const eased = 1 - ((1 - tNorm) ** 3);
+        const current = Math.round(from + (to - from) * eased);
+        const view = xpView(current);
+        cards.forEach((card) => {
+          const num = card.querySelector('.profile-battle-card-level-num');
+          const nowEl = card.querySelector('[data-xp-now]');
+          const fill = card.querySelector('[data-xp-fill], .profile-battle-card-xp-fill');
+          if (num) num.textContent = String(view.level);
+          if (nowEl) nowEl.textContent = String(view.xpInLevel);
+          if (fill) {
+            fill.style.transition = 'none';
+            fill.style.width = `${view.pct}%`;
+          }
+        });
+        if (tNorm < 1) {
+          requestAnimationFrame(frame);
+          return;
+        }
+        applyBattleCardXp(to);
+        cards.forEach((card) => card.classList.remove('is-xp-gain'));
+        resolve();
+      }
+      requestAnimationFrame(frame);
+    });
+  }
+
   function renderXpProgressBar({ xpInLevel, xpToNext, level, compact, minimal }) {
     const pct = xpToNext > 0 ? Math.min(100, Math.round((xpInLevel / xpToNext) * 100)) : 0;
     const compactClass = compact ? ' xp-bar-compact' : '';
@@ -406,6 +494,8 @@
     renderBadgeCard,
     renderMenuProfileCard,
     renderXpProgressBar,
+    applyBattleCardXp,
+    animateBattleCardXp,
     spawnSoftConfetti,
     ensureStyles,
   };

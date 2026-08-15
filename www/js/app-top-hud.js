@@ -9,20 +9,20 @@
   const HUD_ID = 'app-top-hud';
   const STYLE_HREF = 'css/menu-hud.css?v=20260815p';
   const CHROME_HREF = 'css/app-chrome.css?v=20260815n';
-  const PROFILE_STYLE_HREF = 'css/profile.css?v=20260815i';
+  const PROFILE_STYLE_HREF = 'css/profile.css?v=20260815j';
 
   const DEPS = [
     ['ProfileService', 'js/profile-service.js?v=20260815a'],
     ['CoinIcon', 'js/coin-icon.js'],
     ['BadgeService', 'js/badge-service.js'],
-    ['ProfileUI', 'js/profile-ui.js'],
+    ['ProfileUI', 'js/profile-ui.js?v=20260815a'],
     ['PlayerHud', 'js/player-hud.js?v=20260815a'],
     ['DailyGiftService', 'js/daily-gift-service.js'],
     ['DailyGiftUI', 'js/daily-gift-ui.js?v=20260803a'],
     ['DailyCalendarService', 'js/daily-calendar-service.js'],
     ['DailyCalendarModal', 'js/daily-calendar-modal.js?v=20260815p'],
-    ['ChestRoomService', 'js/chest-room-service.js?v=20260803c'],
-    ['ChestRoomUI', 'js/chest-room-ui.js?v=20260803b'],
+    ['ChestRoomService', 'js/chest-room-service.js?v=20260815a'],
+    ['ChestRoomUI', 'js/chest-room-ui.js?v=20260815a'],
   ];
 
   function bind(bar) {

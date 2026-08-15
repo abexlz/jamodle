@@ -247,12 +247,14 @@
 
       const profile = global.ProfileService?.loadProfile?.();
       const coinsBefore = profile?.coins || 0;
+      const xpBefore = profile?.totalXp || 0;
 
       global.ChestRewardUI.show({
         coins: pendingChest.coins,
         xp: pendingChest.xp,
         bonusItem: pendingChest.bonusItem || null,
         coinsBefore,
+        xpBefore,
         chestTier: pendingChest.chestTier || 'original',
         autoOpen: false,
         onOpenStart: () => {

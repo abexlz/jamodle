@@ -1288,14 +1288,23 @@
 
 .profile-battle-card-level {
   position: absolute;
-  top: 5%;
+  top: 3.5%;
   left: 50%;
   transform: translateX(-50%);
-  width: 26%;
-  height: 17%;
+  min-width: 38%;
+  height: 18%;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 0.18em;
+  padding: 0 6%;
+  box-sizing: border-box;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #5ec8ff 0%, #1e78e8 58%, #155db8 100%);
+  border: 1.5px solid #fff;
+  box-shadow:
+    0 2px 0 #0d3a7a,
+    0 0 0 1px rgba(0, 0, 0, 0.35);
   font-family: 'Junegull', sans-serif !important;
   font-weight: 400;
   font-size: clamp(10px, 5vw, 18px);
@@ -1311,24 +1320,95 @@
     -1px 1px 0 #000,
     0 1px 0 #000,
     1px 1px 0 #000;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.profile-battle-card-lv {
+  font-size: 0.62em;
+  letter-spacing: 0.04em;
+  opacity: 0.92;
+  transform: translateY(0.04em);
+}
+
+.profile-battle-card-level-num {
+  font-size: 1em;
+}
+
+.profile-badge-card--menu .profile-battle-card-level {
+  font-size: clamp(7px, 2vw, 9px);
+  min-width: 52%;
+  height: 20%;
+  top: 2.5%;
+  border-width: 1px;
+  box-shadow: 0 1px 0 #0d3a7a;
+}
+
+.profile-badge-card--hero .profile-battle-card-level {
+  font-size: clamp(12px, 5.4vw, 20px);
+  min-width: 42%;
+  height: 16%;
+}
+
+.profile-battle-card-xp-row {
+  position: absolute;
+  top: 22%;
+  left: 7%;
+  right: 8%;
+  height: 8%;
+  min-height: 10px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
   z-index: 3;
   pointer-events: none;
 }
 
-.profile-badge-card--menu .profile-battle-card-level {
-  font-size: clamp(8px, 2.2vw, 11px);
+.profile-battle-card-xp-label {
+  flex-shrink: 0;
+  font-family: 'Junegull', sans-serif !important;
+  font-size: clamp(8px, 2.8vw, 12px);
+  line-height: 1;
+  color: #fff;
+  text-shadow:
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;
+  white-space: nowrap;
 }
 
-.profile-badge-card--hero .profile-battle-card-level {
-  font-size: clamp(12px, 6vw, 22px);
+.profile-badge-card--menu .profile-battle-card-xp-row {
+  top: 24%;
+  left: 8%;
+  right: 8%;
+  height: 10%;
+  min-height: 5px;
+  gap: 2px;
+}
+
+.profile-badge-card--menu .profile-battle-card-xp-label {
+  font-size: clamp(5px, 1.6vw, 7px);
+}
+
+.profile-badge-card--hero .profile-battle-card-xp-row {
+  top: 21%;
+  height: 7%;
+  min-height: 12px;
+  gap: 6px;
+}
+
+.profile-badge-card--hero .profile-battle-card-xp-label {
+  font-size: clamp(11px, 3.4vw, 14px);
 }
 
 .profile-battle-card-xp {
-  position: absolute;
-  top: 20%;
-  left: 14%;
-  right: 14%;
-  height: 5%;
+  position: relative;
+  top: auto;
+  left: auto;
+  right: auto;
+  flex: 1;
+  height: 70%;
   min-height: 4px;
   background: rgba(0, 0, 0, 0.24);
   border-radius: 999px;
@@ -1341,6 +1421,15 @@
   background: #7dd4ff;
   border-radius: 999px;
   transition: width 0.35s ease;
+}
+
+.profile-battle-card.is-xp-gain .profile-battle-card-xp {
+  box-shadow: 0 0 8px rgba(125, 212, 255, 0.85);
+}
+
+.profile-battle-card.is-xp-gain .profile-battle-card-xp-fill {
+  background: linear-gradient(90deg, #9be7ff 0%, #5ec8ff 50%, #fff 100%);
+  background-size: 200% 100%;
 }
 
 .profile-battle-card-body {

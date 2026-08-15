@@ -4,7 +4,7 @@
 (function (global) {
   'use strict';
 
-  const STYLES_HREF = 'css/chest-reward.css?v=8';
+  const STYLES_HREF = 'css/chest-reward.css?v=9';
   const CHEST_CLOSED = 'assets/chests/chest-closed.png';
   const CHEST_OPEN = 'assets/chests/chest-open.png';
   const COIN_SRC = 'assets/coin.png';
@@ -214,7 +214,9 @@
     if (item.kind === 'coins') {
       return global.CoinIcon?.html?.('coin-icon coin-icon--md') || '🪙';
     }
-    if (item.kind === 'xp') return '<span class="chest-reel-emoji" aria-hidden="true">⭐</span>';
+    if (item.kind === 'xp') {
+      return '<span class="chest-reel-xp-badge" aria-hidden="true">XP</span>';
+    }
     if (item.kind === 'hint') return '<span class="chest-reel-emoji" aria-hidden="true">💡</span>';
     if (item.kind === 'heart') return '<span class="chest-reel-emoji" aria-hidden="true">❤️</span>';
     return global.CoinIcon?.html?.('coin-icon coin-icon--md') || '🪙';
@@ -258,7 +260,12 @@
       `);
     }
     if ((reward.xp || 0) > 0) {
-      parts.push(`<div class="chest-reward-xp">+${escapeHtml(String(reward.xp || 0))} XP</div>`);
+      parts.push(`
+        <div class="chest-reward-xp">
+          <span class="chest-reel-xp-badge" aria-hidden="true">XP</span>
+          <span>+${escapeHtml(String(reward.xp || 0))}</span>
+        </div>
+      `);
     }
     if (reward.bonusItem) {
       parts.push(`
@@ -456,6 +463,9 @@
   }
 
   async function playCoinFlight(overlay, reward, coinsBefore) {
+    const totalCoins = Math.max(0, Math.floor(Number(reward.coins) || 0));
+    if (totalCoins <= 0) return;
+
     const reel = overlay.querySelector('#chest-reel');
     const winnerCard = overlay.querySelector('.chest-reel-card.is-winner');
     const from = getElCenter(winnerCard) || getElCenter(reel) || {
@@ -470,7 +480,6 @@
     };
 
     const count = coinCountForAmount(reward.coins);
-    const totalCoins = Math.max(0, Math.floor(Number(reward.coins) || 0));
     let landed = 0;
 
     setDisplayedCoins(coinsBefore);
@@ -499,7 +508,109 @@
 
     await Promise.all(flights);
     setDisplayedCoins(coinsBefore + totalCoins);
+    if (!reward.xp) global.PlayerHud?.refresh?.();
+  }
+
+  function getHudXpEl() {
+    return (
+      document.querySelector('#nav-profile .profile-battle-card-xp')
+      || document.querySelector('#menu-profile-card .profile-battle-card-xp')
+      || document.querySelector('.profile-badge-card--hero .profile-battle-card-xp')
+      || document.querySelector('.profile-battle-card-xp')
+    );
+  }
+
+  function xpChipCount(amount) {
+    const n = Math.max(0, Math.floor(Number(amount) || 0));
+    if (n <= 0) return 0;
+    if (n <= 10) return 4;
+    if (n <= 20) return 6;
+    if (n <= 40) return 8;
+    return 10;
+  }
+
+  function flyOneXp(from, to, delay, size) {
+    return new Promise((resolve) => {
+      const el = document.createElement('span');
+      el.className = 'chest-fly-xp';
+      el.textContent = 'XP';
+      el.style.width = `${size}px`;
+      el.style.height = `${Math.round(size * 0.72)}px`;
+      el.style.fontSize = `${Math.max(8, Math.round(size * 0.32))}px`;
+      document.body.appendChild(el);
+
+      const burstAngle = (Math.random() * Math.PI) - (Math.PI / 2);
+      const burstDist = 36 + Math.random() * 70;
+      const mid1 = {
+        x: from.x + Math.cos(burstAngle) * burstDist,
+        y: from.y + Math.sin(burstAngle) * burstDist - 16,
+      };
+      const mid2 = {
+        x: from.x + (to.x - from.x) * 0.55 + (Math.random() * 36 - 18),
+        y: Math.min(from.y, to.y) - 36 - Math.random() * 40,
+      };
+
+      const start = `translate(${from.x - size / 2}px, ${from.y - size / 2}px) scale(0.2)`;
+      const burst = `translate(${mid1.x - size / 2}px, ${mid1.y - size / 2}px) scale(1.15)`;
+      const arc = `translate(${mid2.x - size / 2}px, ${mid2.y - size / 2}px) scale(1)`;
+      const end = `translate(${to.x - size / 2}px, ${to.y - size / 2}px) scale(0.35)`;
+      const duration = 680 + Math.random() * 160;
+
+      const anim = el.animate([
+        { transform: start, opacity: 0 },
+        { transform: burst, opacity: 1, offset: 0.18 },
+        { transform: arc, opacity: 1, offset: 0.5 },
+        { transform: end, opacity: 0.95, offset: 0.9 },
+        { transform: end, opacity: 0 },
+      ], {
+        duration,
+        delay,
+        easing: 'cubic-bezier(0.18, 0.7, 0.22, 1)',
+        fill: 'forwards',
+      });
+
+      anim.finished
+        .then(() => { el.remove(); resolve(); })
+        .catch(() => { el.remove(); resolve(); });
+    });
+  }
+
+  async function playXpFlight(overlay, reward, xpBefore, xpAfter) {
+    const gained = Math.max(0, Math.floor(Number(reward.xp) || 0));
+    if (gained <= 0) return;
+
+    const fromXp = xpBefore != null ? xpBefore : Math.max(0, (xpAfter || 0) - gained);
+    const toXp = xpAfter != null ? xpAfter : fromXp + gained;
+    global.ProfileUI?.applyBattleCardXp?.(fromXp);
+
+    const reel = overlay.querySelector('#chest-reel');
+    const winnerCard = overlay.querySelector('.chest-reel-card.is-winner');
+    const from = getElCenter(winnerCard) || getElCenter(reel) || {
+      x: global.innerWidth / 2,
+      y: global.innerHeight / 2,
+    };
+    const to = getElCenter(getHudXpEl()) || getElCenter(document.getElementById('nav-profile')) || {
+      x: global.innerWidth / 2,
+      y: 40,
+    };
+
+    if (reduceMotion()) {
+      await global.ProfileUI?.animateBattleCardXp?.(fromXp, toXp, { duration: 1 });
+      global.PlayerHud?.refresh?.();
+      return;
+    }
+
+    const count = xpChipCount(gained);
+    const flights = [];
+    for (let i = 0; i < count; i++) {
+      const delay = 30 + i * 50 + Math.random() * 24;
+      const size = 26 + Math.floor(Math.random() * 8);
+      flights.push(flyOneXp(from, to, delay, size));
+    }
+    await Promise.all(flights);
+    await global.ProfileUI?.animateBattleCardXp?.(fromXp, toXp);
     global.PlayerHud?.refresh?.();
+    global.ProfileUI?.applyBattleCardXp?.(toXp);
   }
 
   function computeStopOffset(windowEl) {
@@ -667,6 +778,7 @@
     amounts?.classList.add('is-visible');
 
     await playCoinFlight(overlay, reward, coinsBefore);
+    await playXpFlight(overlay, reward, overlay._xpBefore, overlay._xpAfter);
 
     const continueBtn = overlay.querySelector('#chest-reward-continue');
     continueBtn?.classList.add('is-visible');
@@ -689,6 +801,7 @@
    *   bonusItem?: string, bonusKind?: string, bonusAmount?: number,
    *   prizeLabel?: string, title?: string, chestTier?: string,
    *   closedSrc?: string, openSrc?: string, tapCount?: number,
+   *   xpBefore?: number, xpAfter?: number,
    *   onOpenStart?: Function, onComplete?: Function
    * }} opts
    */
@@ -713,6 +826,10 @@
     const coinsBefore = opts.coinsBefore != null
       ? opts.coinsBefore
       : Math.max(0, currentCoins - reward.coins);
+    const xpBefore = opts.xpBefore != null
+      ? opts.xpBefore
+      : Math.max(0, (profile?.totalXp || 0) - reward.xp);
+    const xpAfter = opts.xpAfter != null ? opts.xpAfter : xpBefore + reward.xp;
 
     if (activeOverlay) {
       activeOverlay.remove();
@@ -733,7 +850,10 @@
     opening = false;
     global.I18n?.applyToDocument?.(overlay);
 
+    overlay._xpBefore = xpBefore;
+    overlay._xpAfter = xpAfter;
     setDisplayedCoins(coinsBefore);
+    if (reward.xp > 0) global.ProfileUI?.applyBattleCardXp?.(xpBefore);
     requestAnimationFrame(() => overlay.classList.add('visible'));
     global.SoundEffects?.chestAppear?.();
 

@@ -166,6 +166,7 @@
 
     const today = getTodayKey();
     const coinsBefore = profile.coins || 0;
+    const xpBefore = profile.totalXp || 0;
     const { prize, index } = pickPrize(
       'mega',
       `mega-free:${today}:${profile.displayName || 'player'}`,
@@ -183,6 +184,8 @@
       prize,
       index,
       coinsBefore,
+      xpBefore,
+      xpAfter: profile.totalXp || 0,
       display: prizeToRewardDisplay(prize),
     };
   }
@@ -199,6 +202,7 @@
     }
 
     const coinsBeforePurchase = profile.coins || 0;
+    const xpBefore = profile.totalXp || 0;
     profile.coins = coinsBeforePurchase - tier.price;
 
     const today = getTodayKey();
@@ -218,6 +222,8 @@
       index,
       price: tier.price,
       coinsBefore: coinsBeforeReward,
+      xpBefore,
+      xpAfter: profile.totalXp || 0,
       display: prizeToRewardDisplay(prize),
     };
   }

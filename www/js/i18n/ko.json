@@ -666,6 +666,8 @@
     "displayName": "표시 이름",
     "levelLine": "레벨 {{level}} · {{title}}",
     "levelShort": "레벨 {{level}}",
+    "levelAbbrev": "LV",
+    "xpAbbrev": "xp",
     "xpProgress": "다음 레벨까지 {{current}} / {{total}} XP",
     "streakLine": "🔥 {{days}}일 Korean Learning Streak",
     "streakStart": "오늘 Korean Learning Streak을 시작해 보세요",
