@@ -413,6 +413,7 @@
     "bestStreak": "Best Streak: {{n}}",
     "comboLabel": "Combo",
     "bestCombo": "Best Combo: {{n}}",
+    "resultsDailyNextWord": "Daily Day {{n}} · New word tomorrow at midnight (KST)",
     "selectTile": "\"{{char}}\" selected — tap a slot",
     "rotationLabel": "Rotate",
     "mergeLabel": "Merge",

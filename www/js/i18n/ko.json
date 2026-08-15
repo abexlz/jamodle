@@ -413,6 +413,7 @@
     "bestStreak": "최고 연속 기록: {{n}}",
     "comboLabel": "콤보",
     "bestCombo": "최고 콤보: {{n}}",
+    "resultsDailyNextWord": "데일리 {{n}}일차 · 내일 자정(KST)에 새 단어",
     "selectTile": "\"{{char}}\" 선택 — 칸을 탭하세요",
     "rotationLabel": "돌리기",
     "mergeLabel": "결합",

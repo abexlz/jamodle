@@ -6485,7 +6485,7 @@
         this.els.resultsStreak.textContent = String(this.streak);
       }
       if (this.isDaily) {
-        this.els.resultsBest.textContent = `Daily Day ${MD.getDayNumber()} · 내일 자정(KST)에 새 단어`;
+        this.els.resultsBest.textContent = t('match.resultsDailyNextWord', { n: MD.getDayNumber() });
       } else if (!this.versus) {
         this.els.resultsBest.textContent = this.bestStreak > 0
           ? t('match.bestCombo', { n: this.bestStreak })
