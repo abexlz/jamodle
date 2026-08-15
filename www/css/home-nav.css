@@ -237,6 +237,10 @@ body.has-home-bottom-bar.home-nav-game {
   padding-bottom: var(--home-nav-offset) !important;
 }
 
+html.viewport-fit-lock body.has-app-top-hud:not(.home-menu-active) {
+  padding-top: calc(var(--viewport-fit-pad-y, 8px) + var(--app-top-hud-offset, calc(58px + var(--safe-top)))) !important;
+}
+
 body.has-home-bottom-bar.game-active #game-screen #bottom-bar {
   padding-bottom: 0;
 }
