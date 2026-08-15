@@ -15,7 +15,7 @@
   const FLIP_MS = 380;
   const FLIP_FAST_MS = 120;
   const FLIP_STAGGER = 90;
-  const FLY_MS = 300;
+  const FLY_MS = 60;
   const GREEN_FLASH_MS = 200;
   const GREEN_FLASH_FAST_MS = 70;
   const TRAIL_ADVANCE_MS = 480;
@@ -3576,6 +3576,7 @@
       this._flyingTileId = tileId;
       this.renderSlots();
       this.renderDock();
+      global.SoundEffects?.place?.();
 
       const slotEl = this.getPlayerSlotEl(slotIndex);
       const targetRect = slotEl?.getBoundingClientRect();
@@ -3596,7 +3597,6 @@
         this._activeFlies = Math.max(0, this._activeFlies - 1);
         this.renderSlots();
         this.renderDock();
-        global.SoundEffects?.place?.();
         finishPlace();
       });
     }
