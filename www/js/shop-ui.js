@@ -204,7 +204,6 @@
               ${escapeHtml(t('shop.scopeCosmetic'))}
             </button>
           </div>
-          <p class="shop-section-balance">${escapeHtml(t('shop.balance'))}: <strong>${global.CoinIcon?.html?.('coin-icon coin-icon--sm') || '🪙'} ${inv.coins}</strong></p>
         </div>
 
         <div class="shop-scope-panel${scope === 'item' ? '' : ' hidden'}" data-shop-scope-panel="item"
