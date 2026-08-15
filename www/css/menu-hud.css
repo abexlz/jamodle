@@ -10,7 +10,7 @@
   --menu-hud-star: #2f8fd4;
   --menu-bar-h: 42px;
   --menu-profile-size: 34px;
-  --app-top-hud-offset: calc(var(--menu-bar-h) + env(safe-area-inset-top, var(--safe-top, 0px)));
+  --app-top-hud-offset: calc(var(--menu-bar-h) + var(--safe-top, env(safe-area-inset-top, 0px)));
 }
 
 /* Global fixed HUD — stays visible on home, games, and secondary pages. */

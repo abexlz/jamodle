@@ -5,7 +5,7 @@
   'use strict';
 
   const BAR_ID = 'home-bottom-bar';
-  const CHROME_HREF = 'css/app-chrome.css?v=20260815h';
+  const CHROME_HREF = 'css/app-chrome.css?v=20260815i';
   const HOME_TAB_KEY = 'jamodeul-home-tab';
   const ACTIVE_GAME_KEY = 'jamodeul-active-game';
   /** Learn tab skips its landing screen and opens tutorial step 1. */
@@ -116,10 +116,17 @@
       insets = { top: 0, right: 0, bottom: 0, left: 0 };
     }
     const missing = insets.top + insets.right + insets.bottom + insets.left <= 0;
-    if (missing && isAppleTouch()) {
-      /* env() is 0 when the webview is already below the status bar.
-         Do not invent a 47px notch or the HUD gets a huge empty teal band. */
-      insets = { top: 0, right: 0, bottom: 20, left: 0 };
+    if (isAppleTouch()) {
+      const fb = fallbackSafeInsets();
+      /* env(safe-area-inset-*, 0px) is 0 when unsupported OR when the
+         inset is actually 0. CSS env() fallbacks do not run for a 0 value,
+         so invent notch/home-indicator padding only when the probe is ~0. */
+      if (insets.top < 12) insets.top = fb.top;
+      if (insets.bottom < 8) insets.bottom = Math.max(insets.bottom, fb.bottom);
+      if (insets.left < 1 && fb.left) insets.left = fb.left;
+      if (insets.right < 1 && fb.right) insets.right = fb.right;
+    } else if (missing) {
+      insets = { top: 0, right: 0, bottom: 0, left: 0 };
     }
     const root = document.documentElement;
     root.style.setProperty('--safe-top', px(insets.top));

@@ -12,7 +12,7 @@ html {
   --safe-right: env(safe-area-inset-right, 0px);
   --menu-bar-h: 42px;
   --menu-profile-size: 34px;
-  --app-top-hud-offset: calc(var(--menu-bar-h) + env(safe-area-inset-top, var(--safe-top)));
+  --app-top-hud-offset: calc(var(--menu-bar-h) + var(--safe-top));
   --home-nav-offset: calc(
     var(--home-nav-section-h, 40px) + var(--safe-bottom)
   );
@@ -68,12 +68,13 @@ html {
 #app-top-hud.menu-top-bar {
   box-sizing: border-box;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
-  padding-top: env(safe-area-inset-top, var(--safe-top)) !important;
+  padding-top: var(--safe-top) !important;
   padding-right: max(10px, var(--safe-right)) !important;
   padding-left: max(10px, var(--safe-left)) !important;
-  padding-bottom: 0 !important;
-  min-height: calc(var(--menu-bar-h) + env(safe-area-inset-top, var(--safe-top))) !important;
+  padding-bottom: 4px !important;
+  min-height: calc(var(--menu-bar-h) + var(--safe-top)) !important;
   align-items: end !important;
+  overflow: visible !important;
 }
 
 #app-top-hud .menu-hud-left,
@@ -102,7 +103,7 @@ html {
 
 html.viewport-fit-lock body.has-app-top-hud:not(.home-menu-active),
 body.has-app-top-hud:not(.home-menu-active) {
-  padding-top: var(--app-top-hud-offset) !important;
+  padding-top: calc(8px + var(--app-top-hud-offset)) !important;
   padding-left: max(10px, var(--safe-left)) !important;
   padding-right: max(10px, var(--safe-right)) !important;
 }
@@ -114,15 +115,12 @@ body.has-home-bottom-bar.home-menu-active.has-app-top-hud {
 }
 
 html.viewport-fit-lock body.has-home-bottom-bar:not(.home-menu-active),
-body.has-home-bottom-bar:not(.home-menu-active),
-html.viewport-fit-lock body.has-home-bottom-bar:has(#related-words-app),
-html.viewport-fit-lock body.has-home-bottom-bar:has(#race-root.race-app),
-html.viewport-fit-lock body.has-home-bottom-bar:has(#match-app),
-html.viewport-fit-lock body.has-home-bottom-bar.game-active,
-html.viewport-fit-lock body.has-home-bottom-bar.match-page,
-html.viewport-fit-lock body.has-home-bottom-bar.match-race-page,
-html.viewport-fit-lock body.has-home-bottom-bar.match-turn-page {
+body.has-home-bottom-bar:not(.home-menu-active) {
   padding-bottom: var(--home-nav-offset) !important;
+}
+
+html.viewport-fit-lock body.has-home-bottom-bar:not(.home-menu-active):not(.home-nav-game):not(.game-active) {
+  padding-bottom: calc(16px + var(--home-nav-offset)) !important;
 }
 
 body.has-home-bottom-bar.home-menu-active {
