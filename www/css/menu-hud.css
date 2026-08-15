@@ -8,8 +8,9 @@
   --menu-hud-coin-pill-edge: #3d0d18;
   --menu-hud-progress: #3ecfb0;
   --menu-hud-star: #2f8fd4;
-  --menu-hud-profile-art: clamp(36px, 9.5vw, 42px);
-  --menu-hud-stat-h: calc(var(--menu-hud-profile-art) / 3);
+  --menu-hud-profile-art: clamp(40px, 10.5vw, 46px);
+  --menu-hud-icon-w: clamp(43px, 11.4vw, 50px);
+  --menu-hud-stat-h: calc(var(--menu-hud-profile-art) / 2.75);
   --menu-bar-h: calc(var(--menu-hud-profile-art) + var(--menu-hud-stat-h));
   --menu-profile-size: 34px;
   --app-top-hud-offset: calc(var(--menu-bar-h) + var(--safe-top, env(safe-area-inset-top, 0px)));
@@ -41,6 +42,18 @@ body > #app-top-hud.menu-top-bar,
 #app-top-hud .menu-hud-right,
 #app-top-hud .menu-top-bar-left {
   pointer-events: auto;
+}
+
+#app-top-hud.menu-top-bar.menu-hud-bar,
+#app-top-hud.menu-top-bar {
+  align-items: start !important;
+}
+
+#app-top-hud .menu-hud-left,
+#app-top-hud .menu-top-bar-left,
+#app-top-hud .menu-hud-right {
+  align-items: stretch !important;
+  height: var(--menu-bar-h);
 }
 
 html.viewport-fit-lock body.has-app-top-hud:not(.home-menu-active) {
@@ -139,14 +152,14 @@ body.settings-page #app-top-hud .app-hud-page-title {
 
 .menu-hud-spin-chest {
   display: block;
-  width: var(--menu-hud-profile-art);
+  width: var(--menu-hud-icon-w);
   height: var(--menu-bar-h);
   object-fit: contain;
 }
 
 .menu-hud-left .menu-hud-spin {
   flex-shrink: 0;
-  width: var(--menu-hud-profile-art);
+  width: var(--menu-hud-icon-w);
   height: var(--menu-bar-h);
 }
 
@@ -166,8 +179,8 @@ body.settings-page #app-top-hud .app-hud-page-title {
 }
 
 .menu-hud-spin-wheel {
-  width: clamp(36px, 9.5vw, 42px);
-  height: clamp(36px, 9.5vw, 42px);
+  width: var(--menu-hud-icon-w);
+  height: var(--menu-hud-profile-art);
   border-radius: 50%;
   border: 2px solid #fff;
   box-shadow: 0 2px 0 rgba(20, 70, 80, 0.28), inset 0 2px 4px rgba(255, 255, 255, 0.35);
@@ -268,7 +281,7 @@ body.settings-page #app-top-hud .app-hud-page-title {
 /* Calendar chip — aligned with spin wheel disc (above SPIN label) */
 .menu-hud-calendar {
   flex-shrink: 0;
-  width: var(--menu-hud-profile-art);
+  width: var(--menu-hud-icon-w);
   height: var(--menu-bar-h);
   margin-bottom: 0;
   border-radius: 10px;
@@ -293,7 +306,7 @@ body.settings-page #app-top-hud .app-hud-page-title {
 }
 
 .menu-hud-calendar .menu-calendar-nav-sheet {
-  width: calc(var(--menu-hud-profile-art) - 8px);
+  width: calc(var(--menu-hud-icon-w) - 8px);
   height: calc(var(--menu-bar-h) - 12px);
   background: #fff;
   border-radius: 6px;
@@ -307,7 +320,7 @@ body.settings-page #app-top-hud .app-hud-page-title {
   flex-shrink: 0;
   padding: 2px 1px 1px;
   font-family: 'Jua', 'Noto Sans KR', sans-serif;
-  font-size: 7px;
+  font-size: 9px;
   line-height: 1;
   text-align: center;
   text-transform: uppercase;
@@ -319,7 +332,7 @@ body.settings-page #app-top-hud .app-hud-page-title {
   align-items: center;
   justify-content: center;
   font-family: 'Jua', 'Noto Sans KR', sans-serif;
-  font-size: 15px;
+  font-size: 18px;
   line-height: 1;
 }
 
@@ -349,7 +362,7 @@ body.settings-page #app-top-hud .app-hud-page-title {
   align-items: stretch;
   justify-content: flex-start;
   align-self: start;
-  width: var(--menu-hud-profile-art);
+  width: var(--menu-hud-icon-w);
   height: var(--menu-bar-h);
   margin: 0;
   padding: 0;
@@ -451,7 +464,7 @@ body.settings-page #app-top-hud .app-hud-page-title {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: var(--menu-hud-profile-art);
+  width: var(--menu-hud-icon-w);
   height: var(--menu-bar-h);
   margin: 0;
   padding: 0;
@@ -471,7 +484,7 @@ body.settings-page #app-top-hud .app-hud-page-title {
 }
 
 .menu-hud-gift-box {
-  font-size: calc(var(--menu-hud-profile-art) * 0.55);
+  font-size: calc(var(--menu-hud-profile-art) * 0.62);
   line-height: 1;
   filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
 }
@@ -498,9 +511,9 @@ body.settings-page #app-top-hud .app-hud-page-title {
   align-items: center;
   justify-content: flex-end;
   gap: 6px;
-  min-width: clamp(64px, 18vw, 96px);
+  min-width: clamp(77px, 22vw, 115px);
   height: var(--menu-bar-h);
-  padding: 0 36px 0 12px;
+  padding: 0 42px 0 14px;
   margin: 0;
   border-radius: 12px;
   background: linear-gradient(180deg, #7a2038 0%, var(--menu-hud-coin-pill) 45%, var(--menu-hud-coin-pill-edge) 100%) !important;
@@ -523,7 +536,7 @@ body.settings-page #app-top-hud .app-hud-page-title {
   white-space: nowrap;
   flex: 1;
   font-family: 'Jua', sans-serif;
-  font-size: clamp(16px, 4.5vw, 20px);
+  font-size: clamp(19px, 5.4vw, 24px);
   font-weight: 400;
   color: #fff !important;
   text-shadow: 0 2px 0 rgba(40, 6, 14, 0.55);
@@ -536,8 +549,8 @@ body.settings-page #app-top-hud .app-hud-page-title {
   right: -4px;
   top: 50%;
   transform: translateY(-50%);
-  width: clamp(36px, 10vw, 42px);
-  height: clamp(36px, 10vw, 42px);
+  width: clamp(40px, 12vw, 50px);
+  height: clamp(40px, 12vw, 50px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -555,16 +568,16 @@ body.settings-page #app-top-hud .app-hud-page-title {
   position: absolute;
   right: -2px;
   bottom: -4px;
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: linear-gradient(180deg, #6ee7a8 0%, #22c57e 100%);
   border: 2px solid #fff;
   color: #fff;
   font-family: 'Jua', sans-serif;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 400;
-  line-height: 14px;
+  line-height: 16px;
   text-align: center;
   box-shadow: 0 2px 0 #1a9d62;
 }
@@ -584,12 +597,12 @@ body.settings-page #app-top-hud .app-hud-page-title {
   }
 
   .menu-hud-calendar {
-    width: 40px;
-    height: 40px;
+    width: var(--menu-hud-icon-w);
+    height: var(--menu-bar-h);
     margin-bottom: 0;
   }
 
   .menu-hud-left .menu-hud-spin {
-    width: 40px;
+    width: var(--menu-hud-icon-w);
   }
 }
