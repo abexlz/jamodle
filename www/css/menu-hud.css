@@ -1,6 +1,8 @@
 /* Arcade-style menu HUD — spin wheel left, avatar center, coins right */
 
-:root {
+:root,
+html.viewport-fit-lock,
+html {
   --menu-hud-red-top: #2eb8c8;
   --menu-hud-red-mid: #1aa8ba;
   --menu-hud-red-low: #0e96a8;
@@ -11,9 +13,17 @@
   --menu-hud-profile-art: clamp(40px, 10.5vw, 46px);
   --menu-hud-icon-w: clamp(43px, 11.4vw, 50px);
   --menu-hud-stat-h: calc(var(--menu-hud-profile-art) / 2.75);
+  --menu-hud-pad-bottom: 12px;
   --menu-bar-h: calc(var(--menu-hud-profile-art) + var(--menu-hud-stat-h));
   --menu-profile-size: 34px;
-  --app-top-hud-offset: calc(var(--menu-bar-h) + var(--safe-top, env(safe-area-inset-top, 0px)));
+  --app-top-hud-offset: calc(
+    var(--menu-bar-h) + var(--menu-hud-pad-bottom) + var(--safe-top, env(safe-area-inset-top, 0px))
+  );
+}
+
+html.large-text,
+html.xxx-large-text {
+  --menu-bar-h: calc(var(--menu-hud-profile-art) + var(--menu-hud-stat-h));
 }
 
 /* Global fixed HUD — stays visible on home, games, and secondary pages. */
@@ -47,6 +57,8 @@ body > #app-top-hud.menu-top-bar,
 #app-top-hud.menu-top-bar.menu-hud-bar,
 #app-top-hud.menu-top-bar {
   align-items: start !important;
+  padding-bottom: var(--menu-hud-pad-bottom) !important;
+  min-height: calc(var(--menu-bar-h) + var(--safe-top) + var(--menu-hud-pad-bottom)) !important;
 }
 
 #app-top-hud .menu-hud-left,
@@ -70,10 +82,10 @@ body.has-app-top-hud .menu-top-bar-spacer {
 
 .menu-top-bar.menu-hud-bar {
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  min-height: calc(var(--menu-bar-h) + var(--safe-top));
+  min-height: calc(var(--menu-bar-h) + var(--safe-top) + var(--menu-hud-pad-bottom));
   padding-top: var(--safe-top);
   padding-right: max(8px, env(safe-area-inset-right, 0px));
-  padding-bottom: 4px;
+  padding-bottom: var(--menu-hud-pad-bottom);
   padding-left: max(8px, env(safe-area-inset-left, 0px));
   background:
     radial-gradient(circle at 18% 120%, rgba(255, 255, 255, 0.18) 0%, transparent 42%),
@@ -278,17 +290,17 @@ body.settings-page #app-top-hud .app-hud-page-title {
   box-shadow: 0 2px 0 rgba(80, 8, 22, 0.35);
 }
 
-/* Calendar chip — aligned with spin wheel disc (above SPIN label) */
+/* Calendar chip — stacked month over day, same as pre-wide layout */
 #app-top-hud .menu-hud-calendar {
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: auto;
-  min-width: calc(var(--menu-hud-icon-w) * 1.9);
+  width: var(--menu-hud-icon-w);
+  min-width: var(--menu-hud-icon-w);
   height: var(--menu-bar-h);
   margin-bottom: 0;
-  padding: 0 6px;
+  padding: 0;
   border-radius: 10px;
   border: 2px solid #f4d35e;
   background: linear-gradient(180deg, #fff4c8 0%, #ffd45a 55%, #f0b020 100%);
@@ -301,24 +313,37 @@ body.settings-page #app-top-hud .app-hud-page-title {
 }
 
 #app-top-hud .menu-hud-calendar .menu-calendar-nav-sheet {
-  width: auto;
+  width: calc(var(--menu-hud-icon-w) - 8px);
   min-width: 0;
   height: calc(var(--menu-bar-h) - 12px);
-  padding: 0 6px;
+  padding: 0;
   background: #fff;
   border-radius: 6px;
   box-shadow: 0 1px 0 rgba(120, 80, 0, 0.28);
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 0;
   overflow: hidden;
 }
 
-#app-top-hud .menu-hud-calendar .menu-calendar-nav-month,
-#app-top-hud .menu-hud-calendar .menu-calendar-nav-day {
+#app-top-hud .menu-hud-calendar .menu-calendar-nav-month {
   flex: 0 0 auto;
+  display: block;
+  padding: 2px 1px 1px;
+  border-bottom: 1px solid #e8e4e0;
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  text-transform: uppercase;
+  color: #8b4513;
+}
+
+#app-top-hud .menu-hud-calendar .menu-calendar-nav-day {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -329,14 +354,6 @@ body.settings-page #app-top-hud .app-hud-page-title {
   font-weight: 800;
   line-height: 1;
   text-align: center;
-}
-
-#app-top-hud .menu-hud-calendar .menu-calendar-nav-month {
-  color: #8b4513;
-  text-transform: uppercase;
-}
-
-#app-top-hud .menu-hud-calendar .menu-calendar-nav-day {
   color: #5c1424;
 }
 
@@ -621,13 +638,25 @@ body.settings-page #app-top-hud .app-hud-page-title {
   }
 
   #app-top-hud .menu-hud-calendar {
-    width: auto;
-    min-width: calc(var(--menu-hud-icon-w) * 1.9);
+    width: var(--menu-hud-icon-w);
+    min-width: var(--menu-hud-icon-w);
     height: var(--menu-bar-h);
     margin-bottom: 0;
   }
 
-  .menu-hud-left .menu-hud-spin {
-    width: var(--menu-hud-icon-w);
+@media (min-width: 600px) {
+  :root,
+  html.viewport-fit-lock,
+  html {
+    --menu-bar-h: calc(var(--menu-hud-profile-art) + var(--menu-hud-stat-h));
   }
 }
+
+@media (orientation: landscape) and (max-height: 500px) {
+  :root,
+  html.viewport-fit-lock,
+  html {
+    --menu-bar-h: calc(var(--menu-hud-profile-art) + var(--menu-hud-stat-h));
+  }
+}
+
