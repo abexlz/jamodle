@@ -1377,8 +1377,26 @@ body.has-home-bottom-bar .rw-solo-mode .rw-dock-area {
 }
 
 .rw-hint-btn--ad {
-  border-color: #7eb6ff;
-  background: linear-gradient(180deg, #f4f9ff 0%, #e7f1ff 100%);
+  border-color: var(--border, #d5d8e0);
+  background: #fff;
+}
+
+.rw-hint-btn__ad {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 2px;
+  min-width: 22px;
+  height: 16px;
+  padding: 0 5px;
+  border-radius: 5px;
+  background: #2a4a7a;
+  color: #fff;
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1;
 }
 
 .rw-hint-btn__icon {
@@ -1797,8 +1815,12 @@ html.reduce-motion .rw-heartbeat-icon {
 }
 
 [data-theme="dark"] .rw-hint-btn--ad {
-  border-color: #4a7ab8;
-  background: linear-gradient(180deg, #3a4558 0%, #2f3a4c 100%);
+  border-color: #555a6e;
+  background: #3A3E50;
+}
+
+[data-theme="dark"] .rw-hint-btn__ad {
+  background: #5a7ab8;
 }
 
 [data-theme="dark"] .rw-hint-btn__cost {

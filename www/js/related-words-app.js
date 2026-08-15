@@ -1505,18 +1505,16 @@
       btn.classList.toggle('rw-hint-btn--hint', !useAd);
       btn.dataset.mode = useAd ? 'ad' : 'hint';
 
+      const cost = `🪙 ${HINT_COST}`;
+      btn.innerHTML = `
+        <span class="rw-hint-btn__icon" aria-hidden="true">💡</span>
+        <span class="rw-hint-btn__tag" aria-hidden="true">hint!!</span>
+        <span class="rw-hint-btn__cost">${global.CoinIcon?.format?.(cost, 'coin-icon coin-icon--sm') || escapeHtml(cost)}</span>
+        ${useAd ? '<span class="rw-hint-btn__ad" aria-hidden="true">AD</span>' : ''}`;
       if (useAd) {
-        btn.innerHTML = `
-          <span class="rw-hint-btn__icon" aria-hidden="true">📺</span>
-          <span class="rw-hint-btn__label">${escapeHtml(t('relatedWords.hintAdLabel'))}</span>`;
         btn.setAttribute('aria-label', t('relatedWords.hintAdAria'));
         btn.title = t('relatedWords.hintAdAria');
       } else {
-        const cost = `🪙 ${HINT_COST}`;
-        btn.innerHTML = `
-          <span class="rw-hint-btn__icon" aria-hidden="true">💡</span>
-          <span class="rw-hint-btn__tag" aria-hidden="true">hint!!</span>
-          <span class="rw-hint-btn__cost">${global.CoinIcon?.format?.(cost, 'coin-icon coin-icon--sm') || escapeHtml(cost)}</span>`;
         btn.setAttribute('aria-label', t('relatedWords.hintAria', { count: HINT_COST }));
         btn.title = t('relatedWords.hintAria', { count: HINT_COST });
       }
