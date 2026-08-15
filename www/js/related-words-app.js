@@ -26,7 +26,7 @@
   const REVEAL_VANISH_MS = 320;
   const REVEAL_FORM_MS = 520;
   const REVEAL_FORM_HOLD_MS = 140;
-  const HINT_COST = 1;
+  const HINT_COST = 15;
   /** Chain-complete recap pacing — long enough to read every word that was linked. */
   const CHAIN_RECAP_IN_MS = 340;
   const CHAIN_RECAP_WORD_STAGGER_MS = 55;
