@@ -8,8 +8,8 @@
 
   const HUD_ID = 'app-top-hud';
   const STYLE_HREF = 'css/menu-hud.css?v=20260815p';
-  const CHROME_HREF = 'css/app-chrome.css?v=20260815n';
-  const PROFILE_STYLE_HREF = 'css/profile.css?v=20260815j';
+  const CHROME_HREF = 'css/app-chrome.css?v=20260815o';
+  const PROFILE_STYLE_HREF = 'css/profile.css?v=20260815k';
 
   const DEPS = [
     ['ProfileService', 'js/profile-service.js?v=20260815a'],
