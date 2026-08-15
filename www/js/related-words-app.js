@@ -3548,57 +3548,15 @@
       if (slotIndex === -1) return;
       this.touchRevealActivity();
 
-      const dockEl = this.els.dock.querySelector(`[data-tile-id="${tileId}"]`);
-      const fromRect = dockEl?.getBoundingClientRect();
-      const toRect = this.getPlayerSlotEl(slotIndex)?.getBoundingClientRect();
-
       this.slots[slotIndex] = tile;
       tile.used = true;
       tile.slotIndex = slotIndex;
-
-      const finishPlace = () => {
-        if (this.allSlotsFilled()) {
-          this.checkAnswer();
-        }
-      };
-
-      if (reduceMotion() || !fromRect || !toRect) {
-        this._flyingSlotIndex = -1;
-        this._flyingTileId = null;
-        this.renderSlots();
-        this.renderDock();
-        global.SoundEffects?.place?.();
-        finishPlace();
-        return;
-      }
-
-      this._flyingSlotIndex = slotIndex;
-      this._flyingTileId = tileId;
+      this._flyingSlotIndex = -1;
+      this._flyingTileId = null;
       this.renderSlots();
       this.renderDock();
       global.SoundEffects?.place?.();
-
-      const slotEl = this.getPlayerSlotEl(slotIndex);
-      const targetRect = slotEl?.getBoundingClientRect();
-      if (!slotEl || !targetRect) {
-        this._flyingSlotIndex = -1;
-        this._flyingTileId = null;
-        this.renderSlots();
-        this.renderDock();
-        finishPlace();
-        return;
-      }
-
-      this._activeFlies += 1;
-
-      this.flyLetterFromDock(tile.char, fromRect, targetRect, dockEl, () => {
-        this._flyingSlotIndex = -1;
-        this._flyingTileId = null;
-        this._activeFlies = Math.max(0, this._activeFlies - 1);
-        this.renderSlots();
-        this.renderDock();
-        finishPlace();
-      });
+      if (this.allSlotsFilled()) this.checkAnswer();
     }
 
     clearSlot(slotIndex) {
