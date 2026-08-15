@@ -334,7 +334,7 @@ body.settings-page #app-top-hud .app-hud-page-title {
   padding: 2px 1px 1px;
   border-bottom: 1px solid #e8e4e0;
   font-family: 'Jua', 'Noto Sans KR', sans-serif;
-  font-size: 9px;
+  font-size: 9.9px;
   font-weight: 700;
   line-height: 1;
   text-align: center;
@@ -361,7 +361,7 @@ body.settings-page #app-top-hud .app-hud-page-title {
   flex-shrink: 0;
   padding: 2px 1px 1px;
   font-family: 'Jua', 'Noto Sans KR', sans-serif;
-  font-size: 9px;
+  font-size: 9.9px;
   line-height: 1;
   text-align: center;
   text-transform: uppercase;
