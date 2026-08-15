@@ -232,6 +232,10 @@ body.home-menu-active.home-tab-quests .menu-quests-page-title {
   color: #0a3d52;
 }
 
+.quest-card:not(.is-complete):not(.is-claimable) {
+  background: #99CCFF !important;
+}
+
 .quest-card--weekly {
   border-color: #73B5F2 !important;
   background: #99CCFF !important;

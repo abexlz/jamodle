@@ -520,6 +520,13 @@ body.home-menu-active #menu-screen.is-quests-tab .quest-card {
   padding: 10px 12px;
 }
 
+body.home-menu-active.home-tab-quests .quest-card:not(.is-complete):not(.is-claimable),
+body.home-menu-active #menu-screen.is-quests-tab .quest-card:not(.is-complete):not(.is-claimable) {
+  background: #99CCFF !important;
+  border-color: #73B5F2 !important;
+  box-shadow: 0 3px 0 #5A9FDB !important;
+}
+
 body.home-menu-active #menu-screen.is-shop-tab .shop-section {
   flex: 1 1 0;
   min-height: 0;
@@ -532,10 +539,6 @@ body.home-menu-active #menu-screen.is-shop-tab .shop-section {
   margin-top: 0;
   padding-top: 0;
   border-top: none;
-}
-
-body.home-menu-active #menu-screen.is-quests-tab .quest-section {
-  padding-top: 0;
 }
 
 body.home-menu-active.home-tab-shop .shop-scope-bar {
