@@ -35,7 +35,6 @@ body.home-menu-active.home-tab-quests .menu-quests-page-title {
 
 .quest-tab-section {
   width: 100%;
-  height: 100%;
   min-height: 0;
   padding-bottom: 0;
   box-sizing: border-box;
@@ -163,13 +162,11 @@ body.home-menu-active.home-tab-quests .menu-quests-page-title {
 
 .quest-list-scroll {
   position: relative;
-  flex: 1 1 0;
+  flex: 0 0 auto;
   min-height: 0;
   display: flex;
   flex-direction: column;
-  overflow-x: hidden;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow: visible;
 }
 
 .quest-list-scroll::after {

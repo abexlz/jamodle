@@ -13,6 +13,7 @@
 /* ── Shared viewport lock ── */
 html.viewport-fit-lock,
 body.viewport-fit-lock,
+body.home-menu-active,
 body.game-active,
 body.match-page,
 body.match-race-page,
@@ -29,6 +30,7 @@ body:has(.level-mode-app) {
 }
 
 body.viewport-fit-lock,
+body.home-menu-active,
 body.game-active,
 body.match-page,
 body.match-race-page,
@@ -436,12 +438,26 @@ body.home-menu-active.home-tab-menu .menu-mode-heading-badge {
   padding: 3px clamp(12px, 3vw, 18px);
 }
 
-/* Quest / shop / learn tabs */
+/* Quest tab: lock chrome, scroll only the quest list panel */
+body.home-menu-active.home-tab-quests #menu-screen,
+body.home-menu-active.home-tab-quests #menu-screen .menu-inner,
+body.home-menu-active.home-tab-quests #menu-screen #menu-root {
+  overflow: hidden !important;
+  min-height: 0 !important;
+}
+
+body.home-menu-active.home-tab-quests #menu-screen .menu-inner {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
 body.home-menu-active.home-tab-quests #menu-root > .menu-sections.quest-tab-section {
+  display: flex;
+  flex-direction: column;
   flex: 1 1 0;
   min-height: 0;
-  height: 100%;
-  overflow: hidden;
+  height: auto;
+  overflow: hidden !important;
   gap: 8px;
 }
 
@@ -452,20 +468,56 @@ body.home-menu-active.home-tab-quests .dq-friend-card {
   margin-bottom: 0;
 }
 
-body.home-menu-active.home-tab-quests #menu-screen .menu-inner {
-  overflow: hidden !important;
-}
-
-body.home-menu-active.home-tab-quests #menu-screen #menu-root {
-  overflow: hidden !important;
-}
-
+body.home-menu-active.home-tab-quests .quest-section,
 body.home-menu-active #menu-screen.is-quests-tab .quest-section {
   flex: 1 1 0;
   min-height: 0;
-  overflow: hidden;
+  overflow: hidden !important;
   display: flex;
   flex-direction: column;
+  padding-top: 0;
+}
+
+body.home-menu-active.home-tab-quests .quest-scope-bar,
+body.home-menu-active #menu-screen.is-quests-tab .quest-scope-bar {
+  flex: 0 0 auto;
+  margin-bottom: 8px;
+}
+
+body.home-menu-active.home-tab-quests .quest-scope-panel,
+body.home-menu-active #menu-screen.is-quests-tab .quest-scope-panel {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+}
+
+body.home-menu-active.home-tab-quests .quest-scope-panel.hidden,
+body.home-menu-active #menu-screen.is-quests-tab .quest-scope-panel.hidden {
+  display: none !important;
+}
+
+body.home-menu-active.home-tab-quests .quest-list-scroll,
+body.home-menu-active #menu-screen.is-quests-tab .quest-list-scroll {
+  flex: 0 0 auto;
+  min-height: 0;
+  overflow: visible !important;
+}
+
+body.home-menu-active.home-tab-quests .quest-list,
+body.home-menu-active #menu-screen.is-quests-tab .quest-list {
+  gap: 8px;
+}
+
+body.home-menu-active.home-tab-quests .quest-card,
+body.home-menu-active #menu-screen.is-quests-tab .quest-card {
+  flex: 0 0 auto;
+  min-height: auto;
+  padding: 10px 12px;
 }
 
 body.home-menu-active #menu-screen.is-shop-tab .shop-section {
@@ -474,42 +526,6 @@ body.home-menu-active #menu-screen.is-shop-tab .shop-section {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-}
-
-body.home-menu-active #menu-screen.is-quests-tab .quest-scope-bar {
-  flex-shrink: 0;
-  margin-bottom: 8px;
-}
-
-body.home-menu-active #menu-screen.is-quests-tab .quest-scope-panel {
-  flex: 1 1 0;
-  min-height: 0;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-body.home-menu-active #menu-screen.is-quests-tab .quest-scope-panel.hidden {
-  display: none;
-}
-
-body.home-menu-active #menu-screen.is-quests-tab .quest-list-scroll {
-  flex: 1 1 0;
-  min-height: 0;
-  overflow-x: hidden;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-}
-
-body.home-menu-active #menu-screen.is-quests-tab .quest-list {
-  gap: 8px;
-}
-
-body.home-menu-active #menu-screen.is-quests-tab .quest-card {
-  flex: 0 0 auto;
-  min-height: auto;
-  padding: 10px 12px;
 }
 
 body.home-menu-active #menu-screen.is-shop-tab .shop-section {
