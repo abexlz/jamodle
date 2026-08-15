@@ -687,3 +687,48 @@ body.home-menu-active.home-tab-learn .section-header {
     }
   }
 }
+
+/* Full-screen sheets sit in the middle of the area above the tab bar. */
+body.has-home-bottom-bar :is(
+  .multiplayer-overlay,
+  .shop-overlay,
+  .daily-cal-overlay,
+  .daily-gift-overlay,
+  .wheel-overlay,
+  .chest-reward-overlay,
+  .profile-modal-overlay,
+  .pause-quit-overlay,
+  .race-length-overlay,
+  .race-challenge-overlay,
+  .dict-overlay,
+  .confirm-overlay,
+  #overlay.show,
+  #length-overlay:not(.hidden)
+) {
+  position: fixed !important;
+  inset: 0 !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding-left: 16px !important;
+  padding-right: 16px !important;
+  padding-top: calc(12px + var(--safe-top, env(safe-area-inset-top, 0px))) !important;
+  padding-bottom: calc(12px + var(--home-nav-offset, 0px)) !important;
+}
+
+body.has-home-bottom-bar :is(
+  .multiplayer-modal,
+  .shop-modal,
+  .daily-cal-modal,
+  .daily-gift-modal,
+  .wheel-modal,
+  .profile-modal-card,
+  .pause-quit-card,
+  .race-length-card,
+  .race-challenge-modal,
+  #overlay .modal
+) {
+  max-height: 100% !important;
+  min-height: 0;
+}
