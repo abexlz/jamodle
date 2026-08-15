@@ -10,10 +10,10 @@ html {
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
-  --menu-bar-h: clamp(50px, 7.4dvh, 58px);
+  --menu-bar-h: 46px;
   --app-top-hud-offset: calc(var(--menu-bar-h) + var(--safe-top));
   --home-nav-offset: calc(
-    var(--home-nav-section-h, 50px) + var(--safe-bottom)
+    var(--home-nav-section-h, 40px) + var(--safe-bottom)
   );
   --app-pad-x: max(12px, var(--safe-left), var(--safe-right));
   --app-content-max: min(100%, 28.75rem);
@@ -23,7 +23,7 @@ html {
 @media (min-width: 600px) {
   :root,
   html {
-    --menu-bar-h: 58px;
+    --menu-bar-h: 52px;
     --app-content-max: min(100%, 36rem);
   }
 }
@@ -50,11 +50,11 @@ html {
 }
 
 html.large-text {
-  --menu-bar-h: clamp(54px, 8dvh, 66px);
+  --menu-bar-h: 52px;
 }
 
 html.xxx-large-text {
-  --menu-bar-h: clamp(58px, 9dvh, 72px);
+  --menu-bar-h: 56px;
 }
 
 html {
@@ -70,6 +70,7 @@ html {
   padding-top: var(--safe-top) !important;
   padding-right: max(10px, var(--safe-right)) !important;
   padding-left: max(10px, var(--safe-left)) !important;
+  padding-bottom: 2px !important;
   min-height: calc(var(--menu-bar-h) + var(--safe-top)) !important;
 }
 
@@ -99,7 +100,7 @@ html {
 
 html.viewport-fit-lock body.has-app-top-hud:not(.home-menu-active),
 body.has-app-top-hud:not(.home-menu-active) {
-  padding-top: calc(6px + var(--app-top-hud-offset)) !important;
+  padding-top: calc(2px + var(--app-top-hud-offset)) !important;
   padding-left: max(10px, var(--safe-left)) !important;
   padding-right: max(10px, var(--safe-right)) !important;
 }
@@ -119,7 +120,7 @@ html.viewport-fit-lock body.has-home-bottom-bar.game-active,
 html.viewport-fit-lock body.has-home-bottom-bar.match-page,
 html.viewport-fit-lock body.has-home-bottom-bar.match-race-page,
 html.viewport-fit-lock body.has-home-bottom-bar.match-turn-page {
-  padding-bottom: calc(var(--home-nav-offset) + 8px) !important;
+  padding-bottom: var(--home-nav-offset) !important;
 }
 
 body.has-home-bottom-bar.home-menu-active {

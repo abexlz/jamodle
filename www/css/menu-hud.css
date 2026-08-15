@@ -8,7 +8,7 @@
   --menu-hud-coin-pill-edge: #3d0d18;
   --menu-hud-progress: #3ecfb0;
   --menu-hud-star: #2f8fd4;
-  --menu-bar-h: 58px;
+  --menu-bar-h: 46px;
   --app-top-hud-offset: calc(var(--menu-bar-h) + var(--safe-top, env(safe-area-inset-top, 0px)));
 }
 
@@ -41,7 +41,7 @@ body > #app-top-hud.menu-top-bar,
 }
 
 html.viewport-fit-lock body.has-app-top-hud:not(.home-menu-active) {
-  padding-top: calc(8px + var(--app-top-hud-offset)) !important;
+  padding-top: calc(2px + var(--app-top-hud-offset)) !important;
 }
 
 body.has-home-bottom-bar.home-menu-active.has-app-top-hud {
@@ -73,8 +73,8 @@ body.has-app-top-hud .menu-top-bar-spacer {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: -8px;
-  height: 10px;
+  bottom: -4px;
+  height: 6px;
   background:
     radial-gradient(circle, rgba(255, 255, 255, 0.28) 0 2px, transparent 3px) 0 0 / 24px 10px repeat-x;
   opacity: 0.35;

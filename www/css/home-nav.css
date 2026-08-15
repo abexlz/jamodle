@@ -1,8 +1,8 @@
 /* Home bottom tab bar — fixed segmented nav on menu screens */
 
 :root {
-  /* 60% of prior bar height so game chrome keeps more board space */
-  --home-nav-section-h: clamp(46px, 7.5dvh, 56px);
+  /* Tight to icon size; home-indicator lives in padding-bottom only */
+  --home-nav-section-h: 40px;
   --home-nav-offset: calc(
     var(--home-nav-section-h) + var(--safe-bottom, env(safe-area-inset-bottom, 0px))
   );
@@ -17,15 +17,22 @@
   --home-nav-border: rgba(123, 207, 255, 0.42);
   --home-nav-divider: rgba(255, 255, 255, 0.2);
   --home-nav-active-accent: #ffe566;
-  --home-nav-icon-size: clamp(25px, 6.3vw, 31px);
+  --home-nav-icon-size: 26px;
+}
+
+@media (min-width: 600px) {
+  :root {
+    --home-nav-section-h: 44px;
+    --home-nav-icon-size: 28px;
+  }
 }
 
 html.large-text {
-  --home-nav-section-h: clamp(49px, 7.8dvh, 60px);
+  --home-nav-section-h: 44px;
   --home-nav-offset: calc(
     var(--home-nav-section-h) + var(--safe-bottom, env(safe-area-inset-bottom, 0px))
   );
-  --home-nav-icon-size: clamp(26px, 6.6vw, 32px);
+  --home-nav-icon-size: 28px;
 }
 
 /* ── Bottom bar shell ── */
@@ -100,7 +107,7 @@ body > #home-bottom-bar.home-bottom-bar,
   width: 100%;
   min-width: 0;
   min-height: var(--home-nav-section-h);
-  padding: 6px 5px;
+  padding: 2px 4px 0;
   margin: 0;
   border: none;
   border-left: 1px solid var(--home-nav-divider);

@@ -5,7 +5,7 @@
   'use strict';
 
   const BAR_ID = 'home-bottom-bar';
-  const CHROME_HREF = 'css/app-chrome.css?v=20260815e';
+  const CHROME_HREF = 'css/app-chrome.css?v=20260815f';
   const HOME_TAB_KEY = 'jamodeul-home-tab';
   const ACTIVE_GAME_KEY = 'jamodeul-active-game';
   /** Learn tab skips its landing screen and opens tutorial step 1. */
@@ -90,7 +90,11 @@
         : { top: 20, right: 0, bottom: 0, left: 0 };
     }
 
-    const island = short >= 390;
+    // Classic notch (X–14 / 12–13 Pro Max): 47px. Dynamic Island (14 Pro+): 59px.
+    const classicNotch = long <= 844
+      || (short >= 414 && long <= 896)
+      || (short >= 428 && long <= 926);
+    const island = !classicNotch && short >= 390 && long >= 852;
     if (landscape) {
       const side = island ? 59 : 47;
       return { top: 0, right: side, bottom: 21, left: side };

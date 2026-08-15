@@ -565,12 +565,12 @@ html.reduce-motion .rw-chain-recap-word {
 }
 
 .rw-solo-mode .rw-answer-photo {
-  flex: 1 1 auto;
-  min-height: 140px;
-  max-height: min(52dvh, 420px);
+  flex: 1 1 0;
+  min-height: 0;
+  max-height: min(36dvh, 280px);
   justify-content: center;
-  margin-top: clamp(2px, 0.6dvh, 6px);
-  margin-bottom: clamp(4px, 1dvh, 10px);
+  margin-top: 0;
+  margin-bottom: 4px;
 }
 
 .rw-solo-mode .rw-answer-photo-grid {
@@ -581,7 +581,7 @@ html.reduce-motion .rw-chain-recap-word {
 }
 
 .rw-solo-mode .rw-answer-photo-frame {
-  min-height: 72px;
+  min-height: 0;
   height: 100%;
   aspect-ratio: auto;
 }
@@ -992,7 +992,7 @@ html.reduce-motion .rw-answer-english {
   flex: 1 1 0;
   min-height: 0;
   justify-content: flex-start;
-  padding-bottom: clamp(8px, 2dvh, 16px);
+  padding-bottom: 0;
   overflow: hidden;
 }
 
@@ -1065,7 +1065,7 @@ html.reduce-motion .rw-answer-english {
 
 .rw-solo-mode .rw-dock-area {
   margin-top: 0;
-  margin-bottom: clamp(6px, 1.5dvh, 14px);
+  margin-bottom: 0;
   flex-shrink: 0;
 }
 
@@ -1921,6 +1921,10 @@ html.reduce-motion .rw-confetti-piece {
   min-height: 0;
 }
 
+.rw-solo-mode.rw-image-mode .rw-board {
+  flex: 0 0 auto;
+}
+
 #related-words-app {
   position: relative;
   display: flex;
@@ -1928,6 +1932,25 @@ html.reduce-motion .rw-confetti-piece {
   flex: 1 1 0;
   min-height: 0;
   height: 100%;
+}
+
+@media (max-height: 900px) {
+  .rw-solo-mode .rw-answer-photo {
+    max-height: min(34dvh, 240px);
+  }
+
+  .rw-dock-tile.flip-tile {
+    width: clamp(54px, 15.5vw, 74px);
+    height: clamp(54px, 15.5vw, 74px);
+  }
+
+  .rw-dock-face {
+    font-size: clamp(26px, 8vw, 36px);
+  }
+
+  .rw-solo-mode .rw-board {
+    gap: 8px;
+  }
 }
 
 @media (max-width: 379px) {
