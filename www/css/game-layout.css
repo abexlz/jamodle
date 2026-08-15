@@ -430,8 +430,19 @@ body.home-menu-active.home-tab-quests .dq-friend-card {
   margin-bottom: 0;
 }
 
-body.home-menu-active #menu-screen.is-quests-tab .quest-section,
-body.home-menu-active #menu-screen.is-quests-tab .shop-section,
+body.home-menu-active.home-tab-quests #menu-screen .menu-inner,
+body.home-menu-active.home-tab-quests #menu-screen #menu-root {
+  overflow: visible !important;
+}
+
+body.home-menu-active #menu-screen.is-quests-tab .quest-section {
+  flex: 0 0 auto;
+  min-height: 0;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+}
+
 body.home-menu-active #menu-screen.is-shop-tab .shop-section {
   flex: 1 1 0;
   min-height: 0;
@@ -446,9 +457,9 @@ body.home-menu-active #menu-screen.is-quests-tab .quest-scope-bar {
 }
 
 body.home-menu-active #menu-screen.is-quests-tab .quest-scope-panel {
-  flex: 1 1 0;
+  flex: 0 0 auto;
   min-height: 0;
-  overflow: hidden;
+  overflow: visible;
   display: flex;
   flex-direction: column;
 }
@@ -458,8 +469,9 @@ body.home-menu-active #menu-screen.is-quests-tab .quest-scope-panel.hidden {
 }
 
 body.home-menu-active #menu-screen.is-quests-tab .quest-list-scroll {
-  flex: 1 1 0;
-  min-height: 0;
+  flex: 0 0 auto;
+  min-height: auto;
+  overflow: visible;
 }
 
 body.home-menu-active #menu-screen.is-quests-tab .quest-list {

@@ -291,7 +291,7 @@ body.home-menu-active.home-tab-menu #menu-screen .menu-top-daily-row .menu-daily
 
 #menu-screen .quest-progress-text,
 #menu-screen .quest-reward-amount {
-  font-size: calc(var(--menu-type-base) * 1.265);
+  font-size: calc(var(--menu-type-base) * 1.392);
 }
 
 #menu-screen .shop-section-balance {
@@ -307,7 +307,7 @@ body.home-menu-active.home-tab-menu #menu-screen .menu-top-daily-row .menu-daily
 }
 
 #menu-screen .quest-reward-xp {
-  font-size: calc(clamp(10px, 2.6vw, 12px) * 1.265);
+  font-size: calc(clamp(10px, 2.6vw, 12px) * 1.392);
 }
 
 #menu-screen .quest-claim-btn {
@@ -333,7 +333,7 @@ body.home-menu-active.home-tab-menu #menu-screen .menu-top-daily-row .menu-daily
 }
 
 #menu-screen .quest-refresh-timer {
-  font-size: calc(clamp(11px, 3vw, 14px) * 1.265);
+  font-size: calc(clamp(11px, 3vw, 14px) * 1.392);
 }
 
 /* ── Text stays inside boxes ── */

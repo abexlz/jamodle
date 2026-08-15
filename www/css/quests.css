@@ -1,4 +1,29 @@
-/* Quest tab — scroll list under fixed bottom nav */
+/* Quest tab — list fits the page; logo replaced by QUEST title */
+
+.menu-quests-page-title {
+  display: none;
+  margin: 4px 0 8px;
+  padding: 0;
+  text-align: center;
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: clamp(28px, 8vw, 36px);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: 0.04em;
+  color: #083848;
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.95),
+    0 2px 0 rgba(255, 255, 255, 0.5),
+    0 3px 10px rgba(0, 40, 50, 0.16);
+}
+
+body.home-menu-active.home-tab-quests .menu-brand {
+  display: none !important;
+}
+
+body.home-menu-active.home-tab-quests .menu-quests-page-title {
+  display: block;
+}
 
 .quest-tab-section {
   width: 100%;
@@ -80,7 +105,7 @@
 
 .quest-refresh-timer {
   margin: 0;
-  font-size: 15.2px;
+  font-size: 16.72px;
   color: #111 !important;
   text-align: center;
   line-height: 1.3;
@@ -97,7 +122,7 @@
 .quest-refresh-time {
   font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
   font-variant-numeric: tabular-nums;
-  font-size: 16.4px;
+  font-size: 18.04px;
   font-weight: 700;
   letter-spacing: 0.04em;
   color: #111 !important;
@@ -121,17 +146,17 @@
 
 .quest-subsection-hint {
   margin: 0 0 10px;
-  font-size: 15.2px;
+  font-size: 16.72px;
   color: #333 !important;
 }
 
 .quest-list-scroll {
   position: relative;
-  flex: 1 1 0;
+  flex: 0 0 auto;
   min-height: 0;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .quest-list-scroll::after {
@@ -142,13 +167,10 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  flex: 1 1 0;
+  flex: 0 0 auto;
   min-height: 0;
-  overflow-x: hidden;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow: visible;
   padding-bottom: 8px;
-  scroll-padding-bottom: 8px;
 }
 
 .quest-wheel-chip {
@@ -167,7 +189,7 @@
   color: #0a3d52 !important;
   text-decoration: none;
   font-family: 'Jua', sans-serif;
-  font-size: 16.4px;
+  font-size: 18.04px;
   line-height: 1.1;
 }
 
@@ -291,7 +313,7 @@
   justify-content: center;
   height: 100%;
   font-family: 'Jua', sans-serif;
-  font-size: 13.9px;
+  font-size: 15.29px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   color: #fff;
@@ -378,7 +400,7 @@
 
 .quest-reward-amount {
   font-family: 'Jua', sans-serif;
-  font-size: 16.4px;
+  font-size: 18.04px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   color: #0a3d52;
@@ -386,7 +408,7 @@
 }
 
 .quest-reward-xp {
-  font-size: 12.65px;
+  font-size: 13.92px;
   font-weight: 700;
   color: rgba(10, 61, 82, 0.72);
   line-height: 1.1;
@@ -423,7 +445,7 @@
 
 .quest-empty {
   margin: 0;
-  font-size: 16.4px;
+  font-size: 18.04px;
   color: #333 !important;
 }
 

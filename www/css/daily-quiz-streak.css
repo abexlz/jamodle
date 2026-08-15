@@ -54,7 +54,7 @@
 .dq-streak-status {
   grid-column: 1;
   margin: 0;
-  font-size: 16.4px;
+  font-size: 18.04px;
   font-weight: 600;
 }
 
@@ -76,13 +76,13 @@
 .dq-friend-hint,
 .dq-friend-row {
   margin: 0;
-  font-size: 16.4px;
+  font-size: 18.04px;
   color: #0a3d52;
 }
 
 .dq-friend-nudge {
   margin: 4px 0 0;
-  font-size: 15.2px;
+  font-size: 16.72px;
   font-weight: 700;
   color: #b45309;
 }
@@ -91,7 +91,7 @@
   display: inline-block;
   margin-top: 6px;
   font-weight: 700;
-  font-size: 16.4px;
+  font-size: 18.04px;
   color: #007A8E;
 }
 
