@@ -423,6 +423,13 @@ body.home-menu-active.home-tab-learn #menu-root > .menu-sections {
   min-height: 0;
 }
 
+body.home-menu-active.home-tab-quests .dq-streak-hero,
+body.home-menu-active.home-tab-quests .dq-friend-card {
+  flex: 0 0 auto;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
 body.home-menu-active #menu-screen.is-quests-tab .quest-section,
 body.home-menu-active #menu-screen.is-quests-tab .shop-section,
 body.home-menu-active #menu-screen.is-shop-tab .shop-section {

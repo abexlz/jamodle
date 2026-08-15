@@ -329,18 +329,9 @@
     return `<section class="dq-friend-card"><p class="dq-friend-title">${escapeHtml(t('dailyStreak.friendTitle'))}</p>${body}</section>`;
   }
 
-  function renderHomeQuests() {
-    const html = global.QuestUI?.renderHomePreview?.() || '';
-    if (!html) return '';
-    return `<section class="dq-home-quests" aria-label="${escapeHtml(t('quests.title'))}">${html}</section>`;
-  }
-
   function renderMainMenu() {
     return `
       <div class="menu-sections">
-        ${renderStreakHero()}
-        ${renderFriendStreakCard()}
-        ${renderHomeQuests()}
         ${renderMenuTop()}
         ${renderSinglePlayerSection()}
         ${renderMenuBottom()}
@@ -526,7 +517,13 @@
 
   function renderQuestTab() {
     const questHtml = global.QuestUI?.renderSection?.() || '';
-    return `<div class="menu-sections quest-tab-section">${questHtml}</div>`;
+    return `
+      <div class="menu-sections quest-tab-section">
+        ${renderStreakHero()}
+        ${renderFriendStreakCard()}
+        ${questHtml}
+      </div>
+    `;
   }
 
   function renderMenu(tab = 'menu') {
