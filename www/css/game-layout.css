@@ -501,8 +501,31 @@ body.home-menu-active.home-tab-shop .shop-theme-grid {
 }
 
 body.home-menu-active.home-tab-shop .shop-item-card,
-body.home-menu-active.home-tab-shop .shop-theme-card {
+body.home-menu-active.home-tab-shop .shop-theme-card,
+body.home-menu-active #menu-screen.is-shop-tab .shop-item-card,
+body.home-menu-active #menu-screen.is-shop-tab .shop-theme-card {
   min-height: auto;
+  background: rgba(0, 70, 85, 0.52) !important;
+}
+
+body.home-menu-active.home-tab-shop .shop-item-name,
+body.home-menu-active.home-tab-shop .shop-item-qty,
+body.home-menu-active.home-tab-shop .shop-item-desc,
+body.home-menu-active.home-tab-shop .shop-pack-badge,
+body.home-menu-active #menu-screen.is-shop-tab .shop-item-name,
+body.home-menu-active #menu-screen.is-shop-tab .shop-item-qty,
+body.home-menu-active #menu-screen.is-shop-tab .shop-item-desc,
+body.home-menu-active #menu-screen.is-shop-tab .shop-pack-badge {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.45);
+}
+
+body.home-menu-active.home-tab-shop .shop-section-balance,
+body.home-menu-active.home-tab-shop .shop-section-balance strong,
+body.home-menu-active.home-tab-shop .shop-subsection-title,
+body.home-menu-active #menu-screen.is-shop-tab .shop-section-balance,
+body.home-menu-active #menu-screen.is-shop-tab .shop-section-balance strong,
+body.home-menu-active #menu-screen.is-shop-tab .shop-subsection-title {
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
 }
 
 body.home-menu-active.home-tab-learn .word-games-grid {
