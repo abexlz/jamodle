@@ -411,7 +411,7 @@
               <div class="rw-answer-photo-grid" id="rw-answer-photo-grid">
                 ${Array.from({ length: 4 }, (_, index) => `
                   <div class="rw-answer-photo-frame">
-                    <img class="rw-answer-photo-img" data-image-slot="${index}" alt="" decoding="async" />
+                    <img class="rw-answer-photo-img" data-image-slot="${index}" alt="" decoding="async" referrerpolicy="no-referrer" />
                   </div>
                 `).join('')}
               </div>
@@ -835,9 +835,9 @@
       });
     }
 
-    /** Word Chain clues are fetched as four-image Pixabay sets. */
+    /** Word Chain clues are fetched as four-image Pixabay sets (Pexels fallback). */
     imageServices() {
-      return [global.PixabayImageService]
+      return [global.PixabayImageService, global.PexelsImageService]
         .filter((svc) => svc && typeof svc.photoForWord === 'function');
     }
 
@@ -870,7 +870,10 @@
         credit.classList.add('hidden');
       }
 
-      let englishHint = global.WordChainEnglish?.getEnglish?.(word) || '';
+      let englishHint = String(this.puzzle?.englishHint || '').trim()
+        || global.RelatedWordsImageMode?.getEnglish?.(word)
+        || global.WordChainEnglish?.getEnglish?.(word)
+        || '';
       if (!englishHint) {
         try {
           // Same English gloss pipeline as the clue meaning line.
@@ -913,25 +916,27 @@
 
       if (requestId !== this._answerPhotoRequestId) return;
       const imageSet = Array.isArray(photo?.imageSet) ? photo.imageSet : [];
-      // Prefer the smaller webformat ("previewUrl", ~640px) over the full-size
-      // largeImageURL. The 2×2 cells are small, so the preview is visually
-      // identical but downloads in a fraction of the time.
-      const imageUrls = imageSet
-        .map((image) => image?.previewUrl || image?.url || image?.imageUrl)
-        .filter(Boolean);
-      if (!imageUrls.length && (photo?.previewUrl || photo?.imageUrl)) {
-        imageUrls.push(photo.previewUrl || photo.imageUrl);
+      const slotSources = imageSet.map((image) => {
+        const urls = [image?.previewUrl, image?.url, image?.imageUrl]
+          .map((u) => String(u || '').trim())
+          .filter(Boolean);
+        return [...new Set(urls)];
+      }).filter((urls) => urls.length);
+      if (!slotSources.length && (photo?.previewUrl || photo?.imageUrl)) {
+        slotSources.push([photo.previewUrl || photo.imageUrl].filter(Boolean));
       }
-      if (!imageUrls.length) {
+      if (!slotSources.length) {
         this.clearAnswerPhoto();
         return;
       }
 
       // A reviewed Pixabay set supplies four unique images. Local/offline
-      // illustrations may supply fewer, so repeat the available source rather
-      // than leaving a question-grid cell empty.
-      while (imageUrls.length < 4) imageUrls.push(imageUrls[imageUrls.length - 1]);
-      imageUrls.length = 4;
+      // illustrations (or Pexels) may supply fewer, so repeat the available
+      // source rather than leaving a question-grid cell empty.
+      while (slotSources.length < 4) {
+        slotSources.push(slotSources[slotSources.length - 1]);
+      }
+      slotSources.length = 4;
 
       const settle = () => {
         if (requestId !== this._answerPhotoRequestId) return;
@@ -948,18 +953,26 @@
       };
 
       // Load each cell independently so one broken image never removes the
-      // whole 2×2 grid. The grid is revealed as soon as any image loads.
-      const loadImage = (img, url) => new Promise((resolve) => {
-        img.onload = () => resolve(true);
-        img.onerror = () => {
-          img.removeAttribute('src');
-          resolve(false);
+      // whole 2×2 grid. Try CDN first, then any proxy fallback URL.
+      const loadImage = (img, urls) => new Promise((resolve) => {
+        const list = (Array.isArray(urls) ? urls : [urls]).filter(Boolean);
+        let i = 0;
+        const tryNext = () => {
+          if (i >= list.length) {
+            img.removeAttribute('src');
+            resolve(false);
+            return;
+          }
+          const url = list[i++];
+          img.onload = () => resolve(true);
+          img.onerror = tryNext;
+          img.src = url;
+          if (img.complete && img.naturalWidth) resolve(true);
         };
-        img.src = url;
-        if (img.complete && img.naturalWidth) resolve(true);
+        tryNext();
       });
       settle();
-      const results = await Promise.all(imgs.map((img, index) => loadImage(img, imageUrls[index])));
+      const results = await Promise.all(imgs.map((img, index) => loadImage(img, slotSources[index])));
       if (requestId !== this._answerPhotoRequestId) return;
       if (!results.some(Boolean)) {
         this.clearAnswerPhoto();
@@ -1008,6 +1021,7 @@
             if (!url) return;
             const pre = new ImageCtor();
             pre.decoding = 'async';
+            pre.referrerPolicy = 'no-referrer';
             pre.src = url; // kicks off the download into the browser cache
           });
         })

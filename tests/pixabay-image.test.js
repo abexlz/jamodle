@@ -79,11 +79,41 @@ function hit(id, tags) {
     assert.strictEqual(res.body.imageSet.length, 4);
     assert.deepStrictEqual(res.body.imageSet.map((image) => image.requestedType), ['photo', 'illustration', 'illustration', 'vector']);
     assert.deepStrictEqual(res.body.imageSet.map((image) => image.type), ['photo', 'illustration', 'illustration', 'vector']);
-    // Images are served through our same-origin proxy so blockers can't hide them.
+    // Images are served from Pixabay's CDN when available; hashed
+    // pixabay.com/get URLs still go through the same-origin proxy.
     assert.strictEqual(
       res.body.imageSet[0].url,
       `/api/image/proxy?url=${encodeURIComponent('https://images.example/1-large.jpg')}`,
     );
+  }
+
+  // CDN preview URLs are returned directly (no proxy) so <img> tags can load.
+  {
+    const { res } = await run('apple', {
+      fetchImpl: async (url) => {
+        const type = new URL(String(url)).searchParams.get('image_type');
+        const cdnHit = (id) => ({
+          id,
+          tags: 'apple, fruit',
+          previewURL: `https://cdn.pixabay.com/photo/2015/01/01/${id}_150.jpg`,
+          webformatURL: `https://pixabay.com/get/${id}_640.jpg`,
+          largeImageURL: `https://pixabay.com/get/${id}_1280.jpg`,
+          pageURL: `https://pixabay.com/${id}`,
+          user: `artist-${id}`,
+        });
+        const hits = {
+          photo: [cdnHit(1)],
+          illustration: [cdnHit(2), cdnHit(3)],
+          vector: [cdnHit(4)],
+        }[type];
+        return { ok: true, status: 200, json: async () => ({ hits }), text: async () => '' };
+      },
+    });
+    assert.strictEqual(res.statusCode, 200);
+    assert.strictEqual(res.body.imageSet.length, 4);
+    assert.ok(res.body.imageSet.every((image) => image.url.startsWith('https://cdn.pixabay.com/')));
+    assert.ok(res.body.imageSet.every((image) => image.url.includes('_640.jpg')));
+    assert.ok(res.body.imageSet.every((image) => !image.url.includes('/api/image/proxy')));
   }
 
   // Excluded/compound-tag images are removed, and another category fills slots.

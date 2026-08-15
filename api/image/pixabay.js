@@ -139,20 +139,54 @@ function looseRank(hits) {
 }
 
 /**
- * Serve every image through our own origin. Some browsers (ad/privacy
- * blockers, corporate content filters) block direct `pixabay.com/get/...`
- * requests, which collapses the grid. Same-origin URLs sidestep that.
+ * Prefer Pixabay's public CDN (`cdn.pixabay.com/photo/..._640.jpg`). Those
+ * URLs load in <img> tags without a same-origin proxy. Routing every cell
+ * through `/api/image/proxy` was collapsing the 2×2 grid: Vercel payloads,
+ * shared rate limits, and Pixabay blocking the proxy User-Agent all made
+ * every image `onerror`, after which the client hid the whole section.
+ *
+ * `pixabay.com/get/...` hashes still go through the proxy as a fallback.
  */
 function proxied(url) {
   if (!url) return null;
   return `/api/image/proxy?url=${encodeURIComponent(url)}`;
 }
 
+function isPixabayCdn(url) {
+  try {
+    const host = new URL(String(url)).hostname;
+    return host === 'cdn.pixabay.com' || host === 'i.pixabay.com' || host.endsWith('.pixabay.com');
+  } catch {
+    return false;
+  }
+}
+
+/** Upgrade a 150px preview CDN URL to the 640px webformat size. */
+function cdnDisplayUrl(hit) {
+  const preview = String(hit?.previewURL || '');
+  if (isPixabayCdn(preview)) {
+    return preview.replace(/_\d+(\.[a-zA-Z0-9]+)$/i, '_640$1');
+  }
+  const web = String(hit?.webformatURL || '');
+  if (isPixabayCdn(web)) return web;
+  const large = String(hit?.largeImageURL || '');
+  if (isPixabayCdn(large)) return large;
+  return null;
+}
+
+function publicUrl(raw) {
+  if (!raw) return null;
+  return isPixabayCdn(raw) ? raw : proxied(raw);
+}
+
 function toImage(hit, type) {
+  const cdn = cdnDisplayUrl(hit);
+  const large = hit.largeImageURL || hit.webformatURL;
+  const web = hit.webformatURL || hit.previewURL || null;
   return {
     type,
-    url: proxied(hit.largeImageURL || hit.webformatURL),
-    previewUrl: proxied(hit.webformatURL || hit.previewURL || null),
+    url: cdn || publicUrl(large),
+    previewUrl: cdn || publicUrl(web),
     id: hit.id,
     tags: hit.tags || '',
     creditName: hit.user || null,

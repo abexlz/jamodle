@@ -565,14 +565,25 @@ html.reduce-motion .rw-chain-recap-word {
 }
 
 .rw-solo-mode .rw-answer-photo {
-  flex: 0 0 auto;
-  justify-content: flex-start;
+  flex: 1 1 auto;
+  min-height: 140px;
+  max-height: min(52dvh, 420px);
+  justify-content: center;
   margin-top: clamp(2px, 0.6dvh, 6px);
   margin-bottom: clamp(4px, 1dvh, 10px);
 }
 
-.rw-solo-mode .rw-answer-photo-frame {
+.rw-solo-mode .rw-answer-photo-grid {
+  flex: 1 1 auto;
   min-height: 0;
+  height: 100%;
+  align-content: stretch;
+}
+
+.rw-solo-mode .rw-answer-photo-frame {
+  min-height: 72px;
+  height: 100%;
+  aspect-ratio: auto;
 }
 
 .rw-topbar-start {
@@ -1031,7 +1042,7 @@ html.reduce-motion .rw-answer-english {
   flex: 0 0 auto;
   min-height: 0;
   margin-top: 0;
-  margin-bottom: auto;
+  margin-bottom: 0;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;

@@ -8,8 +8,8 @@
 (function (global) {
   'use strict';
 
-  // v3: URLs are now same-origin proxy paths (/api/image/proxy?url=...).
-  const CACHE_PREFIX = 'jamodeul-pixabay-v4-nosmoke-';
+  // v5: prefer Pixabay CDN URLs so the 2×2 grid does not depend on /api/image/proxy.
+  const CACHE_PREFIX = 'jamodeul-pixabay-v5-cdn-';
   const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
   const memory = new Map();
 
@@ -126,7 +126,9 @@
       return null;
     }
 
-    writeCache(q, data);
+    if (data && data.found !== false && (data.imageUrl || data.imageSet?.length)) {
+      writeCache(q, data);
+    }
     return data;
   }
 

@@ -256,6 +256,11 @@ body:has(#related-words-app) .rw-solo-mode .rw-play-cluster {
   overflow: hidden;
 }
 
+body:has(#related-words-app) .rw-solo-mode .rw-answer-photo {
+  flex: 1 1 auto;
+  min-height: 140px;
+}
+
 body:has(#related-words-app) .rw-solo-mode .rw-board {
   flex: 0 0 auto;
   justify-content: flex-start;

@@ -19,7 +19,7 @@ const ALLOWED_HOSTS = new Set([
   'pixabay.b-cdn.net',
 ]);
 
-const ALLOWED_CONTENT_TYPES = /^image\/(jpeg|png|gif|webp|svg\+xml)$/i;
+const ALLOWED_CONTENT_TYPES = /^image\/(jpeg|jpg|png|gif|webp|svg\+xml|avif)/i;
 
 function getClientIp(req) {
   return req.headers['x-forwarded-for']?.split(',')[0]?.trim()
