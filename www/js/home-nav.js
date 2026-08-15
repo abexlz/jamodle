@@ -255,6 +255,26 @@
     return file + (global.location.search || '') + (global.location.hash || '');
   }
 
+  function pageFileFromHref(href) {
+    const path = String(href || '').split(/[?#]/)[0];
+    return path.slice(path.lastIndexOf('/') + 1) || 'index.html';
+  }
+
+  /** Settings / profile / shop rooms are not games — Home should not toggle back to them. */
+  const NON_PARKABLE_PAGES = new Set([
+    'index.html',
+    'settings.html',
+    'profile.html',
+    'leaderboard.html',
+    'chest-room.html',
+    'wheel.html',
+  ]);
+
+  function isParkableHref(href) {
+    const file = pageFileFromHref(href);
+    return Boolean(file) && !NON_PARKABLE_PAGES.has(file);
+  }
+
   function readStoredHomeTab() {
     try {
       const stored = sessionStorage.getItem(HOME_TAB_KEY);
@@ -278,7 +298,7 @@
       const data = JSON.parse(raw);
       if (!data || typeof data !== 'object') return null;
       if (data.type === 'daily') return data;
-      if (typeof data.href === 'string' && data.href && !data.href.includes('index.html')) {
+      if (typeof data.href === 'string' && isParkableHref(data.href)) {
         return data;
       }
       return null;
@@ -411,7 +431,7 @@
     if (tab === 'learn') {
       if (isIndexPage()) {
         global.GameShell?.park?.('learn');
-      } else if (!(global.location.pathname || '').includes('match-tutorial')) {
+      } else if (isParkableHref(currentPageHref())) {
         runLeaveHook();
         setActiveGame({
           href: currentPageHref(),
@@ -424,27 +444,21 @@
     }
 
     if (isIndexPage()) {
-      // External game resume (Word Chain / Hangul-dle) takes priority on Home.
-      if (tab === 'menu') {
-        const active = getActiveGame();
-        if (active?.type === 'page' && active.href) {
-          storeHomeTab('menu');
-          global.location.href = active.href;
-          return;
-        }
-      }
       storeHomeTab(tab);
       global.MenuApp?.setHomeTab?.(tab);
       return;
     }
 
-    // Game / secondary pages: park session then open the menu tab on index.
+    // Game pages: park session then open the menu tab on index.
+    // Settings and other chrome pages must not be parked — Home stays on Home.
     runLeaveHook();
-    setActiveGame({
-      href: currentPageHref(),
-      type: 'page',
-      at: Date.now(),
-    });
+    if (isParkableHref(currentPageHref())) {
+      setActiveGame({
+        href: currentPageHref(),
+        type: 'page',
+        at: Date.now(),
+      });
+    }
     goToIndexTab(tab);
   }
 
@@ -460,7 +474,7 @@
       const tab = btn.dataset.homeTab;
       if (tab === 'settings') {
         runLeaveHook();
-        if (!isIndexPage() && !isSettingsPage()) {
+        if (isParkableHref(currentPageHref())) {
           setActiveGame({
             href: currentPageHref(),
             type: 'page',
