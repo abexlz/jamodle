@@ -7,8 +7,8 @@
   'use strict';
 
   const HUD_ID = 'app-top-hud';
-  const STYLE_HREF = 'css/menu-hud.css?v=20260815k';
-  const CHROME_HREF = 'css/app-chrome.css?v=20260815k';
+  const STYLE_HREF = 'css/menu-hud.css?v=20260815m';
+  const CHROME_HREF = 'css/app-chrome.css?v=20260815m';
   const PROFILE_STYLE_HREF = 'css/profile.css?v=20260815h';
 
   const DEPS = [
@@ -132,6 +132,7 @@
           </button>
           <div class="player-hud-slot menu-hud-coins-slot" id="player-hud" data-player-hud="compact"></div>
         </div>
+        <p class="app-hud-page-title" id="app-hud-page-title" hidden></p>
       </div>
     `;
   }
@@ -147,6 +148,20 @@
     return file + (global.location.search || '') + (global.location.hash || '');
   }
 
+  function syncPageTitle(bar) {
+    const el = (bar || document.getElementById(HUD_ID))?.querySelector('#app-hud-page-title');
+    if (!el) return;
+    const isSettings = document.body?.classList.contains('settings-page');
+    if (!isSettings) {
+      el.hidden = true;
+      el.textContent = '';
+      return;
+    }
+    const text = global.I18n?.t?.('settings.title') || '세팅';
+    el.textContent = text;
+    el.hidden = false;
+  }
+
   function refresh() {
     global.PlayerHud?.refresh?.();
     global.DailyCalendarModal?.updateMenuCalendarNav?.();
@@ -154,6 +169,7 @@
     global.ChestRoomUI?.updateMenuWheelNav?.();
     const bar = document.getElementById(HUD_ID);
     if (bar) global.I18n?.applyToDocument?.(bar);
+    syncPageTitle(bar);
   }
 
   function inject() {
@@ -166,6 +182,13 @@
       if (bar.parentElement !== document.body) {
         document.body.appendChild(bar);
       }
+      if (!bar.querySelector('#app-hud-page-title')) {
+        const title = document.createElement('p');
+        title.className = 'app-hud-page-title';
+        title.id = 'app-hud-page-title';
+        title.hidden = true;
+        bar.appendChild(title);
+      }
     } else {
       const wrap = document.createElement('div');
       wrap.innerHTML = markup().trim();
@@ -176,6 +199,8 @@
     document.body.classList.add('has-app-top-hud');
     bind(bar);
     refresh();
+    syncPageTitle(bar);
+    try { global.HomeNav?.syncHudSafePad?.(); } catch (err) {}
     return bar;
   }
 

@@ -5,7 +5,7 @@
   'use strict';
 
   const BAR_ID = 'home-bottom-bar';
-  const CHROME_HREF = 'css/app-chrome.css?v=20260815k';
+  const CHROME_HREF = 'css/app-chrome.css?v=20260815m';
   const HOME_TAB_KEY = 'jamodeul-home-tab';
   const ACTIVE_GAME_KEY = 'jamodeul-active-game';
   /** Learn tab skips its landing screen and opens tutorial step 1. */
@@ -118,7 +118,8 @@
     const missing = insets.top + insets.right + insets.bottom + insets.left <= 0;
     if (isAppleTouch()) {
       const fb = fallbackSafeInsets();
-      if (insets.top < 12) insets.top = fb.top;
+      /* Status-bar-only values (~20–24px) still clip the notch/island HUD. */
+      if (insets.top < 44) insets.top = Math.max(insets.top, fb.top);
       /* Do not invent a 34px home-indicator; that doubles the tab bar
          when the webview is already inset. Keep a small cushion only. */
       if (insets.bottom < 8) insets.bottom = 10;
@@ -132,6 +133,20 @@
     root.style.setProperty('--safe-right', px(insets.right));
     root.style.setProperty('--safe-bottom', px(insets.bottom));
     root.style.setProperty('--safe-left', px(insets.left));
+    pinTopHudSafePad(insets.top);
+  }
+
+  function pinTopHudSafePad(topPx) {
+    const bar = document.getElementById('app-top-hud');
+    if (!bar) return;
+    const pad = Math.max(0, Math.round(topPx));
+    bar.style.setProperty('padding-top', px(pad), 'important');
+    requestAnimationFrame(() => {
+      const h = Math.ceil(bar.getBoundingClientRect().height);
+      if (h > 0) {
+        document.documentElement.style.setProperty('--app-top-hud-offset', px(h));
+      }
+    });
   }
 
   function applyDynamicTypeClass() {
@@ -549,5 +564,11 @@
     setLeaveHook,
     mountGamePage,
     resumeActiveGame,
+    syncHudSafePad() {
+      const top = parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue('--safe-top')
+      ) || 0;
+      pinTopHudSafePad(top);
+    },
   };
 })(typeof window !== 'undefined' ? window : globalThis);
