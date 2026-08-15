@@ -5,7 +5,7 @@
   'use strict';
 
   const BAR_ID = 'home-bottom-bar';
-  const CHROME_HREF = 'css/app-chrome.css?v=20260815d';
+  const CHROME_HREF = 'css/app-chrome.css?v=20260815e';
   const HOME_TAB_KEY = 'jamodeul-home-tab';
   const ACTIVE_GAME_KEY = 'jamodeul-active-game';
   /** Learn tab skips its landing screen and opens tutorial step 1. */
@@ -28,6 +28,134 @@
   }
 
   ensureChromeStyles();
+
+  function px(n) {
+    return `${Math.max(0, Math.round(n * 100) / 100)}px`;
+  }
+
+  function isAppleTouch() {
+    const ua = navigator.userAgent || '';
+    return /iPhone|iPod|iPad/.test(ua)
+      || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  }
+
+  function measureSafeInsets() {
+    const probe = document.createElement('div');
+    probe.setAttribute('aria-hidden', 'true');
+    probe.style.cssText = [
+      'position:fixed',
+      'top:0',
+      'left:0',
+      'width:0',
+      'height:0',
+      'visibility:hidden',
+      'pointer-events:none',
+      'padding-top:env(safe-area-inset-top, 0px)',
+      'padding-right:env(safe-area-inset-right, 0px)',
+      'padding-bottom:env(safe-area-inset-bottom, 0px)',
+      'padding-left:env(safe-area-inset-left, 0px)',
+    ].join(';');
+    document.documentElement.appendChild(probe);
+    const cs = getComputedStyle(probe);
+    const insets = {
+      top: parseFloat(cs.paddingTop) || 0,
+      right: parseFloat(cs.paddingRight) || 0,
+      bottom: parseFloat(cs.paddingBottom) || 0,
+      left: parseFloat(cs.paddingLeft) || 0,
+    };
+    probe.remove();
+    return insets;
+  }
+
+  function fallbackSafeInsets() {
+    const w = window.innerWidth || 0;
+    const h = window.innerHeight || 0;
+    const landscape = w > h;
+    const short = Math.min(w, h);
+    const long = Math.max(w, h);
+    const pad = short >= 600
+      || /iPad/.test(navigator.userAgent || '')
+      || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1 && short >= 600);
+
+    if (pad) {
+      return landscape
+        ? { top: 20, right: 0, bottom: 21, left: 0 }
+        : { top: 24, right: 0, bottom: 21, left: 0 };
+    }
+
+    const seLike = short <= 375 && long <= 667;
+    if (seLike) {
+      return landscape
+        ? { top: 0, right: 0, bottom: 0, left: 0 }
+        : { top: 20, right: 0, bottom: 0, left: 0 };
+    }
+
+    const island = short >= 390;
+    if (landscape) {
+      const side = island ? 59 : 47;
+      return { top: 0, right: side, bottom: 21, left: side };
+    }
+    return {
+      top: island ? 59 : 47,
+      right: 0,
+      bottom: 34,
+      left: 0,
+    };
+  }
+
+  function applySafeAreaInsets() {
+    if (typeof document === 'undefined' || !document.documentElement) return;
+    let insets = { top: 0, right: 0, bottom: 0, left: 0 };
+    try {
+      insets = measureSafeInsets();
+    } catch {
+      insets = { top: 0, right: 0, bottom: 0, left: 0 };
+    }
+    const missing = insets.top + insets.right + insets.bottom + insets.left <= 0;
+    if (missing && isAppleTouch()) {
+      insets = fallbackSafeInsets();
+    }
+    const root = document.documentElement;
+    root.style.setProperty('--safe-top', px(insets.top));
+    root.style.setProperty('--safe-right', px(insets.right));
+    root.style.setProperty('--safe-bottom', px(insets.bottom));
+    root.style.setProperty('--safe-left', px(insets.left));
+  }
+
+  function applyDynamicTypeClass() {
+    const root = document.documentElement;
+    if (!root || root.classList.contains('large-text')) return;
+    const probe = document.createElement('div');
+    probe.style.cssText = 'position:fixed;visibility:hidden;font:-apple-system-body;';
+    document.documentElement.appendChild(probe);
+    const size = parseFloat(getComputedStyle(probe).fontSize) || 17;
+    probe.remove();
+    if (size >= 24) {
+      root.classList.add('large-text', 'xxx-large-text');
+    } else if (size >= 20) {
+      root.classList.add('large-text');
+    }
+  }
+
+  let chromeTimer = 0;
+  function scheduleDeviceChrome() {
+    clearTimeout(chromeTimer);
+    chromeTimer = setTimeout(() => {
+      applySafeAreaInsets();
+      applyDynamicTypeClass();
+    }, 40);
+  }
+
+  function bindDeviceChrome() {
+    if (document.documentElement.dataset.deviceChromeBound === '1') return;
+    document.documentElement.dataset.deviceChromeBound = '1';
+    scheduleDeviceChrome();
+    window.addEventListener('resize', scheduleDeviceChrome, { passive: true });
+    window.addEventListener('orientationchange', scheduleDeviceChrome, { passive: true });
+    window.visualViewport?.addEventListener('resize', scheduleDeviceChrome, { passive: true });
+  }
+
+  bindDeviceChrome();
 
   /**
    * Vercel Toolbar / Comments inject a bottom-right control that overlaps the

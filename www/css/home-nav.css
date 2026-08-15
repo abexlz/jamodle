@@ -210,7 +210,7 @@ body.has-home-bottom-bar.home-menu-active #menu-screen {
   min-height: 0;
   height: auto;
   width: 100%;
-  max-width: 420px;
+  max-width: var(--app-content-max, 28.75rem);
 }
 
 body.has-home-bottom-bar.home-menu-active #menu-screen .menu-inner {

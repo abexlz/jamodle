@@ -1929,3 +1929,95 @@ html.reduce-motion .rw-confetti-piece {
   min-height: 0;
   height: 100%;
 }
+
+@media (max-width: 379px) {
+  .rw-solo-mode .rw-slot.flip-tile {
+    width: clamp(48px, 15vw, 64px);
+    height: clamp(48px, 15vw, 64px);
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .rw-solo-mode .rw-slot-face {
+    font-size: clamp(20px, 8vw, 32px);
+  }
+
+  .rw-hint-btn {
+    min-width: 0;
+    min-height: 40px;
+    padding: 5px 8px;
+    font-size: 14px;
+  }
+
+  .rw-dock-tile.flip-tile {
+    width: clamp(56px, 18vw, 72px);
+    height: clamp(56px, 18vw, 72px);
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .rw-solo-mode .rw-answer-photo {
+    flex: 1 1 auto;
+    min-height: 72px;
+    max-height: min(42dvh, 200px);
+    margin-bottom: 4px;
+  }
+
+  .rw-solo-mode .rw-slot.flip-tile {
+    width: clamp(40px, 9vw, 56px);
+    height: clamp(40px, 9vw, 56px);
+    min-width: 36px;
+    min-height: 36px;
+  }
+
+  .rw-solo-mode .rw-dock-area {
+    margin-bottom: 0;
+  }
+
+  .rw-dock-tile.flip-tile {
+    width: clamp(44px, 8.2vw, 60px);
+    height: clamp(44px, 8.2vw, 60px);
+  }
+
+  .rw-play-top {
+    min-height: 0;
+  }
+}
+
+@media (orientation: landscape) and (min-width: 700px) and (min-height: 500px) {
+  .rw-solo-mode.rw-image-mode .rw-stage,
+  .rw-solo-mode.rw-image-mode .rw-play-cluster {
+    min-height: 0;
+    height: 100%;
+  }
+
+  .rw-solo-mode.rw-image-mode .rw-play-cluster {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(240px, 0.85fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    align-items: stretch;
+    gap: 8px 20px;
+    overflow: hidden;
+  }
+
+  .rw-solo-mode.rw-image-mode .rw-play-top {
+    grid-column: 1 / -1;
+  }
+
+  .rw-solo-mode.rw-image-mode .rw-answer-photo {
+    grid-column: 1;
+    grid-row: 2;
+    max-height: none;
+    height: 100%;
+    min-height: 0;
+    margin: 0;
+  }
+
+  .rw-solo-mode.rw-image-mode .rw-board {
+    grid-column: 2;
+    grid-row: 2;
+    height: 100%;
+    justify-content: center;
+    gap: 12px;
+  }
+}
