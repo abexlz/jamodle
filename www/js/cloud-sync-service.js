@@ -27,6 +27,12 @@
     'jamodeul-daily-',
     'jamodeul-match-daily-',
   ];
+  const RESET_EPOCH_KEY = 'jamodeul-cloud-reset-epoch';
+  const KEEP_ON_FORCE_RESET = new Set([
+    'jamodeul-preferences',
+    'jamodeul-tutorial-progress',
+    RESET_EPOCH_KEY,
+  ]);
 
   let pushTimer = null;
 
@@ -48,6 +54,34 @@
     } catch {
       return null;
     }
+  }
+
+  function removeRaw(key) {
+    if (global.AppStorage?.remove) global.AppStorage.remove(key);
+    else {
+      try { localStorage.removeItem(key); } catch { /* ignore */ }
+    }
+  }
+
+  function localResetEpoch() {
+    return Math.max(0, parseInt(readRaw(RESET_EPOCH_KEY), 10) || 0);
+  }
+
+  function clearSyncedStatKeys() {
+    EXACT_SYNC_KEYS.forEach((key) => {
+      if (!KEEP_ON_FORCE_RESET.has(key)) removeRaw(key);
+    });
+    try {
+      const keys = [];
+      for (let i = 0; i < localStorage.length; i += 1) {
+        const key = localStorage.key(i);
+        if (key) keys.push(key);
+      }
+      keys.forEach((key) => {
+        if (KEEP_ON_FORCE_RESET.has(key)) return;
+        if (PREFIX_SYNC_PREFIXES.some((prefix) => key.startsWith(prefix))) removeRaw(key);
+      });
+    } catch { /* ignore */ }
   }
 
   function writeRaw(key, value) {
@@ -294,20 +328,37 @@
     return {
       version: BUNDLE_VERSION,
       updatedAt: Date.now(),
+      resetEpoch: localResetEpoch(),
       kv,
     };
   }
 
   function applyBundle(bundle) {
     if (!bundle?.kv) return;
+    if (bundle.resetEpoch) writeRaw(RESET_EPOCH_KEY, bundle.resetEpoch);
     Object.entries(bundle.kv).forEach(([key, value]) => {
       writeRaw(key, value);
     });
   }
 
   function mergeBundles(local, remote) {
-    if (!remote?.kv) return { ...local, updatedAt: Date.now() };
-    if (!local?.kv) return { ...remote, updatedAt: Date.now() };
+    const localEpoch = local?.resetEpoch || 0;
+    const remoteEpoch = remote?.resetEpoch || 0;
+    if (remote?.kv && remoteEpoch > localEpoch) {
+      const kv = { ...remote.kv };
+      KEEP_ON_FORCE_RESET.forEach((key) => {
+        if (key === RESET_EPOCH_KEY) return;
+        if (local?.kv?.[key] != null) kv[key] = local.kv[key];
+      });
+      return {
+        version: BUNDLE_VERSION,
+        updatedAt: Date.now(),
+        resetEpoch: remoteEpoch,
+        kv,
+      };
+    }
+    if (!remote?.kv) return { ...local, updatedAt: Date.now(), resetEpoch: Math.max(localEpoch, remoteEpoch) };
+    if (!local?.kv) return { ...remote, updatedAt: Date.now(), resetEpoch: Math.max(localEpoch, remoteEpoch) };
     const localUpdatedAt = local.updatedAt || 0;
     const remoteUpdatedAt = remote.updatedAt || 0;
     const keys = new Set([...Object.keys(local.kv), ...Object.keys(remote.kv)]);
@@ -324,6 +375,58 @@
     return {
       version: BUNDLE_VERSION,
       updatedAt: Date.now(),
+      resetEpoch: Math.max(localEpoch, remoteEpoch),
+      kv,
+    };
+  }
+
+  function emptyStatBundle(resetEpoch, local) {
+    const profile = global.ProfileService?.emptyProfile?.() || {
+      version: 5,
+      displayName: 'Learner',
+      avatarId: 'default',
+      totalXp: 0,
+      coins: 0,
+      coinsUpdatedAt: Date.now(),
+    };
+    const name = local?.kv?.[PROFILE_KEY]?.displayName;
+    if (typeof name === 'string' && name.trim()) profile.displayName = name.trim().slice(0, 24);
+    profile.coinsUpdatedAt = Date.now();
+    profile.totalXp = 0;
+    profile.coins = 0;
+    profile.avatarId = 'default';
+    profile.frameId = 'none';
+    const kv = {
+      [PROFILE_KEY]: profile,
+      'jamodeul-learning-progress': { wordsLearned: 0, builderWordsCompleted: 0 },
+      'jamodeul-related-words-progress': { soloStreak: 0, bestSoloStreak: 0 },
+      'jamodeul-korean-learning-streak': {
+        currentStreak: 0,
+        longestStreak: 0,
+        lastActivityDate: null,
+        todayCompleted: false,
+      },
+      'jamodeul-daily-quiz-streak': {
+        currentStreak: 0,
+        longestStreak: 0,
+        lastClearedDate: null,
+        freezeCount: 0,
+        freezeMilestonesGranted: [],
+        milestonesAwarded: [],
+      },
+      'jamodeul-friend-streaks': {},
+      'jamodeul-tokens': '0',
+      'jamodeul-match-best-streak': '0',
+      'jamodeul-daily-calendar': { unlockedPast: [], earnedBadges: {} },
+    };
+    KEEP_ON_FORCE_RESET.forEach((key) => {
+      if (key === RESET_EPOCH_KEY) return;
+      if (local?.kv?.[key] != null) kv[key] = local.kv[key];
+    });
+    return {
+      version: BUNDLE_VERSION,
+      updatedAt: Date.now(),
+      resetEpoch,
       kv,
     };
   }
@@ -340,9 +443,42 @@
   async function syncOnLogin(uid, db) {
     if (!uid || !db) return null;
     const local = collectLocalBundle();
+    let userEpoch = 0;
+    try {
+      const userSnap = await db.collection('users').doc(uid).get();
+      userEpoch = Math.max(0, parseInt(userSnap.data()?.statsResetEpoch, 10) || 0);
+    } catch { /* ignore */ }
     const ref = db.collection('users').doc(uid).collection('private').doc(SAVE_DOC_ID);
     const snap = await ref.get();
     const remote = snap.exists ? snap.data()?.bundle : null;
+    const remoteEpoch = Math.max(remote?.resetEpoch || 0, userEpoch);
+    if (remoteEpoch > (local?.resetEpoch || 0)) {
+      clearSyncedStatKeys();
+      const wiped = emptyStatBundle(remoteEpoch, local);
+      applyBundle(wiped);
+      if (global.ProfileService?.loadProfile && global.ProfileService?.saveProfile) {
+        const profile = global.ProfileService.loadProfile();
+        global.ProfileService.saveProfile(profile);
+      }
+      await writeCloudBundle(uid, db, wiped);
+      try {
+        await db.collection('users').doc(uid).set({
+          totalXp: 0,
+          wordChainBestStreak: 0,
+          dailyQuizStreak: 0,
+          dailyQuizLastCleared: null,
+          avatarId: 'default',
+          frameId: 'none',
+          statsResetEpoch: remoteEpoch,
+        }, { merge: true });
+      } catch (err) {
+        console.warn('[CloudSync] public reset failed', err);
+      }
+      try {
+        global.dispatchEvent(new CustomEvent('jamodeul-cloud-sync'));
+      } catch (_) { /* ignore */ }
+      return wiped;
+    }
     const merged = mergeBundles(local, remote);
     applyBundle(merged);
     if (global.ProfileService?.loadProfile && global.ProfileService?.saveProfile) {

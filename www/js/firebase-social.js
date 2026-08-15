@@ -216,10 +216,10 @@
       if (user) {
         try {
           userProfile = await ensureUserDoc(user);
-          if (global.CloudSyncService?.syncOnLogin) {
-            runAfterUserGesture(() => global.CloudSyncService.syncOnLogin(user.uid, db));
-          }
           runAfterUserGesture(async () => {
+            if (global.CloudSyncService?.syncOnLogin) {
+              await global.CloudSyncService.syncOnLogin(user.uid, db);
+            }
             await pushLocalPublicProfile();
             await pushLocalWordChainBestStreak();
           });
