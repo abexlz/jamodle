@@ -7,8 +7,8 @@
   'use strict';
 
   const HUD_ID = 'app-top-hud';
-  const STYLE_HREF = 'css/menu-hud.css?v=20260815w';
-  const CHROME_HREF = 'css/app-chrome.css?v=20260815o';
+  const STYLE_HREF = 'css/menu-hud.css?v=20260815x';
+  const CHROME_HREF = 'css/app-chrome.css?v=20260815p';
   const PROFILE_STYLE_HREF = 'css/profile.css?v=20260815l';
 
   const DEPS = [
@@ -75,13 +75,13 @@
       link.rel = 'stylesheet';
       document.head.appendChild(link);
     }
-    if (id === 'app-chrome-styles') document.head.appendChild(link);
+    if (id === 'app-top-hud-styles') document.head.appendChild(link);
     if (link.getAttribute('href') !== href) link.href = href;
   }
 
   function ensureStyles() {
-    ensureLink('app-top-hud-styles', STYLE_HREF);
     ensureLink('app-chrome-styles', CHROME_HREF);
+    ensureLink('app-top-hud-styles', STYLE_HREF);
     if (!document.querySelector('link[href*="profile.css"]')) {
       ensureLink('app-top-hud-profile-styles', PROFILE_STYLE_HREF);
     }

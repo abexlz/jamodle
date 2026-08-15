@@ -10,9 +10,16 @@ html {
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
-  --menu-bar-h: 42px;
+  --menu-hud-profile-art: clamp(40px, 10.5vw, 46px);
+  --menu-hud-icon-w: clamp(43px, 11.4vw, 50px);
+  --menu-hud-stat-h: calc(var(--menu-hud-profile-art) / 2.75);
+  --menu-hud-pad-bottom: 18px;
+  --menu-hud-title-gap: 10px;
+  --menu-bar-h: calc(var(--menu-hud-profile-art) + var(--menu-hud-stat-h));
   --menu-profile-size: 34px;
-  --app-top-hud-offset: calc(var(--menu-bar-h) + var(--safe-top));
+  --app-top-hud-offset: calc(
+    var(--menu-bar-h) + var(--menu-hud-pad-bottom) + var(--menu-hud-title-gap) + var(--safe-top)
+  );
   --home-nav-offset: calc(
     var(--home-nav-section-h, 40px) + var(--safe-bottom)
   );
@@ -24,7 +31,7 @@ html {
 @media (min-width: 600px) {
   :root,
   html {
-    --menu-bar-h: 48px;
+    --menu-bar-h: calc(var(--menu-hud-profile-art) + var(--menu-hud-stat-h));
     --app-content-max: min(100%, 36rem);
   }
 }
@@ -46,16 +53,16 @@ html {
 @media (orientation: landscape) and (max-height: 500px) {
   :root,
   html {
-    --menu-bar-h: 44px;
+    --menu-bar-h: calc(var(--menu-hud-profile-art) + var(--menu-hud-stat-h));
   }
 }
 
 html.large-text {
-  --menu-bar-h: 48px;
+  --menu-bar-h: calc(var(--menu-hud-profile-art) + var(--menu-hud-stat-h));
 }
 
 html.xxx-large-text {
-  --menu-bar-h: 52px;
+  --menu-bar-h: calc(var(--menu-hud-profile-art) + var(--menu-hud-stat-h));
 }
 
 html {
@@ -71,9 +78,11 @@ html {
   padding-top: var(--safe-top) !important;
   padding-right: max(10px, var(--safe-right)) !important;
   padding-left: max(10px, var(--safe-left)) !important;
-  padding-bottom: 4px !important;
-  min-height: calc(var(--menu-bar-h) + var(--safe-top)) !important;
-  align-items: end !important;
+  padding-bottom: var(--menu-hud-pad-bottom, 18px) !important;
+  min-height: calc(
+    var(--menu-bar-h) + var(--safe-top) + var(--menu-hud-pad-bottom, 18px) + 3px
+  ) !important;
+  align-items: start !important;
   overflow: visible !important;
 }
 
@@ -194,7 +203,9 @@ body.settings-page.has-app-top-hud:not(.home-menu-active) {
 body.settings-page #app-top-hud.menu-top-bar,
 body.settings-page #app-top-hud.menu-top-bar.menu-hud-bar {
   padding-top: var(--safe-top) !important;
-  min-height: calc(var(--menu-bar-h) + var(--safe-top)) !important;
+  min-height: calc(
+    var(--menu-bar-h) + var(--safe-top) + var(--menu-hud-pad-bottom, 18px) + 3px
+  ) !important;
   overflow: visible !important;
 }
 
