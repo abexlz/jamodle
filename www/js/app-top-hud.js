@@ -7,7 +7,7 @@
   'use strict';
 
   const HUD_ID = 'app-top-hud';
-  const STYLE_HREF = 'css/menu-hud.css?v=20260815b';
+  const STYLE_HREF = 'css/menu-hud.css?v=20260815c';
   const PROFILE_STYLE_HREF = 'css/profile.css';
 
   const DEPS = [
@@ -185,6 +185,9 @@
   }
 
   function autoMount() {
+    // Paint the bar immediately so the home screen is never HUD-less while
+    // optional calendar/gift scripts finish loading.
+    try { inject(); } catch (err) { console.warn('[Jamodeul] AppTopHud inject', err); }
     mount().catch((err) => console.warn('[Jamodeul] AppTopHud failed', err));
   }
 

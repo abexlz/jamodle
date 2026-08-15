@@ -201,6 +201,10 @@ body.has-home-bottom-bar.home-menu-active {
   align-items: center;
 }
 
+body.has-home-bottom-bar.home-menu-active.has-app-top-hud {
+  padding-top: var(--app-top-hud-offset, calc(58px + env(safe-area-inset-top, 0px))) !important;
+}
+
 body.has-home-bottom-bar.home-menu-active #menu-screen {
   flex: 1 1 0;
   min-height: 0;
