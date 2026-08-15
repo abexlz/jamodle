@@ -75,7 +75,7 @@ html.viewport-fit-lock body.has-app-top-hud:not(.home-menu-active) {
 
 html.viewport-fit-lock body.settings-page.has-app-top-hud:not(.home-menu-active),
 body.settings-page.has-app-top-hud:not(.home-menu-active) {
-  padding-top: calc(var(--app-top-hud-offset) - 44px) !important;
+  padding-top: var(--app-top-hud-offset) !important;
 }
 
 body.has-home-bottom-bar.home-menu-active.has-app-top-hud {

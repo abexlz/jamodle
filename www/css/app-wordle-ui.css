@@ -818,6 +818,8 @@ body.match-turn-page .rotation-dock-label {
 }
 
 body.settings-page .settings-page-heading {
+  display: block !important;
+  visibility: visible !important;
   color: #ffffff !important;
   text-shadow:
     -1px -1px 0 rgba(0, 45, 58, 0.55),

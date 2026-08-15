@@ -195,7 +195,7 @@ body.game-active #game-screen .app {
 
 html.viewport-fit-lock body.settings-page.has-app-top-hud:not(.home-menu-active),
 body.settings-page.has-app-top-hud:not(.home-menu-active) {
-  padding-top: calc(var(--app-top-hud-offset) - 44px) !important;
+  padding-top: var(--app-top-hud-offset) !important;
   padding-bottom: calc(12px + var(--home-nav-section-h, 32px) + env(safe-area-inset-bottom, 0px)) !important;
 }
 
