@@ -9,7 +9,7 @@
   'use strict';
 
   // v5: prefer Pixabay CDN URLs so the 2×2 grid does not depend on /api/image/proxy.
-  const CACHE_PREFIX = 'jamodeul-pixabay-v5-cdn-';
+  const CACHE_PREFIX = 'jamodeul-pixabay-v6-unique-';
   const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
   const memory = new Map();
 

@@ -907,41 +907,49 @@
         return;
       }
 
-      // Try each provider in turn; the first with a usable image wins (point 6).
-      let photo = null;
+      // Try providers in turn and keep collecting distinct images until we
+      // have four. Never pad the grid by repeating the same photo.
+      const slotSources = [];
+      const seenKeys = new Set();
+      const addSlot = (image) => {
+        if (slotSources.length >= 4) return;
+        const urls = [image?.previewUrl, image?.url, image?.imageUrl]
+          .map((u) => String(u || '').trim())
+          .filter(Boolean);
+        const uniqueUrls = [...new Set(urls)];
+        if (!uniqueUrls.length) return;
+        const key = String(image?.id || uniqueUrls[0]);
+        if (seenKeys.has(key) || uniqueUrls.some((u) => seenKeys.has(u))) return;
+        seenKeys.add(key);
+        uniqueUrls.forEach((u) => seenKeys.add(u));
+        slotSources.push(uniqueUrls);
+      };
+
       for (const svc of services) {
+        let photo = null;
         try {
           photo = await svc.photoForWord(word, englishHint);
         } catch {
           photo = null;
         }
         if (requestId !== this._answerPhotoRequestId) return;
-        if (photo?.imageUrl || photo?.imageSet?.length) break;
+        const imageSet = Array.isArray(photo?.imageSet) ? photo.imageSet : [];
+        imageSet.forEach((image) => addSlot(image));
+        if (photo?.previewUrl || photo?.imageUrl) {
+          addSlot({
+            id: photo.imageId || photo.photoId,
+            previewUrl: photo.previewUrl,
+            imageUrl: photo.imageUrl,
+          });
+        }
+        if (slotSources.length >= 4) break;
       }
 
       if (requestId !== this._answerPhotoRequestId) return;
-      const imageSet = Array.isArray(photo?.imageSet) ? photo.imageSet : [];
-      const slotSources = imageSet.map((image) => {
-        const urls = [image?.previewUrl, image?.url, image?.imageUrl]
-          .map((u) => String(u || '').trim())
-          .filter(Boolean);
-        return [...new Set(urls)];
-      }).filter((urls) => urls.length);
-      if (!slotSources.length && (photo?.previewUrl || photo?.imageUrl)) {
-        slotSources.push([photo.previewUrl || photo.imageUrl].filter(Boolean));
-      }
       if (!slotSources.length) {
         this.clearAnswerPhoto();
         return;
       }
-
-      // A reviewed Pixabay set supplies four unique images. Local/offline
-      // illustrations (or Pexels) may supply fewer, so repeat the available
-      // source rather than leaving a question-grid cell empty.
-      while (slotSources.length < 4) {
-        slotSources.push(slotSources[slotSources.length - 1]);
-      }
-      slotSources.length = 4;
 
       const settle = () => {
         if (requestId !== this._answerPhotoRequestId) return;

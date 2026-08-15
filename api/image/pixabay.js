@@ -18,7 +18,7 @@ const PIXABAY_SEARCH = 'https://pixabay.com/api/';
  */
 const CANDIDATE_COUNT = 30;
 /** Cache namespace so Pixabay and Pexels entries never collide in-process. */
-const CACHE_NS = 'pixabay:image-set:';
+const CACHE_NS = 'pixabay:image-set-v3:';
 const IMAGE_SLOTS = ['photo', 'illustration', 'illustration', 'vector'];
 const EXCLUDED_TAGS = new Set([
   'table', 'background', 'group', 'people', 'person', 'holding', 'hand', 'hands',
@@ -194,20 +194,55 @@ function toImage(hit, type) {
   };
 }
 
+function mergeUniqueHits(primary, extra) {
+  const seen = new Set();
+  const out = [];
+  for (const hit of [...(primary || []), ...(extra || [])]) {
+    if (!hit?.id || seen.has(hit.id)) continue;
+    seen.add(hit.id);
+    out.push(hit);
+  }
+  return out;
+}
+
+function uniqueImageCount(imageSet) {
+  return new Set((imageSet || []).map((image) => image?.id).filter(Boolean)).size;
+}
+
+/**
+ * Build a 2×2 set of distinct Pixabay hits. Never reuse the same id/url —
+ * a repeated cell is worse than leaving a slot empty.
+ */
 function selectImageSet(byType) {
   const usedIds = new Set();
-  const all = ['photo', 'illustration', 'vector']
-    .flatMap((type) => byType[type].map((hit) => ({ hit, type })));
-  return IMAGE_SLOTS.map((requestedType) => {
-    const preferred = byType[requestedType].find((hit) => !usedIds.has(hit.id));
-    const fallback = all.find(({ hit }) => !usedIds.has(hit.id))
-      || (byType[requestedType][0] && { hit: byType[requestedType][0], type: requestedType })
-      || all[0];
-    if (!fallback && !preferred) return null;
-    const selected = preferred ? { hit: preferred, type: requestedType } : fallback;
-    usedIds.add(selected.hit.id);
-    return { ...toImage(selected.hit, selected.type), requestedType };
-  }).filter(Boolean);
+  const leftovers = () => ['photo', 'illustration', 'vector']
+    .flatMap((type) => (byType[type] || []).map((hit) => ({ hit, type })))
+    .filter(({ hit }) => hit && !usedIds.has(hit.id));
+  const takeNext = (list, type) => {
+    const hit = (list || []).find((item) => item && !usedIds.has(item.id));
+    if (!hit) return null;
+    usedIds.add(hit.id);
+    return { ...toImage(hit, type), requestedType: type };
+  };
+
+  const slots = [];
+  for (const requestedType of IMAGE_SLOTS) {
+    const picked = takeNext(byType[requestedType], requestedType);
+    if (picked) {
+      slots.push(picked);
+      continue;
+    }
+    const extra = leftovers()[0];
+    if (!extra) continue;
+    usedIds.add(extra.hit.id);
+    slots.push({ ...toImage(extra.hit, extra.type), requestedType });
+  }
+  for (const { hit, type } of leftovers()) {
+    if (slots.length >= 4) break;
+    usedIds.add(hit.id);
+    slots.push({ ...toImage(hit, type), requestedType: type });
+  }
+  return slots.slice(0, 4);
 }
 
 module.exports = async function handler(req, res) {
@@ -256,12 +291,13 @@ module.exports = async function handler(req, res) {
     return json(res, 200, { ...cached, cached: true });
   }
 
-  const searchPixabay = async (term, imageType) => {
+  const searchPixabay = async (term, imageType, page = 1) => {
     const url = new URL(PIXABAY_SEARCH);
     url.searchParams.set('key', apiKey);
     url.searchParams.set('q', term);
     url.searchParams.set('image_type', imageType);
     url.searchParams.set('per_page', String(CANDIDATE_COUNT));
+    url.searchParams.set('page', String(Math.max(1, page)));
     url.searchParams.set('safesearch', 'true');
     url.searchParams.set('lang', 'en');
     url.searchParams.set('order', 'popular');
@@ -279,6 +315,8 @@ module.exports = async function handler(req, res) {
   };
 
   try {
+    const rankHits = (hits) => mergeUniqueHits(filterAndRank(hits), looseRank(hits));
+
     const findImageSet = async (term) => {
       // Fetch all three image types concurrently. These used to run serially
       // with a 500 ms gap between them, which added ~1 s of latency per word on
@@ -287,13 +325,17 @@ module.exports = async function handler(req, res) {
       const hitsByType = await Promise.all(types.map((type) => searchPixabay(term, type)));
       const byType = {};
       types.forEach((type, i) => {
-        const hits = hitsByType[i];
-        // Prefer strict single-object matches, but fall back to any Pixabay
-        // result so a valid search never leaves the grid empty.
-        const strict = filterAndRank(hits);
-        byType[type] = strict.length ? strict : looseRank(hits);
+        byType[type] = rankHits(hitsByType[i]);
       });
-      return { byType, imageSet: selectImageSet(byType) };
+      let imageSet = selectImageSet(byType);
+      if (uniqueImageCount(imageSet) < 4) {
+        const extraHits = await Promise.all(types.map((type) => searchPixabay(term, type, 2)));
+        types.forEach((type, i) => {
+          byType[type] = mergeUniqueHits(byType[type], rankHits(extraHits[i]));
+        });
+        imageSet = selectImageSet(byType);
+      }
+      return { byType, imageSet };
     };
 
     let searchTerm = query;

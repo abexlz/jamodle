@@ -80,7 +80,7 @@ module.exports = async function handler(req, res) {
     });
   }
 
-  const cached = cache.get(query);
+  const cached = cache.get('pexels:set-v2:' + query);
   if (cached) {
     return json(res, 200, { ...cached, cached: true });
   }
@@ -113,21 +113,23 @@ module.exports = async function handler(req, res) {
 
   try {
     let searchTerm = query;
-    let best = rank.pickBestPhoto(await searchPexels(searchTerm), searchTerm);
+    const photos = await searchPexels(searchTerm);
+    let ranked = rank.pickTopPhotos(photos, searchTerm, 4);
 
     // A multi-word gloss can be too narrow ("korean wrestling"); retry on the
     // head noun so we still land on a photo that depicts the subject.
     const tokens = rank.tokenize(query);
-    if (best.score === 0 && tokens.length > 1) {
+    if ((!ranked.length || ranked[0].score === 0) && tokens.length > 1) {
       const headNoun = tokens[tokens.length - 1];
-      const fallbackBest = rank.pickBestPhoto(await searchPexels(headNoun), headNoun);
-      if (fallbackBest.score > 0) {
+      const fallback = rank.pickTopPhotos(await searchPexels(headNoun), headNoun, 4);
+      if (fallback.length && fallback[0].score > (ranked[0]?.score || 0)) {
         searchTerm = headNoun;
-        best = fallbackBest;
+        ranked = fallback;
       }
     }
 
-    const photo = best.photo;
+    const best = ranked[0];
+    const photo = best?.photo;
     if (!photo?.src) {
       const empty = {
         ok: true,
@@ -139,15 +141,31 @@ module.exports = async function handler(req, res) {
         pexelsUrl: null,
         alt: null,
       };
-      cache.set(query, empty);
+      cache.set('pexels:set-v2:' + query, empty);
       return json(res, 200, empty);
     }
+
+    const toPexelsImage = (item) => {
+      const src = item.photo.src || {};
+      const url = src.landscape || src.large || src.medium || src.original || null;
+      return {
+        type: 'photo',
+        requestedType: 'photo',
+        url,
+        previewUrl: src.medium || src.small || url,
+        id: item.photo.id,
+        creditName: item.photo.photographer || null,
+        creditUrl: item.photo.photographer_url || item.photo.url || null,
+      };
+    };
+    const imageSet = ranked.map(toPexelsImage).filter((image) => image.url);
 
     const payload = {
       ok: true,
       query,
       searchTerm,
       found: true,
+      imageSet,
       imageUrl: photo.src.landscape || photo.src.large || photo.src.medium || photo.src.original || null,
       photographer: photo.photographer || null,
       photographerUrl: photo.photographer_url || null,
@@ -157,7 +175,7 @@ module.exports = async function handler(req, res) {
       matchScore: best.score,
       matchRank: best.index,
     };
-    cache.set(query, payload);
+    cache.set('pexels:set-v2:' + query, payload);
     return json(res, 200, payload);
   } catch (err) {
     console.error('[pexels] search error', err);
