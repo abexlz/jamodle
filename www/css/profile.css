@@ -1257,7 +1257,7 @@
 }
 
 .profile-badge-card--menu {
-  width: var(--menu-profile-size, 100px);
+  width: var(--menu-profile-size, 34px);
 }
 
 .profile-badge-card--hero {
@@ -1309,7 +1309,7 @@
 }
 
 .profile-badge-card--menu .profile-battle-card-level {
-  font-size: clamp(9px, 2.8vw, 13px);
+  font-size: clamp(8px, 2.2vw, 11px);
 }
 
 .profile-badge-card--hero .profile-battle-card-level {

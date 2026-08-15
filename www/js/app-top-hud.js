@@ -7,9 +7,9 @@
   'use strict';
 
   const HUD_ID = 'app-top-hud';
-  const STYLE_HREF = 'css/menu-hud.css?v=20260815g';
-  const CHROME_HREF = 'css/app-chrome.css?v=20260815g';
-  const PROFILE_STYLE_HREF = 'css/profile.css';
+  const STYLE_HREF = 'css/menu-hud.css?v=20260815h';
+  const CHROME_HREF = 'css/app-chrome.css?v=20260815h';
+  const PROFILE_STYLE_HREF = 'css/profile.css?v=20260815h';
 
   const DEPS = [
     ['BadgeService', 'js/badge-service.js'],

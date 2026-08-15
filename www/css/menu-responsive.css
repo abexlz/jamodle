@@ -138,7 +138,7 @@ html.large-text body.home-menu-active {
     --app-btn-min-h: clamp(46px, 12.5vw, 64px);
     --app-btn-max-h: clamp(54px, 14.5vw, 72px);
     --menu-header-gap: 8px;
-    --menu-profile-size: clamp(40px, 10.5vw, 46px);
+    --menu-profile-size: 34px;
   }
 }
 

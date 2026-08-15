@@ -9,6 +9,7 @@
   --menu-hud-progress: #3ecfb0;
   --menu-hud-star: #2f8fd4;
   --menu-bar-h: 42px;
+  --menu-profile-size: 34px;
   --app-top-hud-offset: calc(var(--menu-bar-h) + env(safe-area-inset-top, var(--safe-top, 0px)));
 }
 
@@ -299,7 +300,9 @@ body.has-app-top-hud .menu-top-bar-spacer {
   z-index: 36;
 }
 
-.menu-hud-bar .menu-profile-card--menu {
+.menu-hud-bar .menu-profile-card--menu,
+#app-top-hud .profile-badge-card--menu {
+  width: var(--menu-profile-size, 34px);
   filter: drop-shadow(0 2px 4px rgba(20, 70, 80, 0.22));
 }
 
@@ -450,7 +453,7 @@ body.has-app-top-hud .menu-top-bar-spacer {
 
 @media (max-height: 760px) {
   :root {
-    --menu-profile-size: clamp(40px, 10.5vw, 46px);
+    --menu-profile-size: 34px;
     --menu-profile-drop: 0%;
   }
 
