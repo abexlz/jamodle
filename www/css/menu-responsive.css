@@ -284,10 +284,20 @@ body.home-menu-active.home-tab-menu #menu-screen .menu-top-daily-row .menu-daily
 }
 
 #menu-screen .quest-progress-text,
-#menu-screen .quest-reward-amount,
-#menu-screen .shop-section-balance,
-#menu-screen .shop-item-name {
+#menu-screen .quest-reward-amount {
   font-size: var(--menu-type-base);
+}
+
+#menu-screen .shop-section-balance {
+  font-size: clamp(15px, 4.2vw, 18px);
+}
+
+#menu-screen .shop-section-balance strong {
+  font-size: clamp(17px, 4.8vw, 21px);
+}
+
+#menu-screen .shop-item-name {
+  font-size: clamp(16px, 4.6vw, 20px);
 }
 
 #menu-screen .quest-reward-xp {
@@ -299,7 +309,16 @@ body.home-menu-active.home-tab-menu #menu-screen .menu-top-daily-row .menu-daily
 }
 
 #menu-screen .shop-subsection-title {
-  font-size: var(--menu-type-base);
+  font-size: clamp(16px, 4.6vw, 20px);
+}
+
+#menu-screen .shop-item-qty,
+#menu-screen .shop-item-desc {
+  font-size: clamp(13px, 3.6vw, 16px);
+}
+
+#menu-screen .shop-pack-badge {
+  font-size: clamp(11px, 3vw, 13px);
 }
 
 #menu-screen .quest-subsection-title,
@@ -355,9 +374,8 @@ body.home-menu-active.home-tab-menu #menu-screen .menu-top-daily-row .menu-daily
   font-size: clamp(12px, 3.2vw, 16px);
 }
 
-#menu-screen .quest-claim-btn,
 #menu-screen .shop-buy-btn {
-  font-size: var(--menu-type-base);
+  font-size: clamp(14px, 4vw, 17px);
 }
 
 .home-tab-badge {

@@ -9,7 +9,7 @@
 
 .shop-section-balance {
   margin: 0;
-  font-size: 13px;
+  font-size: 16px;
   color: var(--text-soft, #9AA3AD);
   text-align: center;
 }
@@ -20,13 +20,13 @@
   gap: 4px;
   font-family: 'Jua', sans-serif;
   color: var(--heading, #7B8FD4);
-  font-size: 15px;
+  font-size: 19px;
 }
 
 .shop-subsection-title {
   margin: 14px 0 8px;
   font-family: 'Jua', sans-serif;
-  font-size: 14px;
+  font-size: 18px;
   color: var(--text, #5D6470);
 }
 
@@ -206,13 +206,13 @@
 }
 
 .shop-balance-label {
-  font-size: 14px;
+  font-size: 16px;
   color: var(--text, #5D6470);
 }
 
 .shop-balance-coins {
   font-family: 'Jua', sans-serif;
-  font-size: 20px;
+  font-size: 24px;
   color: var(--heading, #7B8FD4);
 }
 
@@ -378,7 +378,7 @@
 .shop-item-name {
   margin: 0;
   font-family: 'Jua', sans-serif;
-  font-size: 14px;
+  font-size: 18px;
   color: var(--heading, #7B8FD4);
   line-height: 1.25;
 }
@@ -389,7 +389,7 @@
 
 .shop-item-qty {
   margin: 0;
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--text-soft, #9AA3AD);
 }
@@ -398,7 +398,7 @@
   display: inline-block;
   padding: 1px 6px;
   border-radius: 999px;
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 700;
   background: var(--success-bg, #E4F8EC);
   color: var(--success-text, #4A9A6A);
@@ -415,7 +415,7 @@
   border: 2px solid var(--peach-btn, #FFD0A8);
   background: var(--peach, #FFE8D4);
   font-family: 'Jua', sans-serif;
-  font-size: 12px;
+  font-size: 15px;
   color: var(--heading, #7B8FD4);
   cursor: pointer;
   flex-shrink: 0;
@@ -455,7 +455,7 @@
   right: 8px;
   padding: 2px 8px;
   border-radius: 999px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
