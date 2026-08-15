@@ -452,9 +452,15 @@ body.home-menu-active.home-tab-quests .dq-friend-card {
   margin-bottom: 0;
 }
 
-body.home-menu-active.home-tab-quests #menu-screen .menu-inner,
+body.home-menu-active.home-tab-quests #menu-screen .menu-inner {
+  overflow: hidden !important;
+}
+
 body.home-menu-active.home-tab-quests #menu-screen #menu-root {
-  overflow: visible !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 body.home-menu-active #menu-screen.is-quests-tab .quest-section {
