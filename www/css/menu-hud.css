@@ -145,15 +145,18 @@ body.has-app-top-hud .menu-top-bar-spacer {
 
 .menu-hud-spin-chest {
   display: block;
-  width: var(--menu-hud-icon-w);
+  width: calc(var(--menu-hud-icon-w) * 1.16);
   height: var(--menu-bar-h);
   object-fit: contain;
+  object-position: bottom center;
+  align-self: flex-end;
 }
 
 .menu-hud-left .menu-hud-spin {
   flex-shrink: 0;
-  width: var(--menu-hud-icon-w);
+  width: calc(var(--menu-hud-icon-w) * 1.16);
   height: var(--menu-bar-h);
+  align-items: flex-end;
 }
 
 .menu-hud-spin {
@@ -384,8 +387,8 @@ body.has-app-top-hud .menu-top-bar-spacer {
   align-items: stretch;
   justify-content: flex-start;
   align-self: start;
-  width: var(--menu-hud-icon-w);
-  height: var(--menu-bar-h);
+  width: calc(var(--menu-hud-icon-w) * 1.05);
+  height: calc(var(--menu-bar-h) * 1.05);
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -414,8 +417,8 @@ body.has-app-top-hud .menu-top-bar-spacer {
 #app-top-hud .menu-hud-profile .profile-battle-card {
   position: relative;
   width: 100%;
-  height: var(--menu-hud-profile-art);
-  flex: 0 0 var(--menu-hud-profile-art);
+  height: calc(var(--menu-hud-profile-art) * 1.05);
+  flex: 0 0 calc(var(--menu-hud-profile-art) * 1.05);
   aspect-ratio: auto;
   overflow: hidden;
   border: 2px solid rgba(255, 255, 255, 0.85);
@@ -438,6 +441,10 @@ body.has-app-top-hud .menu-top-bar-spacer {
 #app-top-hud .menu-hud-profile .profile-battle-card-body {
   top: 8%;
   bottom: 8%;
+}
+
+#app-top-hud .menu-hud-profile .profile-battle-card-icon {
+  font-size: calc(clamp(20px, 10vw, 32px) * 1.05);
 }
 
 .profile-battle-hud-stat {
@@ -550,6 +557,7 @@ body.has-app-top-hud .menu-top-bar-spacer {
   box-shadow: 0 2px 0 rgba(40, 6, 14, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
 }
 
+#app-top-hud .menu-hud-coins-value,
 .menu-hud-bar .menu-hud-coins-value {
   min-width: 0;
   max-width: 100%;
@@ -558,7 +566,7 @@ body.has-app-top-hud .menu-top-bar-spacer {
   white-space: nowrap;
   flex: 1;
   font-family: 'Jua', sans-serif;
-  font-size: clamp(19px, 5.4vw, 24px);
+  font-size: clamp(24.7px, 7.02vw, 31.2px);
   font-weight: 400;
   color: #fff !important;
   text-shadow: 0 2px 0 rgba(40, 6, 14, 0.55);
