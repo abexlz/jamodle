@@ -469,7 +469,7 @@ body.home-menu-active #menu-screen.is-quests-tab .quest-list {
 body.home-menu-active #menu-screen.is-quests-tab .quest-card {
   flex: 0 0 auto;
   min-height: auto;
-  padding: 14px 14px;
+  padding: 10px 12px;
 }
 
 body.home-menu-active #menu-screen.is-shop-tab .shop-section {

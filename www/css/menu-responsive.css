@@ -275,18 +275,14 @@ body.home-menu-active.home-tab-menu #menu-screen .menu-top-daily-row .menu-daily
 }
 
 /* ── Quest / shop tabs ── */
-#menu-screen .quest-scope-btn {
-  font-size: 28px;
-  padding: 16px 12px;
-}
-
+#menu-screen .quest-scope-btn,
 #menu-screen .shop-scope-btn {
   font-size: var(--menu-type-base);
   padding: clamp(10px, 2.8vw, 14px) clamp(8px, 2.4vw, 12px);
 }
 
 #menu-screen .quest-card-task {
-  font-size: 24px;
+  font-size: var(--menu-type-base);
 }
 
 #menu-screen .shop-item-icon {
@@ -295,7 +291,7 @@ body.home-menu-active.home-tab-menu #menu-screen .menu-top-daily-row .menu-daily
 
 #menu-screen .quest-progress-text,
 #menu-screen .quest-reward-amount {
-  font-size: 24px;
+  font-size: var(--menu-type-base);
 }
 
 #menu-screen .shop-section-balance {
@@ -311,11 +307,11 @@ body.home-menu-active.home-tab-menu #menu-screen .menu-top-daily-row .menu-daily
 }
 
 #menu-screen .quest-reward-xp {
-  font-size: 20px;
+  font-size: clamp(10px, 2.6vw, 12px);
 }
 
 #menu-screen .quest-claim-btn {
-  font-size: 24px;
+  font-size: clamp(11px, 3vw, 13px);
 }
 
 #menu-screen .shop-subsection-title {
@@ -333,15 +329,11 @@ body.home-menu-active.home-tab-menu #menu-screen .menu-top-daily-row .menu-daily
 
 #menu-screen .quest-subsection-title,
 #menu-screen .quest-subsection-hint {
-  font-size: 28px;
-}
-
-#menu-screen .quest-subsection-hint {
-  font-size: 24px;
+  font-size: var(--menu-type-base);
 }
 
 #menu-screen .quest-refresh-timer {
-  font-size: 24px;
+  font-size: clamp(11px, 3vw, 14px);
 }
 
 /* ── Text stays inside boxes ── */
@@ -368,13 +360,7 @@ body.home-menu-active.home-tab-menu #menu-screen .menu-top-daily-row .menu-daily
   padding-inline: clamp(4px, 1.5vw, 8px);
 }
 
-#menu-screen .quest-card-task {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
+#menu-screen .quest-card-task,
 #menu-screen .shop-item-desc {
   display: -webkit-box;
   -webkit-line-clamp: 2;
