@@ -186,14 +186,16 @@
 
 .profile-nav-btn {
   flex: 1;
-  min-height: 44px;
-  padding: 10px 6px 12px;
+  min-height: 52px;
+  padding: 12px 4px 14px;
   border-radius: 14px 14px 0 0;
   border: 2px solid var(--border, #E8E4E0);
   border-bottom: 2px solid var(--border, #E8E4E0);
   background: var(--bg-soft, #F8F6F4);
   font-family: 'Jua', sans-serif;
-  font-size: 13px;
+  font-size: clamp(15px, 4.2vw, 18px);
+  line-height: 1.15;
+  letter-spacing: 0.02em;
   color: var(--text-soft, #9AA3AD);
   cursor: pointer;
   touch-action: manipulation;
@@ -289,7 +291,8 @@
 
 .profile-panel-subhead {
   font-family: 'Jua', sans-serif;
-  font-size: 15px;
+  font-size: 20px;
+  line-height: 1.25;
   color: var(--heading, #7B8FD4);
   margin: 0 0 10px;
 }
@@ -462,7 +465,7 @@
 
 .profile-nickname-label {
   display: block;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--text-soft, #9AA3AD);
   margin-bottom: 6px;
@@ -483,7 +486,7 @@
 
 .profile-nickname-save {
   font-family: 'Noto Sans KR', sans-serif;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
   padding: 8px 14px;
   border-radius: 12px;
@@ -509,7 +512,7 @@
 .profile-nickname-save:disabled { opacity: 0.45; cursor: default; }
 
 .profile-nickname-hint {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text-soft, #9AA3AD);
   margin: 0 0 8px;
   line-height: 1.4;
@@ -525,13 +528,17 @@
 }
 
 .profile-level-line {
-  font-size: 14px;
+  font-size: 17px;
   color: var(--text-soft, #9AA3AD);
   margin: 0 0 12px;
 }
 
+.profile-coins-line {
+  font-size: 17px;
+}
+
 .profile-streak-line {
-  font-size: 14px;
+  font-size: 17px;
   color: var(--text, #5D6470);
   margin: 10px 0 0;
 }
@@ -710,14 +717,14 @@
 
 .profile-stat-label {
   display: block;
-  font-size: 11px;
+  font-size: 14px;
   color: var(--text-soft, #9AA3AD);
   margin-bottom: 4px;
 }
 
 .profile-stat strong {
   font-family: 'Jua', sans-serif;
-  font-size: 20px;
+  font-size: 24px;
   color: var(--heading, #7B8FD4);
 }
 
@@ -773,13 +780,13 @@
 
 .badge-card-name {
   font-family: 'Jua', sans-serif;
-  font-size: 13px;
+  font-size: 16px;
   color: var(--heading, #7B8FD4);
   display: block;
 }
 
 .badge-card-status {
-  font-size: 10px;
+  font-size: 13px;
   color: var(--text-soft, #9AA3AD);
   display: block;
   margin-top: 4px;
@@ -834,7 +841,7 @@
 }
 
 .profile-cosmetics-hint {
-  font-size: 12px;
+  font-size: 15px;
   color: var(--text-soft, #9AA3AD);
   margin: -6px 0 12px;
   line-height: 1.45;
@@ -903,7 +910,7 @@
 }
 
 .profile-social-hint {
-  font-size: 13px;
+  font-size: 16px;
   color: var(--text-soft, #9AA3AD);
   margin: 0 0 10px;
   line-height: 1.45;
@@ -914,9 +921,9 @@
   align-items: center;
   justify-content: center;
   font-family: 'Noto Sans KR', sans-serif;
-  font-size: 11px;
+  font-size: 15px;
   font-weight: 700;
-  padding: 5px 10px;
+  padding: 8px 14px;
   border-radius: 999px;
   border: 2px solid var(--lavender-btn, #CFC0F5);
   background: var(--lavender, #E8DEFF);
@@ -950,12 +957,12 @@
 
 .profile-social-hint--compact {
   margin-bottom: 8px;
-  font-size: 12px;
+  font-size: 15px;
 }
 
 .profile-social-name {
   font-family: 'Jua', sans-serif;
-  font-size: 15px;
+  font-size: 18px;
   color: var(--heading, #7B8FD4);
 }
 
@@ -966,7 +973,7 @@
 .profile-social-block:last-child { margin-bottom: 0; }
 
 .profile-social-label {
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.5px;
   color: var(--text-soft, #9AA3AD);
@@ -995,7 +1002,7 @@
   flex: 1;
   min-width: 0;
   font-family: 'Noto Sans KR', sans-serif;
-  font-size: 13px;
+  font-size: 16px;
   padding: 8px 10px;
   border-radius: 12px;
   border: 2px solid var(--border-soft, #F0ECE8);
@@ -1011,9 +1018,9 @@
 
 .profile-social-btn {
   font-family: 'Noto Sans KR', sans-serif;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 700;
-  padding: 8px 12px;
+  padding: 10px 14px;
   border-radius: 12px;
   border: none;
   background: var(--lavender-btn, #CFC0F5);
@@ -1037,7 +1044,7 @@
 .profile-social-btn:disabled { opacity: 0.45; cursor: default; }
 
 .profile-social-msg {
-  font-size: 12px;
+  font-size: 14px;
   margin-top: 6px;
   min-height: 16px;
 }
@@ -1069,7 +1076,7 @@
 .friend-request-name {
   flex: 1;
   min-width: 0;
-  font-size: 14px;
+  font-size: 16px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1101,13 +1108,13 @@
   border-radius: 12px;
   border: 2px solid var(--border-soft, #F0ECE8);
   background: var(--bg, #FFF8F5);
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .profile-friends-empty {
   color: var(--text-soft, #9AA3AD);
   text-align: center;
-  font-size: 13px;
+  font-size: 15px;
 }
 
 /* ── Parallelogram profile frame ── */
@@ -1527,6 +1534,16 @@
 .title-option .profile-badge-title-pill {
   width: 100%;
   max-width: 300px;
+  padding: 8px 12px;
+}
+
+.title-option .profile-badge-title-text {
+  font-size: clamp(14px, 4.4vw, 18px);
+  line-height: 1.05;
+}
+
+.title-option .profile-badge-spark {
+  font-size: 12px;
 }
 
 .title-option:not(:disabled):hover,
