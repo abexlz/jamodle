@@ -10,8 +10,8 @@ html {
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
-  --menu-bar-h: 46px;
-  --app-top-hud-offset: calc(var(--menu-bar-h) + var(--safe-top));
+  --menu-bar-h: 42px;
+  --app-top-hud-offset: calc(var(--menu-bar-h) + env(safe-area-inset-top, var(--safe-top)));
   --home-nav-offset: calc(
     var(--home-nav-section-h, 40px) + var(--safe-bottom)
   );
@@ -23,7 +23,7 @@ html {
 @media (min-width: 600px) {
   :root,
   html {
-    --menu-bar-h: 52px;
+    --menu-bar-h: 48px;
     --app-content-max: min(100%, 36rem);
   }
 }
@@ -50,11 +50,11 @@ html {
 }
 
 html.large-text {
-  --menu-bar-h: 52px;
+  --menu-bar-h: 48px;
 }
 
 html.xxx-large-text {
-  --menu-bar-h: 56px;
+  --menu-bar-h: 52px;
 }
 
 html {
@@ -67,11 +67,12 @@ html {
 #app-top-hud.menu-top-bar {
   box-sizing: border-box;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
-  padding-top: var(--safe-top) !important;
+  padding-top: env(safe-area-inset-top, var(--safe-top)) !important;
   padding-right: max(10px, var(--safe-right)) !important;
   padding-left: max(10px, var(--safe-left)) !important;
-  padding-bottom: 2px !important;
-  min-height: calc(var(--menu-bar-h) + var(--safe-top)) !important;
+  padding-bottom: 0 !important;
+  min-height: calc(var(--menu-bar-h) + env(safe-area-inset-top, var(--safe-top))) !important;
+  align-items: end !important;
 }
 
 #app-top-hud .menu-hud-left,
@@ -100,7 +101,7 @@ html {
 
 html.viewport-fit-lock body.has-app-top-hud:not(.home-menu-active),
 body.has-app-top-hud:not(.home-menu-active) {
-  padding-top: calc(2px + var(--app-top-hud-offset)) !important;
+  padding-top: var(--app-top-hud-offset) !important;
   padding-left: max(10px, var(--safe-left)) !important;
   padding-right: max(10px, var(--safe-right)) !important;
 }

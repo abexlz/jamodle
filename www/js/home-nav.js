@@ -5,7 +5,7 @@
   'use strict';
 
   const BAR_ID = 'home-bottom-bar';
-  const CHROME_HREF = 'css/app-chrome.css?v=20260815f';
+  const CHROME_HREF = 'css/app-chrome.css?v=20260815g';
   const HOME_TAB_KEY = 'jamodeul-home-tab';
   const ACTIVE_GAME_KEY = 'jamodeul-active-game';
   /** Learn tab skips its landing screen and opens tutorial step 1. */
@@ -117,7 +117,9 @@
     }
     const missing = insets.top + insets.right + insets.bottom + insets.left <= 0;
     if (missing && isAppleTouch()) {
-      insets = fallbackSafeInsets();
+      /* env() is 0 when the webview is already below the status bar.
+         Do not invent a 47px notch or the HUD gets a huge empty teal band. */
+      insets = { top: 0, right: 0, bottom: 20, left: 0 };
     }
     const root = document.documentElement;
     root.style.setProperty('--safe-top', px(insets.top));

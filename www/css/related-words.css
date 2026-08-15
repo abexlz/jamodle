@@ -378,6 +378,7 @@ html.reduce-motion .rw-chain-recap-word {
 .wc-combo-wrap--hud {
   margin: 0;
   min-height: 0;
+  overflow: visible;
 }
 
 /* Flat combo pill on Word Chain — no gradients */
@@ -406,16 +407,33 @@ html.reduce-motion .rw-chain-recap-word {
 }
 
 .rw-solo-mode .wc-combo-wrap--hud .wc-combo-badge__pill {
-  padding: 3px 8px 3px 6px;
-  gap: 4px;
+  padding: 2px 7px 2px 5px;
+  gap: 3px;
 }
 
-.rw-solo-mode .wc-combo-wrap--hud .wc-combo-badge__count-stack {
-  min-width: clamp(28px, 8vw, 36px);
+.rw-solo-mode .wc-combo-wrap--hud .wc-combo-badge__count-stack,
+.rw-solo-mode .wc-combo-wrap--hud .wc-combo-badge.is-burning .wc-combo-badge__count-stack,
+.rw-solo-mode .wc-combo-wrap--hud [class*="tier"].is-burning .wc-combo-badge__count-stack {
+  min-width: 22px !important;
+  min-height: 22px !important;
+}
+
+.rw-solo-mode .wc-combo-wrap--hud .wc-combo-badge__count {
+  font-size: 16px;
+  line-height: 1;
 }
 
 .rw-solo-mode .wc-combo-wrap--hud .wc-combo-badge__label {
-  font-size: 9px;
+  font-size: 8px;
+  letter-spacing: 0.12em;
+}
+
+.rw-solo-mode .wc-combo-wrap--hud .wc-combo-badge__flame,
+.rw-solo-mode .wc-combo-wrap--hud .wc-combo-badge.is-burning .wc-combo-badge__flame {
+  width: 26px !important;
+  height: 30px !important;
+  bottom: 22% !important;
+  filter: none;
 }
 
 .rw-stage {
@@ -452,6 +470,8 @@ html.reduce-motion .rw-chain-recap-word {
 
 .rw-play-top > .rw-combo-row {
   grid-column: 2;
+  position: relative;
+  z-index: 3;
 }
 
 .rw-combo-row {

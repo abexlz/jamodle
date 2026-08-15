@@ -8,8 +8,8 @@
   --menu-hud-coin-pill-edge: #3d0d18;
   --menu-hud-progress: #3ecfb0;
   --menu-hud-star: #2f8fd4;
-  --menu-bar-h: 46px;
-  --app-top-hud-offset: calc(var(--menu-bar-h) + var(--safe-top, env(safe-area-inset-top, 0px)));
+  --menu-bar-h: 42px;
+  --app-top-hud-offset: calc(var(--menu-bar-h) + env(safe-area-inset-top, var(--safe-top, 0px)));
 }
 
 /* Global fixed HUD — stays visible on home, games, and secondary pages. */
@@ -41,7 +41,7 @@ body > #app-top-hud.menu-top-bar,
 }
 
 html.viewport-fit-lock body.has-app-top-hud:not(.home-menu-active) {
-  padding-top: calc(2px + var(--app-top-hud-offset)) !important;
+  padding-top: var(--app-top-hud-offset) !important;
 }
 
 body.has-home-bottom-bar.home-menu-active.has-app-top-hud {

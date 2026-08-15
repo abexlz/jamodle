@@ -2,7 +2,7 @@
 
 :root {
   /* Tight to icon size; home-indicator lives in padding-bottom only */
-  --home-nav-section-h: 40px;
+  --home-nav-section-h: 36px;
   --home-nav-offset: calc(
     var(--home-nav-section-h) + var(--safe-bottom, env(safe-area-inset-bottom, 0px))
   );
@@ -17,22 +17,22 @@
   --home-nav-border: rgba(123, 207, 255, 0.42);
   --home-nav-divider: rgba(255, 255, 255, 0.2);
   --home-nav-active-accent: #ffe566;
-  --home-nav-icon-size: 26px;
+  --home-nav-icon-size: 30px;
 }
 
 @media (min-width: 600px) {
   :root {
-    --home-nav-section-h: 44px;
-    --home-nav-icon-size: 28px;
+    --home-nav-section-h: 40px;
+    --home-nav-icon-size: 32px;
   }
 }
 
 html.large-text {
-  --home-nav-section-h: 44px;
+  --home-nav-section-h: 40px;
   --home-nav-offset: calc(
     var(--home-nav-section-h) + var(--safe-bottom, env(safe-area-inset-bottom, 0px))
   );
-  --home-nav-icon-size: 28px;
+  --home-nav-icon-size: 32px;
 }
 
 /* ── Bottom bar shell ── */
@@ -107,7 +107,7 @@ body > #home-bottom-bar.home-bottom-bar,
   width: 100%;
   min-width: 0;
   min-height: var(--home-nav-section-h);
-  padding: 2px 4px 0;
+  padding: 0;
   margin: 0;
   border: none;
   border-left: 1px solid var(--home-nav-divider);
