@@ -7,7 +7,7 @@
   'use strict';
 
   const HUD_ID = 'app-top-hud';
-  const STYLE_HREF = 'css/menu-hud.css?v=20260815o';
+  const STYLE_HREF = 'css/menu-hud.css?v=20260815p';
   const CHROME_HREF = 'css/app-chrome.css?v=20260815n';
   const PROFILE_STYLE_HREF = 'css/profile.css?v=20260815h';
 
@@ -20,7 +20,7 @@
     ['DailyGiftService', 'js/daily-gift-service.js'],
     ['DailyGiftUI', 'js/daily-gift-ui.js?v=20260803a'],
     ['DailyCalendarService', 'js/daily-calendar-service.js'],
-    ['DailyCalendarModal', 'js/daily-calendar-modal.js?v=20260814v'],
+    ['DailyCalendarModal', 'js/daily-calendar-modal.js?v=20260815p'],
     ['ChestRoomService', 'js/chest-room-service.js?v=20260803c'],
     ['ChestRoomUI', 'js/chest-room-ui.js?v=20260803b'],
   ];
