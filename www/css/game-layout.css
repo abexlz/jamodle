@@ -273,6 +273,21 @@ body:has(#related-words-app) .rw-solo-mode .rw-answer-photo {
   min-height: 140px;
 }
 
+body:has(#related-words-app) .rw-solo-mode.rw-image-mode .rw-stage {
+  justify-content: flex-start;
+}
+
+body:has(#related-words-app) .rw-solo-mode.rw-image-mode .rw-play-cluster {
+  justify-content: flex-start;
+}
+
+body:has(#related-words-app) .rw-solo-mode.rw-image-mode .rw-answer-photo {
+  flex: 0 1 auto;
+  min-height: 0;
+  max-height: min(36dvh, 280px);
+  justify-content: flex-start;
+}
+
 body:has(#related-words-app) .rw-solo-mode .rw-board {
   flex: 0 0 auto;
   justify-content: flex-start;

@@ -117,6 +117,11 @@ body.has-app-top-hud:not(.home-menu-active):not(.settings-page) {
   padding-right: max(10px, var(--safe-right)) !important;
 }
 
+html.viewport-fit-lock body.rw-page.has-app-top-hud,
+body.rw-page.has-app-top-hud {
+  padding-top: var(--app-top-hud-offset) !important;
+}
+
 body.has-home-bottom-bar.home-menu-active.has-app-top-hud {
   padding-top: var(--app-top-hud-offset) !important;
   padding-left: max(10px, var(--safe-left)) !important;

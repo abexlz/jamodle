@@ -572,7 +572,9 @@
         global.KoreanTTS?.prime?.();
       } else if (!this.showOppPreview) {
         this.root.classList.add('rw-solo-mode');
-      }
+        if (this.imageMode) {
+          this.root.querySelector('.rw-topbar')?.classList.add('hidden');
+        }
 
       global.I18n?.onChange?.(() => this.renderStaticI18n());
 
