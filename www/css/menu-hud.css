@@ -279,41 +279,65 @@ body.settings-page #app-top-hud .app-hud-page-title {
 }
 
 /* Calendar chip — aligned with spin wheel disc (above SPIN label) */
-.menu-hud-calendar {
+#app-top-hud .menu-hud-calendar {
   flex-shrink: 0;
-  width: var(--menu-hud-icon-w);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-width: calc(var(--menu-hud-icon-w) * 1.9);
   height: var(--menu-bar-h);
   margin-bottom: 0;
+  padding: 0 6px;
   border-radius: 10px;
   border: 2px solid #f4d35e;
   background: linear-gradient(180deg, #fff4c8 0%, #ffd45a 55%, #f0b020 100%);
   box-shadow: 0 2px 0 #9a7010, inset 0 1px 0 rgba(255, 255, 255, 0.55);
 }
 
-.menu-hud-calendar:active {
+#app-top-hud .menu-hud-calendar:active {
   transform: translateY(2px) scale(0.96);
   box-shadow: 0 1px 0 #9a7010, inset 0 1px 0 rgba(255, 255, 255, 0.45);
 }
 
-.menu-hud-calendar .menu-calendar-nav-month {
-  color: #8b4513;
-  font-weight: 700;
-}
-
-.menu-hud-calendar .menu-calendar-nav-day {
-  color: #5c1424;
-  font-weight: 800;
-}
-
-.menu-hud-calendar .menu-calendar-nav-sheet {
-  width: calc(var(--menu-hud-icon-w) - 8px);
+#app-top-hud .menu-hud-calendar .menu-calendar-nav-sheet {
+  width: auto;
+  min-width: 0;
   height: calc(var(--menu-bar-h) - 12px);
+  padding: 0 6px;
   background: #fff;
   border-radius: 6px;
   box-shadow: 0 1px 0 rgba(120, 80, 0, 0.28);
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   overflow: hidden;
+}
+
+#app-top-hud .menu-hud-calendar .menu-calendar-nav-month,
+#app-top-hud .menu-hud-calendar .menu-calendar-nav-day {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-bottom: none;
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1;
+  text-align: center;
+}
+
+#app-top-hud .menu-hud-calendar .menu-calendar-nav-month {
+  color: #8b4513;
+  text-transform: uppercase;
+}
+
+#app-top-hud .menu-hud-calendar .menu-calendar-nav-day {
+  color: #5c1424;
 }
 
 .menu-calendar-nav-month {
@@ -596,8 +620,9 @@ body.settings-page #app-top-hud .app-hud-page-title {
     --menu-profile-drop: 0%;
   }
 
-  .menu-hud-calendar {
-    width: var(--menu-hud-icon-w);
+  #app-top-hud .menu-hud-calendar {
+    width: auto;
+    min-width: calc(var(--menu-hud-icon-w) * 1.9);
     height: var(--menu-bar-h);
     margin-bottom: 0;
   }
