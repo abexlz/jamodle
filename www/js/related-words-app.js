@@ -575,6 +575,7 @@
         if (this.imageMode) {
           this.root.querySelector('.rw-topbar')?.classList.add('hidden');
         }
+      }
 
       global.I18n?.onChange?.(() => this.renderStaticI18n());
 
