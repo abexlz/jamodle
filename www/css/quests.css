@@ -35,8 +35,11 @@ body.home-menu-active.home-tab-quests .menu-quests-page-title {
 
 .quest-tab-section {
   width: 100%;
-  padding-bottom: 8px;
+  height: 100%;
+  min-height: 0;
+  padding-bottom: 0;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 #menu-screen.is-quests-tab .quest-section {
@@ -160,11 +163,13 @@ body.home-menu-active.home-tab-quests .menu-quests-page-title {
 
 .quest-list-scroll {
   position: relative;
-  flex: 0 0 auto;
+  flex: 1 1 0;
   min-height: 0;
   display: flex;
   flex-direction: column;
-  overflow: visible;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .quest-list-scroll::after {

@@ -82,26 +82,6 @@
     `;
   }
 
-  function renderWheelChip(snap) {
-    const wheelReady = QS()?.isDailyWheelAvailable?.(global.ProfileService?.loadProfile?.());
-    const wheelClaimed = snap.dailyWheelClaimed;
-    const href = wheelReady ? 'chest-room.html?claim=1' : 'chest-room.html';
-    const label = wheelClaimed
-      ? t('wheel.claimed')
-      : wheelReady
-        ? t('chestRoom.openFree')
-        : t('wheel.spinShort');
-    const stateClass = wheelClaimed ? ' is-claimed' : (wheelReady ? ' is-ready' : '');
-    return `
-      <a href="${escapeHtml(href)}" class="quest-wheel-chip${stateClass}" id="quest-wheel-chip">
-        <span class="quest-wheel-chip-icon quest-chest-chip-icon" aria-hidden="true">
-          <img src="assets/chests/mega-closed.png" alt="" width="22" height="22" decoding="async" draggable="false">
-        </span>
-        <span class="quest-wheel-chip-label">${escapeHtml(label)}</span>
-      </a>
-    `;
-  }
-
   function renderRefreshTimer(scope) {
     const ms = QS()?.getRefreshMs?.(scope) ?? 0;
     const time = QS()?.formatRefreshCountdown?.(ms) ?? '00:00:00';
@@ -154,7 +134,6 @@
               ${escapeHtml(t('quests.scopeWeekly'))}
             </button>
           </div>
-          ${scope === 'daily' ? renderWheelChip(snap) : ''}
           ${renderRefreshTimer(scope)}
         </div>
 

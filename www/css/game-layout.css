@@ -437,12 +437,12 @@ body.home-menu-active.home-tab-menu .menu-mode-heading-badge {
 }
 
 /* Quest / shop / learn tabs */
-body.home-menu-active.home-tab-quests #menu-root > .menu-sections,
-body.home-menu-active.home-tab-shop #menu-root > .menu-sections,
-body.home-menu-active.home-tab-learn #menu-root > .menu-sections {
-  display: flex;
-  flex-direction: column;
+body.home-menu-active.home-tab-quests #menu-root > .menu-sections.quest-tab-section {
+  flex: 1 1 0;
   min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  gap: 8px;
 }
 
 body.home-menu-active.home-tab-quests .dq-streak-hero,
@@ -457,16 +457,13 @@ body.home-menu-active.home-tab-quests #menu-screen .menu-inner {
 }
 
 body.home-menu-active.home-tab-quests #menu-screen #menu-root {
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
+  overflow: hidden !important;
 }
 
 body.home-menu-active #menu-screen.is-quests-tab .quest-section {
-  flex: 0 0 auto;
+  flex: 1 1 0;
   min-height: 0;
-  overflow: visible;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
 }
@@ -485,9 +482,9 @@ body.home-menu-active #menu-screen.is-quests-tab .quest-scope-bar {
 }
 
 body.home-menu-active #menu-screen.is-quests-tab .quest-scope-panel {
-  flex: 0 0 auto;
+  flex: 1 1 0;
   min-height: 0;
-  overflow: visible;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
 }
@@ -497,9 +494,12 @@ body.home-menu-active #menu-screen.is-quests-tab .quest-scope-panel.hidden {
 }
 
 body.home-menu-active #menu-screen.is-quests-tab .quest-list-scroll {
-  flex: 0 0 auto;
-  min-height: auto;
-  overflow: visible;
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 body.home-menu-active #menu-screen.is-quests-tab .quest-list {
