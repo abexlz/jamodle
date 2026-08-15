@@ -1307,6 +1307,15 @@ html.reduce-motion .rw-answer-english {
   display: none !important;
 }
 
+.rw-image-mode .rw-topbar.hidden {
+  display: none !important;
+}
+
+body.has-home-bottom-bar .rw-solo-mode .rw-dock-area {
+  margin-bottom: 4px;
+  padding-bottom: 2px;
+}
+
 .rw-hint-btn {
   display: inline-flex;
   align-items: center;
@@ -1325,6 +1334,16 @@ html.reduce-motion .rw-answer-english {
   line-height: 1;
   cursor: pointer;
   transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.15s ease;
+}
+
+@media (max-width: 430px) {
+  .rw-hint-btn {
+    min-width: 0;
+    min-height: 44px;
+    padding: 6px 10px;
+    gap: 5px;
+    font-size: 16px;
+  }
 }
 
 .rw-hint-btn:active:not(:disabled) {

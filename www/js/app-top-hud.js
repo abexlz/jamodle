@@ -7,7 +7,8 @@
   'use strict';
 
   const HUD_ID = 'app-top-hud';
-  const STYLE_HREF = 'css/menu-hud.css?v=20260815c';
+  const STYLE_HREF = 'css/menu-hud.css?v=20260815d';
+  const CHROME_HREF = 'css/app-chrome.css?v=20260815d';
   const PROFILE_STYLE_HREF = 'css/profile.css';
 
   const DEPS = [
@@ -72,11 +73,13 @@
       link.rel = 'stylesheet';
       document.head.appendChild(link);
     }
+    if (id === 'app-chrome-styles') document.head.appendChild(link);
     if (link.getAttribute('href') !== href) link.href = href;
   }
 
   function ensureStyles() {
     ensureLink('app-top-hud-styles', STYLE_HREF);
+    ensureLink('app-chrome-styles', CHROME_HREF);
     if (!document.querySelector('link[href*="profile.css"]')) {
       ensureLink('app-top-hud-profile-styles', PROFILE_STYLE_HREF);
     }
@@ -187,6 +190,7 @@
   function autoMount() {
     // Paint the bar immediately so the home screen is never HUD-less while
     // optional calendar/gift scripts finish loading.
+    try { ensureStyles(); } catch (err) {}
     try { inject(); } catch (err) { console.warn('[Jamodeul] AppTopHud inject', err); }
     mount().catch((err) => console.warn('[Jamodeul] AppTopHud failed', err));
   }

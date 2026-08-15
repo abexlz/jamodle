@@ -1,0 +1,84 @@
+/**
+ * Phone chrome insets — keep the fixed top HUD and bottom tab bar
+ * from covering page content on notched iPhones (e.g. iPhone 14).
+ * Loaded last via HomeNav / AppTopHud so it wins padding wars.
+ */
+
+:root,
+html.viewport-fit-lock,
+html {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --menu-bar-h: 58px;
+  --app-top-hud-offset: calc(var(--menu-bar-h) + var(--safe-top));
+  --home-nav-offset: calc(
+    var(--home-nav-section-h, 50px) + var(--safe-bottom)
+  );
+}
+
+@media (max-width: 430px) and (min-height: 800px) {
+  :root,
+  html.viewport-fit-lock,
+  html {
+    --safe-top: max(47px, env(safe-area-inset-top, 0px));
+    --safe-bottom: max(34px, env(safe-area-inset-bottom, 0px));
+  }
+}
+
+#app-top-hud.menu-top-bar.menu-hud-bar,
+#app-top-hud.menu-top-bar {
+  grid-template-columns: minmax(108px, 1fr) auto minmax(158px, 1fr) !important;
+  padding-top: var(--safe-top) !important;
+  padding-right: max(14px, var(--safe-right)) !important;
+  padding-left: max(12px, var(--safe-left)) !important;
+  min-height: calc(var(--menu-bar-h) + var(--safe-top)) !important;
+}
+
+#app-top-hud .menu-hud-left,
+#app-top-hud .menu-top-bar-left,
+#app-top-hud .menu-hud-right {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  gap: clamp(6px, 1.8vw, 10px);
+}
+
+html.viewport-fit-lock body.has-app-top-hud:not(.home-menu-active),
+body.has-app-top-hud:not(.home-menu-active) {
+  padding-top: calc(8px + var(--app-top-hud-offset)) !important;
+  padding-left: max(14px, var(--safe-left)) !important;
+  padding-right: max(14px, var(--safe-right)) !important;
+}
+
+body.has-home-bottom-bar.home-menu-active.has-app-top-hud {
+  padding-top: var(--app-top-hud-offset) !important;
+}
+
+html.viewport-fit-lock body.has-home-bottom-bar:not(.home-menu-active),
+body.has-home-bottom-bar:not(.home-menu-active),
+html.viewport-fit-lock body.has-home-bottom-bar:has(#related-words-app),
+html.viewport-fit-lock body.has-home-bottom-bar:has(#race-root.race-app),
+html.viewport-fit-lock body.has-home-bottom-bar:has(#match-app),
+html.viewport-fit-lock body.has-home-bottom-bar.game-active,
+html.viewport-fit-lock body.has-home-bottom-bar.match-page,
+html.viewport-fit-lock body.has-home-bottom-bar.match-race-page,
+html.viewport-fit-lock body.has-home-bottom-bar.match-turn-page {
+  padding-bottom: calc(var(--home-nav-offset) + 8px) !important;
+}
+
+body.has-home-bottom-bar.home-menu-active {
+  padding-bottom: 0 !important;
+}
+
+.home-bottom-bar {
+  padding-left: var(--safe-left);
+  padding-right: var(--safe-right);
+}
+
+.home-bottom-bar-inner.home-bottom-bar-inner--5 {
+  min-height: calc(var(--home-nav-section-h) + var(--safe-bottom));
+  padding-bottom: var(--safe-bottom);
+}

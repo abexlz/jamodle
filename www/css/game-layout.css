@@ -10,6 +10,13 @@
   --viewport-fit-pad-y: 6px;
 }
 
+@media (max-width: 430px) and (min-height: 800px) {
+  :root {
+    --safe-top: max(47px, env(safe-area-inset-top, 0px));
+    --safe-bottom: max(34px, env(safe-area-inset-bottom, 0px));
+  }
+}
+
 /* ── Shared viewport lock ── */
 html.viewport-fit-lock,
 body.viewport-fit-lock,
@@ -42,10 +49,13 @@ body:has(#related-words-app) {
 }
 
 body.game-active {
-  padding:
-    calc(var(--viewport-fit-pad-y) + var(--safe-top))
-    var(--viewport-fit-pad-x)
-    calc(var(--viewport-fit-pad-y) + var(--safe-bottom)) !important;
+  padding-left: var(--viewport-fit-pad-x) !important;
+  padding-right: var(--viewport-fit-pad-x) !important;
+  padding-bottom: calc(var(--viewport-fit-pad-y) + var(--safe-bottom)) !important;
+}
+
+body.game-active:not(.has-app-top-hud) {
+  padding-top: calc(var(--viewport-fit-pad-y) + var(--safe-top)) !important;
 }
 
 body.has-home-bottom-bar.game-active {
@@ -55,10 +65,15 @@ body.has-home-bottom-bar.game-active {
 body.match-page,
 body.match-race-page,
 body.match-turn-page {
-  padding:
-    calc(var(--viewport-fit-pad-y) + var(--safe-top))
-    10px
-    calc(var(--viewport-fit-pad-y) + var(--safe-bottom)) !important;
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+  padding-bottom: calc(var(--viewport-fit-pad-y) + var(--safe-bottom)) !important;
+}
+
+body.match-page:not(.has-app-top-hud),
+body.match-race-page:not(.has-app-top-hud),
+body.match-turn-page:not(.has-app-top-hud) {
+  padding-top: calc(var(--viewport-fit-pad-y) + var(--safe-top)) !important;
 }
 
 body.has-home-bottom-bar.match-page,
@@ -69,10 +84,14 @@ body.has-home-bottom-bar.match-turn-page {
 
 body:has(#race-root.race-app),
 body:has(#related-words-app) {
-  padding:
-    calc(8px + var(--safe-top))
-    14px
-    calc(8px + var(--safe-bottom)) !important;
+  padding-left: 14px !important;
+  padding-right: 14px !important;
+  padding-bottom: calc(8px + var(--safe-bottom)) !important;
+}
+
+body:has(#race-root.race-app):not(.has-app-top-hud),
+body:has(#related-words-app):not(.has-app-top-hud) {
+  padding-top: calc(8px + var(--safe-top)) !important;
 }
 
 body.has-home-bottom-bar:has(#related-words-app),

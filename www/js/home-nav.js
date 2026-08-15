@@ -5,12 +5,29 @@
   'use strict';
 
   const BAR_ID = 'home-bottom-bar';
+  const CHROME_HREF = 'css/app-chrome.css?v=20260815d';
   const HOME_TAB_KEY = 'jamodeul-home-tab';
   const ACTIVE_GAME_KEY = 'jamodeul-active-game';
   /** Learn tab skips its landing screen and opens tutorial step 1. */
   const LEARN_TUTORIAL_HREF = 'match-tutorial.html?start=1';
 
   let leaveHook = null;
+
+  function ensureChromeStyles() {
+    if (typeof document === 'undefined') return;
+    let link = document.getElementById('app-chrome-styles');
+    if (!link) {
+      link = document.createElement('link');
+      link.id = 'app-chrome-styles';
+      link.rel = 'stylesheet';
+      (document.head || document.documentElement).appendChild(link);
+    } else if (link.parentNode === document.head) {
+      document.head.appendChild(link);
+    }
+    if (link.getAttribute('href') !== CHROME_HREF) link.href = CHROME_HREF;
+  }
+
+  ensureChromeStyles();
 
   /**
    * Vercel Toolbar / Comments inject a bottom-right control that overlaps the
