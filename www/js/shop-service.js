@@ -125,6 +125,21 @@
     return getCoins() >= price;
   }
 
+  /** Debit coins and persist. Returns `{ ok, coins }` or `{ ok: false, reason }`. */
+  function spendCoins(amount) {
+    const n = Math.max(0, parseInt(amount, 10) || 0);
+    const profile = loadProfile();
+    if (!profile) return { ok: false, reason: 'no-profile' };
+    if (n > 0 && (profile.coins || 0) < n) return { ok: false, reason: 'insufficient' };
+    if (n > 0) {
+      profile.coins -= n;
+      profile.coinsUpdatedAt = Date.now();
+      saveProfile(profile);
+      global.PlayerHud?.refresh?.();
+    }
+    return { ok: true, coins: profile.coins || 0 };
+  }
+
   function grantCoins(amount, opts = {}) {
     const n = Math.max(0, parseInt(amount, 10) || 0);
     if (!n) return getCoins();
@@ -134,6 +149,7 @@
       ? n
       : (global.BuffService?.scaleCoins?.(n, profile) ?? n);
     profile.coins = (profile.coins || 0) + scaled;
+    profile.coinsUpdatedAt = Date.now();
     if (!opts.skipSave) {
       saveProfile(profile);
       global.PlayerHud?.refresh?.();
@@ -148,6 +164,7 @@
     const base = (to - from) * COINS_PER_LEVEL;
     const coins = global.BuffService?.scaleCoins?.(base, profile) ?? base;
     profile.coins = (profile.coins || 0) + coins;
+    profile.coinsUpdatedAt = Date.now();
     return coins;
   }
 
@@ -288,6 +305,7 @@
     ownsFrame,
     canAfford,
     grantCoins,
+    spendCoins,
     grantLevelUpCoins,
     grantLevelUpCoinsOnProfile,
     buyTheme,

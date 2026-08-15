@@ -1449,14 +1449,11 @@
 
     onExtraGuessBuyCoins() {
       const price = this.getExtraGuessPrice();
-      const profile = global.ProfileService?.loadProfile?.();
-      if (!profile || (profile.coins || 0) < price) {
+      const spent = global.ShopService?.spendCoins?.(price);
+      if (!spent?.ok) {
         this.showFeedback(t('relatedWords.extraGuessInsufficient'), 'error');
         return;
       }
-      profile.coins -= price;
-      global.ProfileService?.saveProfile?.(profile);
-      global.PlayerHud?.refresh?.();
       this.grantExtraGuess();
     }
 
@@ -1536,16 +1533,20 @@
     }
 
     spendHintCoins() {
-      const profile = global.ProfileService?.loadProfile?.();
-      if (!profile || (profile.coins || 0) < HINT_COST) {
+      if (!this.isHintAvailable()) {
+        this.renderHintDock();
+        return;
+      }
+      const spent = global.ShopService?.spendCoins?.(HINT_COST);
+      if (!spent?.ok) {
         this.showFeedback(t('relatedWords.hintInsufficient'), 'error');
         this.renderHintDock();
         return;
       }
-      profile.coins -= HINT_COST;
-      global.ProfileService?.saveProfile?.(profile);
-      global.PlayerHud?.refresh?.();
-      this.applyNextCharHint();
+      if (!this.applyNextCharHint()) {
+        global.ShopService?.grantCoins?.(HINT_COST, { skipBoost: true });
+        this.renderHintDock();
+      }
     }
 
     watchHintAd() {
@@ -1556,7 +1557,7 @@
     applyNextCharHint() {
       if (!this.isHintAvailable()) {
         this.renderHintDock();
-        return;
+        return false;
       }
 
       const SLOT = this.nextHintSlotIndex();
@@ -1592,7 +1593,7 @@
           this._hintBusy = false;
           this.showFeedback(t('relatedWords.hintUnavailable'), 'error');
           this.renderHintDock();
-          return;
+          return false;
         }
         this.slots[SLOT] = tile;
         tile.used = true;
@@ -1610,6 +1611,7 @@
       if (this.allSlotsFilled()) {
         this.checkAnswer();
       }
+      return true;
     }
 
     async onExtraGuessGiveUp() {

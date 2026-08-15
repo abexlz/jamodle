@@ -40,6 +40,7 @@
       avatarId: 'default',
       totalXp: 0,
       coins: 0,
+      coinsUpdatedAt: 0,
       ownedThemes: [],
       purchasedTitleIds: [],
       selectedCosmeticTheme: 'default',
@@ -110,6 +111,7 @@
       avatarId: typeof raw.avatarId === 'string' ? raw.avatarId : 'default',
       totalXp: Math.max(0, parseInt(raw.totalXp, 10) || 0),
       coins: Math.max(0, parseInt(raw.coins, 10) || 0),
+      coinsUpdatedAt: Math.max(0, parseInt(raw.coinsUpdatedAt, 10) || 0),
       ownedThemes: normalizeStringArray(raw.ownedThemes),
       purchasedTitleIds: normalizeStringArray(raw.purchasedTitleIds),
       selectedCosmeticTheme: typeof raw.selectedCosmeticTheme === 'string'
@@ -181,6 +183,21 @@
     try {
       const copy = { ...profile };
       delete copy._level;
+      try {
+        const prev = global.AppStorage
+          ? global.AppStorage.get(PROFILE_KEY, null)
+          : JSON.parse(localStorage.getItem(PROFILE_KEY) || 'null');
+        const prevCoins = Math.max(0, parseInt(prev?.coins, 10) || 0);
+        const nextCoins = Math.max(0, parseInt(copy.coins, 10) || 0);
+        if (prevCoins !== nextCoins) {
+          copy.coinsUpdatedAt = Date.now();
+        } else {
+          copy.coinsUpdatedAt = Math.max(0, parseInt(copy.coinsUpdatedAt, 10) || 0)
+            || Math.max(0, parseInt(prev?.coinsUpdatedAt, 10) || 0);
+        }
+      } catch {
+        /* keep caller timestamp */
+      }
       if (global.AppStorage) {
         global.AppStorage.set(PROFILE_KEY, copy);
       } else {

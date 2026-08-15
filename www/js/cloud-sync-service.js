@@ -114,7 +114,15 @@
     const merged = {
       ...left,
       totalXp: maxInt(left.totalXp, right.totalXp),
-      coins: maxInt(left.coins, right.coins),
+      // Spending must win over a stale higher remote balance. `max` used to
+      // restore coins after Word Chain hints (local save, then home login merge).
+      coins: (() => {
+        const leftTs = parseInt(left.coinsUpdatedAt, 10) || 0;
+        const rightTs = parseInt(right.coinsUpdatedAt, 10) || 0;
+        if (leftTs === rightTs) return maxInt(left.coins, right.coins);
+        return leftTs > rightTs ? (left.coins || 0) : (right.coins || 0);
+      })(),
+      coinsUpdatedAt: maxInt(left.coinsUpdatedAt, right.coinsUpdatedAt),
       extraGuessTokens: maxInt(left.extraGuessTokens, right.extraGuessTokens),
       activeBuffs: {
         dailyUnlockUntil: maxInt(
