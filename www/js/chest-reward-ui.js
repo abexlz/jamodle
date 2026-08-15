@@ -513,10 +513,12 @@
 
   function getHudXpEl() {
     return (
-      document.querySelector('#nav-profile .profile-battle-card-xp')
+      document.querySelector('#nav-profile .profile-battle-hud-stat')
+      || document.querySelector('#nav-profile .profile-battle-card-xp')
       || document.querySelector('#menu-profile-card .profile-battle-card-xp')
       || document.querySelector('.profile-badge-card--hero .profile-battle-card-xp')
       || document.querySelector('.profile-battle-card-xp')
+      || document.getElementById('nav-profile')
     );
   }
 

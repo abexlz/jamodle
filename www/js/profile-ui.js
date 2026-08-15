@@ -338,6 +338,9 @@
             ${showTitle ? renderTitlePill(titleText) : ''}
           </div>
         </div>
+        <div class="profile-battle-hud-stat" aria-hidden="true">
+          <span data-hud-level>${summary.level || 1}</span>-<span data-hud-xp>${summary.xpInLevel || 0}</span>
+        </div>
       </div>
     `;
   }
@@ -394,8 +397,18 @@
     return { ...info, pct };
   }
 
+  function applyHudStat(root, view) {
+    const hudLevel = root.querySelector('[data-hud-level]');
+    const hudXp = root.querySelector('[data-hud-xp]');
+    if (hudLevel) hudLevel.textContent = String(view.level);
+    if (hudXp) hudXp.textContent = String(view.xpInLevel);
+  }
+
   function applyBattleCardXp(totalXp) {
     const view = xpView(totalXp);
+    document.querySelectorAll('.profile-badge-card').forEach((card) => {
+      applyHudStat(card, view);
+    });
     document.querySelectorAll('.profile-battle-card').forEach((card) => {
       const num = card.querySelector('.profile-battle-card-level-num');
       const lv = card.querySelector('.profile-battle-card-level');
@@ -420,6 +433,7 @@
         }));
       }
       card.classList.toggle('is-xp-gain', false);
+      applyHudStat(card.parentElement || card, view);
     });
   }
 
@@ -453,6 +467,7 @@
             fill.style.transition = 'none';
             fill.style.width = `${view.pct}%`;
           }
+          applyHudStat(card.parentElement || card, view);
         });
         if (tNorm < 1) {
           requestAnimationFrame(frame);

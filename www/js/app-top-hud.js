@@ -7,15 +7,15 @@
   'use strict';
 
   const HUD_ID = 'app-top-hud';
-  const STYLE_HREF = 'css/menu-hud.css?v=20260815p';
+  const STYLE_HREF = 'css/menu-hud.css?v=20260815q';
   const CHROME_HREF = 'css/app-chrome.css?v=20260815o';
-  const PROFILE_STYLE_HREF = 'css/profile.css?v=20260815k';
+  const PROFILE_STYLE_HREF = 'css/profile.css?v=20260815l';
 
   const DEPS = [
     ['ProfileService', 'js/profile-service.js?v=20260815a'],
     ['CoinIcon', 'js/coin-icon.js'],
     ['BadgeService', 'js/badge-service.js'],
-    ['ProfileUI', 'js/profile-ui.js?v=20260815a'],
+    ['ProfileUI', 'js/profile-ui.js?v=20260815b'],
     ['PlayerHud', 'js/player-hud.js?v=20260815a'],
     ['DailyGiftService', 'js/daily-gift-service.js'],
     ['DailyGiftUI', 'js/daily-gift-ui.js?v=20260803a'],

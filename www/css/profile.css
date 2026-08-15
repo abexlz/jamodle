@@ -1275,6 +1275,10 @@
   width: min(100%, 188px);
 }
 
+.profile-battle-hud-stat {
+  display: none;
+}
+
 .profile-battle-card {
   position: relative;
   width: 100%;

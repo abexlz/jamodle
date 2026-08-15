@@ -8,8 +8,9 @@
   --menu-hud-coin-pill-edge: #3d0d18;
   --menu-hud-progress: #3ecfb0;
   --menu-hud-star: #2f8fd4;
-  --menu-bar-h: 42px;
+  --menu-bar-h: calc(var(--menu-hud-profile-art) * 4 / 3);
   --menu-profile-size: 34px;
+  --menu-hud-profile-art: clamp(36px, 9.5vw, 42px);
   --app-top-hud-offset: calc(var(--menu-bar-h) + var(--safe-top, env(safe-area-inset-top, 0px)));
 }
 
@@ -341,10 +342,12 @@ body.settings-page #app-top-hud .app-hud-page-title {
   pointer-events: auto;
   z-index: 36;
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: clamp(36px, 9.5vw, 42px);
-  height: clamp(36px, 9.5vw, 42px);
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  align-self: start;
+  width: var(--menu-hud-profile-art);
+  height: calc(var(--menu-hud-profile-art) * 4 / 3);
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -362,15 +365,59 @@ body.settings-page #app-top-hud .app-hud-page-title {
 
 .menu-hud-bar .menu-hud-profile .menu-profile-card,
 .menu-hud-bar .menu-hud-profile .menu-profile-card--menu,
-#app-top-hud .menu-hud-profile .profile-badge-card--menu,
-#app-top-hud .menu-hud-profile .profile-battle-card {
+#app-top-hud .menu-hud-profile .profile-badge-card--menu {
+  display: flex;
+  flex-direction: column;
   width: 100%;
   height: 100%;
   filter: none;
 }
 
+#app-top-hud .menu-hud-profile .profile-battle-card {
+  position: relative;
+  width: 100%;
+  height: var(--menu-hud-profile-art);
+  flex: 0 0 var(--menu-hud-profile-art);
+  aspect-ratio: auto;
+}
+
 #app-top-hud .menu-hud-profile .profile-battle-card-img {
   object-fit: cover;
+  height: 100%;
+}
+
+#app-top-hud .menu-hud-profile .profile-battle-card-level,
+#app-top-hud .menu-hud-profile .profile-battle-card-xp-row {
+  display: none;
+}
+
+#app-top-hud .menu-hud-profile .profile-battle-card-body {
+  top: 8%;
+  bottom: 8%;
+}
+
+.profile-battle-hud-stat {
+  display: none;
+}
+
+#app-top-hud .menu-hud-profile .profile-battle-hud-stat {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 auto;
+  min-height: calc(var(--menu-hud-profile-art) / 3);
+  padding: 0 2px 1px;
+  font-family: 'Junegull', 'Jua', sans-serif;
+  font-size: calc(var(--menu-hud-profile-art) / 3);
+  line-height: 1;
+  letter-spacing: 0.01em;
+  color: #fff;
+  text-shadow:
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;
+  background: rgba(8, 40, 48, 0.42);
 }
 
 /* Right — daily gift + rectangular coin shop button */
