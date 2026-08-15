@@ -5,7 +5,7 @@
   'use strict';
 
   const BAR_ID = 'home-bottom-bar';
-  const CHROME_HREF = 'css/app-chrome.css?v=20260815m';
+  const CHROME_HREF = 'css/app-chrome.css?v=20260815n';
   const HOME_TAB_KEY = 'jamodeul-home-tab';
   const ACTIVE_GAME_KEY = 'jamodeul-active-game';
   /** Learn tab skips its landing screen and opens tutorial step 1. */
@@ -118,8 +118,9 @@
     const missing = insets.top + insets.right + insets.bottom + insets.left <= 0;
     if (isAppleTouch()) {
       const fb = fallbackSafeInsets();
-      /* Status-bar-only values (~20–24px) still clip the notch/island HUD. */
-      if (insets.top < 44) insets.top = Math.max(insets.top, fb.top);
+      /* Always at least the notch/island inset — env() often reports 20–47px
+         while StatusBar overlays the WebView (needs 47 or 59). */
+      insets.top = Math.max(insets.top, fb.top);
       /* Do not invent a 34px home-indicator; that doubles the tab bar
          when the webview is already inset. Keep a small cushion only. */
       if (insets.bottom < 8) insets.bottom = 10;
@@ -139,7 +140,7 @@
   function pinTopHudSafePad(topPx) {
     const bar = document.getElementById('app-top-hud');
     if (!bar) return;
-    const pad = Math.max(0, Math.round(topPx));
+    const pad = Math.max(0, Math.round(topPx)) + 8;
     bar.style.setProperty('padding-top', px(pad), 'important');
     requestAnimationFrame(() => {
       const h = Math.ceil(bar.getBoundingClientRect().height);

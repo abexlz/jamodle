@@ -90,6 +90,27 @@ body.settings-page #app-top-hud.menu-top-bar {
   grid-template-rows: auto auto;
 }
 
+body.settings-page #app-top-hud .menu-hud-left,
+body.settings-page #app-top-hud .menu-top-bar-left {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+body.settings-page #app-top-hud .menu-hud-profile {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+body.settings-page #app-top-hud .menu-hud-right {
+  grid-column: 3;
+  grid-row: 1;
+}
+
+body.settings-page #app-top-hud .app-hud-page-title {
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
+
 .menu-top-bar.menu-hud-bar::after {
   content: '';
   position: absolute;
@@ -300,8 +321,8 @@ body.settings-page #app-top-hud.menu-top-bar {
 
 .menu-calendar-nav-badge {
   position: absolute;
-  top: -5px;
-  right: -4px;
+  top: 1px;
+  right: 1px;
   min-width: 14px;
   height: 14px;
   padding: 0 3px;
@@ -374,8 +395,8 @@ body.settings-page #app-top-hud.menu-top-bar {
 
 .menu-hud-gift-dot {
   position: absolute;
-  top: -3px;
-  right: -3px;
+  top: 1px;
+  right: 1px;
   width: 12px;
   height: 12px;
   border-radius: 50%;
