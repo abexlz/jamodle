@@ -5,7 +5,7 @@
   'use strict';
 
   const BAR_ID = 'home-bottom-bar';
-  const CHROME_HREF = 'css/app-chrome.css?v=20260816b';
+  const CHROME_HREF = 'css/app-chrome.css?v=20260816c';
   const HOME_TAB_KEY = 'jamodeul-home-tab';
   const ACTIVE_GAME_KEY = 'jamodeul-active-game';
   /** Learn tab skips its landing screen and opens tutorial step 1. */
@@ -140,12 +140,17 @@
   function pinTopHudSafePad(topPx) {
     const bar = document.getElementById('app-top-hud');
     if (!bar) return;
-    const pad = Math.max(0, Math.round(topPx)) + 8;
+    const isSettings = document.body?.classList.contains('settings-page');
+    const pad = Math.max(0, Math.round(topPx)) + (isSettings ? 0 : 8);
     bar.style.setProperty('padding-top', px(pad), 'important');
     requestAnimationFrame(() => {
       const h = Math.ceil(bar.getBoundingClientRect().height);
       if (h > 0) {
         document.documentElement.style.setProperty('--app-top-hud-offset', px(h));
+        if (isSettings) {
+          // Beat stylesheet padding wars so SETTINGS sits under the HUD like QUEST/SHOP.
+          document.body.style.setProperty('padding-top', px(Math.max(0, h - 44)), 'important');
+        }
       }
     });
   }
