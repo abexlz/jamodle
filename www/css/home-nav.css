@@ -248,10 +248,26 @@ body.has-home-bottom-bar:not(.home-menu-active) {
 }
 
 /* Game modes keep the translucent bar visible with content inset */
-body.has-home-bottom-bar.game-active,
-body.has-home-bottom-bar.home-nav-game,
-body.has-home-bottom-bar.rw-race-page {
+body.has-home-bottom-bar.game-active:not(.duel-page),
+body.has-home-bottom-bar.home-nav-game:not(.duel-page) {
   padding-bottom: calc(10px + var(--home-nav-offset)) !important;
+}
+
+html.viewport-fit-lock body.duel-page.has-home-bottom-bar,
+body.duel-page.has-home-bottom-bar {
+  padding-top: max(10px, var(--safe-top, env(safe-area-inset-top, 0px))) !important;
+  padding-bottom: 0 !important;
+}
+
+body.duel-page.has-home-bottom-bar .race-app {
+  box-sizing: border-box !important;
+  min-height: 0 !important;
+  padding-bottom: calc(12px + var(--home-nav-offset)) !important;
+}
+
+body.duel-page #app-top-hud,
+body.duel-page .menu-top-bar.menu-hud-bar {
+  display: none !important;
 }
 
 html.viewport-fit-lock body.has-app-top-hud:not(.home-menu-active):not(.settings-page):not(.rw-page) {

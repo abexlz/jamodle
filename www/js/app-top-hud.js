@@ -8,7 +8,7 @@
 
   const HUD_ID = 'app-top-hud';
   const STYLE_HREF = 'css/menu-hud.css?v=20260816h';
-  const CHROME_HREF = 'css/app-chrome.css?v=20260816f';
+  const CHROME_HREF = 'css/app-chrome.css?v=20260816g';
   const PROFILE_STYLE_HREF = 'css/profile.css?v=20260815l';
 
   const DEPS = [
@@ -168,7 +168,26 @@
     syncPageTitle(bar);
   }
 
+  function isDuelPage() {
+    const file = ((global.location.pathname || '').split('/').pop() || '').split('?')[0];
+    return file === 'related-words-race.html'
+      || file === 'match-race.html'
+      || file === 'match-turn.html'
+      || file === 'race.html'
+      || document.body?.classList.contains('duel-page')
+      || document.body?.dataset?.noAppTopHud === '1';
+  }
+
+  function suppressHud() {
+    document.getElementById(HUD_ID)?.remove();
+    document.body?.classList.remove('has-app-top-hud');
+  }
+
   function inject() {
+    if (isDuelPage() || (global.location.pathname || '').includes('/admin/')) {
+      suppressHud();
+      return null;
+    }
     ensureStyles();
     let bar = document.getElementById(HUD_ID)
       || document.querySelector('.menu-top-bar.menu-hud-bar');
@@ -201,14 +220,20 @@
   }
 
   async function mount() {
-    if (document.body?.dataset?.noAppTopHud === '1') return null;
-    if ((global.location.pathname || '').includes('/admin/')) return null;
+    if (isDuelPage() || (global.location.pathname || '').includes('/admin/')) {
+      suppressHud();
+      return null;
+    }
     ensureStyles();
     await ensureDeps();
     return inject();
   }
 
   function autoMount() {
+    if (isDuelPage()) {
+      suppressHud();
+      return;
+    }
     // Paint the bar immediately so the home screen is never HUD-less while
     // optional calendar/gift scripts finish loading.
     try { ensureStyles(); } catch (err) {}

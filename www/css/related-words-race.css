@@ -442,6 +442,34 @@ body.rw-race-page .race-app {
   min-height: 0;
 }
 
+body.rw-race-page.rw-race-active .rw-answer-photo {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-width: 100%;
+  max-height: none;
+  margin: 0 0 8px;
+  justify-content: stretch;
+}
+
+body.rw-race-page.rw-race-active .rw-answer-photo-grid {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  gap: 6px;
+}
+
+body.rw-race-page.rw-race-active .rw-answer-photo-frame {
+  min-height: 0;
+  height: 100%;
+  aspect-ratio: auto;
+}
+
+body.rw-race-page.rw-race-active .rw-answer-photo-img {
+  object-fit: cover;
+  padding: 0;
+}
+
 body.rw-race-page.rw-race-active .race-app {
   gap: 6px;
 }
@@ -1152,16 +1180,17 @@ html.reduce-motion .rw-reveal-letter {
 .rw-race-mode .rw-dock-area {
   margin-top: 6px;
   flex: 0 0 auto;
+  overflow: visible;
 }
 
 .rw-race-mode .rw-dock {
   max-width: min(340px, 92vw);
-  gap: clamp(10px, 2.6vw, 14px);
+  gap: clamp(8px, 2.2vw, 12px);
 }
 
 .rw-race-mode .rw-dock-tile.flip-tile {
-  width: clamp(68px, 19vw, 88px);
-  height: clamp(68px, 19vw, 88px);
+  width: clamp(56px, 16vw, 72px);
+  height: clamp(56px, 16vw, 72px);
   border-radius: 14px;
 }
 
