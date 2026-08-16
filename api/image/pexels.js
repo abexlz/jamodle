@@ -80,7 +80,7 @@ module.exports = async function handler(req, res) {
     });
   }
 
-  const cached = cache.get('pexels:set-v2:' + query);
+  const cached = cache.get('pexels:set-v3:' + query);
   if (cached) {
     return json(res, 200, { ...cached, cached: true });
   }
@@ -141,7 +141,7 @@ module.exports = async function handler(req, res) {
         pexelsUrl: null,
         alt: null,
       };
-      cache.set('pexels:set-v2:' + query, empty);
+      cache.set('pexels:set-v3:' + query, empty);
       return json(res, 200, empty);
     }
 
@@ -175,7 +175,7 @@ module.exports = async function handler(req, res) {
       matchScore: best.score,
       matchRank: best.index,
     };
-    cache.set('pexels:set-v2:' + query, payload);
+    cache.set('pexels:set-v3:' + query, payload);
     return json(res, 200, payload);
   } catch (err) {
     console.error('[pexels] search error', err);

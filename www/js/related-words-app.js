@@ -490,6 +490,7 @@
         trailTrack: this.root.querySelector('#rw-trail-track'),
         clueMeaning: this.root.querySelector('#rw-clue-meaning'),
         answerPhoto: this.root.querySelector('#rw-answer-photo'),
+        answerPhotoGrid: this.root.querySelector('#rw-answer-photo-grid'),
         answerPhotoImgs: [...this.root.querySelectorAll('.rw-answer-photo-img')],
         answerPhotoCredit: this.root.querySelector('#rw-answer-photo-credit'),
         lives: this.root.querySelector('#rw-lives'),
@@ -795,9 +796,11 @@
         wrap.setAttribute('aria-hidden', 'true');
         wrap.classList.remove('is-loading', 'is-ready');
       }
+      if (this.els.answerPhotoGrid) this.els.answerPhotoGrid.dataset.count = '0';
       imgs.forEach((img) => {
         img.removeAttribute('src');
         img.alt = '';
+        img.closest('.rw-answer-photo-frame')?.classList.remove('is-empty');
       });
       if (credit) {
         credit.textContent = '';
@@ -907,8 +910,8 @@
         return;
       }
 
-      // Try providers in turn and keep collecting distinct images until we
-      // have four. Never pad the grid by repeating the same photo.
+      // Collect distinct images from one provider at a time. Never pad the grid
+      // by repeating the same photo.
       const slotSources = [];
       const seenKeys = new Set();
       const addSlot = (image) => {
@@ -942,7 +945,10 @@
             imageUrl: photo.imageUrl,
           });
         }
-        if (slotSources.length >= 4) break;
+        // The server already picks a single coherent media type. Mixing in the
+        // fallback provider's photos would break that, so only fall through
+        // when this provider gave us nothing at all.
+        if (slotSources.length) break;
       }
 
       if (requestId !== this._answerPhotoRequestId) return;
@@ -950,6 +956,14 @@
         this.clearAnswerPhoto();
         return;
       }
+
+      // A word without four good matches gets a smaller grid rather than empty
+      // cells, so a short set still looks deliberate.
+      const grid = this.els.answerPhotoGrid;
+      if (grid) grid.dataset.count = String(slotSources.length);
+      imgs.forEach((img, index) => {
+        img.closest('.rw-answer-photo-frame')?.classList.toggle('is-empty', index >= slotSources.length);
+      });
 
       const settle = () => {
         if (requestId !== this._answerPhotoRequestId) return;

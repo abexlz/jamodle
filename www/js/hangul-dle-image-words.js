@@ -256,7 +256,7 @@
 
     // 4-syllable
     고속도로: 'highway',
-    재활용품: 'recyclables',
+    재활용품: 'recycling bin',
 
     // ── 국립국어원 학습용 어휘 확장 (National Institute of Korean Language) ──
     // 1-syllable

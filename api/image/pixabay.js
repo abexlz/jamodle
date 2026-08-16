@@ -2,34 +2,25 @@
  * Pixabay four-image-set proxy for Word Chain answer illustrations.
  *
  * The object's English name is the search term (e.g. "apple"); the game answer
- * stays the Korean translation. A photo, two illustrations, and a vector are
- * selected server-side so every clue renders as a consistent 2×2 set.
+ * stays the Korean translation. Candidates are re-ranked server-side (see
+ * lib/pixabay-rank) so every clue is a coherent 2×2 set of images that actually
+ * depict the word.
  */
 'use strict';
 
 const cache = require('../../lib/pexels-cache');
 const rateLimit = require('../../lib/rate-limit');
+const rank = require('../../lib/pixabay-rank');
 
 const PIXABAY_SEARCH = 'https://pixabay.com/api/';
 /**
- * A handful of candidates so we can prefer a hit whose tags match the search
- * term. Kept small (was 100) so Pixabay's JSON payload stays light and parses
- * fast — the 2×2 grid only needs four images.
+ * A wide-ish candidate pool: the relevance gate rejects most hits, so a small
+ * page often leaves the grid short. Still light enough to parse fast.
  */
-const CANDIDATE_COUNT = 30;
+const CANDIDATE_COUNT = 40;
 /** Cache namespace so Pixabay and Pexels entries never collide in-process. */
-const CACHE_NS = 'pixabay:image-set-v3:';
-const IMAGE_SLOTS = ['photo', 'illustration', 'illustration', 'vector'];
-const EXCLUDED_TAGS = new Set([
-  'table', 'background', 'group', 'people', 'person', 'holding', 'hand', 'hands',
-  'crowd', 'woman', 'man', 'child', 'children', 'restaurant', 'room', 'kitchen',
-  'landscape', 'collage', 'collection', 'set',
-  // Never surface tobacco/smoking imagery (e.g. a cigarette pack slipping into a
-  // "lunch box" search). This keeps every word's clue kid-appropriate.
-  'cigarette', 'cigarettes', 'cigar', 'cigars', 'smoking', 'smoke', 'tobacco',
-  'nicotine', 'ashtray', 'lighter', 'vape', 'vaping', 'e-cigarette',
-]);
-const PREFERRED_TAGS = new Set(['isolated', 'white background', 'white']);
+const CACHE_NS = 'pixabay:image-set-v4:';
+const GRID_SIZE = 4;
 
 function getClientIp(req) {
   return req.headers['x-forwarded-for']?.split(',')[0]?.trim()
@@ -91,51 +82,6 @@ async function fetchWithRetry(url, { retries = 1, backoffMs = 300 } = {}) {
     }
   }
   throw lastErr;
-}
-
-function splitTags(tags) {
-  return String(tags || '').toLowerCase().split(',').map((tag) => tag.trim()).filter(Boolean);
-}
-
-/** Keep simple single-object results, ranking isolated / white-background hits first. */
-function filterAndRank(hits) {
-  return (Array.isArray(hits) ? hits : [])
-    .filter((hit) => hit && (hit.largeImageURL || hit.webformatURL))
-    .map((hit) => {
-      const tags = splitTags(hit.tags);
-      return {
-        hit,
-        tags,
-        excluded: tags.some((tag) => EXCLUDED_TAGS.has(tag)),
-        preferred: tags.filter((tag) => PREFERRED_TAGS.has(tag)).length,
-      };
-    })
-    .filter(({ tags, excluded }) => tags.length > 0 && tags.length <= 3 && !excluded)
-    .sort((a, b) => b.preferred - a.preferred || a.tags.length - b.tags.length || a.hit.id - b.hit.id)
-    .map(({ hit }) => hit);
-}
-
-/**
- * Looser fallback ranking. Used when the strict single-object filter removes
- * every candidate, so the 2×2 grid still gets filled with Pixabay results
- * rather than collapsing to an empty space.
- */
-function looseRank(hits) {
-  return (Array.isArray(hits) ? hits : [])
-    .filter((hit) => hit && (hit.largeImageURL || hit.webformatURL))
-    .map((hit) => {
-      const tags = splitTags(hit.tags);
-      return {
-        hit,
-        excluded: tags.some((tag) => EXCLUDED_TAGS.has(tag)),
-        preferred: tags.filter((tag) => PREFERRED_TAGS.has(tag)).length,
-      };
-    })
-    // Still honor the excluded-tag blocklist; only relax the strict tag-count
-    // limit so more words end up with usable imagery.
-    .filter(({ excluded }) => !excluded)
-    .sort((a, b) => b.preferred - a.preferred || a.hit.id - b.hit.id)
-    .map(({ hit }) => hit);
 }
 
 /**
@@ -205,44 +151,12 @@ function mergeUniqueHits(primary, extra) {
   return out;
 }
 
-function uniqueImageCount(imageSet) {
-  return new Set((imageSet || []).map((image) => image?.id).filter(Boolean)).size;
-}
-
-/**
- * Build a 2×2 set of distinct Pixabay hits. Never reuse the same id/url —
- * a repeated cell is worse than leaving a slot empty.
- */
-function selectImageSet(byType) {
-  const usedIds = new Set();
-  const leftovers = () => ['photo', 'illustration', 'vector']
-    .flatMap((type) => (byType[type] || []).map((hit) => ({ hit, type })))
-    .filter(({ hit }) => hit && !usedIds.has(hit.id));
-  const takeNext = (list, type) => {
-    const hit = (list || []).find((item) => item && !usedIds.has(item.id));
-    if (!hit) return null;
-    usedIds.add(hit.id);
-    return { ...toImage(hit, type), requestedType: type };
-  };
-
-  const slots = [];
-  for (const requestedType of IMAGE_SLOTS) {
-    const picked = takeNext(byType[requestedType], requestedType);
-    if (picked) {
-      slots.push(picked);
-      continue;
-    }
-    const extra = leftovers()[0];
-    if (!extra) continue;
-    usedIds.add(extra.hit.id);
-    slots.push({ ...toImage(extra.hit, extra.type), requestedType });
-  }
-  for (const { hit, type } of leftovers()) {
-    if (slots.length >= 4) break;
-    usedIds.add(hit.id);
-    slots.push({ ...toImage(hit, type), requestedType: type });
-  }
-  return slots.slice(0, 4);
+/** Ranked picks → the wire format the client renders. */
+function toImageSet(picked) {
+  return (picked?.items || []).map((item) => ({
+    ...toImage(item.hit, item.type),
+    score: Math.round(item.score),
+  }));
 }
 
 module.exports = async function handler(req, res) {
@@ -321,39 +235,41 @@ module.exports = async function handler(req, res) {
   };
 
   try {
-    const rankHits = (hits) => mergeUniqueHits(filterAndRank(hits), looseRank(hits));
-
     const findImageSet = async (term) => {
-      // Fetch all three image types concurrently. These used to run serially
-      // with a 500 ms gap between them, which added ~1 s of latency per word on
-      // a cache miss; three parallel requests are well within Pixabay's limit.
-      const types = ['photo', 'illustration', 'vector'];
-      const hitsByType = await Promise.all(types.map((type) => searchPixabay(term, type)));
+      // Fetch all three media types concurrently, then let the ranker decide
+      // which one gives the clearest set for this particular word.
       const byType = {};
-      types.forEach((type, i) => {
-        byType[type] = rankHits(hitsByType[i]);
-      });
-      let imageSet = selectImageSet(byType);
-      if (uniqueImageCount(imageSet) < 4) {
+      const firstPage = await Promise.all(rank.TYPES.map((type) => searchPixabay(term, type)));
+      rank.TYPES.forEach((type, i) => { byType[type] = firstPage[i]; });
+
+      let picked = rank.pickImageSet(byType, term, GRID_SIZE);
+      if (picked.items.length < GRID_SIZE) {
+        // The relevance gate rejects a lot; a second page usually completes the grid.
         try {
-          const extraHits = await Promise.all(types.map((type) => searchPixabay(term, type, 2)));
-          types.forEach((type, i) => {
-            byType[type] = mergeUniqueHits(byType[type], rankHits(extraHits[i]));
+          const secondPage = await Promise.all(rank.TYPES.map((type) => searchPixabay(term, type, 2)));
+          rank.TYPES.forEach((type, i) => {
+            byType[type] = mergeUniqueHits(byType[type], secondPage[i]);
           });
-          imageSet = selectImageSet(byType);
+          picked = rank.pickImageSet(byType, term, GRID_SIZE);
         } catch {
-          /* Keep the unique page-1 set rather than failing the whole clue. */
+          /* Keep the page-1 set rather than failing the whole clue. */
         }
       }
-      return { byType, imageSet };
+      return { picked, imageSet: toImageSet(picked) };
     };
 
     let searchTerm = query;
     let result = await findImageSet(searchTerm);
+    // A multi-word gloss can be too narrow ("leather dress shoes"); retry on the
+    // head noun, which is what the picture must actually show.
     const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
-    if (!result.imageSet.length && tokens.length > 1) {
-      searchTerm = tokens[tokens.length - 1];
-      result = await findImageSet(searchTerm);
+    if (result.imageSet.length < GRID_SIZE && tokens.length > 1) {
+      const headTerm = tokens[tokens.length - 1];
+      const fallback = await findImageSet(headTerm);
+      if (fallback.imageSet.length > result.imageSet.length) {
+        searchTerm = headTerm;
+        result = fallback;
+      }
     }
 
     if (!result.imageSet.length) {
@@ -377,6 +293,7 @@ module.exports = async function handler(req, res) {
       searchTerm,
       found: true,
       imageSet: result.imageSet,
+      imageType: result.picked.type,
       // Compatibility for clients expecting one image.
       imageUrl: firstImage.url,
       previewUrl: firstImage.previewUrl,

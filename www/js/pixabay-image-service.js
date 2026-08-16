@@ -8,8 +8,8 @@
 (function (global) {
   'use strict';
 
-  // v5: prefer Pixabay CDN URLs so the 2×2 grid does not depend on /api/image/proxy.
-  const CACHE_PREFIX = 'jamodeul-pixabay-v6-unique-';
+  // v7: relevance-gated, single-media-type image sets (see lib/pixabay-rank).
+  const CACHE_PREFIX = 'jamodeul-pixabay-v7-ranked-';
   const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
   const memory = new Map();
 

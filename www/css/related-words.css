@@ -533,6 +533,23 @@ html.reduce-motion .rw-chain-recap-word {
   width: 100%;
 }
 
+/*
+ * Some words simply do not have four on-subject images. Reflow the grid to the
+ * number we actually got instead of leaving blank cells.
+ */
+.rw-answer-photo-grid[data-count="1"],
+.rw-answer-photo-grid[data-count="2"] {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.rw-answer-photo-grid[data-count="3"] .rw-answer-photo-frame:first-child {
+  grid-column: span 2;
+}
+
+.rw-answer-photo-frame.is-empty {
+  display: none;
+}
+
 .rw-answer-photo-frame {
   width: 100%;
   aspect-ratio: 3 / 2;

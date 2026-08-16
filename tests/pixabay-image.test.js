@@ -1,6 +1,6 @@
 /**
- * Pixabay 2×2 image-set proxy — request shaping, single-object filtering,
- * slot ordering, fallback, and configuration errors.
+ * Pixabay 2×2 image-set proxy — request shaping, relevance gating, coherent
+ * media-type selection, fallback, and configuration errors.
  */
 'use strict';
 
@@ -49,6 +49,9 @@ function hit(id, tags) {
     webformatURL: `https://images.example/${id}.jpg`,
     pageURL: `https://pixabay.example/${id}`,
     user: `artist-${id}`,
+    downloads: 500,
+    imageWidth: 1280,
+    imageHeight: 960,
   };
 }
 
@@ -61,33 +64,61 @@ function hit(id, tags) {
     assert.strictEqual(calls.length, 0);
   }
 
-  // Fetches each required category and returns the slots in UI order.
+  // Every media type is searched, and the grid is served from the one with the
+  // strongest candidates rather than a photo/illustration/vector mishmash.
   {
     const { res, calls } = await run('apple', {
       fetchImpl: async (url) => {
         const type = new URL(String(url)).searchParams.get('image_type');
         const hits = {
           photo: [hit(1, 'apple, fruit')],
-          illustration: [hit(2, 'apple, isolated'), hit(3, 'apple, white background')],
-          vector: [hit(4, 'apple, fruit, isolated')],
+          illustration: [
+            hit(2, 'apple, isolated'),
+            hit(3, 'apple, white background'),
+            hit(4, 'apple, fruit'),
+            hit(5, 'apple, red'),
+          ],
+          vector: [hit(6, 'apple, fruit, isolated')],
         }[type];
         return { ok: true, status: 200, json: async () => ({ hits }), text: async () => '' };
       },
     });
     assert.strictEqual(res.statusCode, 200);
-    assert.deepStrictEqual(calls.map((url) => new URL(url).searchParams.get('image_type')), ['photo', 'illustration', 'vector']);
-    assert.strictEqual(res.body.imageSet.length, 4);
     assert.deepStrictEqual(
-      [...new Set(res.body.imageSet.map((image) => image.id))].sort((a, b) => a - b),
-      [1, 2, 3, 4],
+      calls.map((url) => new URL(url).searchParams.get('image_type')).slice(0, 3).sort(),
+      ['illustration', 'photo', 'vector'],
     );
-    assert.deepStrictEqual(res.body.imageSet.map((image) => image.requestedType), ['photo', 'illustration', 'illustration', 'vector']);
-    assert.deepStrictEqual(res.body.imageSet.map((image) => image.type), ['photo', 'illustration', 'illustration', 'vector']);
+    assert.strictEqual(res.body.imageSet.length, 4);
+    assert.strictEqual(res.body.imageType, 'illustration');
+    assert.ok(res.body.imageSet.every((image) => image.type === 'illustration'));
+    assert.strictEqual(new Set(res.body.imageSet.map((image) => image.id)).size, 4);
     // Images are served from Pixabay's CDN when available; hashed
     // pixabay.com/get URLs still go through the same-origin proxy.
-    assert.strictEqual(
-      res.body.imageSet[0].url,
-      `/api/image/proxy?url=${encodeURIComponent('https://images.example/1-large.jpg')}`,
+    assert.ok(res.body.imageSet.every((image) => image.url.startsWith('/api/image/proxy?url=')));
+  }
+
+  // A hit that only mentions the word as a modifier is not a clue for it.
+  {
+    const { res } = await run('chocolate', {
+      fetchImpl: async (url) => {
+        const type = new URL(String(url)).searchParams.get('image_type');
+        const hits = {
+          photo: [
+            hit(11, 'chocolate ice cream, dessert'),
+            hit(12, 'dark chocolate, cocoa'),
+            hit(13, 'chocolate, sweet'),
+            hit(14, 'chocolate bar, candy'),
+          ],
+          illustration: [],
+          vector: [],
+        }[type];
+        return { ok: true, status: 200, json: async () => ({ hits }), text: async () => '' };
+      },
+    });
+    assert.strictEqual(res.statusCode, 200);
+    assert.ok(
+      !res.body.imageSet.some((image) => image.id === 11),
+      'chocolate ice cream never fills a chocolate clue while real matches exist',
     );
   }
 
@@ -120,7 +151,7 @@ function hit(id, tags) {
     assert.ok(res.body.imageSet.every((image) => !image.url.includes('/api/image/proxy')));
   }
 
-  // Excluded/compound-tag images are removed, and another category fills slots.
+  // A cluttered shot loses to a type that can fill the grid cleanly.
   {
     const { res } = await run('house', {
       fetchImpl: async (url) => {
