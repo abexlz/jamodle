@@ -13,12 +13,13 @@ html {
   --menu-hud-profile-art: clamp(40px, 10.5vw, 46px);
   --menu-hud-icon-w: clamp(43px, 11.4vw, 50px);
   --menu-hud-stat-h: calc(var(--menu-hud-profile-art) / 2.75);
+  --menu-hud-pad-top: 8px;
   --menu-hud-pad-bottom: 18px;
   --menu-hud-title-gap: 0px;
   --menu-bar-h: calc(var(--menu-hud-profile-art) + var(--menu-hud-stat-h));
   --menu-profile-size: 34px;
   --app-top-hud-offset: calc(
-    var(--menu-bar-h) + var(--menu-hud-pad-bottom) + var(--safe-top, env(safe-area-inset-top, 0px))
+    var(--menu-bar-h) + var(--menu-hud-pad-top) + var(--menu-hud-pad-bottom) + var(--safe-top, env(safe-area-inset-top, 0px))
   );
 }
 
@@ -58,8 +59,12 @@ body > #app-top-hud.menu-top-bar,
 #app-top-hud.menu-top-bar.menu-hud-bar,
 #app-top-hud.menu-top-bar {
   align-items: start !important;
+  padding-top: calc(var(--safe-top) + var(--menu-hud-pad-top, 8px)) !important;
+  padding-right: max(16px, calc(var(--safe-right, 0px) + 12px)) !important;
+  padding-left: max(16px, calc(var(--safe-left, 0px) + 12px)) !important;
   padding-bottom: var(--menu-hud-pad-bottom) !important;
-  min-height: calc(var(--menu-bar-h) + var(--safe-top) + var(--menu-hud-pad-bottom) + 3px) !important;
+  min-height: calc(var(--menu-bar-h) + var(--safe-top) + var(--menu-hud-pad-top, 8px) + var(--menu-hud-pad-bottom) + 3px) !important;
+  overflow: visible !important;
 }
 
 #app-top-hud .menu-hud-left,
@@ -88,11 +93,11 @@ body.has-app-top-hud .menu-top-bar-spacer {
 
 .menu-top-bar.menu-hud-bar {
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  min-height: calc(var(--menu-bar-h) + var(--safe-top) + var(--menu-hud-pad-bottom) + 3px);
-  padding-top: var(--safe-top);
-  padding-right: max(8px, env(safe-area-inset-right, 0px));
+  min-height: calc(var(--menu-bar-h) + var(--safe-top) + var(--menu-hud-pad-top, 8px) + var(--menu-hud-pad-bottom) + 3px);
+  padding-top: calc(var(--safe-top) + var(--menu-hud-pad-top, 8px));
+  padding-right: max(16px, calc(env(safe-area-inset-right, 0px) + 12px));
   padding-bottom: var(--menu-hud-pad-bottom);
-  padding-left: max(8px, env(safe-area-inset-left, 0px));
+  padding-left: max(16px, calc(env(safe-area-inset-left, 0px) + 12px));
   background:
     radial-gradient(circle at 18% 120%, rgba(255, 255, 255, 0.18) 0%, transparent 42%),
     radial-gradient(circle at 82% 130%, rgba(255, 255, 255, 0.12) 0%, transparent 38%),
@@ -520,8 +525,8 @@ body.has-app-top-hud .menu-top-bar-spacer {
 
 .menu-hud-gift-dot {
   position: absolute;
-  top: 1px;
-  right: 1px;
+  top: 4px;
+  right: 4px;
   width: 12px;
   height: 12px;
   border-radius: 50%;
@@ -542,8 +547,9 @@ body.has-app-top-hud .menu-top-bar-spacer {
   gap: 6px;
   min-width: clamp(77px, 22vw, 115px);
   height: var(--menu-bar-h);
-  padding: 0 42px 0 14px;
+  padding: 0 44px 0 12px;
   margin: 0;
+  overflow: visible;
   border-radius: 12px;
   background: linear-gradient(180deg, #7a2038 0%, var(--menu-hud-coin-pill) 45%, var(--menu-hud-coin-pill-edge) 100%) !important;
   border: 2px solid rgba(255, 200, 120, 0.4) !important;
@@ -576,7 +582,7 @@ body.has-app-top-hud .menu-top-bar-spacer {
 
 .menu-hud-bar .menu-hud-coins-coin {
   position: absolute;
-  right: -4px;
+  right: 4px;
   top: 50%;
   transform: translateY(-50%);
   width: clamp(40px, 12vw, 50px);
@@ -596,8 +602,8 @@ body.has-app-top-hud .menu-top-bar-spacer {
 
 .menu-hud-bar .menu-hud-coins-plus {
   position: absolute;
-  right: -2px;
-  bottom: -4px;
+  right: 2px;
+  bottom: 2px;
   width: 20px;
   height: 20px;
   border-radius: 50%;

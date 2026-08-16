@@ -13,12 +13,13 @@ html {
   --menu-hud-profile-art: clamp(40px, 10.5vw, 46px);
   --menu-hud-icon-w: clamp(43px, 11.4vw, 50px);
   --menu-hud-stat-h: calc(var(--menu-hud-profile-art) / 2.75);
+  --menu-hud-pad-top: 8px;
   --menu-hud-pad-bottom: 18px;
   --menu-hud-title-gap: 0px;
   --menu-bar-h: calc(var(--menu-hud-profile-art) + var(--menu-hud-stat-h));
   --menu-profile-size: 34px;
   --app-top-hud-offset: calc(
-    var(--menu-bar-h) + var(--menu-hud-pad-bottom) + var(--safe-top)
+    var(--menu-bar-h) + var(--menu-hud-pad-top) + var(--menu-hud-pad-bottom) + var(--safe-top)
   );
   --home-nav-offset: calc(
     var(--home-nav-section-h, 40px) + var(--safe-bottom)
@@ -75,12 +76,12 @@ html {
 #app-top-hud.menu-top-bar {
   box-sizing: border-box;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
-  padding-top: var(--safe-top) !important;
-  padding-right: max(10px, var(--safe-right)) !important;
-  padding-left: max(10px, var(--safe-left)) !important;
+  padding-top: calc(var(--safe-top) + var(--menu-hud-pad-top, 8px)) !important;
+  padding-right: max(16px, calc(var(--safe-right) + 12px)) !important;
+  padding-left: max(16px, calc(var(--safe-left) + 12px)) !important;
   padding-bottom: var(--menu-hud-pad-bottom, 18px) !important;
   min-height: calc(
-    var(--menu-bar-h) + var(--safe-top) + var(--menu-hud-pad-bottom, 18px) + 3px
+    var(--menu-bar-h) + var(--safe-top) + var(--menu-hud-pad-top, 8px) + var(--menu-hud-pad-bottom, 18px) + 3px
   ) !important;
   align-items: start !important;
   overflow: visible !important;
@@ -130,7 +131,7 @@ body.has-home-bottom-bar.home-menu-active.has-app-top-hud {
 
 html.viewport-fit-lock body.has-home-bottom-bar:not(.home-menu-active),
 body.has-home-bottom-bar:not(.home-menu-active) {
-  padding-bottom: var(--home-nav-offset) !important;
+  padding-bottom: calc(10px + var(--home-nav-offset)) !important;
 }
 
 html.viewport-fit-lock body.has-home-bottom-bar:not(.home-menu-active):not(.home-nav-game):not(.game-active) {
@@ -206,9 +207,9 @@ body.settings-page.has-app-top-hud:not(.home-menu-active) {
 
 body.settings-page #app-top-hud.menu-top-bar,
 body.settings-page #app-top-hud.menu-top-bar.menu-hud-bar {
-  padding-top: var(--safe-top) !important;
+  padding-top: calc(var(--safe-top) + var(--menu-hud-pad-top, 8px)) !important;
   min-height: calc(
-    var(--menu-bar-h) + var(--safe-top) + var(--menu-hud-pad-bottom, 18px) + 3px
+    var(--menu-bar-h) + var(--safe-top) + var(--menu-hud-pad-top, 8px) + var(--menu-hud-pad-bottom, 18px) + 3px
   ) !important;
   overflow: visible !important;
 }

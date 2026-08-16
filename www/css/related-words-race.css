@@ -439,6 +439,7 @@ body.rw-race-page.rw-race-active .race-header h1 {
 
 body.rw-race-page .race-app {
   max-width: 480px;
+  min-height: 0;
 }
 
 body.rw-race-page.rw-race-active .race-app {

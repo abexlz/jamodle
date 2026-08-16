@@ -90,8 +90,10 @@ body:has(#related-words-app):not(.has-app-top-hud) {
 }
 
 body.has-home-bottom-bar:has(#related-words-app),
-body.has-home-bottom-bar:has(#race-root.race-app) {
-  padding-bottom: var(--home-nav-offset, calc(46px + var(--safe-bottom))) !important;
+body.has-home-bottom-bar:has(#race-root.race-app),
+body.has-home-bottom-bar.rw-race-page,
+body.has-home-bottom-bar:has(#rw-race-root) {
+  padding-bottom: calc(10px + var(--home-nav-offset, calc(46px + var(--safe-bottom)))) !important;
 }
 
 /* ── Index: daily Wordle game screen ── */
@@ -308,6 +310,7 @@ body.rw-race-page .race-main,
 body.rw-race-page #rw-race-game {
   flex: 1 1 0;
   min-height: 0;
+  max-height: 100%;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -342,7 +345,10 @@ body.rw-race-page .rw-race-mode .rw-dock-area {
   position: relative;
   flex: 0 0 auto;
   margin-top: auto;
+  margin-bottom: 0;
   min-height: 0;
+  overflow: visible;
+  padding-bottom: 8px;
 }
 
 /* Status text overlays the board — never steals height from the dock */

@@ -249,8 +249,9 @@ body.has-home-bottom-bar:not(.home-menu-active) {
 
 /* Game modes keep the translucent bar visible with content inset */
 body.has-home-bottom-bar.game-active,
-body.has-home-bottom-bar.home-nav-game {
-  padding-bottom: var(--home-nav-offset) !important;
+body.has-home-bottom-bar.home-nav-game,
+body.has-home-bottom-bar.rw-race-page {
+  padding-bottom: calc(10px + var(--home-nav-offset)) !important;
 }
 
 html.viewport-fit-lock body.has-app-top-hud:not(.home-menu-active):not(.settings-page):not(.rw-page) {
