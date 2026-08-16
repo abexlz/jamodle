@@ -3,9 +3,10 @@
 :root,
 html.viewport-fit-lock,
 html {
-  --menu-hud-red-top: #2eb8c8;
-  --menu-hud-red-mid: #1aa8ba;
-  --menu-hud-red-low: #0e96a8;
+  --menu-hud-red-top: rgba(46, 184, 200, 0.42);
+  --menu-hud-red-mid: rgba(26, 168, 186, 0.28);
+  --menu-hud-red-low: rgba(14, 150, 168, 0.12);
+  --menu-hud-blur: blur(16px) saturate(1.28);
   --menu-hud-coin-pill: #fff6d6;
   --menu-hud-coin-pill-edge: #e8b63a;
   --menu-hud-tile-r: 14px;
@@ -68,6 +69,9 @@ body > #app-top-hud.menu-top-bar,
   padding-bottom: var(--menu-hud-pad-bottom) !important;
   min-height: calc(var(--menu-bar-h) + var(--safe-top) + var(--menu-hud-pad-top, 8px) + var(--menu-hud-pad-bottom) + 3px) !important;
   overflow: visible !important;
+  background-color: transparent;
+  -webkit-backdrop-filter: var(--menu-hud-blur, blur(16px) saturate(1.28));
+  backdrop-filter: var(--menu-hud-blur, blur(16px) saturate(1.28));
 }
 
 #app-top-hud .menu-hud-left,
@@ -101,12 +105,20 @@ body.has-app-top-hud .menu-top-bar-spacer {
   padding-right: max(16px, calc(env(safe-area-inset-right, 0px) + 12px));
   padding-bottom: var(--menu-hud-pad-bottom);
   padding-left: max(16px, calc(env(safe-area-inset-left, 0px) + 12px));
-  background:
-    radial-gradient(circle at 18% 120%, rgba(255, 255, 255, 0.18) 0%, transparent 42%),
-    radial-gradient(circle at 82% 130%, rgba(255, 255, 255, 0.12) 0%, transparent 38%),
+  background-color: transparent;
+  background-image:
     linear-gradient(180deg, var(--menu-hud-red-top) 0%, var(--menu-hud-red-mid) 58%, var(--menu-hud-red-low) 100%);
-  border-bottom: 3px solid var(--menu-bar-edge, rgba(90, 160, 172, 0.42));
-  box-shadow: 0 3px 0 rgba(90, 160, 172, 0.28), 0 6px 14px rgba(40, 90, 100, 0.12);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow: 0 8px 18px rgba(10, 50, 60, 0.08);
+  -webkit-backdrop-filter: var(--menu-hud-blur);
+  backdrop-filter: var(--menu-hud-blur);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .menu-top-bar.menu-hud-bar,
+  #app-top-hud.menu-top-bar.menu-hud-bar {
+    background-color: rgba(26, 168, 186, 0.72);
+  }
 }
 
 #app-top-hud .app-hud-page-title {

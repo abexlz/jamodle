@@ -6,14 +6,14 @@
   --home-nav-offset: calc(
     var(--home-nav-section-h) + env(safe-area-inset-bottom, 0px)
   );
-  --home-nav-bg: rgba(6, 90, 104, 0.72);
+  --home-nav-bg: rgba(6, 90, 104, 0.28);
   --home-nav-bg-tint: linear-gradient(
     180deg,
-    rgba(18, 160, 180, 0.55) 0%,
-    rgba(8, 110, 126, 0.62) 55%,
-    rgba(5, 80, 92, 0.7) 100%
+    rgba(18, 160, 180, 0.22) 0%,
+    rgba(8, 110, 126, 0.32) 55%,
+    rgba(5, 80, 92, 0.38) 100%
   );
-  --home-nav-blur: blur(18px) saturate(1.35);
+  --home-nav-blur: blur(16px) saturate(1.28);
   --home-nav-border: rgba(123, 207, 255, 0.42);
   --home-nav-divider: rgba(255, 255, 255, 0.2);
   --home-nav-active-accent: #ffe566;
@@ -49,9 +49,8 @@ body > #home-bottom-bar.home-bottom-bar,
   background-image: var(--home-nav-bg-tint);
   border-top: 1px solid var(--home-nav-border);
   box-shadow:
-    0 -2px 0 rgba(255, 255, 255, 0.12),
-    0 -6px 16px rgba(0, 20, 30, 0.35),
-    0 -2px 6px rgba(0, 0, 0, 0.22);
+    0 -1px 0 rgba(255, 255, 255, 0.22),
+    0 -8px 18px rgba(0, 20, 30, 0.12);
   -webkit-backdrop-filter: var(--home-nav-blur);
   backdrop-filter: var(--home-nav-blur);
   pointer-events: auto;
@@ -281,7 +280,7 @@ body.has-home-bottom-bar.game-active #game-screen #bottom-bar {
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   body > #home-bottom-bar.home-bottom-bar,
   .home-bottom-bar {
-    background-color: rgba(6, 90, 104, 0.92);
+    background-color: rgba(6, 90, 104, 0.72);
   }
 }
 

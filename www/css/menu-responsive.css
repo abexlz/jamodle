@@ -60,12 +60,12 @@ html.large-text #home-bottom-bar.home-bottom-bar {
   --menu-bar-teal-mid: #0e92a6;
   --menu-bar-teal-low: #0a7f92;
   --menu-bg-teal: #0097B2;
-  --home-nav-bg: rgba(6, 90, 104, 0.72);
+  --home-nav-bg: rgba(6, 90, 104, 0.28);
   --home-nav-bg-tint: linear-gradient(
     180deg,
-    rgba(18, 160, 180, 0.55) 0%,
-    rgba(8, 110, 126, 0.62) 55%,
-    rgba(5, 80, 92, 0.7) 100%
+    rgba(18, 160, 180, 0.22) 0%,
+    rgba(8, 110, 126, 0.32) 55%,
+    rgba(5, 80, 92, 0.38) 100%
   );
   --home-nav-border: rgba(123, 207, 255, 0.42);
 }
@@ -78,11 +78,12 @@ html.large-text body:has(#menu-screen:not(.hidden)) {
 html[data-theme="dark"] .menu-top-bar,
 html.high-contrast .menu-top-bar,
 html.large-text .menu-top-bar {
-  background: linear-gradient(180deg,
-    #2eb8c8 0%,
-    #1aa8ba 55%,
-    #0e96a8 100%) !important;
-  border-bottom-color: rgba(90, 160, 172, 0.42) !important;
+  background-color: transparent !important;
+  background-image: linear-gradient(180deg,
+    rgba(46, 184, 200, 0.42) 0%,
+    rgba(26, 168, 186, 0.28) 55%,
+    rgba(14, 150, 168, 0.12) 100%) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.28) !important;
 }
 
 html[data-theme="dark"] .menu-header::before,
