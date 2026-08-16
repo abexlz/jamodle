@@ -304,27 +304,14 @@ body.chest-room-page-body h3 {
   text-decoration: underline;
 }
 
-/* Menu HUD chest shortcut (replaces wheel disc) */
-.menu-hud-spin-chest {
-  width: clamp(36px, 9.5vw, 42px);
-  height: clamp(36px, 9.5vw, 42px);
-  display: block;
-  object-fit: contain;
-  filter: drop-shadow(0 2px 0 rgba(20, 70, 80, 0.28));
+/* Menu HUD chest shortcut */
+.menu-hud-bar .menu-wheel-nav.is-ready .menu-hud-chest-art {
+  filter: drop-shadow(0 0 5px rgba(255, 220, 120, 0.7));
 }
 
-.menu-hud-bar .menu-wheel-nav.is-ready .menu-hud-spin-chest {
-  animation: menu-hud-chest-glow 1.8s ease-in-out infinite;
-}
-
-.menu-hud-bar .menu-wheel-nav.is-claimed .menu-hud-spin-chest {
-  filter: grayscale(0.35) drop-shadow(0 2px 0 rgba(20, 70, 80, 0.2));
-  opacity: 0.85;
-}
-
-@keyframes menu-hud-chest-glow {
-  0%, 100% { filter: drop-shadow(0 2px 0 rgba(20, 70, 80, 0.28)) drop-shadow(0 0 4px rgba(255, 150, 210, 0.35)); }
-  50% { filter: drop-shadow(0 2px 0 rgba(20, 70, 80, 0.28)) drop-shadow(0 0 10px rgba(255, 150, 210, 0.75)); }
+.menu-hud-bar .menu-wheel-nav.is-claimed .menu-hud-chest-art {
+  filter: grayscale(0.2);
+  opacity: 0.9;
 }
 
 .quest-wheel-chip-icon img,
