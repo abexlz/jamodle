@@ -114,12 +114,12 @@ html.large-text body.home-menu-active {
   --app-btn-max-h: clamp(58px, calc(16vw + 0.45dvh), 88px);
   --app-btn-radius: clamp(14px, 3.6vw, 22px);
 
-  --menu-game-side-w: clamp(54px, 14vw, 66px);
-  --menu-game-title-size: clamp(20px, 5.4vw, 28px);
-  --menu-game-btn-min-h: clamp(60px, 16vw, 80px);
+  --menu-game-side-w: clamp(65px, 17vw, 79px);
+  --menu-game-title-size: clamp(24px, 6.5vw, 34px);
+  --menu-game-btn-min-h: clamp(72px, 19vw, 96px);
 
   --menu-type-base: clamp(13px, calc(3.35vw + 0.12rem), 17px);
-  --menu-type-lg: clamp(16px, calc(4.1vw + 0.15rem), 22px);
+  --menu-type-lg: clamp(19px, calc(4.9vw + 0.15rem), 26px);
   --menu-type-xl: clamp(18px, calc(4.8vw + 0.18rem), 28px);
   --menu-type-2xl: clamp(22px, calc(5.8vw + 0.2rem), 34px);
 }
@@ -218,6 +218,7 @@ body.home-menu-active.home-tab-menu #menu-screen .menu-top-daily-row .menu-daily
 #menu-screen .menu-daily-puzzle-bar .mode-name,
 #menu-screen .menu-top-daily-row .menu-daily-puzzle-main .mode-name {
   font-size: clamp(18px, 5vw, 26px) !important;
+  text-align: center;
 }
 
 #menu-screen .menu-mode-heading-text {

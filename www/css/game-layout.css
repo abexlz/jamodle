@@ -423,7 +423,7 @@ body.home-menu-active.home-tab-menu .menu-mode-panel {
   min-height: auto;
   overflow: visible;
   flex: 0 0 auto;
-  padding: 14px 16px 16px !important;
+  padding: 16px 18px 18px !important;
 }
 
 body.home-menu-active.home-tab-menu .menu-mode-panel .daily-challenges-grid {
@@ -445,12 +445,12 @@ body.home-menu-active.home-tab-menu .dq-home-quests {
 }
 
 body.home-menu-active.home-tab-menu .menu-mode-heading-wrap {
-  padding-bottom: 4px;
+  padding-bottom: 6px;
 }
 
 body.home-menu-active.home-tab-menu .menu-mode-heading-badge {
-  min-height: 26px;
-  padding: 3px clamp(12px, 3vw, 18px);
+  min-height: 32px;
+  padding: 4px clamp(14px, 3.5vw, 22px);
 }
 
 /* Quest tab: lock chrome, scroll only the quest list panel */
