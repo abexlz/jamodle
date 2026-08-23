@@ -432,8 +432,9 @@ body.home-menu-active.home-tab-menu .menu-mode-panel .daily-challenges-grid {
 
 body.home-menu-active.home-tab-menu .menu-top-daily-row,
 body.home-menu-active.home-tab-menu .menu-top-daily-row .menu-daily-puzzle-bar {
+  --menu-daily-bar-h: clamp(58px, calc(15vw + 0.4dvh), 80px);
   height: auto;
-  min-height: clamp(58px, calc(15vw + 0.4dvh), 80px) !important;
+  min-height: var(--menu-daily-bar-h) !important;
 }
 
 body.home-menu-active.home-tab-menu .dq-streak-hero,
