@@ -1241,7 +1241,7 @@
         <header class="race-header">
           <span class="race-header-spacer" aria-hidden="true"></span>
           <h1 class="race-header-title race-header-title--logo">
-            <img class="race-header-title-img" src="assets/hangul-dle-title.png" alt="${escapeHtml(rt('title'))}" draggable="false">
+            <img class="race-header-title-img" src="assets/hangul-dle-title.png?v=20260823h" alt="${escapeHtml(rt('title'))}" draggable="false">
           </h1>
           <a class="race-settings-link" href="settings.html" aria-label="Settings">⚙️</a>
         </header>

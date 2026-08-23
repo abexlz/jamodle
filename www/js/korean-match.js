@@ -951,7 +951,7 @@
       const chromeTitleHtml = this.tutorialMode
         ? `<h1 class="match-chrome-title">${escapeHtml(chromeTitle)}</h1>`
         : `<h1 class="match-chrome-title match-chrome-title--logo">
-            <img class="match-chrome-title-img" src="assets/hangul-dle-title.png" alt="${escapeHtml(chromeTitle)}" draggable="false">
+            <img class="match-chrome-title-img" src="assets/hangul-dle-title.png?v=20260823h" alt="${escapeHtml(chromeTitle)}" draggable="false">
           </h1>`;
 
       const headerHtml = this.versus
