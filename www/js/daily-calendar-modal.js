@@ -42,7 +42,7 @@
       .replace(/"/g, '&quot;');
   }
 
-  const CAL_STYLES_HREF = 'css/daily-calendar.css?v=16';
+  const CAL_STYLES_HREF = 'css/daily-calendar.css?v=17';
 
   function ensureStyles() {
     let link = document.getElementById('daily-cal-styles');
@@ -314,8 +314,23 @@
     }
 
     const dateLabel = formatPlayDate(selectedDate);
-    const isFree = svc.isToday(selectedDate) || svc.getPlayCost(selectedDate) === 0;
+    const completed = svc.isDateCompleted(selectedDate);
     const canPlay = svc.canPlayDate(selectedDate);
+
+    if (completed) {
+      const clearedLabel = svc.isToday(selectedDate)
+        ? t('dailyCalendar.clearedToday')
+        : t('dailyCalendar.clearedDate', { date: dateLabel });
+      return `
+        <div class="daily-cal-play-row">
+          <button type="button" class="daily-cal-play-btn is-cleared no-press" data-cal-action="play" aria-label="${escapeHtml(t('dailyCalendar.viewResult'))}">
+            <span class="daily-cal-play-check" aria-hidden="true">✓</span>
+            <span class="daily-cal-play-label">${escapeHtml(clearedLabel)}</span>
+            <span class="daily-cal-cleared-tag">${escapeHtml(t('dailyCalendar.viewResult'))}</span>
+          </button>
+        </div>
+      `;
+    }
 
     if (canPlay) {
       const playLabel = svc.isToday(selectedDate)
