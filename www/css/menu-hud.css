@@ -187,8 +187,8 @@ body.has-app-top-hud .menu-top-bar-spacer {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 72%;
-  height: 72%;
+  width: 88%;
+  height: 88%;
   pointer-events: none;
 }
 
@@ -198,7 +198,8 @@ body.has-app-top-hud .menu-top-bar-spacer {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 1px 0 rgba(40, 20, 80, 0.28));
+  object-position: center;
+  filter: drop-shadow(0 1px 1px rgba(40, 20, 80, 0.28));
 }
 
 .menu-hud-spin-wheel {

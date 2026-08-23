@@ -7,21 +7,13 @@
   'use strict';
 
   const HUD_ID = 'app-top-hud';
-  const STYLE_HREF = 'css/menu-hud.css?v=20260816j';
+  const STYLE_HREF = 'css/menu-hud.css?v=20260823a';
   const CHROME_HREF = 'css/app-chrome.css?v=20260816g';
   const PROFILE_STYLE_HREF = 'css/profile.css?v=20260815l';
 
   const CHEST_ICON = `
     <span class="menu-hud-chest-art" aria-hidden="true">
-      <svg viewBox="0 0 48 48" width="32" height="32" focusable="false">
-        <path d="M8 18c0-7.2 32-7.2 32 0v5H8v-5z" fill="#f0c24a"/>
-        <path d="M10 16.5c2.2-4.6 25.8-4.6 28 0" fill="none" stroke="#fff3b0" stroke-width="2" stroke-linecap="round"/>
-        <rect x="7" y="22" width="34" height="18" rx="3.5" fill="#c47a22"/>
-        <rect x="7" y="20" width="34" height="6" rx="2" fill="#f6d45c"/>
-        <rect x="21.5" y="24" width="5" height="9" rx="1.6" fill="#ffe99a"/>
-        <circle cx="24" cy="28.5" r="2.1" fill="#6b3a12"/>
-        <path d="M22.4 26.2a1.7 1.7 0 0 1 3.2 0" fill="none" stroke="#6b3a12" stroke-width="1.5" stroke-linecap="round"/>
-      </svg>
+      <img class="menu-hud-spin-chest" src="assets/chests/mega-closed.png" alt="" width="42" height="42" decoding="async" draggable="false">
     </span>`;
 
   const DEPS = [
@@ -219,7 +211,10 @@
       }
       const oldChest = bar.querySelector('.menu-hud-spin-chest');
       const spin = bar.querySelector('#menu-wheel-nav');
-      if (spin && (oldChest || !spin.querySelector('.menu-hud-chest-art'))) {
+      const chestArt = spin?.querySelector('.menu-hud-chest-art');
+      const hasFancyImg = !!spin?.querySelector('img.menu-hud-spin-chest[src*="mega-closed"]');
+      if (spin && (!hasFancyImg || chestArt?.querySelector('svg'))) {
+        chestArt?.remove();
         oldChest?.remove();
         if (!spin.querySelector('.menu-hud-chest-art')) {
           spin.insertAdjacentHTML('afterbegin', CHEST_ICON);
