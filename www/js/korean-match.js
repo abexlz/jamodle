@@ -3571,16 +3571,23 @@
       if (this.els.tokenCount && HT) {
         this.els.tokenCount.textContent = unlimited ? '∞' : String(tokens);
       }
+      // Keep hint buttons clickable when low on tokens — handlers already show
+      // a "need tokens" message. Only lock them while the round is blocked.
       if (this.els.orientHint) {
-        this.els.orientHint.disabled = blocked || (!unlimited && tokens < 2);
+        this.els.orientHint.disabled = blocked;
+        this.els.orientHint.classList.toggle('is-low-tokens', !blocked && !unlimited && tokens < 2);
       }
       if (this.els.disableHint) {
-        this.els.disableHint.disabled = blocked || (!unlimited && tokens < 2);
+        this.els.disableHint.disabled = blocked;
+        this.els.disableHint.classList.toggle('is-low-tokens', !blocked && !unlimited && tokens < 2);
       }
       if (this.els.meaningBtn) {
         const needsTokens = !this.versus && !this.meaningRevealed;
-        this.els.meaningBtn.disabled = blocked
-          || (needsTokens && !unlimited && tokens < 2);
+        this.els.meaningBtn.disabled = blocked;
+        this.els.meaningBtn.classList.toggle(
+          'is-low-tokens',
+          !blocked && needsTokens && !unlimited && tokens < 2
+        );
       }
       if (this.els.devAnswerBtn) {
         this.els.devAnswerBtn.disabled = blocked || this.multiFindMode || !this.currentWord?.word;

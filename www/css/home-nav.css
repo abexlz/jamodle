@@ -285,28 +285,44 @@ body.has-home-bottom-bar.game-active #game-screen #bottom-bar {
 }
 
 /*
- * Word Chain only: compact bottom nav so the photo grid can grow.
- * Do NOT apply on match pages — otherwise ALIGN/DELETE/MEANING sit under the
- * translucent home bar (look faded + absorb taps).
+ * Compact bottom nav on game pages (Word Chain + Match).
+ * Home menu keeps the taller square tabs.
  */
-body.rw-page.has-home-bottom-bar {
-  --home-nav-section-h: clamp(44px, 11.5vw, 52px);
-  --home-nav-icon-size: clamp(26px, 7vw, 34px);
+body.rw-page.has-home-bottom-bar,
+body.match-page.has-home-bottom-bar,
+body.home-nav-game.has-home-bottom-bar {
+  --home-nav-section-h: clamp(40px, 10.5vw, 48px);
+  --home-nav-icon-size: clamp(24px, 6.5vw, 32px);
   --home-nav-offset: calc(
     var(--home-nav-section-h) + env(safe-area-inset-bottom, 0px)
   );
 }
 
-body.rw-page.has-home-bottom-bar .home-bottom-bar-inner--5 .home-tab-btn {
+body.rw-page.has-home-bottom-bar .home-bottom-bar-inner--5 .home-tab-btn,
+body.match-page.has-home-bottom-bar .home-bottom-bar-inner--5 .home-tab-btn,
+body.home-nav-game.has-home-bottom-bar .home-bottom-bar-inner--5 .home-tab-btn {
   aspect-ratio: auto;
   height: var(--home-nav-section-h);
   min-height: var(--home-nav-section-h);
   padding: 4px 0;
 }
 
-body.rw-page.has-home-bottom-bar .home-bottom-bar-inner.home-bottom-bar-inner--5 {
+body.rw-page.has-home-bottom-bar .home-bottom-bar-inner.home-bottom-bar-inner--5,
+body.match-page.has-home-bottom-bar .home-bottom-bar-inner.home-bottom-bar-inner--5,
+body.home-nav-game.has-home-bottom-bar .home-bottom-bar-inner.home-bottom-bar-inner--5 {
   min-height: calc(var(--home-nav-section-h) + env(safe-area-inset-bottom, 0px));
   padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Empty chrome of the tab bar must not steal taps from the hint dock above it. */
+body.match-page #home-bottom-bar.home-bottom-bar,
+body.home-nav-game #home-bottom-bar.home-bottom-bar {
+  pointer-events: none;
+}
+
+body.match-page #home-bottom-bar .home-tab-btn,
+body.home-nav-game #home-bottom-bar .home-tab-btn {
+  pointer-events: auto;
 }
 
 /* Battle picker must sit on the viewport, not as a flex item under the tab bar. */

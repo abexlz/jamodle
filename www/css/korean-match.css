@@ -558,6 +558,12 @@
     filter: none;
   }
 
+  /* Low tokens: stay fully visible + clickable (toast explains cost). */
+  .match-hint-btn--icon.is-low-tokens {
+    opacity: 1 !important;
+    filter: none !important;
+  }
+
   .multi-tiles-hint {
     margin: 6px 0 0;
     font-size: 14px;
