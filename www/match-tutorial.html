@@ -30,22 +30,24 @@
 <link rel="stylesheet" href="css/app-theme.css?v=26">
 <link rel="stylesheet" href="css/app-wordle-ui.css?v=22">
 <link rel="stylesheet" href="css/answer-tts.css?v=20260814k">
-<link rel="stylesheet" href="css/tutorial.css?v=20260815b">
+<link rel="stylesheet" href="css/tutorial.css?v=20260823e">
 <link rel="stylesheet" href="css/home-nav.css?v=27">
 <link rel="stylesheet" href="css/app-chrome.css?v=20260823b" id="app-chrome-styles">
 <style>
-  /* Match Hangul-dle (match.html) shell sizing — one-screen flex column */
+  /* Match Hangul-dle shell — one-screen flex column (details in tutorial.css) */
   body.match-page.tutorial-page {
     display: flex;
     flex-direction: column;
     min-height: 100dvh;
-    height: auto;
-    overflow-x: hidden;
-    overflow-y: auto;
+    height: 100dvh;
+    max-height: 100dvh;
+    overflow: hidden;
     margin: 0;
     color: var(--text, #5D6470);
     font-family: 'Noto Sans KR', sans-serif;
-    padding: calc(6px + env(safe-area-inset-top, 0px)) 10px calc(6px + env(safe-area-inset-bottom, 0px));
+    padding-right: 10px;
+    padding-left: 10px;
+    box-sizing: border-box;
   }
 
   body.match-page.tutorial-page #match-app {
@@ -53,12 +55,13 @@
     --app-btn-max-h: 50px;
     --block-size: clamp(64px, 19vw, 88px);
     --tile-size: clamp(36px, 9.5vw, 50px);
-    flex: 1;
+    --tutorial-merge-slot: clamp(34px, 9vw, 42px);
+    flex: 1 1 auto;
     display: flex;
     flex-direction: column;
     height: auto;
     min-height: 0;
-    max-height: none;
+    max-height: 100%;
     max-width: 100%;
     width: 100%;
     margin: 0 auto;
