@@ -1333,7 +1333,7 @@
         },
         "original": {
           "name": "Original Chest",
-          "desc": "Balanced rewards & tokens",
+          "desc": "Better coins, tokens & XP boosts",
           "opened": "Original Chest"
         },
         "mega": {
@@ -2911,7 +2911,7 @@
         },
         "original": {
           "name": "오리지널 상자",
-          "desc": "균형 잡힌 보상·토큰",
+          "desc": "더 많은 코인·토큰·XP 부스트",
           "opened": "오리지널 상자"
         },
         "mega": {
