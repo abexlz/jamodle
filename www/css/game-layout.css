@@ -276,7 +276,7 @@ body:has(#related-words-app) .rw-solo-mode .rw-play-cluster {
 
 body:has(#related-words-app) .rw-solo-mode .rw-answer-photo {
   flex: 1 1 auto;
-  min-height: 140px;
+  min-height: 168px;
 }
 
 body:has(#related-words-app) .rw-solo-mode.rw-image-mode .rw-stage {
@@ -290,8 +290,8 @@ body:has(#related-words-app) .rw-solo-mode.rw-image-mode .rw-play-cluster {
 
 body:has(#related-words-app) .rw-solo-mode.rw-image-mode .rw-answer-photo {
   flex: 1 1 auto;
-  min-height: 120px;
-  max-height: min(32dvh, 240px);
+  min-height: 168px;
+  max-height: min(46dvh, 360px);
   justify-content: flex-start;
 }
 

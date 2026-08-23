@@ -649,7 +649,7 @@ html.reduce-motion .rw-chain-recap-word {
 .rw-solo-mode .rw-answer-photo {
   flex: 1 1 0;
   min-height: 0;
-  max-height: min(36dvh, 280px);
+  max-height: min(46dvh, 360px);
   justify-content: center;
   margin-top: 0;
   margin-bottom: 4px;
@@ -2166,8 +2166,8 @@ html.reduce-motion .rw-confetti-piece {
 
 .rw-solo-mode.rw-image-mode .rw-answer-photo {
   flex: 1 1 auto;
-  min-height: 120px;
-  max-height: min(32dvh, 240px);
+  min-height: 168px;
+  max-height: min(46dvh, 360px);
   justify-content: flex-start;
   margin-top: 0;
   margin-bottom: 4px;
@@ -2202,7 +2202,7 @@ html.reduce-motion .rw-confetti-piece {
 
 @media (max-height: 900px) {
   .rw-solo-mode .rw-answer-photo {
-    max-height: min(34dvh, 240px);
+    max-height: min(44dvh, 320px);
   }
 
   .rw-dock-tile.flip-tile {
@@ -2247,8 +2247,8 @@ html.reduce-motion .rw-confetti-piece {
 @media (orientation: landscape) and (max-height: 500px) {
   .rw-solo-mode .rw-answer-photo {
     flex: 1 1 auto;
-    min-height: 72px;
-    max-height: min(42dvh, 200px);
+    min-height: 88px;
+    max-height: min(48dvh, 240px);
     margin-bottom: 4px;
   }
 

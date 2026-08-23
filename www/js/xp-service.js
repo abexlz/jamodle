@@ -270,15 +270,16 @@
     let badgeDelay = 0;
 
     if (isMatch) {
-      setTimeout(() => { void global.ProfileUI.showMatchXpCelebration(result); }, 320);
+      // Skip bottom XP bar banner — keep play area clear; still celebrate level-ups.
       if (shouldShowLevelUp(result)) {
+        global.ProfileUI.showLevelUpModal(result);
         if (result.coinsGranted > 0) {
-          setTimeout(() => global.ShopUI?.showLevelCoinToast?.(result.coinsGranted), 1800);
+          global.ShopUI?.showLevelCoinToast?.(result.coinsGranted);
         }
         markLevelCelebrated(result.level);
-        badgeDelay = 3400;
+        badgeDelay = 800;
       } else {
-        badgeDelay = 2000;
+        badgeDelay = 400;
       }
     } else {
       global.ProfileUI.showXpToast(result);
