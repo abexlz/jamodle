@@ -10,8 +10,9 @@ html {
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
-  --menu-hud-profile-art: clamp(40px, 10.5vw, 46px);
+  --menu-hud-profile-art: clamp(44px, 11.55vw, 51px);
   --menu-hud-icon-w: clamp(43px, 11.4vw, 50px);
+  --menu-hud-profile-w: calc(var(--menu-hud-icon-w) * 1.1);
   --menu-hud-stat-h: calc(var(--menu-hud-profile-art) / 2.75);
   --menu-hud-pad-top: 8px;
   --menu-hud-pad-bottom: 18px;

@@ -14,8 +14,9 @@ html {
   --menu-hud-tile-shadow: 0 3px 0 rgba(18, 72, 82, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.42);
   --menu-hud-progress: #3ecfb0;
   --menu-hud-star: #2f8fd4;
-  --menu-hud-profile-art: clamp(40px, 10.5vw, 46px);
+  --menu-hud-profile-art: clamp(44px, 11.55vw, 51px);
   --menu-hud-icon-w: clamp(43px, 11.4vw, 50px);
+  --menu-hud-profile-w: calc(var(--menu-hud-icon-w) * 1.1);
   --menu-hud-stat-h: calc(var(--menu-hud-profile-art) / 2.75);
   --menu-hud-pad-top: 8px;
   --menu-hud-pad-bottom: 18px;
@@ -423,7 +424,7 @@ body.has-app-top-hud .menu-top-bar-spacer {
   align-items: stretch;
   justify-content: flex-start;
   align-self: start;
-  width: var(--menu-hud-icon-w);
+  width: var(--menu-hud-profile-w, calc(var(--menu-hud-icon-w) * 1.1));
   height: var(--menu-bar-h);
   margin: 0;
   padding: 0;
@@ -480,7 +481,7 @@ body.has-app-top-hud .menu-top-bar-spacer {
 }
 
 #app-top-hud .menu-hud-profile .profile-battle-card-icon {
-  font-size: calc(clamp(20px, 10vw, 32px) * 1.05);
+  font-size: calc(clamp(20px, 10vw, 32px) * 1.155);
 }
 
 .profile-battle-hud-stat {
