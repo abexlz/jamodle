@@ -585,8 +585,8 @@ html.reduce-motion .rw-chain-recap-word {
   position: absolute;
   right: 6px;
   bottom: 6px;
-  width: 44px;
-  height: 44px;
+  width: 29px;
+  height: 29px;
   border-radius: 999px;
   display: none;
   align-items: center;
@@ -602,8 +602,8 @@ html.reduce-motion .rw-chain-recap-word {
 }
 
 .rw-answer-photo-swap svg {
-  width: 26px;
-  height: 26px;
+  width: 17px;
+  height: 17px;
   display: block;
 }
 
