@@ -250,14 +250,15 @@ body.home-menu-active.home-tab-menu #menu-screen .menu-top-daily-row .menu-daily
 }
 
 #menu-screen .brand-en-wordmark {
+  --brand-en-h: clamp(32px, 8.8vw, 44px);
   gap: clamp(4px, 1vw, 6px);
-  padding: clamp(5px, 1.2vw, 7px) clamp(10px, 2.6vw, 14px);
+  padding: calc(var(--brand-en-h) * 0.125) clamp(10px, 2.6vw, 14px);
 }
 
 #menu-screen .brand-en-letter {
-  width: clamp(20px, 5.5vw, 28px);
-  height: clamp(26px, 6.8vw, 34px);
-  font-size: clamp(15px, 4.1vw, 20px);
+  width: calc(var(--brand-en-h) * 0.82);
+  height: var(--brand-en-h);
+  font-size: calc(var(--brand-en-h) * 0.72);
 }
 
 #menu-screen .menu-brand--jamodeul .brand-tile {

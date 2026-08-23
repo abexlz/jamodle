@@ -425,11 +425,13 @@
   }
 
   .brand-en-wordmark {
+    --brand-en-h: clamp(30px, 8.2vw, 42px);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: clamp(3px, 0.9vw, 5px);
-    padding: clamp(4px, 1.1vw, 6px) clamp(8px, 2.2vw, 12px);
+    /* Vertical pad = 10% of letter height each side → letters fill ~80% of pill. */
+    padding: calc(var(--brand-en-h) * 0.125) clamp(8px, 2.2vw, 12px);
     border-radius: 999px;
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.06) 100%);
     border: 2px solid rgba(255, 255, 255, 0.38);
@@ -454,10 +456,10 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: clamp(19px, 5.2vw, 26px);
-    height: clamp(24px, 6.4vw, 32px);
+    width: calc(var(--brand-en-h) * 0.82);
+    height: var(--brand-en-h);
     font-family: 'Jua', sans-serif;
-    font-size: clamp(14px, 3.9vw, 19px);
+    font-size: calc(var(--brand-en-h) * 0.72);
     font-weight: 400;
     line-height: 1;
     color: #ffffff;
@@ -505,7 +507,7 @@
 
   .brand-en-dash {
     font-family: 'Jua', sans-serif;
-    font-size: clamp(16px, 4.4vw, 22px);
+    font-size: calc(var(--brand-en-h, 32px) * 0.7);
     font-weight: 400;
     color: rgba(255, 255, 255, 0.92);
     text-shadow: 0 2px 0 rgba(0, 40, 50, 0.35);
@@ -1727,8 +1729,8 @@
 <link rel="stylesheet" href="css/daily-calendar.css?v=20" id="daily-cal-styles">
 <link rel="stylesheet" href="css/daily-quiz-streak.css?v=20260823g">
 <link rel="stylesheet" href="css/menu-typography.css?v=1">
-<link rel="stylesheet" href="css/menu-responsive.css?v=29">
-<link rel="stylesheet" href="css/game-layout.css?v=41">
+<link rel="stylesheet" href="css/menu-responsive.css?v=30">
+<link rel="stylesheet" href="css/game-layout.css?v=42">
 <link rel="stylesheet" href="css/app-fonts.css?v=3">
 </head>
 <body>
