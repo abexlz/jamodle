@@ -463,6 +463,100 @@ html.reduce-motion .rw-chain-recap-word {
   min-height: 0;
 }
 
+/* ~80% of the previous hint min-height (57px → 46px); hint + combo share it. */
+.rw-solo-mode .rw-play-top {
+  --rw-chip-h: clamp(36px, 10.5vw, 46px);
+  align-items: center;
+}
+
+.rw-solo-mode .rw-hint-btn {
+  box-sizing: border-box;
+  min-height: var(--rw-chip-h) !important;
+  height: var(--rw-chip-h);
+  padding: 0 12px !important;
+  gap: 6px;
+  border-radius: 14px;
+  border: 1.5px solid rgba(255, 255, 255, 0.55) !important;
+  background: rgba(0, 70, 85, 0.78) !important;
+  box-shadow: 0 3px 0 rgba(0, 55, 68, 0.5) !important;
+  color: #fff !important;
+  font-size: clamp(14px, 3.8vw, 17px);
+}
+
+.rw-solo-mode .rw-hint-btn__icon {
+  font-size: clamp(18px, 5vw, 22px);
+}
+
+.rw-solo-mode .rw-hint-btn__tag {
+  font-size: clamp(13px, 3.5vw, 15px);
+}
+
+.rw-solo-mode .rw-hint-btn__cost {
+  font-size: clamp(14px, 3.8vw, 17px);
+  color: #fff !important;
+}
+
+.rw-solo-mode .rw-hint-btn__tokens {
+  font-size: 10px;
+  padding: 0 3px;
+}
+
+.rw-solo-mode .wc-combo-wrap--hud,
+.rw-solo-mode .rw-combo-row {
+  height: var(--rw-chip-h);
+  min-height: var(--rw-chip-h);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rw-solo-mode .wc-combo-wrap--hud .wc-combo-badge {
+  height: var(--rw-chip-h);
+  display: inline-flex;
+  align-items: center;
+}
+
+.rw-solo-mode .wc-combo-wrap--hud .wc-combo-badge__pill {
+  box-sizing: border-box;
+  height: var(--rw-chip-h) !important;
+  min-height: var(--rw-chip-h) !important;
+  padding: 0 12px 0 8px !important;
+  gap: 4px !important;
+  align-items: center;
+}
+
+.rw-solo-mode .wc-combo-wrap--hud .wc-combo-badge__count-stack,
+.rw-solo-mode .wc-combo-wrap--hud .wc-combo-badge.is-burning .wc-combo-badge__count-stack,
+.rw-solo-mode .wc-combo-wrap--hud [class*="tier"].is-burning .wc-combo-badge__count-stack {
+  min-width: 26px !important;
+  min-height: 26px !important;
+}
+
+.rw-solo-mode .wc-combo-wrap--hud .wc-combo-badge__count {
+  font-size: clamp(15px, 4.2vw, 18px);
+}
+
+.rw-solo-mode .wc-combo-wrap--hud .wc-combo-badge__label {
+  font-size: clamp(9px, 2.4vw, 11px);
+}
+
+.rw-solo-mode .wc-combo-wrap--hud .wc-combo-badge__flame,
+.rw-solo-mode .wc-combo-wrap--hud .wc-combo-badge.is-burning .wc-combo-badge__flame {
+  width: 28px !important;
+  height: 32px !important;
+  bottom: 18% !important;
+}
+
+/* Word Chain: tighten HUD bottom padding so the photo grid can grow. */
+body.rw-page {
+  --menu-hud-pad-bottom: 6px;
+}
+
+body.rw-page #app-top-hud.menu-top-bar,
+body.rw-page #app-top-hud.menu-top-bar.menu-hud-bar {
+  padding-bottom: var(--menu-hud-pad-bottom) !important;
+}
+
 .rw-play-top > .rw-hint-row {
   grid-column: 1;
   justify-self: start;
@@ -649,7 +743,7 @@ html.reduce-motion .rw-chain-recap-word {
 .rw-solo-mode .rw-answer-photo {
   flex: 1 1 0;
   min-height: 0;
-  max-height: min(46dvh, 360px);
+  max-height: min(54dvh, 420px);
   justify-content: center;
   margin-top: 0;
   margin-bottom: 4px;
@@ -2166,8 +2260,8 @@ html.reduce-motion .rw-confetti-piece {
 
 .rw-solo-mode.rw-image-mode .rw-answer-photo {
   flex: 1 1 auto;
-  min-height: 168px;
-  max-height: min(46dvh, 360px);
+  min-height: 200px;
+  max-height: min(54dvh, 420px);
   justify-content: flex-start;
   margin-top: 0;
   margin-bottom: 4px;
@@ -2202,7 +2296,7 @@ html.reduce-motion .rw-confetti-piece {
 
 @media (max-height: 900px) {
   .rw-solo-mode .rw-answer-photo {
-    max-height: min(44dvh, 320px);
+    max-height: min(50dvh, 380px);
   }
 
   .rw-dock-tile.flip-tile {

@@ -140,7 +140,9 @@
   function pinTopHudSafePad(topPx) {
     const bar = document.getElementById('app-top-hud');
     if (!bar) return;
-    const pad = Math.max(0, Math.round(topPx)) + 8;
+    /* Word Chain: keep icons closer to the top so photos can grow. */
+    const extraPad = document.body?.classList.contains('rw-page') ? 2 : 8;
+    const pad = Math.max(0, Math.round(topPx)) + extraPad;
     bar.style.setProperty('padding-top', px(pad), 'important');
     requestAnimationFrame(() => {
       const h = Math.ceil(bar.getBoundingClientRect().height);
