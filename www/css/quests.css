@@ -498,7 +498,7 @@ body.home-menu-active.home-tab-quests .menu-quests-page-title {
 .quest-toast {
   position: fixed;
   left: 50%;
-  bottom: calc(90px + var(--safe-bottom, 0px));
+  bottom: calc(12px + var(--home-nav-offset, calc(56px + env(safe-area-inset-bottom, 0px))));
   transform: translateX(-50%) translateY(12px);
   z-index: 500;
   display: flex;

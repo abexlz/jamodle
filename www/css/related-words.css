@@ -1055,39 +1055,35 @@ html.reduce-motion .rw-chain-recap-word {
 
 /* English translation revealed under the Korean answer on an image-mode win. */
 .rw-answer-english {
-  margin: 10px 0 0;
+  margin: 8px 0 0;
   text-align: center;
   font-weight: 800;
-  font-size: clamp(16px, 4.6vw, 22px);
-  line-height: 1.2;
-  color: #000;
+  font-size: clamp(15px, 4.2vw, 20px);
+  line-height: 1.25;
+  color: #0a3d52;
   letter-spacing: 0.2px;
   text-transform: capitalize;
   animation: rwAnswerEnglishIn 180ms ease-out both;
 }
 
-/* Keep the win English banner above the home bottom bar (not clipped under it). */
-body.has-home-bottom-bar .rw-solo-mode.rw-image-mode.rw-showing-answer-en .rw-answer-english:not(.hidden),
-body.has-home-bottom-bar .rw-race-mode.rw-image-mode.rw-showing-answer-en .rw-answer-english:not(.hidden) {
-  position: fixed;
-  left: 50%;
-  bottom: calc(10px + var(--home-nav-offset, calc(46px + env(safe-area-inset-bottom, 0px))));
-  transform: translateX(-50%);
-  z-index: 58;
-  margin: 0;
-  max-width: min(92vw, 360px);
-  padding: 10px 16px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
-  pointer-events: none;
+.rw-solo-mode.rw-image-mode .rw-answer-english:not(.hidden),
+.rw-race-mode.rw-image-mode .rw-answer-english:not(.hidden) {
+  display: block;
+  width: fit-content;
+  max-width: min(92%, 360px);
+  margin-left: auto;
+  margin-right: auto;
+  padding: 6px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
 }
 
-[data-theme="dark"] body.has-home-bottom-bar .rw-solo-mode.rw-image-mode.rw-showing-answer-en .rw-answer-english:not(.hidden),
-[data-theme="dark"] body.has-home-bottom-bar .rw-race-mode.rw-image-mode.rw-showing-answer-en .rw-answer-english:not(.hidden) {
-  background: rgba(18, 28, 36, 0.96);
+[data-theme="dark"] .rw-solo-mode.rw-image-mode .rw-answer-english:not(.hidden),
+[data-theme="dark"] .rw-race-mode.rw-image-mode .rw-answer-english:not(.hidden) {
+  background: rgba(18, 28, 36, 0.94);
   color: #fff;
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
 }
 
 .rw-answer-english.hidden {
@@ -1095,7 +1091,7 @@ body.has-home-bottom-bar .rw-race-mode.rw-image-mode.rw-showing-answer-en .rw-an
 }
 
 [data-theme="dark"] .rw-answer-english {
-  color: #000;
+  color: #fff;
 }
 
 @keyframes rwAnswerEnglishIn {
@@ -1477,7 +1473,22 @@ body.has-home-bottom-bar .rw-solo-mode .rw-dock-area {
 
 body.has-home-bottom-bar .rw-solo-mode.rw-image-mode .rw-dock-area {
   margin-bottom: 0;
-  padding-bottom: 12px;
+  padding-bottom: calc(8px + var(--home-nav-offset, calc(46px + env(safe-area-inset-bottom, 0px))));
+}
+
+/* Win gloss sits under the answer tiles — don't clip it. */
+.rw-solo-mode.rw-image-mode.rw-showing-answer-en .rw-play-cluster,
+.rw-solo-mode.rw-image-mode.rw-showing-answer-en .rw-board,
+.rw-solo-mode.rw-image-mode.rw-showing-answer-en .rw-answer-area {
+  overflow: visible;
+}
+
+/* Quest / streak toasts on Word Chain must clear the home bottom bar. */
+body.rw-page .quest-toast,
+body.rw-page .daily-streak-toast,
+body.rw-race-page .quest-toast,
+body.rw-race-page .daily-streak-toast {
+  bottom: calc(12px + var(--home-nav-offset, calc(56px + env(safe-area-inset-bottom, 0px))));
 }
 
 .rw-hint-btn {
