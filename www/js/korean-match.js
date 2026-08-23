@@ -2625,6 +2625,18 @@
         if (fillW >= MIN_TILE) tileSize = Math.max(tileSize, fillW);
       }
 
+      // Solo 1-letter: keep dock tiles at CSS --tile-size (same as 2-letter),
+      // instead of expanding a few tiles to fill the tools-column height.
+      const sylCount = Number(
+        this.els?.blocks?.dataset?.sylCount
+        || this.root?.querySelector?.('#match-blocks')?.dataset?.sylCount
+        || 0
+      );
+      if (sylCount === 1 && !this.versus && !this.turnBased && !this.tutorialMode) {
+        const cap = Number.isFinite(rootTile) && rootTile > 0 ? rootTile : 48;
+        tileSize = Math.min(tileSize, cap);
+      }
+
       bank.style.setProperty('--dock-tile-size', `${tileSize}px`);
       bank.style.setProperty('--turn-dock-tile-size', `${tileSize}px`);
 

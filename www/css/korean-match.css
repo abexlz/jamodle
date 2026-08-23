@@ -2817,44 +2817,41 @@
     max-width: var(--wrap-block);
   }
 
-  /* 1-letter single: same empty-block scale as battle turn (fill mid column). */
+  /* 1-letter: same board/dock proportions as 2-letter (one block = half-row size). */
   body.match-page:not(.match-race-page) .blocks-area.match-play-surface:has(.syllable-blocks-row[data-syl-count="1"]) {
-    flex: 1 1 auto;
+    flex: 0 0 auto;
     min-height: 0;
-    margin-top: 0;
-    container-type: size;
-    container-name: blocks-area;
-    justify-content: center;
+    margin-top: auto;
+    justify-content: flex-end;
     align-items: center;
-    overflow: hidden;
+    overflow: visible;
   }
 
   body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="1"] {
     justify-content: center;
     align-items: center;
-    flex: 0 1 auto;
-    flex-shrink: 1;
+    flex: 0 0 auto;
     width: 100%;
-    height: 95%;
-    max-height: 95%;
+    height: auto;
+    max-height: none;
     min-height: 0;
     overflow: visible;
   }
 
   body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="1"] .syllable-block {
+    /* Match a single block from a 2-letter row. */
     flex: 0 0 auto;
     flex-shrink: 0;
-    width: min(95cqh, 95%, 90vw);
-    height: min(95cqh, 95%, 90vw);
-    max-width: min(95cqh, 95%, 90vw);
-    max-height: min(95cqh, 95%, 90vw);
+    width: calc((100% - clamp(3px, 1vw, 10px)) / 2);
+    max-width: calc((100% - clamp(3px, 1vw, 10px)) / 2);
+    height: auto;
+    aspect-ratio: 1 / 1.12;
     min-width: 0;
-    aspect-ratio: 1 / 1;
   }
 
   body.match-page:not(.match-race-page) #match-app:has(.syllable-blocks-row[data-syl-count="1"]) {
-    /* Keep dock/rotate tiles at normal size; only the board scales up. */
-    --tile-size: min(48px, 14vw);
+    /* Same dock tile scale as 2-letter mode (JS also caps fit-to-height). */
+    --tile-size: clamp(36px, 9.5vw, 50px);
   }
 
   body.match-page:not(.match-race-page) .syllable-blocks-row[data-syl-count="1"] .syllable-grid {
