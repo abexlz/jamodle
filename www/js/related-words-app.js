@@ -1493,8 +1493,24 @@
       return Math.max(0, Number(global.ShopService?.getCoins?.() ?? global.ProfileService?.loadProfile?.()?.coins) || 0);
     }
 
-    canAffordHint() {
+    getHintTokenCount() {
+      const HT = global.HintTokens;
+      if (!HT) return 0;
+      if (HT.hasDevUnlimited?.()) return Infinity;
+      return Math.max(0, Number(HT.get?.()) || 0);
+    }
+
+    canAffordHintWithToken() {
+      const n = this.getHintTokenCount();
+      return n === Infinity || n >= 1;
+    }
+
+    canAffordHintWithCoins() {
       return this.getPlayerCoins() >= HINT_COST;
+    }
+
+    canAffordHint() {
+      return this.canAffordHintWithToken() || this.canAffordHintWithCoins();
     }
 
     /** Left-most slot that does not already hold its correct syllable, or -1. */
@@ -1526,21 +1542,35 @@
 
       row.hidden = false;
       const available = this.isHintAvailable();
+      const tokenCount = this.getHintTokenCount();
+      const unlimited = tokenCount === Infinity;
+      const useToken = this.canAffordHintWithToken();
       const useAd = !this.canAffordHint();
       btn.disabled = !available || this._hintBusy;
       btn.classList.toggle('rw-hint-btn--ad', useAd);
       btn.classList.toggle('rw-hint-btn--hint', !useAd);
-      btn.dataset.mode = useAd ? 'ad' : 'hint';
+      btn.classList.toggle('rw-hint-btn--token', useToken);
+      btn.dataset.mode = useAd ? 'ad' : (useToken ? 'token' : 'coin');
 
-      const cost = `🪙 ${HINT_COST}`;
+      const tokenLabel = unlimited ? '∞' : String(tokenCount);
+      const costHtml = useToken
+        ? ''
+        : `<span class="rw-hint-btn__cost">${global.CoinIcon?.format?.(`🪙 ${HINT_COST}`, 'coin-icon coin-icon--sm') || escapeHtml(`🪙 ${HINT_COST}`)}</span>`;
       btn.innerHTML = `
-        <span class="rw-hint-btn__icon" aria-hidden="true">💡</span>
+        <span class="rw-hint-btn__icon-wrap" aria-hidden="true">
+          <span class="rw-hint-btn__icon">💡</span>
+          <span class="rw-hint-btn__tokens">${escapeHtml(tokenLabel)}</span>
+        </span>
         <span class="rw-hint-btn__tag" aria-hidden="true">hint!!</span>
-        <span class="rw-hint-btn__cost">${global.CoinIcon?.format?.(cost, 'coin-icon coin-icon--sm') || escapeHtml(cost)}</span>
+        ${costHtml}
         ${useAd ? '<span class="rw-hint-btn__ad" aria-hidden="true">AD</span>' : ''}`;
       if (useAd) {
         btn.setAttribute('aria-label', t('relatedWords.hintAdAria'));
         btn.title = t('relatedWords.hintAdAria');
+      } else if (useToken) {
+        const shown = unlimited ? '∞' : String(tokenCount);
+        btn.setAttribute('aria-label', t('relatedWords.hintTokenAria', { count: shown }));
+        btn.title = t('relatedWords.hintTokenAria', { count: shown });
       } else {
         btn.setAttribute('aria-label', t('relatedWords.hintAria', { count: HINT_COST }));
         btn.title = t('relatedWords.hintAria', { count: HINT_COST });
@@ -1550,10 +1580,31 @@
     onHintBtnClick() {
       if (!this.isHintAvailable() || this._hintBusy) return;
       global.KoreanTTS?.prime?.();
-      if (this.canAffordHint()) {
+      if (this.canAffordHintWithToken()) {
+        this.spendHintToken();
+      } else if (this.canAffordHintWithCoins()) {
         this.spendHintCoins();
       } else {
         this.watchHintAd();
+      }
+    }
+
+    spendHintToken() {
+      if (!this.isHintAvailable()) {
+        this.renderHintDock();
+        return;
+      }
+      const HT = global.HintTokens;
+      if (!HT?.spend?.(1)) {
+        this.showFeedback(t('relatedWords.hintInsufficientTokens'), 'error');
+        this.renderHintDock();
+        return;
+      }
+      if (!this.applyNextCharHint()) {
+        HT.grant?.(1);
+        this.renderHintDock();
+      } else {
+        this.renderHintDock();
       }
     }
 
@@ -1570,6 +1621,8 @@
       }
       if (!this.applyNextCharHint()) {
         global.ShopService?.grantCoins?.(HINT_COST, { skipBoost: true });
+        this.renderHintDock();
+      } else {
         this.renderHintDock();
       }
     }

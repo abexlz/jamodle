@@ -1419,9 +1419,42 @@ body.has-home-bottom-bar .rw-solo-mode.rw-image-mode .rw-dock-area {
   line-height: 1;
 }
 
+.rw-hint-btn__icon-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  margin-inline-end: 6px;
+}
+
 .rw-hint-btn__icon {
   font-size: 29px;
   line-height: 1;
+}
+
+.rw-hint-btn__tokens {
+  position: absolute;
+  right: -0.55em;
+  bottom: -0.35em;
+  min-width: 1.15em;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: #ffe566;
+  border: 1.5px solid #fff;
+  box-shadow: 0 1px 0 rgba(120, 70, 0, 0.35);
+  color: #5c3a10;
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: center;
+}
+
+.rw-hint-btn--token .rw-hint-btn__tokens {
+  background: #6ee7a8;
+  color: #0b4d32;
+  box-shadow: 0 1px 0 rgba(20, 90, 50, 0.35);
 }
 
 .rw-hint-btn__label {
