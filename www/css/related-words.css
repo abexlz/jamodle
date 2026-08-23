@@ -711,7 +711,7 @@ body.rw-page #app-top-hud.menu-top-bar.menu-hud-bar {
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   object-position: center;
   padding: 0;
   box-sizing: border-box;
@@ -743,7 +743,7 @@ body.rw-page #app-top-hud.menu-top-bar.menu-hud-bar {
 .rw-solo-mode .rw-answer-photo {
   flex: 1 1 0;
   min-height: 0;
-  max-height: min(54dvh, 420px);
+  max-height: none;
   justify-content: center;
   margin-top: 0;
   margin-bottom: 4px;
@@ -1313,7 +1313,7 @@ html.reduce-motion .rw-answer-english {
 }
 
 .rw-solo-mode .rw-dock-area {
-  margin-top: 0;
+  margin-top: auto;
   margin-bottom: 0;
   flex-shrink: 0;
 }
@@ -1561,13 +1561,14 @@ html.reduce-motion .rw-answer-english {
 }
 
 body.has-home-bottom-bar .rw-solo-mode .rw-dock-area {
-  margin-bottom: 4px;
-  padding-bottom: 2px;
+  margin-bottom: 0;
+  padding-bottom: 4px;
 }
 
 body.has-home-bottom-bar .rw-solo-mode.rw-image-mode .rw-dock-area {
   margin-bottom: 0;
-  padding-bottom: calc(8px + var(--home-nav-offset, calc(46px + env(safe-area-inset-bottom, 0px))));
+  /* Body already clears the fixed home nav — keep only a small gap. */
+  padding-bottom: 6px;
 }
 
 /* Win gloss sits under the answer tiles — don't clip it. */
@@ -2260,8 +2261,8 @@ html.reduce-motion .rw-confetti-piece {
 
 .rw-solo-mode.rw-image-mode .rw-answer-photo {
   flex: 1 1 auto;
-  min-height: 200px;
-  max-height: min(54dvh, 420px);
+  min-height: 220px;
+  max-height: none;
   justify-content: flex-start;
   margin-top: 0;
   margin-bottom: 4px;
@@ -2296,7 +2297,7 @@ html.reduce-motion .rw-confetti-piece {
 
 @media (max-height: 900px) {
   .rw-solo-mode .rw-answer-photo {
-    max-height: min(50dvh, 380px);
+    max-height: none;
   }
 
   .rw-dock-tile.flip-tile {
@@ -2342,7 +2343,7 @@ html.reduce-motion .rw-confetti-piece {
   .rw-solo-mode .rw-answer-photo {
     flex: 1 1 auto;
     min-height: 88px;
-    max-height: min(48dvh, 240px);
+    max-height: none;
     margin-bottom: 4px;
   }
 

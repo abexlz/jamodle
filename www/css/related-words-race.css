@@ -466,7 +466,7 @@ body.rw-race-page.rw-race-active .rw-answer-photo-frame {
 }
 
 body.rw-race-page.rw-race-active .rw-answer-photo-img {
-  object-fit: cover;
+  object-fit: contain;
   padding: 0;
 }
 
