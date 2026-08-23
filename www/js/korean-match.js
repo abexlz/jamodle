@@ -6431,7 +6431,8 @@
         this._resultsFitRaf = 0;
       }
 
-      const chars = Array.from(String(word || '').replace(/\s*[·•|]\s*/g, '')).length;
+      const text = String(word || '').trim();
+      const chars = Array.from(text.replace(/\s*[·•|]\s*/g, '')).length;
       banner.dataset.chars = String(Math.max(1, Math.min(chars || 1, 12)));
 
       wordEl.style.removeProperty('font-size');
@@ -6439,20 +6440,23 @@
       this.resetResultsCardWidth();
 
       const fitToBanner = () => {
+        if (!banner.isConnected || !wordEl.isConnected) return;
+        const bw = banner.clientWidth;
+        const bh = banner.clientHeight;
+        if (bw < 40 || bh < 40) return;
+
         const cs = getComputedStyle(banner);
         const padX = (Number.parseFloat(cs.paddingLeft) || 0)
           + (Number.parseFloat(cs.paddingRight) || 0);
         const padY = (Number.parseFloat(cs.paddingTop) || 0)
           + (Number.parseFloat(cs.paddingBottom) || 0);
-        // Gold frame / scalloped ends are inside the PNG, so keep extra inset.
-        const frameX = banner.clientWidth * 0.08;
-        const frameY = banner.clientHeight * 0.16;
-        const innerW = Math.max(40, banner.clientWidth - padX - frameX);
-        const innerH = Math.max(40, banner.clientHeight - padY - frameY);
+        // Padding already clears the PNG frame/laurels; fill ~80% of that inner box.
+        const innerW = Math.max(32, bw - padX);
+        const innerH = Math.max(32, bh - padY);
         const targetW = innerW * 0.8;
-        const targetH = innerH * 0.72;
-        // Jua Hangul glyphs sit taller than font-size; keep a headroom cap.
-        const maxFont = Math.max(32, Math.floor(targetH * 0.82));
+        const targetH = innerH * 0.8;
+        // Short words: grow toward the full target height. Long words shrink for width.
+        const maxFont = Math.max(40, Math.floor(targetH));
 
         const fits = (size) => {
           card.style.setProperty('--results-word-font', `${size}px`);
@@ -6461,9 +6465,9 @@
           return wordEl.scrollWidth <= targetW + 1 && box.height <= targetH + 1;
         };
 
-        let lo = 24;
+        let lo = 20;
         let hi = maxFont;
-        let best = 24;
+        let best = 20;
         while (lo <= hi) {
           const mid = Math.round((lo + hi) / 2);
           if (fits(mid)) {
