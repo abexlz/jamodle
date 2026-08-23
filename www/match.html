@@ -1107,15 +1107,15 @@
     /* app-buttons.css */
   }
 </style>
-<link rel="stylesheet" href="css/korean-match.css?v=20260823e">
+<link rel="stylesheet" href="css/korean-match.css?v=20260823f">
 <link rel="stylesheet" href="css/answer-tts.css?v=20260814k">
 <link rel="stylesheet" href="css/pause-quit.css?v=2">
 <link rel="stylesheet" href="css/app-theme.css?v=26">
-<link rel="stylesheet" href="css/home-nav.css?v=29">
+<link rel="stylesheet" href="css/home-nav.css?v=30">
 <link rel="stylesheet" href="css/app-chrome.css?v=20260816g" id="app-chrome-styles">
 <link rel="stylesheet" href="css/app-wordle-ui.css?v=22">
 <style>
-  /* Fit Korean Match on one screen — no page scroll */
+  /* Fit Korean Match on one screen — leave room for the fixed home tab bar */
   body.match-page {
     display: flex;
     flex-direction: column;
@@ -1123,15 +1123,18 @@
     height: auto;
     overflow-x: hidden;
     overflow-y: auto;
-    padding: calc(6px + var(--safe-top)) 10px calc(6px + var(--safe-bottom));
+    padding-top: calc(6px + var(--safe-top, env(safe-area-inset-top, 0px)));
+    padding-right: 10px;
+    padding-left: 10px;
+    padding-bottom: calc(10px + var(--home-nav-offset, calc(56px + var(--safe-bottom, env(safe-area-inset-bottom, 0px))))) !important;
   }
 
   body.match-page #match-app {
-    flex: 1;
+    flex: 1 1 auto;
     display: flex;
     flex-direction: column;
     height: auto;
-    min-height: min(100dvh - 60px, 100%);
+    min-height: 0;
     max-height: none;
     gap: 4px;
     overflow: hidden;
@@ -1404,12 +1407,17 @@
     align-items: flex-start;
     gap: var(--hint-gap);
     width: 100%;
-    padding: 2px 2px 4px;
+    padding: 8px 10px 10px;
     overflow: visible;
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    backdrop-filter: none;
+    position: relative;
+    z-index: 5;
+    pointer-events: auto !important;
+    background: rgba(0, 55, 68, 0.92) !important;
+    border: 2px solid rgba(123, 207, 255, 0.45) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 4px 14px rgba(0, 30, 40, 0.28) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
   }
 
   body.match-page .match-hint-dock > .match-token-counter {
