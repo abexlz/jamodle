@@ -373,7 +373,7 @@
 
     body.innerHTML = activeTab === 'trophies'
       ? buildTrophiesHtml()
-      : buildBadgesHtml() + buildCalendarHtml() + buildStatsHtml();
+      : buildCalendarHtml() + buildBadgesHtml() + buildStatsHtml();
     footer.innerHTML = activeTab === 'puzzles' ? buildFooterHtml() : '';
 
     overlayEl.querySelectorAll('.daily-cal-tab').forEach((tab) => {

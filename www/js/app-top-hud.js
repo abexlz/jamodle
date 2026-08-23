@@ -34,7 +34,7 @@
     ['DailyGiftService', 'js/daily-gift-service.js'],
     ['DailyGiftUI', 'js/daily-gift-ui.js?v=20260803a'],
     ['DailyCalendarService', 'js/daily-calendar-service.js?v=20260823f'],
-    ['DailyCalendarModal', 'js/daily-calendar-modal.js?v=20260823f'],
+    ['DailyCalendarModal', 'js/daily-calendar-modal.js?v=20260823g'],
     ['ChestRoomService', 'js/chest-room-service.js?v=20260823b'],
     ['ChestRoomUI', 'js/chest-room-ui.js?v=20260815a'],
   ];
