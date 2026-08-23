@@ -4,23 +4,30 @@
 (function (global) {
   'use strict';
 
+  /**
+   * Prize tables target ~90% return vs box price (house edge ~10%).
+   * Coin prizes use face value; other types use shop-equivalent coins:
+   *   hintToken 15, extraGuess 40, xpBoost 70, coinBoost 90, dailyUnlock7 250,
+   *   XP ≈ 0.5 coins each.
+   * Weights create a spread: some rolls below price, some above.
+   */
   const TIERS = {
     wooden: {
       id: 'wooden',
       price: 20,
       closedImg: 'assets/chests/wooden-closed.png',
       openImg: 'assets/chests/wooden-open.png',
-      // Small floor / ceiling — common rolls stay well under original.
+      // Target EV ≈ 18 (90% of 20)
       prizes: [
-        { id: 'coins-3', type: 'coins', amount: 3, weight: 24, icon: '🪙' },
-        { id: 'coins-5', type: 'coins', amount: 5, weight: 20, icon: '🪙' },
-        { id: 'coins-8', type: 'coins', amount: 8, weight: 16, icon: '🪙' },
-        { id: 'coins-12', type: 'coins', amount: 12, weight: 6, icon: '🪙' },
-        { id: 'xp-10', type: 'xp', amount: 10, weight: 14, icon: '⭐' },
-        { id: 'xp-15', type: 'xp', amount: 15, weight: 8, icon: '✨' },
-        { id: 'hint-1', type: 'hintToken', amount: 1, weight: 6, icon: '💡' },
-        { id: 'extra-1', type: 'extraGuess', amount: 1, weight: 3, icon: '❤️' },
-        { id: 'coins-20', type: 'coins', amount: 20, weight: 1, icon: '💰' },
+        { id: 'coins-12', type: 'coins', amount: 12, weight: 16, icon: '🪙' },
+        { id: 'coins-15', type: 'coins', amount: 15, weight: 22, icon: '🪙' },
+        { id: 'coins-20', type: 'coins', amount: 20, weight: 20, icon: '🪙' },
+        { id: 'coins-25', type: 'coins', amount: 25, weight: 12, icon: '💰' },
+        { id: 'coins-40', type: 'coins', amount: 40, weight: 4, icon: '💰' },
+        { id: 'xp-15', type: 'xp', amount: 15, weight: 6, icon: '✨' },
+        { id: 'hint-1', type: 'hintToken', amount: 1, weight: 5, icon: '💡' },
+        { id: 'extra-1', type: 'extraGuess', amount: 1, weight: 2, icon: '❤️' },
+        { id: 'coins-50', type: 'coins', amount: 50, weight: 1, icon: '🎁' },
       ],
     },
     original: {
@@ -28,19 +35,18 @@
       price: 50,
       closedImg: 'assets/chests/chest-closed.png',
       openImg: 'assets/chests/chest-open.png',
-      // Floor starts above wooden's common payouts; tokens/buffs more often.
+      // Target EV ≈ 45 (90% of 50); floor stays above wooden's common rolls
       prizes: [
-        { id: 'coins-15', type: 'coins', amount: 15, weight: 14, icon: '🪙' },
-        { id: 'coins-20', type: 'coins', amount: 20, weight: 13, icon: '🪙' },
-        { id: 'coins-25', type: 'coins', amount: 25, weight: 11, icon: '💰' },
-        { id: 'coins-40', type: 'coins', amount: 40, weight: 7, icon: '💰' },
-        { id: 'xp-20', type: 'xp', amount: 20, weight: 10, icon: '⭐' },
-        { id: 'xp-40', type: 'xp', amount: 40, weight: 8, icon: '✨' },
-        { id: 'hint-1', type: 'hintToken', amount: 1, weight: 8, icon: '💡' },
+        { id: 'coins-25', type: 'coins', amount: 25, weight: 6, icon: '🪙' },
+        { id: 'coins-40', type: 'coins', amount: 40, weight: 20, icon: '💰' },
+        { id: 'coins-50', type: 'coins', amount: 50, weight: 22, icon: '💰' },
+        { id: 'coins-60', type: 'coins', amount: 60, weight: 12, icon: '💰' },
+        { id: 'coins-100', type: 'coins', amount: 100, weight: 3, icon: '🎁' },
+        { id: 'xp-40', type: 'xp', amount: 40, weight: 6, icon: '✨' },
+        { id: 'hint-1', type: 'hintToken', amount: 1, weight: 3, icon: '💡' },
         { id: 'hint-2', type: 'hintToken', amount: 2, weight: 6, icon: '💡' },
-        { id: 'extra-1', type: 'extraGuess', amount: 1, weight: 8, icon: '❤️' },
-        { id: 'buff-xp', type: 'buff', amount: 1, buffId: 'xpBoost2x15', weight: 5, icon: '⚡' },
-        { id: 'coins-50', type: 'coins', amount: 50, weight: 4, icon: '🎁' },
+        { id: 'extra-1', type: 'extraGuess', amount: 1, weight: 5, icon: '❤️' },
+        { id: 'buff-xp', type: 'buff', amount: 1, buffId: 'xpBoost2x15', weight: 4, icon: '⚡' },
       ],
     },
     mega: {
@@ -48,22 +54,18 @@
       price: 100,
       closedImg: 'assets/chests/mega-closed.png',
       openImg: 'assets/chests/mega-open.png',
-      // Stays a clear step above original (higher coin floor + dual buffs).
+      // Target EV ≈ 90 (90% of 100); clear step above original
       prizes: [
-        { id: 'coins-25', type: 'coins', amount: 25, weight: 13, icon: '🪙' },
-        { id: 'coins-40', type: 'coins', amount: 40, weight: 12, icon: '💰' },
-        { id: 'coins-60', type: 'coins', amount: 60, weight: 9, icon: '💰' },
-        { id: 'coins-100', type: 'coins', amount: 100, weight: 3, icon: '🎁' },
-        { id: 'xp-40', type: 'xp', amount: 40, weight: 10, icon: '⭐' },
-        { id: 'xp-50', type: 'xp', amount: 50, weight: 8, icon: '✨' },
-        { id: 'xp-80', type: 'xp', amount: 80, weight: 4, icon: '✨' },
-        { id: 'hint-1', type: 'hintToken', amount: 1, weight: 6, icon: '💡' },
-        { id: 'hint-2', type: 'hintToken', amount: 2, weight: 7, icon: '💡' },
-        { id: 'extra-1', type: 'extraGuess', amount: 1, weight: 6, icon: '❤️' },
-        { id: 'extra-2', type: 'extraGuess', amount: 2, weight: 4, icon: '❤️' },
-        { id: 'buff-xp', type: 'buff', amount: 1, buffId: 'xpBoost2x15', weight: 5, icon: '⚡' },
-        { id: 'buff-coin', type: 'buff', amount: 1, buffId: 'coinBoost2x15', weight: 4, icon: '⚡' },
-        { id: 'buff-daily', type: 'buff', amount: 1, buffId: 'dailyUnlock7', weight: 2, icon: '📅' },
+        { id: 'coins-40', type: 'coins', amount: 40, weight: 2, icon: '🪙' },
+        { id: 'coins-50', type: 'coins', amount: 50, weight: 6, icon: '🪙' },
+        { id: 'coins-60', type: 'coins', amount: 60, weight: 14, icon: '💰' },
+        { id: 'coins-100', type: 'coins', amount: 100, weight: 26, icon: '🎁' },
+        { id: 'xp-80', type: 'xp', amount: 80, weight: 2, icon: '✨' },
+        { id: 'hint-2', type: 'hintToken', amount: 2, weight: 3, icon: '💡' },
+        { id: 'extra-2', type: 'extraGuess', amount: 2, weight: 10, icon: '❤️' },
+        { id: 'buff-xp', type: 'buff', amount: 1, buffId: 'xpBoost2x15', weight: 6, icon: '⚡' },
+        { id: 'buff-coin', type: 'buff', amount: 1, buffId: 'coinBoost2x15', weight: 8, icon: '⚡' },
+        { id: 'buff-daily', type: 'buff', amount: 1, buffId: 'dailyUnlock7', weight: 6, icon: '📅' },
       ],
     },
   };
