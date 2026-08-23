@@ -39,7 +39,8 @@
   }
 
   function hasDevUnlimited() {
-    return global.DevBuild?.hasDevAccess?.() === true;
+    // Must match the Settings “Dev mode” toggle, not merely unlocked/localhost access.
+    return global.DevBuild?.isDevModeActive?.() === true;
   }
 
   function get() {
