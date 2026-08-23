@@ -3700,6 +3700,7 @@
 
     placeFromDock(tileId) {
       if (!this.enabled || this.roundLocked || this.isStunned() || this.awaitingExtraGuess) return;
+      global.SoundEffects?.unlock?.();
       global.KoreanTTS?.unlockPlayback?.();
       const tile = this.dock.find((item) => item.id === tileId && !item.used);
       if (!tile) return;
@@ -3716,21 +3717,30 @@
       this.renderDock();
       global.SoundEffects?.place?.();
       if (this.allSlotsFilled()) {
-        // Kick win TTS off inside the same tap gesture (before any await) so
-        // mobile browsers allow HTMLAudio playback after the async check flow.
         const built = this.getBuiltWord();
-        if (
-          this.imageMode
+        const shouldSpeak = this.imageMode
           && !this.raceMode
           && built
           && built === this.puzzle?.answer
-          && this.isWinTtsEnabled()
-        ) {
-          this._pendingWinTts = this.speakSolvedWordImageMode();
+          && this.isWinTtsEnabled();
+
+        const startRound = () => {
+          if (shouldSpeak) {
+            this._pendingWinTts = this.speakSolvedWordImageMode();
+          } else {
+            this._pendingWinTts = null;
+          }
+          this.checkAnswer();
+        };
+
+        // Resume TTS + SFX AudioContexts in this gesture, then start TTS.
+        global.KoreanTTS?.unlockPlayback?.();
+        const ctx = global.SoundEffects?.getSharedContext?.();
+        if (shouldSpeak && ctx && ctx.state === 'suspended') {
+          ctx.resume().then(startRound).catch(startRound);
         } else {
-          this._pendingWinTts = null;
+          startRound();
         }
-        this.checkAnswer();
       }
     }
 

@@ -194,10 +194,64 @@
     return getCtx();
   }
 
+  /**
+   * Play a decoded AudioBuffer through the shared SFX AudioContext.
+   * Used by Korean TTS so pronunciation is not muted by the iPhone ringer switch
+   * (HTMLAudioElement is). Ignores the soundEffects toggle — pronunciation has its
+   * own preference. Returns a promise that resolves when playback ends.
+   */
+  function playRawBuffer(buffer, { gainValue = 0.9, playbackRate = 1 } = {}) {
+    unlock();
+    const c = getCtx();
+    if (!c || !buffer) return Promise.resolve(false);
+
+    const rate = Number.isFinite(playbackRate) && playbackRate > 0
+      ? Math.max(0.5, Math.min(2, playbackRate))
+      : 1;
+    const amp = Math.max(0.55, Math.min(1, Number(gainValue) || 0.9));
+
+    const run = () => new Promise((resolve) => {
+      try {
+        if (c.state !== 'running') {
+          resolve(false);
+          return;
+        }
+        const src = c.createBufferSource();
+        const gain = c.createGain();
+        src.buffer = buffer;
+        try {
+          src.playbackRate.value = rate;
+        } catch (_) { /* ignore */ }
+        gain.gain.value = amp;
+        src.connect(gain);
+        gain.connect(c.destination);
+
+        let settled = false;
+        const done = (ok) => {
+          if (settled) return;
+          settled = true;
+          resolve(!!ok);
+        };
+        src.onended = () => done(true);
+        src.start(0);
+        const ms = Math.max(250, ((buffer.duration || 1) / rate + 0.2) * 1000);
+        setTimeout(() => done(true), ms);
+      } catch (_) {
+        resolve(false);
+      }
+    });
+
+    if (c.state === 'running') return run();
+    return c.resume()
+      .then(() => (c.state === 'running' ? run() : false))
+      .catch(() => false);
+  }
+
   const SoundEffects = {
     unlock,
     preloadSamples,
     getSharedContext,
+    playRawBuffer,
 
     tap() {
       playTone({ freq: 520, duration: 0.035, peak: 0.07, type: 'triangle' });
