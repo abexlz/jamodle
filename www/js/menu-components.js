@@ -286,18 +286,31 @@
       currentStreak: 0, freezeCount: 0, clearedToday: false,
     };
     const n = snap.currentStreak || 0;
+    const freeze = snap.freezeCount || 0;
+    const milestones = global.DailyQuizStreak?.MILESTONES || [];
+    const next = milestones.find((m) => n < m.days);
+    const nextLine = next
+      ? t('dailyStreak.nextReward', {
+        left: Math.max(0, next.days - n),
+        days: next.days,
+        reward: t(`dailyStreak.milestoneReward.${next.days}`),
+      })
+      : t('dailyStreak.allRewardsUnlocked');
     return `
       <section class="dq-streak-hero" aria-label="${escapeHtml(t('dailyStreak.title'))}">
+        <p class="dq-streak-how-mini">${escapeHtml(t('dailyStreak.howItWorks'))}</p>
         <div class="dq-streak-hero-main">
           <span class="dq-streak-fire" aria-hidden="true">🔥</span>
           <span class="dq-streak-count">${n}</span>
-          <span class="dq-streak-label">${escapeHtml(t('dailyStreak.daysLabel'))}</span>
+          <span class="dq-streak-label">${escapeHtml(t('dailyStreak.currentStreakLabel'))}</span>
         </div>
-        <div class="dq-streak-freeze" title="${escapeHtml(t('dailyStreak.freezeHeld', { count: snap.freezeCount }))}">
+        <div class="dq-streak-freeze" title="${escapeHtml(t('dailyStreak.freezeExplain'))}">
           <span aria-hidden="true">❄️</span>
-          <span>${snap.freezeCount || 0}</span>
+          <span class="dq-streak-freeze-count">${freeze}</span>
+          <span class="dq-streak-freeze-label">${escapeHtml(t('dailyStreak.freezeLabel'))}</span>
         </div>
         <p class="dq-streak-status">${escapeHtml(snap.clearedToday ? t('dailyStreak.savedToday') : t('dailyStreak.keepStreak'))}</p>
+        <p class="dq-streak-next-mini">${escapeHtml(nextLine)}</p>
       </section>
     `;
   }

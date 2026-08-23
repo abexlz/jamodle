@@ -293,6 +293,188 @@
   line-height: 1.2;
 }
 
+/* Daily quiz streak explain panel */
+.daily-cal-streak-panel {
+  background: linear-gradient(180deg, rgba(255, 248, 220, 0.96) 0%, rgba(255, 255, 255, 0.96) 48%);
+  border-color: rgba(255, 180, 40, 0.45);
+}
+
+.dq-streak-how {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: rgba(10, 61, 82, 0.78);
+  text-align: center;
+}
+
+.dq-streak-status-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.dq-streak-stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 2px solid transparent;
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.dq-streak-stat--fire {
+  border-color: rgba(255, 160, 40, 0.45);
+  background: linear-gradient(180deg, #fff6e0 0%, #ffffff 100%);
+}
+
+.dq-streak-stat--freeze {
+  border-color: rgba(90, 170, 220, 0.45);
+  background: linear-gradient(180deg, #eef8ff 0%, #ffffff 100%);
+}
+
+.dq-streak-stat-icon {
+  font-size: 28px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.dq-streak-stat-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.dq-streak-stat-value {
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: 26px;
+  line-height: 1;
+  color: #5c2e00;
+}
+
+.dq-streak-stat--freeze .dq-streak-stat-value {
+  color: #0a4a6e;
+}
+
+.dq-streak-stat-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(10, 61, 82, 0.7);
+  line-height: 1.2;
+}
+
+.dq-streak-freeze-hint {
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(90, 170, 220, 0.12);
+  border: 1px solid rgba(90, 170, 220, 0.28);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #0a4a6e;
+}
+
+.dq-streak-today {
+  margin: 0 0 12px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #007A8E;
+}
+
+.dq-milestone-block {
+  margin-top: 4px;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(255, 180, 40, 0.4);
+}
+
+.dq-milestone-heading {
+  margin: 0 0 8px;
+  font-family: 'Jua', sans-serif;
+  font-size: 14px;
+  color: #5c2e00;
+  text-align: center;
+}
+
+.dq-milestone-track {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.dq-milestone-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 4px 6px;
+  border-radius: 12px;
+  border: 2px solid rgba(10, 61, 82, 0.08);
+  background: rgba(10, 61, 82, 0.04);
+  text-align: center;
+  min-height: 88px;
+}
+
+.dq-milestone-card.is-earned {
+  background: linear-gradient(180deg, #e8fff6 0%, #ffffff 100%);
+  border-color: rgba(46, 200, 126, 0.55);
+  box-shadow: 0 2px 6px rgba(46, 200, 126, 0.16);
+}
+
+.dq-milestone-card.is-next {
+  background: linear-gradient(180deg, #fff6e0 0%, #ffffff 100%);
+  border-color: rgba(255, 170, 40, 0.65);
+  box-shadow: 0 0 0 2px rgba(255, 200, 80, 0.28);
+}
+
+.dq-milestone-card.is-locked {
+  opacity: 0.72;
+}
+
+.dq-milestone-days {
+  font-size: 10px;
+  font-weight: 800;
+  color: rgba(10, 61, 82, 0.72);
+  letter-spacing: 0.02em;
+}
+
+.dq-milestone-icon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.dq-milestone-reward {
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: rgba(10, 61, 82, 0.82);
+}
+
+.dq-milestone-card.is-earned .dq-milestone-reward {
+  color: #0d7a4f;
+}
+
+.dq-milestone-card.is-next .dq-milestone-reward {
+  color: #9a5b00;
+}
+
+.dq-streak-next {
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(255, 215, 80, 0.22);
+  border: 1px solid rgba(255, 180, 40, 0.35);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+  text-align: center;
+  color: #5c2e00;
+}
+
 .daily-cal-progress-wrap {
   position: relative;
   background: rgba(0, 120, 140, 0.12);
@@ -747,6 +929,40 @@ body.daily-cal-open #menu-screen {
     font-size: 10px;
   }
 
+  .dq-streak-how {
+    font-size: 12px;
+  }
+
+  .dq-streak-stat {
+    padding: 8px 8px;
+    gap: 6px;
+  }
+
+  .dq-streak-stat-icon {
+    font-size: 22px;
+  }
+
+  .dq-streak-stat-value {
+    font-size: 22px;
+  }
+
+  .dq-milestone-track {
+    gap: 4px;
+  }
+
+  .dq-milestone-card {
+    min-height: 80px;
+    padding: 6px 2px 5px;
+  }
+
+  .dq-milestone-icon {
+    font-size: 18px;
+  }
+
+  .dq-milestone-reward {
+    font-size: 9px;
+  }
+
   .daily-cal-month-label {
     font-size: 15px;
   }
@@ -862,9 +1078,38 @@ body.daily-cal-open #menu-screen {
 #daily-cal-overlay .daily-cal-weekday,
 #daily-cal-overlay .daily-cal-stat-value,
 #daily-cal-overlay .daily-cal-stat-label,
-#daily-cal-overlay .daily-cal-badge-label {
+#daily-cal-overlay .daily-cal-badge-label,
+#daily-cal-overlay .dq-streak-how,
+#daily-cal-overlay .dq-streak-stat-label,
+#daily-cal-overlay .dq-milestone-heading,
+#daily-cal-overlay .dq-milestone-days,
+#daily-cal-overlay .dq-milestone-reward,
+#daily-cal-overlay .dq-streak-freeze-hint,
+#daily-cal-overlay .dq-streak-today,
+#daily-cal-overlay .dq-streak-next {
   color: #0a3d52 !important;
   text-shadow: none !important;
+}
+
+#daily-cal-overlay .dq-streak-stat-value {
+  color: #5c2e00 !important;
+}
+
+#daily-cal-overlay .dq-streak-stat--freeze .dq-streak-stat-value {
+  color: #0a4a6e !important;
+}
+
+#daily-cal-overlay .dq-streak-freeze-hint {
+  color: #0a4a6e !important;
+}
+
+#daily-cal-overlay .dq-streak-today {
+  color: #007A8E !important;
+}
+
+#daily-cal-overlay .dq-streak-next,
+#daily-cal-overlay .dq-milestone-heading {
+  color: #5c2e00 !important;
 }
 
 #daily-cal-overlay .daily-cal-wins-count {

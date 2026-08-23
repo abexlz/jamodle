@@ -42,7 +42,7 @@
       .replace(/"/g, '&quot;');
   }
 
-  const CAL_STYLES_HREF = 'css/daily-calendar.css?v=15';
+  const CAL_STYLES_HREF = 'css/daily-calendar.css?v=16';
 
   function ensureStyles() {
     let link = document.getElementById('daily-cal-styles');
@@ -121,16 +121,74 @@
     `;
   }
 
+  function buildStreakMilestoneTrack(snap) {
+    const awarded = new Set(global.DailyQuizStreak?.loadState?.()?.milestonesAwarded || []);
+    const streak = snap.currentStreak || 0;
+    const milestones = global.DailyQuizStreak?.MILESTONES || [];
+    const next = milestones.find((m) => streak < m.days);
+    const icons = {
+      3: '🔥',
+      7: '🖼️',
+      14: '👑',
+      30: '🏆',
+      100: '📜',
+    };
+    const items = milestones.map((m) => {
+      const earned = awarded.has(m.days) || streak >= m.days;
+      const state = earned ? 'is-earned' : (next && next.days === m.days ? 'is-next' : 'is-locked');
+      return `
+        <div class="dq-milestone-card ${state}" role="listitem">
+          <span class="dq-milestone-days">${escapeHtml(t('dailyStreak.milestoneDays', { days: m.days }))}</span>
+          <span class="dq-milestone-icon" aria-hidden="true">${icons[m.days] || '⭐'}</span>
+          <span class="dq-milestone-reward">${escapeHtml(t(`dailyStreak.milestoneReward.${m.days}`))}</span>
+        </div>`;
+    }).join('');
+
+    const nextHtml = next
+      ? `<p class="dq-streak-next">${escapeHtml(t('dailyStreak.nextReward', {
+        left: Math.max(0, next.days - streak),
+        days: next.days,
+        reward: t(`dailyStreak.milestoneReward.${next.days}`),
+      }))}</p>`
+      : `<p class="dq-streak-next">${escapeHtml(t('dailyStreak.allRewardsUnlocked'))}</p>`;
+
+    return `
+      <div class="dq-milestone-block">
+        <h4 class="dq-milestone-heading">${escapeHtml(t('dailyStreak.milestonesTitle'))}</h4>
+        <div class="dq-milestone-track" role="list">${items}</div>
+        ${nextHtml}
+      </div>`;
+  }
+
   function buildBadgesHtml() {
     const snap = global.DailyQuizStreak?.getSnapshot?.() || {
       currentStreak: 0, freezeCount: 0, clearedToday: false, longestStreak: 0,
     };
+    const days = snap.currentStreak || 0;
+    const freeze = snap.freezeCount || 0;
     return `
       <section class="daily-cal-prizes daily-cal-streak-panel" aria-label="${escapeHtml(t('dailyStreak.title'))}">
         <h3 class="daily-cal-prizes-title">${escapeHtml(t('dailyStreak.title'))}</h3>
-        <p class="daily-cal-wins-count">🔥 ${snap.currentStreak}</p>
-        <p class="daily-cal-wins-remaining">${escapeHtml(t('dailyStreak.freezeHeld', { count: snap.freezeCount }))}</p>
-        <p class="daily-cal-progress-text">${escapeHtml(t('dailyStreak.milestonesHint'))}</p>
+        <p class="dq-streak-how">${escapeHtml(t('dailyStreak.howItWorks'))}</p>
+        <div class="dq-streak-status-row">
+          <div class="dq-streak-stat dq-streak-stat--fire">
+            <span class="dq-streak-stat-icon" aria-hidden="true">🔥</span>
+            <div class="dq-streak-stat-text">
+              <span class="dq-streak-stat-value">${days}</span>
+              <span class="dq-streak-stat-label">${escapeHtml(t('dailyStreak.currentStreakLabel'))}</span>
+            </div>
+          </div>
+          <div class="dq-streak-stat dq-streak-stat--freeze" title="${escapeHtml(t('dailyStreak.freezeExplain'))}">
+            <span class="dq-streak-stat-icon" aria-hidden="true">❄️</span>
+            <div class="dq-streak-stat-text">
+              <span class="dq-streak-stat-value">${freeze}</span>
+              <span class="dq-streak-stat-label">${escapeHtml(t('dailyStreak.freezeLabel'))}</span>
+            </div>
+          </div>
+        </div>
+        <p class="dq-streak-freeze-hint">${escapeHtml(t('dailyStreak.freezeExplain'))}</p>
+        <p class="dq-streak-today">${escapeHtml(snap.clearedToday ? t('dailyStreak.savedToday') : t('dailyStreak.keepStreak'))}</p>
+        ${buildStreakMilestoneTrack(snap)}
       </section>
     `;
   }
@@ -218,20 +276,33 @@
   }
 
   function buildTrophiesHtml() {
-    const snap = global.DailyQuizStreak?.getSnapshot?.() || { currentStreak: 0, milestonesAwarded: [] };
-    const awarded = new Set(global.DailyQuizStreak?.loadState?.()?.milestonesAwarded || []);
-    const items = (global.DailyQuizStreak?.MILESTONES || []).map((m) => {
-      const earned = awarded.has(m.days) || snap.currentStreak >= m.days;
-      return `
-        <div class="daily-cal-trophy-card${earned ? ' is-earned' : ' is-locked'}">
-          <div class="daily-cal-badge-label">${escapeHtml(t(`dailyStreak.milestone.${m.days}`))}</div>
-        </div>`;
-    }).join('');
+    const snap = global.DailyQuizStreak?.getSnapshot?.() || {
+      currentStreak: 0, freezeCount: 0, clearedToday: false, milestonesAwarded: [],
+    };
     return `
       <div class="daily-cal-trophies">
-        <h3 class="daily-cal-prizes-title">${escapeHtml(t('dailyStreak.milestonesTitle'))}</h3>
-        <p class="daily-cal-progress-text">${escapeHtml(t('dailyStreak.milestonesHint'))}</p>
-        <div class="daily-cal-trophy-grid">${items}</div>
+        <section class="daily-cal-prizes daily-cal-streak-panel" aria-label="${escapeHtml(t('dailyStreak.title'))}">
+          <h3 class="daily-cal-prizes-title">${escapeHtml(t('dailyStreak.title'))}</h3>
+          <p class="dq-streak-how">${escapeHtml(t('dailyStreak.howItWorks'))}</p>
+          <div class="dq-streak-status-row">
+            <div class="dq-streak-stat dq-streak-stat--fire">
+              <span class="dq-streak-stat-icon" aria-hidden="true">🔥</span>
+              <div class="dq-streak-stat-text">
+                <span class="dq-streak-stat-value">${snap.currentStreak || 0}</span>
+                <span class="dq-streak-stat-label">${escapeHtml(t('dailyStreak.currentStreakLabel'))}</span>
+              </div>
+            </div>
+            <div class="dq-streak-stat dq-streak-stat--freeze">
+              <span class="dq-streak-stat-icon" aria-hidden="true">❄️</span>
+              <div class="dq-streak-stat-text">
+                <span class="dq-streak-stat-value">${snap.freezeCount || 0}</span>
+                <span class="dq-streak-stat-label">${escapeHtml(t('dailyStreak.freezeLabel'))}</span>
+              </div>
+            </div>
+          </div>
+          <p class="dq-streak-freeze-hint">${escapeHtml(t('dailyStreak.freezeExplain'))}</p>
+          ${buildStreakMilestoneTrack(snap)}
+        </section>
       </div>
     `;
   }
