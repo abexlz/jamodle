@@ -207,8 +207,7 @@ button.ghost,
 .btn-check,
 .match-mode-btn[data-match-mode="easy"],
 .match-mode-btn[data-match-mode="medium"],
-.match-mode-btn[data-match-mode="hard"],
-.match-token-counter {
+.match-mode-btn[data-match-mode="hard"] {
   background-color: var(--app-btn-fill) !important;
   background-image: var(--app-btn-gloss-overlay) !important;
   border: 2px solid var(--app-btn-border-color) !important;
@@ -353,8 +352,7 @@ button.ghost,
 .modal button,
 #share-btn,
 #modal-btn,
-.back-link,
-.match-token-counter {
+.back-link {
   color: #ffffff !important;
   text-shadow: var(--app-btn-text-shadow) !important;
 }

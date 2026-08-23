@@ -15,6 +15,8 @@
   const FLIP_MS = 420;
   const FLIP_STAGGER = 90;
   const MEANING_POPUP_MS = 5000;
+  /** Same coin price as Word Chain solo hints. */
+  const HINT_COST = 15;
 
   const t = (key, vars) => global.I18n?.t(key, vars) ?? '';
   const prefs = () => global.UserPreferences;
@@ -999,13 +1001,18 @@
           </button>`
         : '';
 
+      const hintCostLabel = t('match.hints.costAria', { count: HINT_COST })
+        || t('relatedWords.hintAria', { count: HINT_COST })
+        || `Use a hint for ${HINT_COST} coins`;
+      const hintCostHtml = global.CoinIcon?.format?.(
+        `🪙 ${HINT_COST}`,
+        'coin-icon coin-icon--sm'
+      ) || escapeHtml(`🪙 ${HINT_COST}`);
       const hintDock = this.versus
         ? ''
         : `<section class="match-hint-dock" aria-label="${t('match.hints.label')}">
-          <div class="match-token-counter" id="match-token-counter" aria-live="polite">
-            <span class="match-token-counter-glyph" aria-hidden="true">
-              🪙&nbsp;<span id="match-token-count">${global.HintTokens?.get?.() ?? 5}</span>
-            </span>
+          <div class="match-hint-cost-badge" id="match-hint-cost" aria-label="${escapeHtml(hintCostLabel)}" title="${escapeHtml(hintCostLabel)}">
+            <span class="match-hint-cost-glyph" aria-hidden="true">${hintCostHtml}</span>
           </div>
           <button type="button" class="match-hint-btn match-hint-btn--icon" id="match-orient-hint" aria-label="${t('match.hints.alignBtn')}" title="${t('match.hints.alignBtn')}" data-i18n-aria="match.hints.alignBtn">
             <span class="match-hint-btn-glyph" aria-hidden="true">
@@ -1216,7 +1223,7 @@
         emoteMount: this.root.querySelector('#match-emote-mount'),
         emoteSelf: this.root.querySelector('#match-emote-self'),
         mergeDockEl: this.root.querySelector('#vowel-merge-dock'),
-        tokenCount: this.root.querySelector('#match-token-count'),
+        hintCost: this.root.querySelector('#match-hint-cost'),
         orientHint: this.root.querySelector('#match-orient-hint'),
         disableHint: this.root.querySelector('#match-disable-hint'),
         meaningBtn: this.root.querySelector('#match-meaning-btn'),
@@ -1711,12 +1718,7 @@
         return;
       }
       if (!this.versus) {
-        const HT = global.HintTokens;
-        if (!HT?.spend(2)) {
-          this.feedback.show('info', t('match.hints.noTokens'));
-          this.updateHintButtons();
-          return;
-        }
+        if (!this.spendHintCoins()) return;
       }
       const word = String(this.currentWord?.word || this.winningWord || '').trim().normalize('NFC');
       let text = this.getSyncMeaning(word);
@@ -3610,30 +3612,58 @@
       return true;
     }
 
+    getPlayerCoins() {
+      return Math.max(
+        0,
+        Number(global.ShopService?.getCoins?.() ?? global.ProfileService?.loadProfile?.()?.coins) || 0
+      );
+    }
+
+    canAffordHint() {
+      return this.getPlayerCoins() >= HINT_COST;
+    }
+
+    /** Spend HINT_COST coins. Returns true on success. */
+    spendHintCoins() {
+      const spent = global.ShopService?.spendCoins?.(HINT_COST);
+      if (!spent?.ok) {
+        this.feedback.show(
+          'info',
+          t('match.hints.noCoins') || t('relatedWords.hintInsufficient') || 'Not enough coins.'
+        );
+        this.updateHintButtons();
+        return false;
+      }
+      return true;
+    }
+
+    refundHintCoins() {
+      global.ShopService?.grantCoins?.(HINT_COST, { skipBoost: true });
+      this.updateHintButtons();
+    }
+
     updateHintButtons() {
       const blocked = this.checkedComplete || this.checking;
-      const HT = global.HintTokens;
-      const unlimited = HT?.hasDevUnlimited?.() === true;
-      const tokens = HT?.get?.() ?? 0;
-      if (this.els.tokenCount && HT) {
-        this.els.tokenCount.textContent = unlimited ? '∞' : String(tokens);
+      const canAfford = this.canAffordHint();
+      if (this.els.hintCost) {
+        this.els.hintCost.classList.toggle('is-low-coins', !canAfford);
       }
-      // Keep hint buttons clickable when low on tokens — handlers already show
-      // a "need tokens" message. Only lock them while the round is blocked.
+      // Keep hint buttons clickable when low on coins — handlers already show
+      // a "need coins" message. Only lock them while the round is blocked.
       if (this.els.orientHint) {
         this.els.orientHint.disabled = blocked;
-        this.els.orientHint.classList.toggle('is-low-tokens', !blocked && !unlimited && tokens < 2);
+        this.els.orientHint.classList.toggle('is-low-tokens', !blocked && !canAfford);
       }
       if (this.els.disableHint) {
         this.els.disableHint.disabled = blocked;
-        this.els.disableHint.classList.toggle('is-low-tokens', !blocked && !unlimited && tokens < 2);
+        this.els.disableHint.classList.toggle('is-low-tokens', !blocked && !canAfford);
       }
       if (this.els.meaningBtn) {
-        const needsTokens = !this.versus && !this.meaningRevealed;
+        const needsCoins = !this.versus && !this.meaningRevealed;
         this.els.meaningBtn.disabled = blocked;
         this.els.meaningBtn.classList.toggle(
           'is-low-tokens',
-          !blocked && needsTokens && !unlimited && tokens < 2
+          !blocked && needsCoins && !canAfford
         );
       }
       if (this.els.devAnswerBtn) {
@@ -3730,12 +3760,7 @@
 
     useOrientHint() {
       if (this.checkedComplete || this.checking) return;
-      const HT = global.HintTokens;
-      if (!HT?.spend(2)) {
-        this.feedback.show('info', t('match.hints.noTokens'));
-        this.updateHintButtons();
-        return;
-      }
+      if (!this.spendHintCoins()) return;
 
       const pending = [];
       Object.values(this.tileMap).forEach((tile) => {
@@ -3759,6 +3784,7 @@
       this.updateHintButtons();
 
       if (!pending.length) {
+        this.refundHintCoins();
         this.feedback.show('info', t('match.hints.orientNone'));
         return;
       }
@@ -3808,12 +3834,7 @@
 
     useDisableHint() {
       if (this.checkedComplete || this.checking) return;
-      const HT = global.HintTokens;
-      if (!HT?.spend(2)) {
-        this.feedback.show('info', t('match.hints.noTokens'));
-        this.updateHintButtons();
-        return;
-      }
+      if (!this.spendHintCoins()) return;
 
       let count = 0;
       const touchedSyl = new Set();
@@ -3832,14 +3853,17 @@
       });
       touchedSyl.forEach((idx) => this.syncSyllableVowelLayout(this.blocks[idx]));
 
+      if (!count) {
+        this.refundHintCoins();
+        this.feedback.show('info', t('match.hints.disableNone'));
+        return;
+      }
+
       this.disableHintUsed = true;
       this.hintsUsedThisRound = true;
       this.updateHintButtons();
       this.updateCheckButton();
-      this.feedback.show(
-        count ? 'success' : 'info',
-        count ? t('match.hints.disableDone', { n: count }) : t('match.hints.disableNone')
-      );
+      this.feedback.show('success', t('match.hints.disableDone', { n: count }));
     }
 
     tryPlaceTile(tile, zone, fromZone = null) {

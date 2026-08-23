@@ -38,7 +38,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/app-preferences.css?v=2">
-<link rel="stylesheet" href="css/app-buttons.css?v=24">
+<link rel="stylesheet" href="css/app-buttons.css?v=20260823s">
 <style>
   :root{
     --bg: #FFF8F5;
@@ -1714,7 +1714,7 @@
 </style>
 <link rel="stylesheet" href="css/home-nav.css?v=31">
 <link rel="stylesheet" href="css/app-chrome.css?v=20260823b" id="app-chrome-styles">
-<link rel="stylesheet" href="css/app-theme.css?v=21">
+<link rel="stylesheet" href="css/app-theme.css?v=20260823s">
 <link rel="stylesheet" href="css/cosmetic-themes.css">
 <link rel="stylesheet" href="css/shop.css?v=20260815c">
 <link rel="stylesheet" href="css/profile.css?v=20260823j">
@@ -1763,7 +1763,6 @@
             <span class="menu-hud-gift-box" aria-hidden="true">🎁</span>
             <span class="menu-hud-gift-dot hidden" id="menu-daily-gift-dot" aria-hidden="true"></span>
           </button>
-          <div class="player-hud-slot menu-hud-coins-slot" id="player-hud" data-player-hud="compact"></div>
         </div>
       </div>
       <div class="menu-top-bar-spacer" aria-hidden="true"></div>
@@ -1929,8 +1928,8 @@
 <script src="js/user-preferences.js"></script>
 <script src="js/button-press.js?v=20260803a"></script>
 <script src="js/sound-effects.js?v=20260823m"></script>
-<script src="js/i18n-messages.js?v=20260823r"></script>
-<script src="js/i18n.js?v=20260823r"></script>
+<script src="js/i18n-messages.js?v=20260823s"></script>
+<script src="js/i18n.js?v=20260823s"></script>
 <script src="js/app-bootstrap.js"></script>
 <script src="js/app-nav.js"></script>
 <script src="js/menu-config.js?v=20260803a"></script>
@@ -1965,7 +1964,7 @@
 <script src="js/quest-ui.js?v=20260816a"></script>
 <script src="js/chest-room-ui.js?v=20260815a"></script>
 <script src="js/daily-gift-ui.js?v=20260803a"></script>
-<script src="js/app-top-hud.js?v=20260823a"></script>
+<script src="js/app-top-hud.js?v=20260823s"></script>
 <script>
 const CHO = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
 const JUNG = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
@@ -3274,7 +3273,7 @@ MenuApp?.bindMenuActions?.({
   applyWordleStaticI18n();
   window.I18n?.onChange?.(applyWordleStaticI18n);
   window.CosmeticThemes?.applyStored?.();
-  window.PlayerHud?.mount?.('player-hud', { compact: true });
+  window.PlayerHud?.refreshMenuProfileNav?.();
   if (window.MenuApp?.mountMenu) {
     MenuApp.mountMenu('menu-root');
   } else {

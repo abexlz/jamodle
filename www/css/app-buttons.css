@@ -428,7 +428,7 @@ button.ghost:disabled,
   grid-column: span 2;
 }
 
-.match-hint-dock > .match-token-counter {
+.match-hint-dock > .match-hint-cost-badge {
   grid-column: span 2;
   justify-self: center;
 }
