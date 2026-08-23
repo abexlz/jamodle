@@ -189,9 +189,15 @@
     });
   }
 
+  function getSharedContext() {
+    unlock();
+    return getCtx();
+  }
+
   const SoundEffects = {
     unlock,
     preloadSamples,
+    getSharedContext,
 
     tap() {
       playTone({ freq: 520, duration: 0.035, peak: 0.07, type: 'triangle' });

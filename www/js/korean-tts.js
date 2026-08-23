@@ -23,6 +23,7 @@
   let activeSession = 0;
   let activeAudio = null;
   let sharedAudio = null;
+  let activeSource = null;
   let primed = false;
   let playbackUnlocked = false;
   let voiceReadyPromise = null;
@@ -30,6 +31,10 @@
   let selectedVoiceGender = null;
 
   const audioCache = new Map();
+  /** @type {Map<string, ArrayBuffer>} */
+  const rawCache = new Map();
+  /** @type {Map<string, AudioBuffer>} */
+  const bufferCache = new Map();
   const cacheOrder = [];
 
   function getApiBase() {
@@ -97,6 +102,8 @@
       if (url) URL.revokeObjectURL(url);
     }
     audioCache.clear();
+    rawCache.clear();
+    bufferCache.clear();
     cacheOrder.length = 0;
   }
 
@@ -170,12 +177,16 @@
   }
 
   /**
-   * Unlock a persistent HTMLAudioElement from a user gesture.
-   * iOS/Safari often block later `new Audio().play()` after async work unless
-   * the same element was already played during a gesture.
+   * Unlock Web Audio (same path as SFX) plus a persistent HTMLAudioElement.
+   * iPhone silent switch often mutes HTMLAudio while Web Audio still plays.
    */
   function unlockPlayback() {
     prime();
+    try {
+      global.SoundEffects?.unlock?.();
+      const ctx = global.SoundEffects?.getSharedContext?.();
+      if (ctx?.state === 'suspended') ctx.resume?.().catch?.(() => {});
+    } catch (_) { /* ignore */ }
     const audio = ensureSharedAudio();
     try {
       if (!audio.src) audio.src = SILENT_WAV;
@@ -207,6 +218,8 @@
       const oldKey = cacheOrder.shift();
       const oldUrl = audioCache.get(oldKey);
       audioCache.delete(oldKey);
+      rawCache.delete(oldKey);
+      bufferCache.delete(oldKey);
       if (oldUrl) URL.revokeObjectURL(oldUrl);
     }
   }
@@ -221,9 +234,9 @@
     return `v8:${gender}:${pace}:${String(text || '').trim()}`;
   }
 
-  async function fetchServerAudio(text, options = {}) {
+  async function fetchServerRaw(text, options = {}) {
     const key = cacheKeyFor(text, options);
-    if (audioCache.has(key)) return audioCache.get(key);
+    if (rawCache.has(key)) return rawCache.get(key);
 
     const gender = preferredVoiceGender();
     const pace = key.split(':')[2];
@@ -243,25 +256,54 @@
       throw err;
     }
 
-    const blob = await res.blob();
-    if (!blob || blob.size < 128) {
+    const buffer = await res.arrayBuffer();
+    if (!buffer || buffer.byteLength < 128) {
       throw new Error('Empty TTS audio');
     }
 
-    const objectUrl = URL.createObjectURL(blob);
+    const copy = buffer.slice(0);
+    rawCache.set(key, copy);
+    const objectUrl = URL.createObjectURL(new Blob([copy], { type: 'audio/mpeg' }));
     rememberCache(key, objectUrl);
-    return objectUrl;
+    return copy;
+  }
+
+  async function fetchServerAudio(text, options = {}) {
+    const key = cacheKeyFor(text, options);
+    if (audioCache.has(key)) return audioCache.get(key);
+    await fetchServerRaw(text, options);
+    return audioCache.get(key);
+  }
+
+  async function getDecodedBuffer(text, options = {}) {
+    const key = cacheKeyFor(text, options);
+    if (bufferCache.has(key)) return bufferCache.get(key);
+
+    const raw = await fetchServerRaw(text, options);
+    const ctx = global.SoundEffects?.getSharedContext?.();
+    if (!ctx) return null;
+    if (ctx.state === 'suspended') {
+      try { await ctx.resume(); } catch (_) { /* ignore */ }
+    }
+    const decoded = await ctx.decodeAudioData(raw.slice(0));
+    bufferCache.set(key, decoded);
+    return decoded;
   }
 
   /** Warm the TTS cache so win playback can start without a network wait. */
   function prefetch(text, options = {}) {
     const word = normalizeWord(text);
     if (!word) return Promise.resolve(null);
-    return fetchServerAudio(word, options).catch(() => null);
+    return getDecodedBuffer(word, options).catch(() => fetchServerAudio(word, options).catch(() => null));
   }
 
   function cancel() {
     activeSession += 1;
+    if (activeSource) {
+      try { activeSource.stop?.(); } catch (_) { /* ignore */ }
+      try { activeSource.disconnect?.(); } catch (_) { /* ignore */ }
+      activeSource = null;
+    }
     const audio = sharedAudio || activeAudio;
     if (audio) {
       try {
@@ -288,6 +330,53 @@
     return DEFAULT_RATE * playbackRate;
   }
 
+  function playViaWebAudio(buffer, volume, playbackRate = 1) {
+    return new Promise(async (resolve) => {
+      const ctx = global.SoundEffects?.getSharedContext?.();
+      if (!ctx || !buffer) {
+        resolve(false);
+        return;
+      }
+      try {
+        if (ctx.state === 'suspended') await ctx.resume();
+      } catch (_) {
+        resolve(false);
+        return;
+      }
+
+      try {
+        if (activeSource) {
+          try { activeSource.stop?.(); } catch (_) { /* ignore */ }
+          activeSource = null;
+        }
+        const src = ctx.createBufferSource();
+        const gain = ctx.createGain();
+        const amp = Math.max(0.45, Math.min(1, volume || 0.85));
+        src.buffer = buffer;
+        try {
+          src.playbackRate.value = clampPlaybackRate(playbackRate);
+        } catch (_) { /* ignore */ }
+        gain.gain.value = amp;
+        src.connect(gain);
+        gain.connect(ctx.destination);
+        activeSource = src;
+        let settled = false;
+        const done = (ok) => {
+          if (settled) return;
+          settled = true;
+          if (activeSource === src) activeSource = null;
+          resolve(!!ok);
+        };
+        src.onended = () => done(true);
+        src.start(0);
+        const dur = Math.max(0.2, (buffer.duration || 1) / clampPlaybackRate(playbackRate));
+        setTimeout(() => done(true), (dur + 0.15) * 1000);
+      } catch (_) {
+        resolve(false);
+      }
+    });
+  }
+
   function playAudioUrl(url, volume, playbackRate = 1) {
     return new Promise((resolve) => {
       const audio = ensureSharedAudio();
@@ -308,7 +397,7 @@
       } catch (_) { /* ignore */ }
 
       activeAudio = audio;
-      audio.volume = Math.max(0, Math.min(1, volume));
+      audio.volume = Math.max(0.45, Math.min(1, volume || 0.85));
       try {
         audio.playbackRate = clampPlaybackRate(playbackRate);
       } catch (_) { /* ignore */ }
@@ -394,21 +483,26 @@
     const volume = Number.isFinite(options.volume) ? options.volume : speakVolume();
     const preferServer = options.preferServer !== false;
     const playbackRate = clampPlaybackRate(options.playbackRate);
+    const audibleVolume = Math.max(0.45, volume || 0.85);
 
     if (preferServer) {
       try {
-        const key = cacheKeyFor(text, options);
-        const cached = audioCache.get(key);
-        // Cached clips can start in the same turn as a user gesture (no await).
-        const audioUrl = cached || await fetchServerAudio(text, options);
-        const ok = await playAudioUrl(audioUrl, volume, playbackRate);
-        if (ok) return true;
+        // Prefer Web Audio (same pipeline as SFX) so iPhone silent switch
+        // does not mute the win pronunciation while still waiting full duration.
+        const decoded = await getDecodedBuffer(text, options);
+        if (decoded) {
+          const ok = await playViaWebAudio(decoded, audibleVolume, playbackRate);
+          if (ok) return true;
+        }
+        const audioUrl = await fetchServerAudio(text, options);
+        const okHtml = await playAudioUrl(audioUrl, audibleVolume, playbackRate);
+        if (okHtml) return true;
       } catch (_) {
         /* fall through to browser voice */
       }
     }
 
-    return speakWithWebSpeech(text, { ...options, volume, playbackRate });
+    return speakWithWebSpeech(text, { ...options, volume: audibleVolume, playbackRate });
   }
 
   function passOptionsForIndex(i, options, baseSyllableGap) {
