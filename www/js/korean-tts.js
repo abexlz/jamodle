@@ -22,6 +22,7 @@
 
   let activeSession = 0;
   let activeAudio = null;
+  let sharedAudio = null;
   let primed = false;
   let playbackUnlocked = false;
   let voiceReadyPromise = null;
@@ -156,20 +157,39 @@
     waitForVoices();
   }
 
-  /** Unlock HTMLAudioElement playback from a user gesture so later win TTS can play. */
+  const SILENT_WAV = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
+
+  function ensureSharedAudio() {
+    if (!sharedAudio) {
+      sharedAudio = new Audio();
+      sharedAudio.setAttribute('playsinline', 'true');
+      sharedAudio.setAttribute('webkit-playsinline', 'true');
+      sharedAudio.preload = 'auto';
+    }
+    return sharedAudio;
+  }
+
+  /**
+   * Unlock a persistent HTMLAudioElement from a user gesture.
+   * iOS/Safari often block later `new Audio().play()` after async work unless
+   * the same element was already played during a gesture.
+   */
   function unlockPlayback() {
     prime();
-    if (playbackUnlocked) return;
-    playbackUnlocked = true;
+    const audio = ensureSharedAudio();
     try {
-      const silent = new Audio(
-        'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA',
-      );
-      silent.volume = 0.01;
-      const playPromise = silent.play();
+      if (!audio.src) audio.src = SILENT_WAV;
+      audio.volume = 0.01;
+      const playPromise = audio.play();
+      playbackUnlocked = true;
       if (playPromise && typeof playPromise.then === 'function') {
         playPromise.then(() => {
-          try { silent.pause(); } catch (_) { /* ignore */ }
+          try {
+            if (audio.src === SILENT_WAV || String(audio.src || '').startsWith('data:')) {
+              audio.pause();
+              audio.currentTime = 0;
+            }
+          } catch (_) { /* ignore */ }
         }).catch(() => {
           playbackUnlocked = false;
         });
@@ -227,15 +247,25 @@
     return objectUrl;
   }
 
+  /** Warm the TTS cache so win playback can start without a network wait. */
+  function prefetch(text, options = {}) {
+    const word = normalizeWord(text);
+    if (!word) return Promise.resolve(null);
+    return fetchServerAudio(word, options).catch(() => null);
+  }
+
   function cancel() {
     activeSession += 1;
-    if (activeAudio) {
+    const audio = sharedAudio || activeAudio;
+    if (audio) {
       try {
-        activeAudio.pause();
-        activeAudio.currentTime = 0;
+        audio.pause();
+        audio.onended = null;
+        audio.onerror = null;
+        audio.oncanplay = null;
       } catch (_) { /* ignore */ }
-      activeAudio = null;
     }
+    activeAudio = null;
     try {
       global.speechSynthesis?.cancel?.();
     } catch (_) { /* ignore */ }
@@ -254,25 +284,50 @@
 
   function playAudioUrl(url, volume, playbackRate = 1) {
     return new Promise((resolve) => {
-      const audio = new Audio(url);
+      const audio = ensureSharedAudio();
+      let settled = false;
+      const done = (ok) => {
+        if (settled) return;
+        settled = true;
+        audio.onended = null;
+        audio.onerror = null;
+        audio.oncanplay = null;
+        if (activeAudio === audio) activeAudio = null;
+        resolve(!!ok);
+      };
+
+      try {
+        audio.pause();
+      } catch (_) { /* ignore */ }
+
       activeAudio = audio;
-      audio.preload = 'auto';
-      audio.volume = volume;
+      audio.volume = Math.max(0, Math.min(1, volume));
       try {
         audio.playbackRate = clampPlaybackRate(playbackRate);
       } catch (_) { /* ignore */ }
 
-      const done = (ok) => {
-        if (activeAudio === audio) activeAudio = null;
-        resolve(ok);
+      const startPlay = () => {
+        if (settled) return;
+        const playPromise = audio.play();
+        if (playPromise && typeof playPromise.catch === 'function') {
+          playPromise.catch(() => done(false));
+        }
       };
 
       audio.onended = () => done(true);
       audio.onerror = () => done(false);
-
-      const playPromise = audio.play();
-      if (playPromise && typeof playPromise.catch === 'function') {
-        playPromise.catch(() => done(false));
+      audio.src = url;
+      if (audio.readyState >= 2) {
+        startPlay();
+      } else {
+        audio.oncanplay = () => {
+          audio.oncanplay = null;
+          startPlay();
+        };
+        try {
+          audio.load();
+        } catch (_) { /* ignore */ }
+        setTimeout(() => startPlay(), 600);
       }
     });
   }
@@ -431,6 +486,7 @@
     REPEAT_GAP_MS,
     prime,
     unlockPlayback,
+    prefetch,
     cancel,
     speak,
     speakOnce,

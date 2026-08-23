@@ -799,6 +799,17 @@
         this.updateSoloStreakDisplay();
       }
       this.loadAnswerPhoto();
+      this.prefetchAnswerTts();
+    }
+
+    prefetchAnswerTts() {
+      const word = this.puzzle?.answer;
+      if (!word || this.winTtsMuted === true) return;
+      const tts = global.KoreanTTS;
+      if (!tts?.prefetch) return;
+      // Warm both cadences used by image-mode win playback.
+      tts.prefetch(word, { syllablePace: 'normal' });
+      tts.prefetch(word, { syllablePace: 'quick' });
     }
 
     clearAnswerPhoto() {
@@ -2026,12 +2037,18 @@
         e.preventDefault();
         e.stopPropagation();
         global.KoreanTTS?.unlockPlayback?.();
-        this.winTtsMuted = this.winTtsMuted !== true;
+        this.winTtsMuted = !(this.winTtsMuted === true);
         this.saveWinTtsMuted(this.winTtsMuted);
         this.syncAnswerTtsButton();
         if (this.winTtsMuted) {
           global.KoreanTTS?.cancel?.();
           global.AnswerTTS?.cancel?.();
+          return;
+        }
+        // Confirm unmute with an immediate read of the current answer.
+        const word = this.puzzle?.answer;
+        if (word) {
+          global.KoreanTTS?.speak?.(word, wordChainSpeakOpts({ force: true, repeats: 1 }));
         }
       });
     }
@@ -3815,6 +3832,7 @@
       const nextLinkIndex = this.puzzle.linkIndex + 1;
       const sharedRace = this.raceMode && this.sharedRace;
 
+      global.KoreanTTS?.unlockPlayback?.();
       global.SoundEffects?.win?.();
       // 1v1 pronounces the new clue via renderTrail; solo speaks the solved word
       // here. Image mode runs its own two-read sequence in the branch below.
