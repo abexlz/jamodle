@@ -257,6 +257,8 @@
     "livesLabel": "Guesses remaining",
     "livesAria": "{{used}} of {{total}} guesses used",
     "slotAria": "Answer slot {{n}}",
+    "answerTtsOn": "Answer sound on — tap to mute",
+    "answerTtsOff": "Answer sound off — tap to unmute",
     "chainProgress": "Link {{current}} of {{total}}",
     "wrong": "Not quite — try again!",
     "tryAgain": "Pick different syllables.",

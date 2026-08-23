@@ -953,6 +953,59 @@ html.reduce-motion .rw-chain-recap-word {
   margin-bottom: 20px;
 }
 
+.rw-answer-row {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  max-width: 100%;
+}
+
+.rw-answer-tts-btn {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 2px solid rgba(10, 61, 82, 0.18);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.88);
+  color: #0a3d52;
+  box-shadow: 0 3px 0 rgba(0, 60, 72, 0.12);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.rw-answer-tts-btn svg {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
+.rw-answer-tts-btn:active,
+.rw-answer-tts-btn.is-pressed {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 rgba(0, 60, 72, 0.12);
+}
+
+.rw-answer-tts-btn.is-muted {
+  color: rgba(10, 61, 82, 0.45);
+  background: rgba(240, 244, 246, 0.92);
+  border-color: rgba(10, 61, 82, 0.12);
+}
+
+.rw-answer-tts-btn:focus-visible {
+  outline: 2px solid #0097B2;
+  outline-offset: 2px;
+}
+
+[data-theme="dark"] .rw-answer-tts-btn {
+  background: rgba(255, 255, 255, 0.92);
+  color: #0a3d52;
+}
+
 /* English translation revealed under the Korean answer on an image-mode win. */
 .rw-answer-english {
   margin: 10px 0 0;
@@ -1112,9 +1165,9 @@ html.reduce-motion .rw-answer-english {
 .rw-solo-mode .rw-slots {
   flex-wrap: nowrap;
   gap: clamp(6px, 2vw, 10px);
-  width: 100%;
-  max-width: 100%;
-  margin-inline: auto;
+  width: auto;
+  max-width: calc(100% - 54px);
+  margin-inline: 0;
 }
 
 .rw-solo-mode .rw-slot.flip-tile {

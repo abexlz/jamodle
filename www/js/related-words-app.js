@@ -51,6 +51,10 @@
   const TRAIL_SPEAKER_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">'
     + '<path fill="currentColor" d="M3 10v4h4l5 5V5L7 10H3zm13.5 2c0-1.77-1.02-3.29-2.5-4.03v8.06c1.48-.74 2.5-2.26 2.5-4.03zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>'
     + '</svg>';
+  const ANSWER_TTS_MUTED_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">'
+    + '<path fill="currentColor" d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3 3 4.27 7.73 9H3v4h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4 9.91 6.09 12 8.18V4z"/>'
+    + '</svg>';
+  const WIN_TTS_MUTE_KEY = 'jamodeul-rw-win-tts-muted';
 
   const t = (key, vars) => global.I18n?.t(key, vars) ?? key;
   const prefs = () => global.UserPreferences;
@@ -267,6 +271,7 @@
         : null;
       this.showOppPreview = this.sharedRace;
       this.oppSlotChars = [];
+      this.winTtsMuted = this.loadWinTtsMuted();
       this.oppWrongCount = 0;
       this.oppStunnedUntil = 0;
       this.stunnedUntil = 0;
@@ -422,7 +427,12 @@
 
             <div class="rw-board" id="rw-board">
             <section class="rw-answer-area">
-              <div class="rw-slots" id="rw-slots"></div>
+              <div class="rw-answer-row">
+                <div class="rw-slots" id="rw-slots"></div>
+                <button type="button" class="rw-answer-tts-btn app-pressable" id="rw-answer-tts-btn" aria-pressed="false">
+                  ${TRAIL_SPEAKER_SVG}
+                </button>
+              </div>
               <p class="rw-answer-english hidden" id="rw-answer-english" aria-live="polite" aria-hidden="true"></p>
             </section>
 
@@ -495,6 +505,7 @@
         answerPhotoCredit: this.root.querySelector('#rw-answer-photo-credit'),
         lives: this.root.querySelector('#rw-lives'),
         slots: this.root.querySelector('#rw-slots'),
+        answerTtsBtn: this.root.querySelector('#rw-answer-tts-btn'),
         answerEnglish: this.root.querySelector('#rw-answer-english'),
         revealSkip: this.root.querySelector('#rw-reveal-skip'),
         revealBtn: this.root.querySelector('#rw-reveal-btn'),
@@ -565,6 +576,8 @@
       this.els.overlayBtn.addEventListener('click', () => this.onOverlayContinue());
       this.els.revealBtn?.addEventListener('click', () => this.onRevealButtonClick());
       this.bindTrailSpeak();
+      this.bindAnswerTtsToggle();
+      this.syncAnswerTtsButton();
 
       if (this.raceMode) {
         this.root.classList.add('rw-race-mode');
@@ -599,6 +612,7 @@
         const key = el.dataset.i18n;
         if (key) el.textContent = t(key);
       });
+      this.syncAnswerTtsButton();
       this.updateLives();
       if (this.isSoloMode()) {
         this.updateSoloStreakDisplay({ animate: false });
@@ -1981,6 +1995,62 @@
         if (!word) return;
         this.speakClueWord(word);
       });
+    }
+
+    loadWinTtsMuted() {
+      try {
+        const raw = global.AppStorage?.get?.(WIN_TTS_MUTE_KEY, null);
+        if (raw === true || raw === '1' || raw === 1) return true;
+        if (raw === false || raw === '0' || raw === 0) return false;
+        return localStorage.getItem(WIN_TTS_MUTE_KEY) === '1';
+      } catch {
+        return false;
+      }
+    }
+
+    saveWinTtsMuted(muted) {
+      try {
+        if (global.AppStorage?.set) global.AppStorage.set(WIN_TTS_MUTE_KEY, muted ? 1 : 0);
+        else localStorage.setItem(WIN_TTS_MUTE_KEY, muted ? '1' : '0');
+      } catch { /* ignore */ }
+    }
+
+    isWinTtsEnabled() {
+      if (this.winTtsMuted) return false;
+      return global.UserPreferences?.get?.().pronunciation !== false;
+    }
+
+    bindAnswerTtsToggle() {
+      const btn = this.els.answerTtsBtn;
+      if (!btn || btn.dataset.bound === '1') return;
+      btn.dataset.bound = '1';
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.winTtsMuted = !this.winTtsMuted;
+        this.saveWinTtsMuted(this.winTtsMuted);
+        this.syncAnswerTtsButton();
+        if (this.winTtsMuted) {
+          global.KoreanTTS?.cancel?.();
+          global.AnswerTTS?.cancel?.();
+        } else {
+          global.KoreanTTS?.prime?.();
+        }
+      });
+    }
+
+    syncAnswerTtsButton() {
+      const btn = this.els.answerTtsBtn;
+      if (!btn) return;
+      const muted = !!this.winTtsMuted;
+      btn.classList.toggle('is-muted', muted);
+      btn.setAttribute('aria-pressed', muted ? 'true' : 'false');
+      btn.setAttribute(
+        'aria-label',
+        muted ? t('relatedWords.answerTtsOff') : t('relatedWords.answerTtsOn'),
+      );
+      btn.title = muted ? t('relatedWords.answerTtsOff') : t('relatedWords.answerTtsOn');
+      btn.innerHTML = muted ? ANSWER_TTS_MUTED_SVG : TRAIL_SPEAKER_SVG;
     }
 
     updateTrailDefinition(word, meaning) {
@@ -4081,7 +4151,7 @@
     speakCorrectWord() {
       const word = this.puzzle?.answer;
       if (!word) return Promise.resolve(false);
-      if (global.UserPreferences?.get?.().pronunciation === false) return Promise.resolve(false);
+      if (!this.isWinTtsEnabled()) return Promise.resolve(false);
       global.KoreanTTS?.prime?.();
       global.DictionaryService?.prefetchWord?.(word);
       // In 1v1, trail render will pronounce the next clue — speak the solved word here.
@@ -4098,7 +4168,7 @@
     async speakSolvedWordImageMode() {
       const word = this.puzzle?.answer;
       if (!word) return;
-      if (global.UserPreferences?.get?.().pronunciation === false) return;
+      if (!this.isWinTtsEnabled()) return;
       const tts = global.KoreanTTS;
       if (!tts?.speak) return;
       tts.prime?.();
@@ -4118,7 +4188,7 @@
     async speakSolvedWordImageQuick() {
       const word = this.puzzle?.answer;
       if (!word) return;
-      if (global.UserPreferences?.get?.().pronunciation === false) return;
+      if (!this.isWinTtsEnabled()) return;
       const tts = global.KoreanTTS;
       if (!tts?.speak) return;
       tts.prime?.();
