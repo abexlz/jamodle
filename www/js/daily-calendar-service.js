@@ -245,12 +245,17 @@
     return checkAndAwardBadges(key);
   }
 
-  function buildPlayUrl(dateKey) {
-    return `match.html?daily=1&date=${encodeURIComponent(dateKey)}`;
+  function buildPlayUrl(dateKey, options = {}) {
+    const params = new URLSearchParams({
+      daily: '1',
+      date: dateKey,
+    });
+    if (options.replay) params.set('replay', '1');
+    return `match.html?${params.toString()}`;
   }
 
-  function navigateToDaily(dateKey) {
-    global.location.href = buildPlayUrl(dateKey);
+  function navigateToDaily(dateKey, options = {}) {
+    global.location.href = buildPlayUrl(dateKey, options);
   }
 
   function getCalendarDays(year, month) {

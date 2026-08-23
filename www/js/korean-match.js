@@ -879,6 +879,10 @@
       this.boardHidden = false;
       this.enabled = true;
       this.isDaily = !this.versus && (options.daily ?? MD?.isDailyModeFromUrl?.() ?? false);
+      this.dailyReplay = this.isDaily && (
+        options.replay === true
+        || new URLSearchParams(global.location?.search || '').get('replay') === '1'
+      );
       this.multiFindMode = !this.versus && !this.isDaily && options.multiFind === true;
       this.multiPuzzle = null;
       this.multiFoundWords = [];
@@ -1948,6 +1952,8 @@
 
     saveDailyProgress(over, won) {
       if (!this.isDaily || !MD) return;
+      // Replay practice must not wipe a cleared calendar entry mid-run.
+      if (this.dailyReplay && !(over && won)) return;
       MD.saveDailyProgress(this.serializeDailyState(over, won), MD.getActiveDateKey());
     }
 
@@ -1958,7 +1964,7 @@
       const dailyLength = MD.DAILY_WORD_LENGTH ?? 2;
       const dailyList = MatchWords?.getWordsForLength?.(dailyLength) || MATCH_WORDS;
       const word = MD.pickDailyMatchWord(dailyList.length ? dailyList : MATCH_WORDS, activeDate);
-      const saved = MD.loadDailySaved?.(activeDate) || null;
+      const saved = this.dailyReplay ? null : (MD.loadDailySaved?.(activeDate) || null);
       this.startRound({ word }, saved);
     }
 
@@ -6186,12 +6192,14 @@
           if (global.MenuProgress?.recordMatchWord) global.MenuProgress.recordMatchWord();
         } else {
           this.saveDailyProgress(true, true);
-          global.DailyCalendarService?.onDailyWin?.(MD.getActiveDateKey());
-          global.DailyQuizStreak?.recordClear?.(MD.getActiveDateKey());
-          global.FirebaseSocial?.onDailyMatchEnd?.(true, elapsed, this.guessCount);
+          if (!this.dailyReplay) {
+            global.DailyCalendarService?.onDailyWin?.(MD.getActiveDateKey());
+            global.DailyQuizStreak?.recordClear?.(MD.getActiveDateKey());
+            global.FirebaseSocial?.onDailyMatchEnd?.(true, elapsed, this.guessCount);
+          }
         }
-        const streakResult = this.recordLearningStreakActivity();
-        if (global.XpService?.awardAndCelebrate) {
+        const streakResult = this.dailyReplay ? null : this.recordLearningStreakActivity();
+        if (!this.dailyReplay && global.XpService?.awardAndCelebrate) {
           global.XpService.awardAndCelebrate({
             mode: this.isDaily ? 'dailyMatch' : 'koreanMatch',
             wordId: resolvedWord,

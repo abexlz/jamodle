@@ -42,7 +42,7 @@
       .replace(/"/g, '&quot;');
   }
 
-  const CAL_STYLES_HREF = 'css/daily-calendar.css?v=17';
+  const CAL_STYLES_HREF = 'css/daily-calendar.css?v=18';
 
   function ensureStyles() {
     let link = document.getElementById('daily-cal-styles');
@@ -323,11 +323,12 @@
         : t('dailyCalendar.clearedDate', { date: dateLabel });
       return `
         <div class="daily-cal-play-row">
-          <button type="button" class="daily-cal-play-btn is-cleared no-press" data-cal-action="view" aria-label="${escapeHtml(t('dailyCalendar.viewResult'))}">
+          <div class="daily-cal-play-btn is-cleared" role="group" aria-label="${escapeHtml(clearedLabel)}">
             <span class="daily-cal-play-check" aria-hidden="true">✓</span>
             <span class="daily-cal-play-label">${escapeHtml(clearedLabel)}</span>
-            <span class="daily-cal-cleared-tag">${escapeHtml(t('dailyCalendar.viewResult'))}</span>
-          </button>
+            <button type="button" class="daily-cal-cleared-tag no-press" data-cal-action="view">${escapeHtml(t('dailyCalendar.viewResult'))}</button>
+            <button type="button" class="daily-cal-cleared-tag daily-cal-replay-tag no-press" data-cal-action="replay">${escapeHtml(t('dailyCalendar.replay'))}</button>
+          </div>
         </div>
       `;
     }
@@ -412,6 +413,13 @@
     close();
   }
 
+  function onReplay() {
+    if (!selectedDate || !SVC().isDateCompleted(selectedDate)) return;
+    if (!SVC().canPlayDate(selectedDate)) return;
+    SVC().navigateToDaily(selectedDate, { replay: true });
+    close();
+  }
+
   function onUnlockCoins() {
     const result = SVC().unlockWithCoins(selectedDate);
     if (!result.ok) {
@@ -436,6 +444,7 @@
     if (!overlayEl) return;
     overlayEl.querySelector('[data-cal-action="play"]')?.addEventListener('click', onPlay);
     overlayEl.querySelector('[data-cal-action="view"]')?.addEventListener('click', onViewResult);
+    overlayEl.querySelector('[data-cal-action="replay"]')?.addEventListener('click', onReplay);
     overlayEl.querySelector('[data-cal-action="coins"]')?.addEventListener('click', onUnlockCoins);
     overlayEl.querySelector('[data-cal-action="ad"]')?.addEventListener('click', onUnlockAd);
   }
