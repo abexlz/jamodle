@@ -2380,22 +2380,58 @@
   }
 
   body.match-page .match-chrome-title--ko {
-    margin: 4px 0 6px;
-    padding: 0 8px;
+    margin: 2px 0 4px;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    line-height: 0;
+    text-shadow: none;
+    color: transparent;
+  }
+
+  body.match-page .match-chrome-title--ko .match-brand-tiles {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(8px, 2.4vw, 12px);
+  }
+
+  /* Home-menu 한글들 tiles — slightly smaller for the in-game chrome */
+  body.match-page .match-chrome-title--ko .brand-tile {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: clamp(44px, 12vw, 58px);
+    height: clamp(48px, 13vw, 64px);
     font-family: 'Jua', 'Noto Sans KR', sans-serif;
-    font-size: clamp(34px, 9.5vw, 44px);
+    font-size: clamp(30px, 8.5vw, 42px);
     font-weight: 400;
-    letter-spacing: 0.06em;
-    line-height: 1.1;
-    color: #ffffff !important;
-    text-align: center;
-    text-shadow:
-      -1px -1px 0 rgba(0, 45, 58, 0.55),
-      1px -1px 0 rgba(0, 45, 58, 0.55),
-      -1px 1px 0 rgba(0, 45, 58, 0.55),
-      1px 1px 0 rgba(0, 45, 58, 0.55),
-      0 2px 0 rgba(0, 50, 65, 0.5),
-      0 4px 10px rgba(0, 35, 48, 0.4) !important;
+    line-height: 1;
+    color: #ffffff;
+    text-shadow: 0 2px 0 rgba(0, 0, 0, 0.22);
+    box-shadow:
+      inset 0 2px 0 rgba(255, 255, 255, 0.35),
+      0 3px 0 rgba(0, 0, 0, 0.18);
+  }
+
+  body.match-page .match-chrome-title--ko .brand-tile-ja {
+    background: linear-gradient(180deg, #ff9ec8 0%, #ff6aab 100%);
+    border-radius: 50% 50% 42% 42%;
+    transform: rotate(-6deg);
+  }
+
+  body.match-page .match-chrome-title--ko .brand-tile-mo {
+    background: linear-gradient(180deg, #ffd966 0%, #ffb800 100%);
+    border-radius: 40% 40% 50% 50%;
+    transform: rotate(4deg);
+  }
+
+  body.match-page .match-chrome-title--ko .brand-tile-deul {
+    background: linear-gradient(180deg, #c8b4ff 0%, #9b7ef5 100%);
+    border-radius: 50%;
+    transform: rotate(5deg);
   }
 
   body.match-page .match-chrome-title-img,
