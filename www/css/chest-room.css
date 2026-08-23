@@ -41,7 +41,7 @@ body.chest-room-page-body h3 {
 
 .chest-room-back-home {
   font-family: 'Jua', 'Noto Sans KR', sans-serif;
-  font-size: 14px;
+  font-size: 18px;
   color: #3d8fd4;
   text-decoration: none;
   opacity: 0.9;
@@ -81,7 +81,7 @@ body.chest-room-page-body h3 {
 .chest-room-title {
   margin: 0;
   font-family: 'Jua', sans-serif;
-  font-size: clamp(20px, 5.5vw, 26px);
+  font-size: clamp(26px, 7.2vw, 34px);
   font-weight: 400;
   letter-spacing: 0.04em;
   color: #ffffff !important;
@@ -95,22 +95,22 @@ body.chest-room-page-body h3 {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 10px;
+  padding: 7px 12px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.92);
   border: 2px solid rgba(255, 255, 255, 0.55);
   font-family: 'Jua', sans-serif;
-  font-size: 14px;
+  font-size: 18px;
   color: #0a3d52 !important;
   flex-shrink: 0;
 }
 
 .chest-room-status {
   margin: 14px 16px 0;
-  padding: 10px 12px;
+  padding: 12px 14px;
   border-radius: 14px;
   font-family: 'Jua', sans-serif;
-  font-size: 13px;
+  font-size: 17px;
   font-weight: 400;
   line-height: 1.45;
   color: #0a3d52 !important;
@@ -207,13 +207,13 @@ body.chest-room-page-body h3 {
   position: absolute;
   top: -4px;
   right: -4px;
-  padding: 3px 7px;
+  padding: 4px 8px;
   border-radius: 999px;
   background: linear-gradient(180deg, #45e8a8 0%, #22c57e 100%);
   border: 1.5px solid #fff;
   color: #064e32;
   font-family: 'Jua', sans-serif;
-  font-size: 10px;
+  font-size: 13px;
   line-height: 1.2;
   box-shadow: 0 2px 0 #1a9d62;
 }
@@ -221,14 +221,14 @@ body.chest-room-page-body h3 {
 .chest-room-card-title {
   margin: 0;
   font-family: 'Jua', sans-serif;
-  font-size: 16px;
+  font-size: 21px;
   color: #0a3d52 !important;
   line-height: 1.2;
 }
 
 .chest-room-card-desc {
   margin: 0;
-  font-size: 12px;
+  font-size: 16px;
   line-height: 1.35;
   color: #5a7080;
 }
@@ -241,14 +241,14 @@ body.chest-room-page-body h3 {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-height: 36px;
-  padding: 8px 14px;
+  min-height: 42px;
+  padding: 10px 16px;
   border-radius: 999px;
   border: 2px solid #73b5f2;
   background: linear-gradient(180deg, #dff0ff 0%, #b8dcff 100%);
   box-shadow: 0 3px 0 #3d8fd4;
   font-family: 'Jua', sans-serif;
-  font-size: 13px;
+  font-size: 17px;
   color: #0a3d52;
   cursor: pointer;
 }
@@ -295,7 +295,7 @@ body.chest-room-page-body h3 {
 
 .chest-room-quests-link {
   font-family: 'Jua', sans-serif;
-  font-size: 13px;
+  font-size: 17px;
   color: #3d8fd4;
   text-decoration: none;
 }
