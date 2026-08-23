@@ -32,7 +32,14 @@
       : (isDaily ? 'Daily Hangul-dle' : 'Hangul-dle');
     const title = t(titleKey) || fallback;
     if (isKoreanLocale()) {
-      return `<h1 class="match-chrome-title match-chrome-title--ko" data-i18n="${titleKey}">${escapeHtml(title)}</h1>`;
+      // Same bubbly 한·글·들 tiles as the home menu brand.
+      return `<h1 class="match-chrome-title match-chrome-title--ko" aria-label="${escapeHtml(title)}">
+            <span class="match-brand-tiles" aria-hidden="true">
+              <span class="brand-tile brand-tile-ja">한</span>
+              <span class="brand-tile brand-tile-mo">글</span>
+              <span class="brand-tile brand-tile-deul">들</span>
+            </span>
+          </h1>`;
     }
     return `<h1 class="match-chrome-title match-chrome-title--logo">
             <img class="match-chrome-title-img" src="assets/hangul-dle-title.png?v=20260823h" alt="${escapeHtml(title)}" draggable="false">
