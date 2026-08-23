@@ -462,7 +462,11 @@
       "modePicker": {
         "title": "Choose word length",
         "subtitle": "Pick how many letters (syllables)",
-        "cancel": "← Back to menu"
+        "cancel": "←",
+        "cancelAria": "Back to menu",
+        "needCoinsTitle": "Not enough coins",
+        "needCoinsBody": "You need at least {{count}} coins to play this length.",
+        "needCoinsOk": "OK"
       },
       "modes": {
         "letterCount": "{{n}} letters",
@@ -2063,7 +2067,11 @@
       "modePicker": {
         "title": "글자 수 선택",
         "subtitle": "몇 글자(음절) 단어로 할까요?",
-        "cancel": "← 메뉴로"
+        "cancel": "←",
+        "cancelAria": "메뉴로 돌아가기",
+        "needCoinsTitle": "코인이 부족해요",
+        "needCoinsBody": "이 글자 수는 최소 {{count}} 코인이 있어야 선택할 수 있어요.",
+        "needCoinsOk": "확인"
       },
       "modes": {
         "letterCount": "{{n}}글자",

@@ -445,7 +445,11 @@
     "modePicker": {
       "title": "Choose word length",
       "subtitle": "Pick how many letters (syllables)",
-      "cancel": "← Back to menu"
+      "cancel": "←",
+      "cancelAria": "Back to menu",
+      "needCoinsTitle": "Not enough coins",
+      "needCoinsBody": "You need at least {{count}} coins to play this length.",
+      "needCoinsOk": "OK"
     },
     "modes": {
       "letterCount": "{{n}} letters",
