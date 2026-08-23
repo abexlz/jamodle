@@ -2156,7 +2156,8 @@
           global.AnswerTTS?.cancel?.();
           return;
         }
-        // Confirm unmute with an immediate read of the current answer.
+        // Confirm unmute only after the answer is already known — never spoil mid-round.
+        if (!this.won) return;
         const word = this.puzzle?.answer;
         if (word) {
           global.KoreanTTS?.speak?.(word, wordChainSpeakOpts({ force: true, repeats: 1 }));
