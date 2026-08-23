@@ -3313,6 +3313,15 @@
     box-shadow: none;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
+    /* Stay above page content; body padding clears the fixed home tab bar. */
+    position: relative;
+    z-index: 3;
+  }
+
+  body.match-page .match-hint-dock {
+    position: relative;
+    z-index: 3;
+    pointer-events: auto;
   }
 
   body.match-page .match-actions {

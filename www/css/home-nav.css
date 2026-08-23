@@ -285,11 +285,11 @@ body.has-home-bottom-bar.game-active #game-screen #bottom-bar {
 }
 
 /*
- * Game pages: compact bottom nav (home menu keeps the taller square tabs).
- * Section height was ~width/5 (~78px on phones); trim vertical chrome so
- * Word Chain photos can use the reclaimed space.
+ * Word Chain only: compact bottom nav so the photo grid can grow.
+ * Do NOT apply on match pages — otherwise ALIGN/DELETE/MEANING sit under the
+ * translucent home bar (look faded + absorb taps).
  */
-body.has-home-bottom-bar:not(.home-menu-active) {
+body.rw-page.has-home-bottom-bar {
   --home-nav-section-h: clamp(44px, 11.5vw, 52px);
   --home-nav-icon-size: clamp(26px, 7vw, 34px);
   --home-nav-offset: calc(
@@ -297,14 +297,14 @@ body.has-home-bottom-bar:not(.home-menu-active) {
   );
 }
 
-body.has-home-bottom-bar:not(.home-menu-active) .home-bottom-bar-inner--5 .home-tab-btn {
+body.rw-page.has-home-bottom-bar .home-bottom-bar-inner--5 .home-tab-btn {
   aspect-ratio: auto;
   height: var(--home-nav-section-h);
   min-height: var(--home-nav-section-h);
   padding: 4px 0;
 }
 
-body.has-home-bottom-bar:not(.home-menu-active) .home-bottom-bar-inner.home-bottom-bar-inner--5 {
+body.rw-page.has-home-bottom-bar .home-bottom-bar-inner.home-bottom-bar-inner--5 {
   min-height: calc(var(--home-nav-section-h) + env(safe-area-inset-bottom, 0px));
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
