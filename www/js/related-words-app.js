@@ -3733,11 +3733,11 @@
           this.checkAnswer();
         };
 
-        // Resume TTS + SFX AudioContexts in this gesture, then start TTS.
+        // Keep SFX AudioContext running in this gesture, then start TTS on it.
         global.KoreanTTS?.unlockPlayback?.();
         const ctx = global.SoundEffects?.getSharedContext?.();
-        if (shouldSpeak && ctx && ctx.state === 'suspended') {
-          ctx.resume().then(startRound).catch(startRound);
+        if (shouldSpeak && ctx && ctx.state !== 'running') {
+          Promise.resolve(ctx.resume()).then(startRound).catch(startRound);
         } else {
           startRound();
         }
@@ -4210,13 +4210,16 @@
      */
     async speakSolvedWordImageMode() {
       const word = this.puzzle?.answer;
-      if (!word) return;
-      if (!this.isWinTtsEnabled()) return;
+      if (!word) return false;
+      if (!this.isWinTtsEnabled()) return false;
       const tts = global.KoreanTTS;
-      if (!tts?.speak) return;
+      if (!tts?.speak) return false;
       tts.unlockPlayback?.();
+      global.SoundEffects?.unlock?.();
+      // Re-warm in case the first prefetch ran before AudioContext existed.
+      this.prefetchAnswerTts();
       global.DictionaryService?.prefetchWord?.(word);
-      await Promise.resolve(tts.speak(word, wordChainSpeakOpts({
+      return Promise.resolve(tts.speak(word, wordChainSpeakOpts({
         force: true,
         repeats: 2,
         gapMs: WORD_CHAIN_WIN_REPEAT_GAP_MS,

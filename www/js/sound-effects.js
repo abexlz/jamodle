@@ -200,7 +200,7 @@
    * (HTMLAudioElement is). Ignores the soundEffects toggle — pronunciation has its
    * own preference. Returns a promise that resolves when playback ends.
    */
-  function playRawBuffer(buffer, { gainValue = 0.9, playbackRate = 1 } = {}) {
+  function playRawBuffer(buffer, { gainValue = 1, playbackRate = 1 } = {}) {
     unlock();
     const c = getCtx();
     if (!c || !buffer) return Promise.resolve(false);
@@ -208,7 +208,7 @@
     const rate = Number.isFinite(playbackRate) && playbackRate > 0
       ? Math.max(0.5, Math.min(2, playbackRate))
       : 1;
-    const amp = Math.max(0.55, Math.min(1, Number(gainValue) || 0.9));
+    const amp = Math.max(0.85, Math.min(1, Number(gainValue) || 1));
 
     const run = () => new Promise((resolve) => {
       try {
@@ -236,15 +236,24 @@
         src.start(0);
         const ms = Math.max(250, ((buffer.duration || 1) / rate + 0.2) * 1000);
         setTimeout(() => done(true), ms);
-      } catch (_) {
+      } catch (err) {
+        console.warn('[SoundEffects] playRawBuffer failed', err);
         resolve(false);
       }
     });
 
+    const afterResume = () => {
+      if (c.state === 'running') return run();
+      // One more tick — iOS sometimes reports running a moment after resume.
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(c.state === 'running' ? run() : Promise.resolve(false));
+        }, 0);
+      }).then((v) => v);
+    };
+
     if (c.state === 'running') return run();
-    return c.resume()
-      .then(() => (c.state === 'running' ? run() : false))
-      .catch(() => false);
+    return c.resume().then(afterResume).catch(() => false);
   }
 
   const SoundEffects = {

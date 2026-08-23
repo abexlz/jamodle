@@ -21,14 +21,8 @@
   const CACHE_MAX = 80;
 
   let activeSession = 0;
-  let activeAudio = null;
-  let sharedAudio = null;
-  let mediaSourceNode = null;
-  let mediaGainNode = null;
-  let ttsCtx = null;
   let activeSource = null;
   let primed = false;
-  let playbackUnlocked = false;
   let voiceReadyPromise = null;
   let selectedVoice = null;
   let selectedVoiceGender = null;
@@ -167,46 +161,17 @@
     waitForVoices();
   }
 
-  function getTtsContext() {
-    const AC = global.AudioContext || global.webkitAudioContext;
-    if (!AC) return null;
-    if (!ttsCtx || ttsCtx.state === 'closed') {
-      ttsCtx = new AC();
-      mediaSourceNode = null;
-      mediaGainNode = null;
+  /**
+   * Use the same AudioContext as SoundEffects (place/win tones already audible).
+   * A separate TTS context often stays suspended after async fetch on iOS.
+   */
+  function getPlaybackContext() {
+    try {
+      global.SoundEffects?.unlock?.();
+      return global.SoundEffects?.getSharedContext?.() || null;
+    } catch (_) {
+      return null;
     }
-    return ttsCtx;
-  }
-
-  function ensureSharedAudio() {
-    if (!sharedAudio) {
-      sharedAudio = new Audio();
-      sharedAudio.setAttribute('playsinline', 'true');
-      sharedAudio.setAttribute('webkit-playsinline', 'true');
-      sharedAudio.preload = 'auto';
-      sharedAudio.crossOrigin = 'anonymous';
-    }
-    return sharedAudio;
-  }
-
-  function ensureMediaGraph() {
-    const ctx = getTtsContext();
-    const audio = ensureSharedAudio();
-    if (!ctx || !audio) return null;
-    if (!mediaSourceNode) {
-      try {
-        mediaSourceNode = ctx.createMediaElementSource(audio);
-        mediaGainNode = ctx.createGain();
-        mediaGainNode.gain.value = 1;
-        mediaSourceNode.connect(mediaGainNode);
-        mediaGainNode.connect(ctx.destination);
-      } catch (_) {
-        mediaSourceNode = null;
-        mediaGainNode = null;
-        return null;
-      }
-    }
-    return { ctx, audio, gain: mediaGainNode };
   }
 
   async function ensureCtxRunning(ctx) {
@@ -218,22 +183,11 @@
     return ctx.state === 'running';
   }
 
-  /**
-   * Unlock TTS Web Audio from a user gesture.
-   * MediaElementSource output is typically audible even with the iPhone ringer muted.
-   */
+  /** Unlock shared Web Audio from a user gesture (tile tap / speaker button). */
   function unlockPlayback() {
     prime();
-    try {
-      global.SoundEffects?.unlock?.();
-    } catch (_) { /* ignore */ }
-    const graph = ensureMediaGraph();
-    if (graph?.ctx) {
-      ensureCtxRunning(graph.ctx).then((ok) => {
-        if (ok) playbackUnlocked = true;
-      }).catch(() => {});
-      if (graph.ctx.state === 'running') playbackUnlocked = true;
-    }
+    const ctx = getPlaybackContext();
+    if (ctx) ensureCtxRunning(ctx);
   }
 
   function rememberCache(key, url) {
@@ -257,7 +211,8 @@
       : options.syllablePace === 'fast'
         ? 'fast'
         : 'normal';
-    return `v8:${gender}:${pace}:${String(text || '').trim()}`;
+    // v9: buffers must be decoded on the SoundEffects AudioContext.
+    return `v9:${gender}:${pace}:${String(text || '').trim()}`;
   }
 
   async function fetchServerRaw(text, options = {}) {
@@ -306,9 +261,9 @@
     if (bufferCache.has(key)) return bufferCache.get(key);
 
     const raw = await fetchServerRaw(text, options);
-    const ctx = getTtsContext() || global.SoundEffects?.getSharedContext?.();
+    const ctx = getPlaybackContext();
     if (!ctx) return null;
-    await ensureCtxRunning(ctx);
+    // decodeAudioData works while suspended; do not require running here.
 
     const decoded = await new Promise((resolve, reject) => {
       try {
@@ -326,9 +281,7 @@
   function prefetch(text, options = {}) {
     const word = normalizeWord(text);
     if (!word) return Promise.resolve(null);
-    return fetchServerRaw(word, options)
-      .then(() => getDecodedBuffer(word, options).catch(() => null))
-      .catch(() => null);
+    return getDecodedBuffer(word, options).catch(() => null);
   }
 
   function cancel() {
@@ -338,16 +291,6 @@
       try { activeSource.disconnect?.(); } catch (_) { /* ignore */ }
       activeSource = null;
     }
-    const audio = sharedAudio || activeAudio;
-    if (audio) {
-      try {
-        audio.pause();
-        audio.onended = null;
-        audio.onerror = null;
-        audio.oncanplay = null;
-      } catch (_) { /* ignore */ }
-    }
-    activeAudio = null;
     try {
       global.speechSynthesis?.cancel?.();
     } catch (_) { /* ignore */ }
@@ -364,16 +307,41 @@
     return DEFAULT_RATE * playbackRate;
   }
 
-  /** Play decoded PCM through TTS AudioContext (audible with iPhone mute switch). */
+  /**
+   * Play decoded PCM through SoundEffects' AudioContext — same path as UI SFX,
+   * so it stays audible with the iPhone ringer switch muted.
+   */
   function playViaWebAudio(buffer, volume, playbackRate = 1) {
+    if (!buffer) return Promise.resolve(false);
+    const gainValue = Math.max(0.85, Math.min(1, Number(volume) || 1));
+    const rate = clampPlaybackRate(playbackRate);
+
+    if (typeof global.SoundEffects?.playRawBuffer === 'function') {
+      return global.SoundEffects.playRawBuffer(buffer, { gainValue, playbackRate: rate });
+    }
+    return playViaOwnBufferSource(buffer, gainValue, rate);
+  }
+
+  /** Start cached clip immediately (no await) — call from a user gesture. */
+  function playIfCached(text, options = {}) {
+    const word = normalizeWord(text);
+    if (!word) return false;
+    const key = cacheKeyFor(word, options);
+    const decoded = bufferCache.get(key);
+    if (!decoded) return false;
+    unlockPlayback();
+    playViaWebAudio(decoded, 1, clampPlaybackRate(options.playbackRate));
+    return true;
+  }
+
+  function playViaOwnBufferSource(buffer, gainValue, playbackRate) {
     return new Promise(async (resolve) => {
-      const ctx = getTtsContext();
+      const ctx = getPlaybackContext();
       if (!ctx || !buffer) {
         resolve(false);
         return;
       }
-      const okRunning = await ensureCtxRunning(ctx);
-      if (!okRunning) {
+      if (!(await ensureCtxRunning(ctx))) {
         resolve(false);
         return;
       }
@@ -384,11 +352,9 @@
         }
         const src = ctx.createBufferSource();
         const gain = ctx.createGain();
-        gain.gain.value = Math.max(0.8, Math.min(1, volume || 1));
+        gain.gain.value = gainValue;
         src.buffer = buffer;
-        try {
-          src.playbackRate.value = clampPlaybackRate(playbackRate);
-        } catch (_) { /* ignore */ }
+        try { src.playbackRate.value = playbackRate; } catch (_) { /* ignore */ }
         src.connect(gain);
         gain.connect(ctx.destination);
         activeSource = src;
@@ -401,72 +367,11 @@
         };
         src.onended = () => done(true);
         src.start(0);
-        const ms = Math.max(300, ((buffer.duration || 1) / clampPlaybackRate(playbackRate) + 0.25) * 1000);
+        const ms = Math.max(300, ((buffer.duration || 1) / playbackRate + 0.25) * 1000);
         setTimeout(() => done(true), ms);
-      } catch (_) {
+      } catch (err) {
+        console.warn('[KoreanTTS] BufferSource play failed', err);
         resolve(false);
-      }
-    });
-  }
-
-  /**
-   * Play an MP3 URL via HTMLAudioElement wired into Web Audio
-   * (MediaElementSource). This is the most reliable audible path on iOS.
-   */
-  function playAudioUrl(url, volume, playbackRate = 1) {
-    return new Promise(async (resolve) => {
-      const graph = ensureMediaGraph();
-      if (!graph) {
-        resolve(false);
-        return;
-      }
-      const { ctx, audio, gain } = graph;
-      const running = await ensureCtxRunning(ctx);
-      if (!running) {
-        resolve(false);
-        return;
-      }
-
-      let settled = false;
-      const done = (ok) => {
-        if (settled) return;
-        settled = true;
-        audio.onended = null;
-        audio.onerror = null;
-        audio.oncanplaythrough = null;
-        resolve(!!ok);
-      };
-
-      try {
-        audio.pause();
-      } catch (_) { /* ignore */ }
-
-      activeAudio = audio;
-      audio.muted = false;
-      audio.volume = 1;
-      if (gain) gain.gain.value = Math.max(0.8, Math.min(1, volume || 1));
-      try {
-        audio.playbackRate = clampPlaybackRate(playbackRate);
-      } catch (_) { /* ignore */ }
-
-      audio.onended = () => done(true);
-      audio.onerror = () => done(false);
-      audio.src = url;
-
-      const start = () => {
-        const p = audio.play();
-        if (p && typeof p.catch === 'function') p.catch(() => done(false));
-      };
-
-      if (audio.readyState >= 3) {
-        start();
-      } else {
-        audio.oncanplaythrough = () => {
-          audio.oncanplaythrough = null;
-          start();
-        };
-        try { audio.load(); } catch (_) { /* ignore */ }
-        setTimeout(start, 500);
       }
     });
   }
@@ -522,7 +427,6 @@
   }
 
   async function speakOnce(text, options = {}) {
-    const volume = Number.isFinite(options.volume) ? options.volume : speakVolume();
     const preferServer = options.preferServer !== false;
     const playbackRate = clampPlaybackRate(options.playbackRate);
     const audibleVolume = 1;
@@ -531,24 +435,23 @@
 
     if (preferServer) {
       try {
-        // 1) MP3 through MediaElementSource (most reliable audible path on iOS)
-        const audioUrl = await fetchServerAudio(text, options);
-        if (audioUrl) {
-          const okHtml = await playAudioUrl(audioUrl, audibleVolume, playbackRate);
-          if (okHtml) return true;
-        }
-      } catch (_) { /* fall through */ }
-
-      try {
-        // 2) Decoded PCM buffer through TTS AudioContext
-        const decoded = await getDecodedBuffer(text, options);
+        const key = cacheKeyFor(text, options);
+        let decoded = bufferCache.get(key) || null;
+        if (!decoded) decoded = await getDecodedBuffer(text, options);
         if (decoded) {
           const ok = await playViaWebAudio(decoded, audibleVolume, playbackRate);
           if (ok) return true;
+          console.warn('[KoreanTTS] Web Audio play returned false');
+        } else {
+          console.warn('[KoreanTTS] No decoded buffer for', text);
         }
-      } catch (_) { /* fall through */ }
+      } catch (err) {
+        console.warn('[KoreanTTS] Server voice failed', err);
+      }
     }
 
+    // force (win TTS): skip Web Speech — on iOS mute switch it waits silently.
+    if (options.force) return false;
     return speakWithWebSpeech(text, { ...options, volume: audibleVolume, playbackRate });
   }
 
@@ -560,8 +463,6 @@
         syllableGapMs: baseSyllableGap,
       };
     }
-    // Second+ pass: half the syllable pause for a snappier re-read,
-    // unless the caller sets an explicit repeat cadence.
     const repeatPace = options.repeatSyllablePace || 'fast';
     const repeatGap = Number.isFinite(options.repeatSyllableGapMs)
       ? options.repeatSyllableGapMs
@@ -590,12 +491,10 @@
     prime();
     unlockPlayback();
 
-    // Start fetching pass 2+ immediately alongside pass 1 playback, so the
-    // audible gap between readings is only gapMs — not a second network round-trip.
     const warmed = [];
     if (preferServer) {
       for (let i = 1; i < repeats; i += 1) {
-        warmed[i] = fetchServerAudio(
+        warmed[i] = getDecodedBuffer(
           word,
           passOptionsForIndex(i, options, baseSyllableGap),
         ).catch(() => null);
@@ -646,6 +545,7 @@
     prime,
     unlockPlayback,
     prefetch,
+    playIfCached,
     cancel,
     speak,
     speakOnce,
