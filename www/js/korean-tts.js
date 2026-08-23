@@ -211,8 +211,8 @@
       : options.syllablePace === 'fast'
         ? 'fast'
         : 'normal';
-    // v9: buffers must be decoded on the SoundEffects AudioContext.
-    return `v9:${gender}:${pace}:${String(text || '').trim()}`;
+    // v10: neutral announcer prosody (invalidate old emphatic clips).
+    return `v10:${gender}:${pace}:${String(text || '').trim()}`;
   }
 
   async function fetchServerRaw(text, options = {}) {

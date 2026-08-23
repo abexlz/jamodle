@@ -33,8 +33,8 @@
   const CHAIN_RECAP_HOLD_MS = 900;
   const CHAIN_RECAP_OUT_MS = 320;
   const CHAIN_RECAP_REDUCED_MS = 1600;
-  /** Word Chain pronunciations play 50% faster than the global Korean TTS default. */
-  const WORD_CHAIN_TTS_RATE = 1.5;
+  /** Keep near natural rate so the announcer voice stays dignified (not chipmunked). */
+  const WORD_CHAIN_TTS_RATE = 1.05;
   /**
    * Second-read syllable gap for the image-mode win pronunciation: ~1/3 of the
    * default 200ms Web-Speech syllable pause (the server voice uses 'quick' pace).
