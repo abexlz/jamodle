@@ -18,7 +18,7 @@
       .replace(/"/g, '&quot;');
   }
 
-  const GIFT_STYLES_HREF = 'css/daily-gift.css?v=3';
+  const GIFT_STYLES_HREF = 'css/daily-gift.css?v=4';
 
   function ensureStyles() {
     let link = document.getElementById('daily-gift-styles');

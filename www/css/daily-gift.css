@@ -107,7 +107,7 @@
 .daily-gift-title {
   margin: 0;
   font-family: 'Jua', 'Junegull', sans-serif;
-  font-size: 22px;
+  font-size: 29px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: #ffffff !important;
@@ -117,7 +117,7 @@
 .daily-gift-sub {
   margin: 0 0 14px;
   font-family: 'Jua', sans-serif;
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: 0.04em;
   line-height: 1.35;
@@ -153,9 +153,9 @@
 
 .daily-gift-cell-header {
   flex-shrink: 0;
-  padding: 5px 4px;
+  padding: 6px 4px;
   font-family: 'Jua', sans-serif;
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -193,7 +193,7 @@
 
 .daily-gift-reward-amt {
   font-family: 'Jua', sans-serif;
-  font-size: 16px;
+  font-size: 21px;
   font-weight: 700;
   line-height: 1;
   color: #ffffff;
@@ -320,7 +320,7 @@
   border: 3px solid #ffffff !important;
   background: linear-gradient(180deg, #7be08f 0%, #3cb85a 55%, #2fa34c 100%) !important;
   font-family: 'Jua', 'Junegull', sans-serif;
-  font-size: 22px;
+  font-size: 29px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: #ffffff !important;
@@ -392,14 +392,14 @@
 .daily-gift-reveal-title {
   margin: 0 0 6px;
   font-family: 'Jua', 'Junegull', sans-serif;
-  font-size: 24px;
+  font-size: 31px;
   color: #ffffff !important;
   text-shadow: 0 2px 0 rgba(40, 20, 80, 0.4);
 }
 
 .daily-gift-reveal-day {
   margin: 0 0 8px;
-  font-size: 13px;
+  font-size: 17px;
   font-weight: 700;
   color: rgba(255, 255, 255, 0.9);
 }
@@ -407,14 +407,14 @@
 .daily-gift-reveal-gift {
   margin: 0 0 4px;
   font-family: 'Jua', sans-serif;
-  font-size: 18px;
+  font-size: 23px;
   color: #ffe566;
   text-shadow: 0 1px 2px rgba(40, 20, 80, 0.35);
 }
 
 .daily-gift-reveal-cycle {
   margin: 8px 0 14px;
-  font-size: 13px;
+  font-size: 17px;
   font-weight: 700;
   color: rgba(255, 255, 255, 0.95);
 }
@@ -431,7 +431,7 @@
   border: 3px solid #ffffff !important;
   background: linear-gradient(180deg, #7be08f 0%, #3cb85a 55%, #2fa34c 100%) !important;
   font-family: 'Jua', 'Junegull', sans-serif;
-  font-size: 18px;
+  font-size: 23px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: #ffffff !important;
@@ -456,7 +456,7 @@
   }
 
   .daily-gift-title {
-    font-size: 18px;
+    font-size: 23px;
   }
 
   .daily-gift-banner {
@@ -479,12 +479,12 @@
   }
 
   .daily-gift-reward-amt {
-    font-size: 14px;
+    font-size: 18px;
   }
 
   .daily-gift-claim-btn {
-    min-height: 48px;
-    font-size: 18px;
+    min-height: 52px;
+    font-size: 24px;
   }
 }
 
