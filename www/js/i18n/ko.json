@@ -381,8 +381,8 @@
     "milestone30": "30일 streak! 한글 학습 챔피언!"
   },
   "match": {
-    "title": "한글놀이",
-    "titleDaily": "오늘의 한글놀이",
+    "title": "한글들",
+    "titleDaily": "오늘의 한글들",
     "subtitle": "자모를 끌어 한글 단어를 맞춰 보세요",
     "subtitleDaily": "오늘의 단어 · 자정(KST)에 갱신",
     "buildLabel": "빈 칸에 자모를 놓으세요",
@@ -426,15 +426,18 @@
     "rotationUnsupported": "\"{{char}}\"은(는) 돌릴 수 없어요",
     "hints": {
       "label": "힌트",
-      "orient": "방향 맞추기",
-      "disable": "빈 칸 끄기",
+      "orient": "정렬",
+      "disable": "삭제",
+      "alignBtn": "정렬",
+      "deleteBtn": "삭제",
+      "meaningBtn": "의미",
       "cost": "{{n}}토큰",
       "noTokens": "힌트 토큰이 부족해요.",
       "orientDone": "돌릴 수 있는 자모 {{n}}개를 맞췄어요.",
       "orientNone": "돌릴 수 있는 자모가 이미 맞아요.",
       "disableDone": "빈 칸 {{n}}개를 비활성화했어요.",
       "disableNone": "비활성화할 빈 칸이 없어요.",
-      "meaning": "뜻 보기",
+      "meaning": "의미",
       "meaningDone": "영어 뜻을 보여줬어요.",
       "noMeaning": "사전에 정의가 없어요."
     },

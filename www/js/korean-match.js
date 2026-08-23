@@ -19,6 +19,25 @@
   const t = (key, vars) => global.I18n?.t(key, vars) ?? '';
   const prefs = () => global.UserPreferences;
   const isDevModeActive = () => global.DevBuild?.isDevModeActive?.() === true;
+  const isKoreanLocale = () => global.I18n?.getLocale?.() === 'ko';
+
+  function matchChromeTitleHtml({ tutorialMode = false, isDaily = false } = {}) {
+    if (tutorialMode) {
+      const chromeTitle = t('tutorial.chromeTitle') || t('tutorial.title') || 'TUTORIAL';
+      return `<h1 class="match-chrome-title">${escapeHtml(chromeTitle)}</h1>`;
+    }
+    const titleKey = isDaily ? 'match.titleDaily' : 'match.title';
+    const fallback = isKoreanLocale()
+      ? (isDaily ? '오늘의 한글들' : '한글들')
+      : (isDaily ? 'Daily Hangul-dle' : 'Hangul-dle');
+    const title = t(titleKey) || fallback;
+    if (isKoreanLocale()) {
+      return `<h1 class="match-chrome-title match-chrome-title--ko" data-i18n="${titleKey}">${escapeHtml(title)}</h1>`;
+    }
+    return `<h1 class="match-chrome-title match-chrome-title--logo">
+            <img class="match-chrome-title-img" src="assets/hangul-dle-title.png?v=20260823h" alt="${escapeHtml(title)}" draggable="false">
+          </h1>`;
+  }
 
   function getDropZoneGuideLabel(zoneType) {
     if (zoneType === 'cho') return t('match.slotGuideConsonant');
@@ -922,12 +941,6 @@
         return;
       }
 
-      const chromeTitle = this.tutorialMode
-        ? (t('tutorial.chromeTitle') || t('tutorial.title') || 'TUTORIAL')
-        : this.isDaily
-        ? (t('match.titleDaily') || 'Daily Hangul-dle')
-        : (t('match.title') || t('menu.modes.classic.title') || 'Hangul-dle');
-
       const learningStreakBar = '';
 
       const statsRow = this.versus
@@ -948,11 +961,10 @@
           </div>`
         : '';
 
-      const chromeTitleHtml = this.tutorialMode
-        ? `<h1 class="match-chrome-title">${escapeHtml(chromeTitle)}</h1>`
-        : `<h1 class="match-chrome-title match-chrome-title--logo">
-            <img class="match-chrome-title-img" src="assets/hangul-dle-title.png?v=20260823h" alt="${escapeHtml(chromeTitle)}" draggable="false">
-          </h1>`;
+      const chromeTitleHtml = matchChromeTitleHtml({
+        tutorialMode: this.tutorialMode,
+        isDaily: this.isDaily,
+      });
 
       const headerHtml = this.versus
         ? hiddenStatsHtml
@@ -966,10 +978,11 @@
 
       const showEnglish = prefs()?.shouldShowEnglish?.() !== false;
       const meaningBtnHtml = showEnglish
-        ? `<button type="button" class="match-hint-btn match-hint-btn--icon match-meaning-btn" id="match-meaning-btn" aria-label="${t('match.hints.meaning')}" title="${t('match.hints.meaning')}">
+        ? `<button type="button" class="match-hint-btn match-hint-btn--icon match-meaning-btn" id="match-meaning-btn" aria-label="${t('match.hints.meaningBtn')}" title="${t('match.hints.meaningBtn')}" data-i18n-aria="match.hints.meaningBtn">
             <span class="match-hint-btn-glyph" aria-hidden="true">
               <img class="match-hint-btn-icon" src="assets/hint-meaning-v2.png" alt="" draggable="false">
             </span>
+            <span class="match-hint-btn-label" data-i18n="match.hints.meaningBtn">${t('match.hints.meaningBtn') || 'MEANING'}</span>
           </button>`
         : '';
 
@@ -987,24 +1000,24 @@
               🪙&nbsp;<span id="match-token-count">${global.HintTokens?.get?.() ?? 5}</span>
             </span>
           </div>
-          <button type="button" class="match-hint-btn match-hint-btn--icon" id="match-orient-hint" aria-label="${t('match.hints.orient')}" title="${t('match.hints.orient')}">
+          <button type="button" class="match-hint-btn match-hint-btn--icon" id="match-orient-hint" aria-label="${t('match.hints.alignBtn')}" title="${t('match.hints.alignBtn')}" data-i18n-aria="match.hints.alignBtn">
             <span class="match-hint-btn-glyph" aria-hidden="true">
               <img class="match-hint-btn-icon" src="assets/hint-align-v2.png" alt="" draggable="false">
             </span>
-            <span class="match-hint-btn-label">ALIGN</span>
+            <span class="match-hint-btn-label" data-i18n="match.hints.alignBtn">${t('match.hints.alignBtn') || 'ALIGN'}</span>
           </button>
-          <button type="button" class="match-hint-btn match-hint-btn--icon" id="match-disable-hint" aria-label="${t('match.hints.disable')}" title="${t('match.hints.disable')}">
+          <button type="button" class="match-hint-btn match-hint-btn--icon" id="match-disable-hint" aria-label="${t('match.hints.deleteBtn')}" title="${t('match.hints.deleteBtn')}" data-i18n-aria="match.hints.deleteBtn">
             <span class="match-hint-btn-glyph" aria-hidden="true">
               <img class="match-hint-btn-icon" src="assets/hint-delete-v2.png" alt="" draggable="false">
             </span>
-            <span class="match-hint-btn-label">DELETE</span>
+            <span class="match-hint-btn-label" data-i18n="match.hints.deleteBtn">${t('match.hints.deleteBtn') || 'DELETE'}</span>
           </button>
           ${showEnglish
-            ? `<button type="button" class="match-hint-btn match-hint-btn--icon match-meaning-btn" id="match-meaning-btn" aria-label="${t('match.hints.meaning')}" title="${t('match.hints.meaning')}">
+            ? `<button type="button" class="match-hint-btn match-hint-btn--icon match-meaning-btn" id="match-meaning-btn" aria-label="${t('match.hints.meaningBtn')}" title="${t('match.hints.meaningBtn')}" data-i18n-aria="match.hints.meaningBtn">
             <span class="match-hint-btn-glyph" aria-hidden="true">
               <img class="match-hint-btn-icon" src="assets/hint-meaning-v2.png" alt="" draggable="false">
             </span>
-            <span class="match-hint-btn-label">MEANING</span>
+            <span class="match-hint-btn-label" data-i18n="match.hints.meaningBtn">${t('match.hints.meaningBtn') || 'MEANING'}</span>
           </button>`
             : ''}
           ${devAnswerBtnHtml}
@@ -1318,6 +1331,7 @@
         global.I18n.onChange(() => {
           global.I18n.applyToDocument(this.root);
           applyDropZoneGuideLabels(this.root);
+          this.syncChromeTitle();
           this.updateLearningStreakDisplay();
           if (this.multiFindMode && this.multiPuzzle) this.renderMultiHint(this.multiPuzzle);
           else if (this.currentWord) this.renderHint(this.currentWord);
@@ -1336,6 +1350,20 @@
         };
         window.addEventListener('resize', this._onDockResize);
       }
+    }
+
+    syncChromeTitle() {
+      if (this.tutorialMode || this.versus) return;
+      const header = this.root?.querySelector?.('header.match-chrome');
+      const current = header?.querySelector?.('.match-chrome-title');
+      if (!header || !current) return;
+      const wrap = document.createElement('div');
+      wrap.innerHTML = matchChromeTitleHtml({
+        tutorialMode: false,
+        isDaily: this.isDaily,
+      });
+      const next = wrap.firstElementChild;
+      if (next) current.replaceWith(next);
     }
 
     /**
