@@ -717,6 +717,7 @@ body.has-home-bottom-bar :is(
   .race-challenge-overlay,
   .dict-overlay,
   .confirm-overlay,
+  .results-overlay,
   #overlay.show,
   #length-overlay:not(.hidden)
 ) {
@@ -728,8 +729,15 @@ body.has-home-bottom-bar :is(
   margin: 0 !important;
   padding-left: 16px !important;
   padding-right: 16px !important;
-  padding-top: calc(12px + var(--safe-top, env(safe-area-inset-top, 0px))) !important;
+  padding-top: calc(12px + var(--app-top-hud-offset, var(--safe-top, env(safe-area-inset-top, 0px)))) !important;
   padding-bottom: calc(12px + var(--home-nav-offset, 0px)) !important;
+}
+
+/* Match Clear frame crown sticks ~3% above the card — keep it under the HUD. */
+body.has-home-bottom-bar .results-overlay.results-overlay--clear,
+body.has-app-top-hud .results-overlay.results-overlay--clear {
+  padding-top: calc(28px + var(--app-top-hud-offset, var(--safe-top, env(safe-area-inset-top, 0px)))) !important;
+  padding-bottom: calc(16px + var(--home-nav-offset, env(safe-area-inset-bottom, 0px))) !important;
 }
 
 body.has-home-bottom-bar :is(
