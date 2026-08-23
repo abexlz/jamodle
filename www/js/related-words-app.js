@@ -3715,7 +3715,23 @@
       this.renderSlots();
       this.renderDock();
       global.SoundEffects?.place?.();
-      if (this.allSlotsFilled()) this.checkAnswer();
+      if (this.allSlotsFilled()) {
+        // Kick win TTS off inside the same tap gesture (before any await) so
+        // mobile browsers allow HTMLAudio playback after the async check flow.
+        const built = this.getBuiltWord();
+        if (
+          this.imageMode
+          && !this.raceMode
+          && built
+          && built === this.puzzle?.answer
+          && this.isWinTtsEnabled()
+        ) {
+          this._pendingWinTts = this.speakSolvedWordImageMode();
+        } else {
+          this._pendingWinTts = null;
+        }
+        this.checkAnswer();
+      }
     }
 
     clearSlot(slotIndex) {
@@ -3961,10 +3977,10 @@
         } catch (err) {
           console.warn('[Jamodeul] Chain quest progress failed.', err);
         }
-        // Start TTS immediately (while the tile-tap gesture is still fresh), then
-        // hold the English gloss ~1s after speech before advancing.
+        // Prefer TTS started from the completing tile tap (gesture-safe on iOS).
         this.showAnswerEnglish(this.puzzle?.englishHint);
-        const ttsPromise = this.speakSolvedWordImageMode();
+        const ttsPromise = this._pendingWinTts || this.speakSolvedWordImageMode();
+        this._pendingWinTts = null;
         await this.delay(reduceMotion() ? 200 : 360);
         await ttsPromise;
         await this.delay(1000);

@@ -211,16 +211,22 @@
     }
   }
 
-  async function fetchServerAudio(text, options = {}) {
+  function cacheKeyFor(text, options = {}) {
     const gender = preferredVoiceGender();
     const pace = options.syllablePace === 'quick' || options.syllablePace === '0.4'
       ? 'quick'
       : options.syllablePace === 'fast'
         ? 'fast'
         : 'normal';
-    const key = `v8:${gender}:${pace}:${text.trim()}`;
+    return `v8:${gender}:${pace}:${String(text || '').trim()}`;
+  }
+
+  async function fetchServerAudio(text, options = {}) {
+    const key = cacheKeyFor(text, options);
     if (audioCache.has(key)) return audioCache.get(key);
 
+    const gender = preferredVoiceGender();
+    const pace = key.split(':')[2];
     const url = `${getApiBase()}/api/tts/speak?text=${encodeURIComponent(text.trim())}`
       + `&voice=${encodeURIComponent(gender)}`
       + `&pace=${encodeURIComponent(pace)}`;
@@ -286,6 +292,7 @@
     return new Promise((resolve) => {
       const audio = ensureSharedAudio();
       let settled = false;
+      let started = false;
       const done = (ok) => {
         if (settled) return;
         settled = true;
@@ -307,7 +314,8 @@
       } catch (_) { /* ignore */ }
 
       const startPlay = () => {
-        if (settled) return;
+        if (settled || started) return;
+        started = true;
         const playPromise = audio.play();
         if (playPromise && typeof playPromise.catch === 'function') {
           playPromise.catch(() => done(false));
@@ -389,7 +397,10 @@
 
     if (preferServer) {
       try {
-        const audioUrl = await fetchServerAudio(text, options);
+        const key = cacheKeyFor(text, options);
+        const cached = audioCache.get(key);
+        // Cached clips can start in the same turn as a user gesture (no await).
+        const audioUrl = cached || await fetchServerAudio(text, options);
         const ok = await playAudioUrl(audioUrl, volume, playbackRate);
         if (ok) return true;
       } catch (_) {
@@ -436,7 +447,8 @@
     cancel();
     const session = activeSession;
     prime();
-    unlockPlayback();
+    // Do not call unlockPlayback() here — starting a silent clip then swapping
+    // src races with play() on iOS. Unlock only from real user gestures.
 
     // Start fetching pass 2+ immediately alongside pass 1 playback, so the
     // audible gap between readings is only gapMs — not a second network round-trip.
