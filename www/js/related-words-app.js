@@ -54,6 +54,9 @@
   const ANSWER_TTS_MUTED_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">'
     + '<path fill="currentColor" d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3 3 4.27 7.73 9H3v4h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4 9.91 6.09 12 8.18V4z"/>'
     + '</svg>';
+  const PHOTO_SWAP_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">'
+    + '<path fill="currentColor" d="M12 6V3L8 7l4 4V8c2.76 0 5 2.24 5 5a5 5 0 0 1-8.9 3.1L6.7 17.5A7 7 0 0 0 19 13c0-3.87-3.13-7-7-7zm-5 2.9L8.5 7.5A7 7 0 0 0 5 13c0 3.87 3.13 7 7 7v3l4-4-4-4v3a5 5 0 0 1-5-5c0-1.3.5-2.5 1.3-3.4z"/>'
+    + '</svg>';
   const WIN_TTS_MUTE_KEY = 'jamodeul-rw-win-tts-muted';
 
   const t = (key, vars) => global.I18n?.t(key, vars) ?? key;
@@ -417,9 +420,10 @@
             <section class="rw-answer-photo hidden" id="rw-answer-photo" aria-hidden="true">
               <div class="rw-answer-photo-grid" id="rw-answer-photo-grid">
                 ${Array.from({ length: 4 }, (_, index) => `
-                  <div class="rw-answer-photo-frame">
+                  <button type="button" class="rw-answer-photo-frame" data-image-slot="${index}" aria-label="${escapeHtml(t('relatedWords.swapPhoto') || 'Replace photo')}">
                     <img class="rw-answer-photo-img" data-image-slot="${index}" alt="" decoding="async" referrerpolicy="no-referrer" />
-                  </div>
+                    <span class="rw-answer-photo-swap" aria-hidden="true">${PHOTO_SWAP_SVG}</span>
+                  </button>
                 `).join('')}
               </div>
               <a class="rw-answer-photo-credit" id="rw-answer-photo-credit" href="https://www.pexels.com" target="_blank" rel="noopener noreferrer"></a>
@@ -577,6 +581,7 @@
       this.els.revealBtn?.addEventListener('click', () => this.onRevealButtonClick());
       this.bindTrailSpeak();
       this.bindAnswerTtsToggle();
+      this.bindAnswerPhotoSwap();
       this.syncAnswerTtsButton();
 
       if (this.raceMode) {
@@ -816,6 +821,7 @@
       const wrap = this.els.answerPhoto;
       const imgs = this.els.answerPhotoImgs || [];
       const credit = this.els.answerPhotoCredit;
+      this.resetAnswerPhotoSwapState();
       if (wrap) {
         wrap.classList.add('hidden');
         wrap.setAttribute('aria-hidden', 'true');
@@ -834,6 +840,122 @@
       }
       // Nothing left to load — release anyone waiting on the clue grid.
       this.markAnswerPhotoReady();
+    }
+
+    resetAnswerPhotoSwapState() {
+      this._photoSlotSwapped = [false, false, false, false];
+      this._photoAlternates = [];
+      this._photoSeenKeys = new Set();
+      this._photoSwapBusy = false;
+      const frames = this.root?.querySelectorAll?.('.rw-answer-photo-frame') || [];
+      frames.forEach((frame) => {
+        frame.classList.remove('is-swapped', 'is-swapping', 'can-swap');
+      });
+    }
+
+    urlsFromImage(image) {
+      const urls = [image?.previewUrl, image?.url, image?.imageUrl]
+        .map((u) => String(u || '').trim())
+        .filter(Boolean);
+      return [...new Set(urls)];
+    }
+
+    rememberPhotoKeys(image, urls) {
+      const keys = this._photoSeenKeys || (this._photoSeenKeys = new Set());
+      const id = String(image?.id || urls[0] || '');
+      if (id) keys.add(id);
+      urls.forEach((u) => keys.add(u));
+    }
+
+    isPhotoSeen(image, urls) {
+      const keys = this._photoSeenKeys || (this._photoSeenKeys = new Set());
+      const id = String(image?.id || '');
+      if (id && keys.has(id)) return true;
+      return urls.some((u) => keys.has(u));
+    }
+
+    syncAnswerPhotoSwapUi() {
+      const frames = [...(this.root?.querySelectorAll?.('.rw-answer-photo-frame') || [])];
+      const poolLeft = (this._photoAlternates || []).length;
+      frames.forEach((frame, index) => {
+        const empty = frame.classList.contains('is-empty');
+        const swapped = !!(this._photoSlotSwapped && this._photoSlotSwapped[index]);
+        const can = this.imageMode && !empty && !swapped && poolLeft > 0
+          && !this.won && !this.gameOver && !this.roundLocked;
+        frame.classList.toggle('can-swap', can);
+        frame.classList.toggle('is-swapped', swapped);
+        frame.disabled = !can;
+        const label = swapped
+          ? (t('relatedWords.swapPhotoUsed') || 'Already replaced')
+          : (t('relatedWords.swapPhoto') || 'Replace photo');
+        frame.setAttribute('aria-label', label);
+      });
+    }
+
+    bindAnswerPhotoSwap() {
+      const grid = this.els.answerPhotoGrid;
+      if (!grid || grid.dataset.swapBound === '1') return;
+      grid.dataset.swapBound = '1';
+      grid.addEventListener('click', (e) => {
+        const frame = e.target.closest('.rw-answer-photo-frame');
+        if (!frame || !grid.contains(frame)) return;
+        e.preventDefault();
+        const slot = parseInt(frame.dataset.imageSlot, 10);
+        if (!Number.isFinite(slot)) return;
+        this.onAnswerPhotoSwap(slot);
+      });
+    }
+
+    loadImageInto(img, urls) {
+      return new Promise((resolve) => {
+        const list = (Array.isArray(urls) ? urls : [urls]).filter(Boolean);
+        let i = 0;
+        const tryNext = () => {
+          if (i >= list.length) {
+            img.removeAttribute('src');
+            resolve(false);
+            return;
+          }
+          const url = list[i++];
+          img.onload = () => resolve(true);
+          img.onerror = tryNext;
+          img.src = url;
+          if (img.complete && img.naturalWidth) resolve(true);
+        };
+        tryNext();
+      });
+    }
+
+    async onAnswerPhotoSwap(slotIndex) {
+      if (!this.imageMode || this.won || this.gameOver || this.roundLocked) return;
+      if (this._photoSwapBusy) return;
+      if (!this._photoSlotSwapped) this._photoSlotSwapped = [false, false, false, false];
+      if (this._photoSlotSwapped[slotIndex]) return;
+      const next = (this._photoAlternates || []).shift();
+      if (!next?.urls?.length) {
+        this.syncAnswerPhotoSwapUi();
+        return;
+      }
+
+      const imgs = this.els.answerPhotoImgs || [];
+      const img = imgs[slotIndex];
+      const frame = img?.closest('.rw-answer-photo-frame');
+      if (!img || !frame) return;
+
+      this._photoSwapBusy = true;
+      frame.classList.add('is-swapping');
+      global.SoundEffects?.tap?.();
+      const ok = await this.loadImageInto(img, next.urls);
+      frame.classList.remove('is-swapping');
+      this._photoSwapBusy = false;
+      if (!ok) {
+        // Put it back so another slot can try a different alternate later.
+        this._photoAlternates.unshift(next);
+        this.syncAnswerPhotoSwapUi();
+        return;
+      }
+      this._photoSlotSwapped[slotIndex] = true;
+      this.syncAnswerPhotoSwapUi();
     }
 
     /**
@@ -894,6 +1016,7 @@
       }
 
       const requestId = (this._answerPhotoRequestId = (this._answerPhotoRequestId || 0) + 1);
+      this.resetAnswerPhotoSwapState();
       wrap.classList.remove('hidden', 'is-ready');
       wrap.classList.add('is-loading');
       wrap.setAttribute('aria-hidden', 'true');
@@ -936,21 +1059,20 @@
       }
 
       // Collect distinct images from one provider at a time. Never pad the grid
-      // by repeating the same photo.
+      // by repeating the same photo. Keep extras as one-tap swap alternates.
       const slotSources = [];
-      const seenKeys = new Set();
-      const addSlot = (image) => {
-        if (slotSources.length >= 4) return;
-        const urls = [image?.previewUrl, image?.url, image?.imageUrl]
-          .map((u) => String(u || '').trim())
-          .filter(Boolean);
-        const uniqueUrls = [...new Set(urls)];
+      const alternateSources = [];
+      const addImage = (image, intoAlternates = false) => {
+        const uniqueUrls = this.urlsFromImage(image);
         if (!uniqueUrls.length) return;
-        const key = String(image?.id || uniqueUrls[0]);
-        if (seenKeys.has(key) || uniqueUrls.some((u) => seenKeys.has(u))) return;
-        seenKeys.add(key);
-        uniqueUrls.forEach((u) => seenKeys.add(u));
-        slotSources.push(uniqueUrls);
+        if (this.isPhotoSeen(image, uniqueUrls)) return;
+        this.rememberPhotoKeys(image, uniqueUrls);
+        const entry = { urls: uniqueUrls, id: image?.id || uniqueUrls[0] };
+        if (!intoAlternates && slotSources.length < 4) {
+          slotSources.push(entry);
+          return;
+        }
+        alternateSources.push(entry);
       };
 
       for (const svc of services) {
@@ -962,13 +1084,15 @@
         }
         if (requestId !== this._answerPhotoRequestId) return;
         const imageSet = Array.isArray(photo?.imageSet) ? photo.imageSet : [];
-        imageSet.forEach((image) => addSlot(image));
+        const alternates = Array.isArray(photo?.alternates) ? photo.alternates : [];
+        imageSet.forEach((image) => addImage(image, false));
+        alternates.forEach((image) => addImage(image, true));
         if (photo?.previewUrl || photo?.imageUrl) {
-          addSlot({
+          addImage({
             id: photo.imageId || photo.photoId,
             previewUrl: photo.previewUrl,
             imageUrl: photo.imageUrl,
-          });
+          }, slotSources.length >= 4);
         }
         // The server already picks a single coherent media type. Mixing in the
         // fallback provider's photos would break that, so only fall through
@@ -981,6 +1105,8 @@
         this.clearAnswerPhoto();
         return;
       }
+
+      this._photoAlternates = alternateSources;
 
       // A word without four good matches gets a smaller grid rather than empty
       // cells, so a short set still looks deliberate.
@@ -1002,29 +1128,13 @@
           credit.textContent = '';
           credit.classList.add('hidden');
         }
+        this.syncAnswerPhotoSwapUi();
       };
 
-      // Load each cell independently so one broken image never removes the
-      // whole 2×2 grid. Try CDN first, then any proxy fallback URL.
-      const loadImage = (img, urls) => new Promise((resolve) => {
-        const list = (Array.isArray(urls) ? urls : [urls]).filter(Boolean);
-        let i = 0;
-        const tryNext = () => {
-          if (i >= list.length) {
-            img.removeAttribute('src');
-            resolve(false);
-            return;
-          }
-          const url = list[i++];
-          img.onload = () => resolve(true);
-          img.onerror = tryNext;
-          img.src = url;
-          if (img.complete && img.naturalWidth) resolve(true);
-        };
-        tryNext();
-      });
       settle();
-      const results = await Promise.all(imgs.map((img, index) => loadImage(img, slotSources[index] || [])));
+      const results = await Promise.all(
+        imgs.map((img, index) => this.loadImageInto(img, slotSources[index]?.urls || [])),
+      );
       if (requestId !== this._answerPhotoRequestId) return;
       if (!results.some(Boolean) && !slotSources.length) {
         this.clearAnswerPhoto();
@@ -1033,6 +1143,7 @@
       // All four cells have finished loading (or failed individually) — the
       // clue is now fully visible, so the bot may start solving.
       this.markAnswerPhotoReady();
+      this.syncAnswerPhotoSwapUi();
       // Warm the next round's images so the switch feels instant.
       this.prefetchNextAnswerPhoto();
     }
@@ -4259,6 +4370,8 @@
       el.textContent = label;
       el.classList.remove('hidden');
       el.setAttribute('aria-hidden', 'false');
+      this.root?.classList.add('rw-showing-answer-en');
+      this.syncAnswerPhotoSwapUi();
     }
 
     /** Clear the English translation reveal. */
@@ -4268,6 +4381,7 @@
       el.textContent = '';
       el.classList.add('hidden');
       el.setAttribute('aria-hidden', 'true');
+      this.root?.classList.remove('rw-showing-answer-en');
     }
 
     getChainLabel(chain) {

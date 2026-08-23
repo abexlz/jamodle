@@ -551,6 +551,7 @@ html.reduce-motion .rw-chain-recap-word {
 }
 
 .rw-answer-photo-frame {
+  position: relative;
   width: 100%;
   aspect-ratio: 3 / 2;
   border-radius: 18px;
@@ -558,6 +559,52 @@ html.reduce-motion .rw-chain-recap-word {
   background: rgba(15, 40, 48, 0.08);
   border: 1px solid rgba(26, 26, 26, 0.08);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  padding: 0;
+  margin: 0;
+  cursor: default;
+  -webkit-tap-highlight-color: transparent;
+  appearance: none;
+  -webkit-appearance: none;
+  font: inherit;
+  color: inherit;
+}
+
+.rw-answer-photo-frame.can-swap {
+  cursor: pointer;
+}
+
+.rw-answer-photo-frame.can-swap:active {
+  transform: scale(0.985);
+}
+
+.rw-answer-photo-frame.is-swapping {
+  opacity: 0.72;
+}
+
+.rw-answer-photo-swap {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.48);
+  color: #fff;
+  pointer-events: none;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+.rw-answer-photo-frame.can-swap .rw-answer-photo-swap {
+  display: inline-flex;
+}
+
+.rw-answer-photo-swap svg {
+  width: 13px;
+  height: 13px;
+  display: block;
 }
 
 [data-theme="dark"] .rw-answer-photo-frame {
@@ -1017,6 +1064,30 @@ html.reduce-motion .rw-chain-recap-word {
   letter-spacing: 0.2px;
   text-transform: capitalize;
   animation: rwAnswerEnglishIn 180ms ease-out both;
+}
+
+/* Keep the win English banner above the home bottom bar (not clipped under it). */
+body.has-home-bottom-bar .rw-solo-mode.rw-image-mode.rw-showing-answer-en .rw-answer-english:not(.hidden),
+body.has-home-bottom-bar .rw-race-mode.rw-image-mode.rw-showing-answer-en .rw-answer-english:not(.hidden) {
+  position: fixed;
+  left: 50%;
+  bottom: calc(10px + var(--home-nav-offset, calc(46px + env(safe-area-inset-bottom, 0px))));
+  transform: translateX(-50%);
+  z-index: 58;
+  margin: 0;
+  max-width: min(92vw, 360px);
+  padding: 10px 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
+  pointer-events: none;
+}
+
+[data-theme="dark"] body.has-home-bottom-bar .rw-solo-mode.rw-image-mode.rw-showing-answer-en .rw-answer-english:not(.hidden),
+[data-theme="dark"] body.has-home-bottom-bar .rw-race-mode.rw-image-mode.rw-showing-answer-en .rw-answer-english:not(.hidden) {
+  background: rgba(18, 28, 36, 0.96);
+  color: #fff;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4);
 }
 
 .rw-answer-english.hidden {

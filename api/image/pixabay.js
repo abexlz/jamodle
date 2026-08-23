@@ -18,9 +18,12 @@ const PIXABAY_SEARCH = 'https://pixabay.com/api/';
  * page often leaves the grid short. Still light enough to parse fast.
  */
 const CANDIDATE_COUNT = 40;
-/** Cache namespace so Pixabay and Pexels entries never collide in-process. */
-const CACHE_NS = 'pixabay:image-set-v4:';
+/** Cache namespace — v5 includes swap alternates beyond the 2×2 grid. */
+const CACHE_NS = 'pixabay:image-set-v5:';
 const GRID_SIZE = 4;
+/** Extra ranked images clients can use for one-tap photo swaps. */
+const ALTERNATE_COUNT = 4;
+const POOL_SIZE = GRID_SIZE + ALTERNATE_COUNT;
 
 function getClientIp(req) {
   return req.headers['x-forwarded-for']?.split(',')[0]?.trim()
@@ -242,7 +245,7 @@ module.exports = async function handler(req, res) {
       const firstPage = await Promise.all(rank.TYPES.map((type) => searchPixabay(term, type)));
       rank.TYPES.forEach((type, i) => { byType[type] = firstPage[i]; });
 
-      let picked = rank.pickImageSet(byType, term, GRID_SIZE);
+      let picked = rank.pickImageSet(byType, term, POOL_SIZE);
       if (picked.items.length < GRID_SIZE) {
         // The relevance gate rejects a lot; a second page usually completes the grid.
         try {
@@ -250,12 +253,17 @@ module.exports = async function handler(req, res) {
           rank.TYPES.forEach((type, i) => {
             byType[type] = mergeUniqueHits(byType[type], secondPage[i]);
           });
-          picked = rank.pickImageSet(byType, term, GRID_SIZE);
+          picked = rank.pickImageSet(byType, term, POOL_SIZE);
         } catch {
           /* Keep the page-1 set rather than failing the whole clue. */
         }
       }
-      return { picked, imageSet: toImageSet(picked) };
+      const all = toImageSet(picked);
+      return {
+        picked,
+        imageSet: all.slice(0, GRID_SIZE),
+        alternates: all.slice(GRID_SIZE),
+      };
     };
 
     let searchTerm = query;
@@ -293,6 +301,7 @@ module.exports = async function handler(req, res) {
       searchTerm,
       found: true,
       imageSet: result.imageSet,
+      alternates: Array.isArray(result.alternates) ? result.alternates : [],
       imageType: result.picked.type,
       // Compatibility for clients expecting one image.
       imageUrl: firstImage.url,

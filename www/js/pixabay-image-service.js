@@ -8,8 +8,8 @@
 (function (global) {
   'use strict';
 
-  // v7: relevance-gated, single-media-type image sets (see lib/pixabay-rank).
-  const CACHE_PREFIX = 'jamodeul-pixabay-v7-ranked-';
+  // v8: ranked sets include alternate images for one-tap photo swaps.
+  const CACHE_PREFIX = 'jamodeul-pixabay-v8-ranked-';
   const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
   const memory = new Map();
 
