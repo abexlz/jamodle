@@ -23,6 +23,7 @@
   let activeSession = 0;
   let activeAudio = null;
   let primed = false;
+  let playbackUnlocked = false;
   let voiceReadyPromise = null;
   let selectedVoice = null;
   let selectedVoiceGender = null;
@@ -153,6 +154,29 @@
       global.speechSynthesis?.getVoices?.();
     } catch (_) { /* ignore */ }
     waitForVoices();
+  }
+
+  /** Unlock HTMLAudioElement playback from a user gesture so later win TTS can play. */
+  function unlockPlayback() {
+    prime();
+    if (playbackUnlocked) return;
+    playbackUnlocked = true;
+    try {
+      const silent = new Audio(
+        'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA',
+      );
+      silent.volume = 0.01;
+      const playPromise = silent.play();
+      if (playPromise && typeof playPromise.then === 'function') {
+        playPromise.then(() => {
+          try { silent.pause(); } catch (_) { /* ignore */ }
+        }).catch(() => {
+          playbackUnlocked = false;
+        });
+      }
+    } catch (_) {
+      playbackUnlocked = false;
+    }
   }
 
   function rememberCache(key, url) {
@@ -351,11 +375,13 @@
       : SYLLABLE_GAP_MS;
     const preferServer = options.preferServer !== false;
 
-    if (!word || !pronunciationEnabled()) return false;
+    if (!word) return false;
+    if (!options.force && !pronunciationEnabled()) return false;
 
     cancel();
     const session = activeSession;
     prime();
+    unlockPlayback();
 
     // Start fetching pass 2+ immediately alongside pass 1 playback, so the
     // audible gap between readings is only gapMs — not a second network round-trip.
@@ -404,6 +430,7 @@
   global.KoreanTTS = {
     REPEAT_GAP_MS,
     prime,
+    unlockPlayback,
     cancel,
     speak,
     speakOnce,

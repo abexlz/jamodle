@@ -2000,9 +2000,8 @@
     loadWinTtsMuted() {
       try {
         const raw = global.AppStorage?.get?.(WIN_TTS_MUTE_KEY, null);
-        if (raw === true || raw === '1' || raw === 1) return true;
-        if (raw === false || raw === '0' || raw === 0) return false;
-        return localStorage.getItem(WIN_TTS_MUTE_KEY) === '1';
+        if (raw === true || raw === 1 || raw === '1') return true;
+        return false;
       } catch {
         return false;
       }
@@ -2016,8 +2015,7 @@
     }
 
     isWinTtsEnabled() {
-      if (this.winTtsMuted) return false;
-      return global.UserPreferences?.get?.().pronunciation !== false;
+      return this.winTtsMuted !== true;
     }
 
     bindAnswerTtsToggle() {
@@ -2027,14 +2025,13 @@
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        this.winTtsMuted = !this.winTtsMuted;
+        global.KoreanTTS?.unlockPlayback?.();
+        this.winTtsMuted = this.winTtsMuted !== true;
         this.saveWinTtsMuted(this.winTtsMuted);
         this.syncAnswerTtsButton();
         if (this.winTtsMuted) {
           global.KoreanTTS?.cancel?.();
           global.AnswerTTS?.cancel?.();
-        } else {
-          global.KoreanTTS?.prime?.();
         }
       });
     }
@@ -2042,7 +2039,7 @@
     syncAnswerTtsButton() {
       const btn = this.els.answerTtsBtn;
       if (!btn) return;
-      const muted = !!this.winTtsMuted;
+      const muted = this.winTtsMuted === true;
       btn.classList.toggle('is-muted', muted);
       btn.setAttribute('aria-pressed', muted ? 'true' : 'false');
       btn.setAttribute(
@@ -3686,7 +3683,7 @@
 
     placeFromDock(tileId) {
       if (!this.enabled || this.roundLocked || this.isStunned() || this.awaitingExtraGuess) return;
-      global.KoreanTTS?.prime?.();
+      global.KoreanTTS?.unlockPlayback?.();
       const tile = this.dock.find((item) => item.id === tileId && !item.used);
       if (!tile) return;
       const slotIndex = this.slots.findIndex((slot) => slot === null);
@@ -3937,8 +3934,6 @@
 
       this.gameOver = true;
 
-      await this.delay(reduceMotion() ? 200 : 360);
-
       // Endless image chain: no chain-complete recap — just advance to the next
       // Pixabay word from the Hangul-dle pool.
       if (this.imageMode) {
@@ -3948,10 +3943,12 @@
         } catch (err) {
           console.warn('[Jamodeul] Chain quest progress failed.', err);
         }
-        // Reveal the English translation under the Korean answer, read the word
-        // twice (2nd pass with tightened syllable spacing), hold ~1s, then move on.
+        // Start TTS immediately (while the tile-tap gesture is still fresh), then
+        // hold the English gloss ~1s after speech before advancing.
         this.showAnswerEnglish(this.puzzle?.englishHint);
-        await this.speakSolvedWordImageMode();
+        const ttsPromise = this.speakSolvedWordImageMode();
+        await this.delay(reduceMotion() ? 200 : 360);
+        await ttsPromise;
         await this.delay(1000);
         this.hideAnswerEnglish();
         const nextIndex = (this.globalLinkIndex || 0) + 1;
@@ -3963,6 +3960,8 @@
         this.checking = false;
         return;
       }
+
+      await this.delay(reduceMotion() ? 200 : 360);
 
       // Captured before commitWinProgress() clears solvedInChain for the next chain.
       const solvedThisChain = [...(this.progress.solvedInChain || []), this.puzzle.answer];
@@ -4152,10 +4151,10 @@
       const word = this.puzzle?.answer;
       if (!word) return Promise.resolve(false);
       if (!this.isWinTtsEnabled()) return Promise.resolve(false);
-      global.KoreanTTS?.prime?.();
+      global.KoreanTTS?.unlockPlayback?.();
       global.DictionaryService?.prefetchWord?.(word);
       // In 1v1, trail render will pronounce the next clue — speak the solved word here.
-      return Promise.resolve(global.KoreanTTS?.speak?.(word, wordChainSpeakOpts()) ?? false);
+      return Promise.resolve(global.KoreanTTS?.speak?.(word, wordChainSpeakOpts({ force: true })) ?? false);
     }
 
     /**
@@ -4171,9 +4170,10 @@
       if (!this.isWinTtsEnabled()) return;
       const tts = global.KoreanTTS;
       if (!tts?.speak) return;
-      tts.prime?.();
+      tts.unlockPlayback?.();
       global.DictionaryService?.prefetchWord?.(word);
       await Promise.resolve(tts.speak(word, wordChainSpeakOpts({
+        force: true,
         repeats: 2,
         gapMs: WORD_CHAIN_WIN_REPEAT_GAP_MS,
         repeatSyllablePace: 'quick',
@@ -4191,9 +4191,10 @@
       if (!this.isWinTtsEnabled()) return;
       const tts = global.KoreanTTS;
       if (!tts?.speak) return;
-      tts.prime?.();
+      tts.unlockPlayback?.();
       global.DictionaryService?.prefetchWord?.(word);
       await Promise.resolve(tts.speak(word, wordChainSpeakOpts({
+        force: true,
         syllablePace: 'quick',
         syllableGapMs: WORD_CHAIN_SYLLABLE_GAP_TIGHT_MS,
       })));
