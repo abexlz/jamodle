@@ -1958,7 +1958,8 @@
       const dailyLength = MD.DAILY_WORD_LENGTH ?? 2;
       const dailyList = MatchWords?.getWordsForLength?.(dailyLength) || MATCH_WORDS;
       const word = MD.pickDailyMatchWord(dailyList.length ? dailyList : MATCH_WORDS, activeDate);
-      this.startRound({ word }, null);
+      const saved = MD.loadDailySaved?.(activeDate) || null;
+      this.startRound({ word }, saved);
     }
 
     restoreDailyLocked(locked) {
@@ -2050,7 +2051,7 @@
         }
       }
 
-      if (!this.isDaily && saved?.over && saved?.won) {
+      if (saved?.over && saved?.won) {
         this.checkedComplete = true;
         this.els.check.disabled = true;
         this.els.reset.disabled = true;
@@ -2058,7 +2059,7 @@
         this.stopTimer();
         this.revealHintWordSync(this.winningWord || word);
         this.showResults(saved.elapsedMs || 0);
-        this.feedback.show('success', t('match.feedbackDailyDone'));
+        this.feedback.show('success', t(this.isDaily ? 'match.feedbackDailyDone' : 'match.feedbackSuccess'));
         return;
       }
 

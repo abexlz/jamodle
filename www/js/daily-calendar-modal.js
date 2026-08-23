@@ -323,7 +323,7 @@
         : t('dailyCalendar.clearedDate', { date: dateLabel });
       return `
         <div class="daily-cal-play-row">
-          <button type="button" class="daily-cal-play-btn is-cleared no-press" data-cal-action="play" aria-label="${escapeHtml(t('dailyCalendar.viewResult'))}">
+          <button type="button" class="daily-cal-play-btn is-cleared no-press" data-cal-action="view" aria-label="${escapeHtml(t('dailyCalendar.viewResult'))}">
             <span class="daily-cal-play-check" aria-hidden="true">✓</span>
             <span class="daily-cal-play-label">${escapeHtml(clearedLabel)}</span>
             <span class="daily-cal-cleared-tag">${escapeHtml(t('dailyCalendar.viewResult'))}</span>
@@ -398,6 +398,16 @@
 
   function onPlay() {
     if (!selectedDate || !SVC().canPlayDate(selectedDate)) return;
+    if (SVC().isDateCompleted(selectedDate)) {
+      onViewResult();
+      return;
+    }
+    SVC().navigateToDaily(selectedDate);
+    close();
+  }
+
+  function onViewResult() {
+    if (!selectedDate || !SVC().isDateCompleted(selectedDate)) return;
     SVC().navigateToDaily(selectedDate);
     close();
   }
@@ -425,6 +435,7 @@
   function bindFooterActions() {
     if (!overlayEl) return;
     overlayEl.querySelector('[data-cal-action="play"]')?.addEventListener('click', onPlay);
+    overlayEl.querySelector('[data-cal-action="view"]')?.addEventListener('click', onViewResult);
     overlayEl.querySelector('[data-cal-action="coins"]')?.addEventListener('click', onUnlockCoins);
     overlayEl.querySelector('[data-cal-action="ad"]')?.addEventListener('click', onUnlockAd);
   }
@@ -477,7 +488,7 @@
           dayBtn.classList.toggle('is-selected', picked);
           dayBtn.setAttribute('aria-pressed', picked ? 'true' : 'false');
         });
-        if (SVC().isToday(dateKey) && SVC().canPlayDate(dateKey)) {
+        if (SVC().isToday(dateKey) && SVC().canPlayDate(dateKey) && !SVC().isDateCompleted(dateKey)) {
           onPlay();
           return;
         }
