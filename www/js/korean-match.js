@@ -1135,9 +1135,6 @@
         <div class="game-feedback empty" id="match-feedback" role="status">&nbsp;</div>
         ${bankSectionHtml}
         <footer class="match-footer" aria-label="Game controls">
-        ${hintDock}
-        ${versusMeaningBtn}
-        ${versusDevAnswerBtn}
         <div class="match-actions">
           <button type="button" class="btn btn-reset match-action-btn" id="match-reset" data-i18n="match.reset">
             <span class="match-action-btn__icon" aria-hidden="true">
@@ -1152,6 +1149,9 @@
             <span class="match-action-btn__label">${t('match.check')}</span>
           </button>
         </div>
+        ${hintDock}
+        ${versusMeaningBtn}
+        ${versusDevAnswerBtn}
         </footer>
         ${resultsOverlay}
       `;

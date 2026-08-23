@@ -74,7 +74,7 @@ body.match-turn-page:not(.has-app-top-hud) {
 body.has-home-bottom-bar.match-page,
 body.has-home-bottom-bar.match-race-page,
 body.has-home-bottom-bar.match-turn-page {
-  padding-bottom: var(--home-nav-offset, calc(46px + var(--safe-bottom))) !important;
+  padding-bottom: calc(8px + var(--home-nav-offset, calc(46px + var(--safe-bottom)))) !important;
 }
 
 body:has(#race-root.race-app),
