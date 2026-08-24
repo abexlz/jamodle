@@ -18,36 +18,6 @@
       .replace(/"/g, '&quot;');
   }
 
-  function renderTitlesBlock(inv) {
-    return Object.values(SS().TITLES).map((title) => {
-      const owned = SS().ownsTitle(title.id);
-      const name = t(`shop.titles.${title.id}`);
-      const desc = t(`shop.titles.${title.id}Desc`);
-
-      let action = '';
-      if (owned) {
-        action = `<span class="shop-owned-badge">${escapeHtml(t('shop.owned'))}</span>`;
-      } else {
-        action = `
-          <button type="button" class="shop-buy-btn shop-buy-btn--compact" data-buy-title="${escapeHtml(title.id)}"
-            ${inv.coins >= title.price ? '' : 'disabled'}>
-            ${global.CoinIcon?.html?.('coin-icon coin-icon--sm') || '🪙'} ${title.price}
-          </button>`;
-      }
-
-      return `
-        <article class="shop-item-card shop-item-card--row shop-cosmetic-card${owned ? ' is-owned' : ''}"
-          title="${escapeHtml(desc)}">
-          <span class="shop-item-icon" aria-hidden="true">${title.icon}</span>
-          <div class="shop-item-main">
-            <span class="shop-item-name">${escapeHtml(name)}</span>
-          </div>
-          ${action}
-        </article>
-      `;
-    }).join('');
-  }
-
   function renderFramePreview(frameId) {
     if (global.ProfileUI?.renderAvatarWithFrame) {
       return global.ProfileUI.renderAvatarWithFrame({
@@ -215,9 +185,7 @@
 
         <div class="shop-scope-panel${scope === 'cosmetic' ? '' : ' hidden'}" data-shop-scope-panel="cosmetic"
           role="tabpanel" aria-labelledby="shop-scope-cosmetic">
-          <h3 class="shop-subsection-title" id="shop-scope-cosmetic">${escapeHtml(t('shop.tabTitles'))}</h3>
-          <div class="shop-item-grid shop-consumables-list">${renderTitlesBlock(inv)}</div>
-          <h3 class="shop-subsection-title">${escapeHtml(t('shop.tabFrames'))}</h3>
+          <h3 class="shop-subsection-title" id="shop-scope-cosmetic">${escapeHtml(t('shop.tabFrames'))}</h3>
           <div class="shop-item-grid shop-frame-grid">${renderFramesBlock(inv)}</div>
         </div>
 
@@ -270,18 +238,6 @@
       btn.addEventListener('click', () => {
         const next = btn.dataset.shopScope;
         if (next) setShopScope(next, root);
-      });
-    });
-
-    section.querySelectorAll('[data-buy-title]').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const result = SS()?.buyTitle?.(btn.dataset.buyTitle);
-        if (result?.ok) {
-          showMessage(section.closest('.menu-sections') || section, t('shop.purchaseSuccess'), 'ok');
-          refreshSection(root);
-        } else if (result?.reason === 'insufficient') {
-          showMessage(section.closest('.menu-sections') || section, t('shop.insufficientCoins'), 'error');
-        }
       });
     });
 

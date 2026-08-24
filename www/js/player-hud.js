@@ -76,7 +76,7 @@
       if (levelEl) levelEl.textContent = String(summary.level || 1);
     }
 
-    nav.setAttribute('aria-label', `${summary.displayName || t('nav.profile')} · ${summary.displayTitle || t('profile.levelShort', { level: summary.level })}`);
+    nav.setAttribute('aria-label', `${summary.displayName || t('nav.profile')} · ${t('profile.levelShort', { level: summary.level })}`);
   }
 
   function refresh() {

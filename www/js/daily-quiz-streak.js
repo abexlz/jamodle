@@ -16,7 +16,7 @@
     { days: 7, id: 'frame-freeze' },
     { days: 14, id: 'special-avatar' },
     { days: 30, id: 'gold-trophy' },
-    { days: 100, id: 'master-title' },
+    { days: 100, id: 'master-bonus' },
   ];
 
   function t(key, vars) {
@@ -219,12 +219,14 @@
         rewards.push({ type: 'freeze', amount: 1 });
       }
     }
-    if (milestone.id === 'master-title') {
-      if (!(profile.purchasedTitleIds || []).includes('hangul-master')) {
-        profile.purchasedTitleIds = profile.purchasedTitleIds || [];
-        profile.purchasedTitleIds.push('hangul-master');
-        rewards.push({ type: 'title', id: 'hangul-master' });
+    if (milestone.id === 'master-bonus') {
+      const bonus = 100;
+      if (global.ShopService?.grantCoins) {
+        global.ShopService.grantCoins(bonus, { profile, skipBoost: true, skipSave: true });
+      } else {
+        profile.coins = (profile.coins || 0) + bonus;
       }
+      rewards.push({ type: 'coins', amount: bonus });
     }
     global.ProfileService.saveProfile(profile);
     return rewards;

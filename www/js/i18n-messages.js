@@ -692,7 +692,7 @@
       "defaultName": "Learner",
       "headerLabel": "Your learning profile",
       "displayName": "Display name",
-      "levelLine": "Level {{level}} · {{title}}",
+      "levelLine": "Level {{level}}",
       "levelShort": "Level {{level}}",
       "levelAbbrev": "LV",
       "xpAbbrev": "xp",
@@ -709,7 +709,7 @@
       },
       "levelUp": {
         "title": "Level Up!",
-        "message": "You are now Level {{level}}: {{title}}",
+        "message": "You are now Level {{level}}!",
         "continue": "Keep going →"
       },
       "badgeEarned": {
@@ -1593,7 +1593,7 @@
       "friendFallback": "Friend",
       "questsIdle": "No extra quests right now",
       "milestonesTitle": "Streak rewards",
-      "milestonesHint": "3🔥 · 7 frame + freeze · 14 avatar · 30 gold + freeze · 100 title",
+      "milestonesHint": "3🔥 · 7 frame + freeze · 14 avatar · 30 gold + freeze · 100 coins",
       "milestoneDays": "{{days}} days",
       "nextReward": "{{left}} more day(s) → {{days}}-day reward: {{reward}}",
       "allRewardsUnlocked": "You unlocked every streak reward — amazing!",
@@ -1602,14 +1602,14 @@
         "7": "Gold frame + freeze",
         "14": "Crown avatar",
         "30": "Gold trophy + freeze",
-        "100": "Hangul Master title"
+        "100": "100 coins"
       },
       "milestone": {
         "3": "3 days · fire badge",
         "7": "7 days · gold frame + freeze",
         "14": "14 days · crown avatar",
         "30": "30 days · gold trophy + freeze",
-        "100": "100 days · 한글 마스터"
+        "100": "100 days · 100 coins"
       }
     }
   },
@@ -2303,7 +2303,7 @@
       "defaultName": "학습자",
       "headerLabel": "나의 학습 프로필",
       "displayName": "표시 이름",
-      "levelLine": "레벨 {{level}} · {{title}}",
+      "levelLine": "레벨 {{level}}",
       "levelShort": "레벨 {{level}}",
       "levelAbbrev": "LV",
       "xpAbbrev": "xp",
@@ -2320,7 +2320,7 @@
       },
       "levelUp": {
         "title": "레벨 업!",
-        "message": "레벨 {{level}}: {{title}}",
+        "message": "레벨 {{level}}에 도달했어요!",
         "continue": "계속하기 →"
       },
       "badgeEarned": {
@@ -3204,7 +3204,7 @@
       "friendFallback": "친구",
       "questsIdle": "지금은 추가 퀘스트가 없어요",
       "milestonesTitle": "연속 보상",
-      "milestonesHint": "3일🔥 · 7일 프레임+프리즈 · 14일 아바타 · 30일 골드+프리즈 · 100일 칭호",
+      "milestonesHint": "3일🔥 · 7일 프레임+프리즈 · 14일 아바타 · 30일 골드+프리즈 · 100일 코인",
       "milestoneDays": "{{days}}일",
       "nextReward": "{{left}}일 더 → {{days}}일 보상: {{reward}}",
       "allRewardsUnlocked": "모든 스트릭 보상을 받았어요!",
@@ -3213,14 +3213,14 @@
         "7": "골드 프레임 + 프리즈",
         "14": "왕관 아바타",
         "30": "골드 트로피 + 프리즈",
-        "100": "한글 마스터 칭호"
+        "100": "코인 100개"
       },
       "milestone": {
         "3": "3일 · 불꽃 배지",
         "7": "7일 · 골드 프레임 + 프리즈",
         "14": "14일 · 왕관 아바타",
         "30": "30일 · 골드 트로피 + 프리즈",
-        "100": "100일 · 한글 마스터"
+        "100": "100일 · 코인 100개"
       }
     }
   }

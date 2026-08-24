@@ -175,7 +175,6 @@
     const existing = document.getElementById('level-up-modal');
     if (existing) existing.remove();
 
-    const title = global.LevelUtils?.getLevelTitle(result.level, t) || '';
     const overlay = document.createElement('div');
     overlay.id = 'level-up-modal';
     overlay.className = 'profile-modal-overlay';
@@ -185,7 +184,7 @@
       <div class="profile-modal-card level-up-card">
         <div class="profile-modal-stars" aria-hidden="true">✨</div>
         <h2 data-i18n="profile.levelUp.title">${t('profile.levelUp.title')}</h2>
-        <p class="level-up-line">${t('profile.levelUp.message', { level: result.level, title })}</p>
+        <p class="level-up-line">${t('profile.levelUp.message', { level: result.level })}</p>
         <button type="button" class="profile-modal-btn" data-action="close">${t('profile.levelUp.continue')}</button>
       </div>
     `;
@@ -313,8 +312,8 @@
     const pct = summary.xpToNext > 0
       ? Math.min(100, Math.round((summary.xpInLevel / summary.xpToNext) * 100))
       : 0;
-    const titleText = summary.displayTitle || summary.levelTitle || '';
-    const showTitle = isHero && titleText;
+    const titleText = '';
+    const showTitle = false;
     const sizeClass = isHero ? 'profile-badge-card--hero' : 'profile-badge-card--menu';
 
     return `

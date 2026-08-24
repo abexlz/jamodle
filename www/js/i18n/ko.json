@@ -675,7 +675,7 @@
     "defaultName": "학습자",
     "headerLabel": "나의 학습 프로필",
     "displayName": "표시 이름",
-    "levelLine": "레벨 {{level}} · {{title}}",
+    "levelLine": "레벨 {{level}}",
     "levelShort": "레벨 {{level}}",
     "levelAbbrev": "LV",
     "xpAbbrev": "xp",
@@ -692,7 +692,7 @@
     },
     "levelUp": {
       "title": "레벨 업!",
-      "message": "레벨 {{level}}: {{title}}",
+      "message": "레벨 {{level}}에 도달했어요!",
       "continue": "계속하기 →"
     },
     "badgeEarned": {

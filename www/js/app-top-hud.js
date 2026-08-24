@@ -22,7 +22,7 @@
     ['CoinIcon', 'js/coin-icon.js'],
     ['BadgeService', 'js/badge-service.js'],
     ['ProfileUI', 'js/profile-ui.js?v=20260815b'],
-    ['PlayerHud', 'js/player-hud.js?v=20260816b'],
+    ['PlayerHud', 'js/player-hud.js?v=20260824i'],
     ['DailyGiftService', 'js/daily-gift-service.js'],
     ['DailyGiftUI', 'js/daily-gift-ui.js?v=20260803a'],
     ['DailyCalendarService', 'js/daily-calendar-service.js?v=20260823f'],

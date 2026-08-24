@@ -675,7 +675,7 @@
     "defaultName": "Learner",
     "headerLabel": "Your learning profile",
     "displayName": "Display name",
-    "levelLine": "Level {{level}} · {{title}}",
+    "levelLine": "Level {{level}}",
     "levelShort": "Level {{level}}",
     "levelAbbrev": "LV",
     "xpAbbrev": "xp",
@@ -692,7 +692,7 @@
     },
     "levelUp": {
       "title": "Level Up!",
-      "message": "You are now Level {{level}}: {{title}}",
+      "message": "You are now Level {{level}}!",
       "continue": "Keep going →"
     },
     "badgeEarned": {

@@ -63,32 +63,6 @@
     }).join('');
   }
 
-  function renderTitles(summary) {
-    const profile = summary.profile || global.ProfileService?.loadProfile?.() || {};
-    const selected = summary.titleId || global.ProfileService?.getDisplayTitleId?.(profile) || 'hangul-starter';
-    const levelTitles = global.LevelUtils?.TITLE_RANGES?.map((r) => r.id).reverse() || [];
-    const shopTitleIds = Object.keys(global.ShopService?.TITLES || {});
-    const extra = (profile.purchasedTitleIds || []).filter((id) => !levelTitles.includes(id) && !shopTitleIds.includes(id));
-    const allTitles = [...levelTitles, ...shopTitleIds.filter((id) => !levelTitles.includes(id)), ...extra];
-    return allTitles.map((titleId) => {
-      const isUnlocked = global.ProfileService?.isTitleUnlocked?.(profile, titleId) ?? false;
-      const isSelected = selected === titleId;
-      const shopTitle = global.ShopService?.TITLES?.[titleId];
-      const label = shopTitle
-        ? t(`shop.titles.${titleId}`)
-        : t(`profile.levelTitles.${titleId}`);
-      return `
-        <button type="button" class="title-option${isSelected ? ' selected' : ''}"
-          data-title-id="${escapeHtml(titleId)}"
-          ${isUnlocked ? '' : 'disabled'}
-          aria-label="${escapeHtml(label)}"
-          aria-pressed="${isSelected}">
-          ${global.ProfileUI?.renderTitleBanner?.(label) || escapeHtml(label)}
-        </button>
-      `;
-    }).join('');
-  }
-
   function renderFrames(summary) {
     const profile = summary.profile || global.ProfileService?.loadProfile?.() || {};
     const selected = summary.frameId || 'none';
@@ -199,11 +173,6 @@
   function renderCosmeticsPanel(summary) {
     return `
       <div class="profile-panel-block">
-        <h3 class="profile-panel-subhead" data-i18n="profile.titles.title">${t('profile.titles.title')}</h3>
-        <p class="profile-cosmetics-hint" data-i18n="profile.titles.hint">${t('profile.titles.hint')}</p>
-        <div class="title-picker" id="title-picker">${renderTitles(summary)}</div>
-      </div>
-      <div class="profile-panel-block">
         <h3 class="profile-panel-subhead" data-i18n="profile.avatars.title">${t('profile.avatars.title')}</h3>
         <div class="avatar-picker" id="avatar-picker">${renderAvatars(summary)}</div>
       </div>
@@ -218,7 +187,7 @@
   function renderStatsPanel(summary) {
     return `
       <div class="profile-panel-block profile-panel-summary">
-        <p class="profile-level-line">${t('profile.levelLine', { level: summary.level, title: summary.displayTitle || summary.levelTitle })}</p>
+        <p class="profile-level-line">${t('profile.levelLine', { level: summary.level })}</p>
         <p class="profile-coins-line">${global.CoinIcon?.html?.('coin-icon coin-icon--md') || '🪙'} ${summary.coins} ${escapeHtml(t('shop.coins'))}</p>
         <p class="profile-streak-line">${summary.currentStreak > 0
           ? t('profile.streakLine', { days: summary.currentStreak })
@@ -375,20 +344,6 @@
         root.querySelectorAll('.frame-option').forEach((b) => {
           b.classList.toggle('selected', b.dataset.frameId === frameId);
           b.setAttribute('aria-pressed', b.dataset.frameId === frameId ? 'true' : 'false');
-        });
-        global.PlayerHud?.refreshMenuProfileNav?.();
-      });
-    });
-
-    root.querySelectorAll('.title-option:not([disabled])').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const titleId = btn.dataset.titleId;
-        global.ProfileService?.setTitleId?.(titleId);
-        const summary = global.ProfileService?.getProfileSummary?.();
-        refreshProfileHero(root, summary);
-        root.querySelectorAll('.title-option').forEach((b) => {
-          b.classList.toggle('selected', b.dataset.titleId === titleId);
-          b.setAttribute('aria-pressed', b.dataset.titleId === titleId ? 'true' : 'false');
         });
         global.PlayerHud?.refreshMenuProfileNav?.();
       });
