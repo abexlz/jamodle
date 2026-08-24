@@ -355,7 +355,7 @@ body.has-app-top-hud .menu-top-bar-spacer {
   padding: 2px 1px 1px;
   border-bottom: 1px solid #e8e4e0;
   font-family: 'Jua', 'Noto Sans KR', sans-serif;
-  font-size: 10.89px;
+  font-size: 14.16px;
   font-weight: 700;
   line-height: 1;
   text-align: center;
@@ -382,7 +382,7 @@ body.has-app-top-hud .menu-top-bar-spacer {
   flex-shrink: 0;
   padding: 2px 1px 1px;
   font-family: 'Jua', 'Noto Sans KR', sans-serif;
-  font-size: 10.89px;
+  font-size: 14.16px;
   line-height: 1;
   text-align: center;
   text-transform: uppercase;

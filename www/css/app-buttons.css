@@ -1107,7 +1107,7 @@ button.ghost:disabled,
   justify-content: center;
   text-align: center;
   text-transform: uppercase;
-  font-size: calc(var(--menu-daily-bar-h, clamp(58px, calc(15vw + 0.4dvh), 80px)) * 0.42) !important;
+  font-size: calc(var(--menu-daily-bar-h, clamp(58px, calc(15vw + 0.4dvh), 80px)) * 0.63) !important;
   line-height: 1.1;
   color: #ffffff !important;
   text-shadow: 0 2px 0 rgba(120, 80, 0, 0.45) !important;
@@ -1121,7 +1121,7 @@ button.ghost:disabled,
   display: flex;
   align-items: center;
   justify-content: center;
-  width: clamp(58px, 15vw, 72px);
+  width: clamp(67px, 17.25vw, 83px);
   padding: 8px 10px;
   background: #f0b020;
   border-left: 2px solid rgba(160, 100, 0, 0.22);
@@ -1129,7 +1129,7 @@ button.ghost:disabled,
 }
 
 #menu-screen .menu-daily-calendar-sheet {
-  width: min(100%, 50px);
+  width: min(100%, 58px);
   aspect-ratio: 1;
   background: #ffffff;
   border-radius: 7px;
@@ -1143,7 +1143,7 @@ button.ghost:disabled,
   flex-shrink: 0;
   padding: 3px 2px 2px;
   font-family: 'Jua', 'Noto Sans KR', sans-serif;
-  font-size: clamp(8px, 2.2vw, 10px);
+  font-size: clamp(10px, 2.86vw, 13px);
   font-weight: 400;
   line-height: 1;
   text-align: center;

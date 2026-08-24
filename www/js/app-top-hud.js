@@ -7,7 +7,7 @@
   'use strict';
 
   const HUD_ID = 'app-top-hud';
-  const STYLE_HREF = 'css/menu-hud.css?v=20260823b';
+  const STYLE_HREF = 'css/menu-hud.css?v=20260824c';
   const CHROME_HREF = 'css/app-chrome.css?v=20260823b';
   const PROFILE_STYLE_HREF = 'css/profile.css?v=20260823j';
 
