@@ -1107,8 +1107,8 @@ button.ghost:disabled,
   justify-content: center;
   text-align: center;
   text-transform: uppercase;
-  font-size: calc(var(--menu-daily-bar-h, clamp(58px, calc(15vw + 0.4dvh), 80px)) * 0.8) !important;
-  line-height: 1;
+  font-size: calc(var(--menu-daily-bar-h, clamp(58px, calc(15vw + 0.4dvh), 80px)) * 0.42) !important;
+  line-height: 1.1;
   color: #ffffff !important;
   text-shadow: 0 2px 0 rgba(120, 80, 0, 0.45) !important;
   white-space: nowrap;
