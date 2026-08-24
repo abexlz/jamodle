@@ -1709,7 +1709,7 @@
           "subtitleKo": "오늘의 단어"
         },
         "daily-match": {
-          "title": "일일퍼즐",
+          "title": "오늘의 퍼즐",
           "subtitle": "오늘의 단어를 자모로 만들어요",
           "subtitleKo": "오늘의 자모 조합"
         }
