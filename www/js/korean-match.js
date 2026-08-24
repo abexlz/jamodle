@@ -1102,9 +1102,7 @@
               <button type="button" class="btn btn-continue" id="match-continue" data-i18n="tutorial.next">${t('tutorial.next')}</button>
             </div>`
           : (this.isDaily
-          ? `<div class="results-actions">
-              <a class="btn btn-leave" href="index.html" id="match-leave" data-i18n="match.menu">${t('match.menu')}</a>
-            </div>`
+          ? ''
           : `<div class="results-actions">
               <button type="button" class="btn btn-continue" id="match-continue" data-i18n="match.keepGoing">${t('match.keepGoing')}</button>
               <a class="btn btn-leave" href="index.html" id="match-leave" data-i18n="match.leave">${t('match.leave')}</a>
