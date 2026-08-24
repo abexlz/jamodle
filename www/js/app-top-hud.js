@@ -60,6 +60,16 @@
         global.DailyGiftUI?.showPicker?.();
         return;
       }
+      const shopLink = e.target.closest('.menu-hud-coins');
+      if (shopLink && !isIndexPage()) {
+        e.preventDefault();
+        global.HomeNav?.setActiveGame?.({
+          href: currentPageHref(),
+          type: 'page',
+          at: Date.now(),
+        });
+        global.location.href = 'index.html?tab=shop';
+      }
     });
   }
 
@@ -128,6 +138,7 @@
             <span class="menu-hud-gift-box" aria-hidden="true">🎁</span>
             <span class="menu-hud-gift-dot hidden" id="menu-daily-gift-dot" aria-hidden="true"></span>
           </button>
+          <div class="player-hud-slot menu-hud-coins-slot" id="player-hud" data-player-hud="compact"></div>
         </div>
         <p class="app-hud-page-title" id="app-hud-page-title" hidden></p>
       </div>
