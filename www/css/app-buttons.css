@@ -1370,10 +1370,6 @@ button.ghost:disabled,
   filter: brightness(0.96);
 }
 
-#menu-screen .menu-top-daily-row.is-complete .menu-daily-puzzle-main .mode-name::after {
-  content: ' ✓';
-}
-
 #menu-screen .menu-top-classic {
   display: grid !important;
   grid-template-columns: auto 1fr;
