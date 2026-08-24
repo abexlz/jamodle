@@ -29,10 +29,10 @@
     for (let i = scripts.length - 1; i >= 0; i--) {
       const src = scripts[i].getAttribute('src') || '';
       if (src.includes('i18n.js')) {
-        return src.replace(/i18n\.js(?:\?.*)?$/, `i18n/${locale}.json?v=20260824d`);
+        return src.replace(/i18n\.js(?:\?.*)?$/, `i18n/${locale}.json?v=20260824e`);
       }
     }
-    return `js/i18n/${locale}.json?v=20260824d`;
+    return `js/i18n/${locale}.json?v=20260824e`;
   }
 
   function getNested(obj, path) {
