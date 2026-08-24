@@ -539,8 +539,8 @@
     },
     "progress": {
       "title": "진행 & Streak",
-      "currentStreak": "현재 streak",
-      "longestStreak": "최장 streak",
+      "currentStreak": "현재 연속",
+      "longestStreak": "최장 연속",
       "wordsLearned": "학습한 단어",
       "matchCompleted": "Korean Match 완료",
       "days": "{{n}}일",
@@ -680,9 +680,9 @@
     "levelAbbrev": "LV",
     "xpAbbrev": "xp",
     "xpProgress": "다음 레벨까지 {{current}} / {{total}} XP",
-    "streakLine": "🔥 {{days}}일 Korean Learning Streak",
-    "streakStart": "오늘 Korean Learning Streak을 시작해 보세요",
-    "longestStreak": "최장 streak: {{days}}일",
+    "streakLine": "🔥 {{days}}일 한글 학습 연속",
+    "streakStart": "오늘 한글 학습 연속을 시작해 보세요",
+    "longestStreak": "최장 연속: {{days}}일",
     "loadError": "프로필을 불러올 수 없어요. 새로고침해 주세요.",
     "tabs": {
       "label": "프로필 메뉴",
@@ -725,8 +725,8 @@
       "wordsLearned": "학습한 단어",
       "match": "Match 완료",
       "daily": "Daily 도전",
-      "currentStreak": "현재 streak",
-      "longestStreak": "최장 streak",
+      "currentStreak": "현재 연속",
+      "longestStreak": "최장 연속",
       "learningDays": "학습한 날"
     },
     "recent": {
